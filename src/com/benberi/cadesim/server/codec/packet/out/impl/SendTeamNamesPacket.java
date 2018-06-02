@@ -27,32 +27,32 @@ public class SendTeamNamesPacket extends OutgoingPacket {
     }
 
     public void getTeamNames() throws Exception {
-    	Properties prop = new Properties();
-        String fileName = "server.config";
-        InputStream is = new FileInputStream(fileName);
-        
-        prop.load(is);
-         
-        String myDriver = "org.gjt.mm.mysql.Driver";
-        String myUrl = "jdbc:mysql://localhost:3306/cadesim?useSSL=false";
-        Class.forName(myDriver);
-        Connection conn = DriverManager.getConnection(myUrl, prop.getProperty("server.username"), prop.getProperty("server.password"));
-                
-        String query = "SELECT * FROM matches ORDER BY match_id DESC LIMIT 1";
-
-        Statement st = conn.createStatement();
-        
-        ResultSet rs = st.executeQuery(query);
-        
-        while (rs.next())
-        {
-          String attacker = rs.getString("match_attacker");
-          String defender = rs.getString("match_defender");
-          
-          this.attacker = attacker;
-          this.defender = defender;
-        }
-        st.close();
+//    	Properties prop = new Properties();
+//        String fileName = "server.config";
+//        InputStream is = new FileInputStream(fileName);
+//
+//        prop.load(is);
+//
+//        String myDriver = "org.gjt.mm.mysql.Driver";
+//        String myUrl = "jdbc:mysql://localhost:3306/cadesim?useSSL=false";
+//        Class.forName(myDriver);
+//        Connection conn = DriverManager.getConnection(myUrl, prop.getProperty("server.username"), prop.getProperty("server.password"));
+//
+//        String query = "SELECT * FROM matches ORDER BY match_id DESC LIMIT 1";
+//
+//        Statement st = conn.createStatement();
+//
+//        ResultSet rs = st.executeQuery(query);
+//
+//        while (rs.next())
+//        {
+//          String attacker = rs.getString("match_attacker");
+//          String defender = rs.getString("match_defender");
+//
+//          this.attacker = attacker;
+//          this.defender = defender;
+//        }
+//        st.close();
     }
 
 
