@@ -643,4 +643,10 @@ public class PlayerManager {
             p.getChannel().flush();
         }
     }
+
+    public void renewGame()
+    {
+        pointsTeamRed = 0;
+        pointsTeamGreen = 0;
+    }
 }

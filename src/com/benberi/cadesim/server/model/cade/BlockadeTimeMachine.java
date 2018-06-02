@@ -95,4 +95,8 @@ public class BlockadeTimeMachine {
         turnTime = Constants.TURN_TIME;
         setLock(false);
     }
+
+    public void renewGame() {
+        gameTime = Constants.BLOCKADE_TIME;
+    }
 }

@@ -36,7 +36,11 @@ public class GameService implements Runnable {
             
 			if(context.getTimeMachine().getGameTime() == 0 && !gameEnded) {
             	logger.info("Game has ended!");
-            	gameEnded = true;           	
+            	gameEnded = true;
+            	logger.info("Starting new segment");
+            	context.getTimeMachine().renewGame();
+            	context.getPlayerManager().renewGame();
+            	gameEnded = false;
             }
 						
         } catch (Exception e) {
