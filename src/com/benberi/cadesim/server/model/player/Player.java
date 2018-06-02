@@ -5,6 +5,7 @@ import com.benberi.cadesim.server.codec.packet.IncomingPacket;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
+import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.player.collision.PlayerCollisionStorage;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -21,6 +22,7 @@ import io.netty.channel.Channel;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 
@@ -300,12 +302,21 @@ public class Player extends Position {
      * Respawns the player
      */
     public void respawn() {
-        int x = 0;
-        int y = 0;
+        int x;
+        int y;
+        if (team == Team.GREEN) {
+            y = BlockadeMap.MAP_HEIGHT-1;
+            x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
+            setFace(VesselFace.SOUTH);
+        } else {
+            y = 0;
+            x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
+            setFace(VesselFace.NORTH);
+        }
         while(context.getPlayerManager().getPlayerByPosition(x, y) != null) {
             x++;
+            x = x % BlockadeMap.MAP_WIDTH;
         }
-        setFace(VesselFace.NORTH);
         set(x, y);
         setNeedsRespawn(false);
         outOfSafe = false;
