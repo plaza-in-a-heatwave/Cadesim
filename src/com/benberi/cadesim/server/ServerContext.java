@@ -55,6 +55,7 @@ public class ServerContext {
 
     static {
         Date date = new Date();
+        new File("logs/").mkdirs();
         log = new File("logs/" + date.toString().replace(" ", "_").replace(":", "") + ".txt");
         try {
             log.createNewFile();
