@@ -60,7 +60,8 @@ public class ServerContext {
         try {
             log.createNewFile();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("failed to create log file: " + log.getName() + " , check log directory permissions");
+            System.exit(1);
         }
     }
 
@@ -91,7 +92,7 @@ public class ServerContext {
     }
 
     /**
-     * Gets the blokade time machine
+     * Gets the blockade time machine
      * @return {@link #timeMachine}
      */
     public BlockadeTimeMachine getTimeMachine() {

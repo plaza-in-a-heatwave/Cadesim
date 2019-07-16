@@ -29,7 +29,7 @@ public class Cli {
 		options.addOption("h", "help", false, "Show overview of functions available");
 		options.addOption("a", "amount", true, "Set amount of allowed players");
 		options.addOption("p", "port", true, "Set port for server");
-		options.addOption("m", "map", true, "Set name of map");
+		options.addOption("m", "map", true, "Set name of map. If you don't set this, make sure there is a maps folder.");
 		
 	}
 
@@ -52,19 +52,25 @@ public class Cli {
 				log.log(Level.SEVERE, "Missing port option");
 				help();
 			}
-			
+
 			if (!cmd.hasOption("m")) { // Chooses random map if no map chosen
 				Path currentRelativePath = Paths.get("");
 				Path mapFolderPath = currentRelativePath.resolveSibling("maps");
 				File mapFolder = mapFolderPath.toFile();
 				File[] mapList = mapFolder.listFiles();
-				File randomMap = mapList[RandomUtils.randInt(0, mapList.length-1)];
-				chosenMap = randomMap.getName();
-				chosenMap = chosenMap.substring(0, chosenMap.lastIndexOf("."));
-				System.out.println(chosenMap);
+				try {
+					File randomMap = mapList[RandomUtils.randInt(0, mapList.length-1)];
+					chosenMap = randomMap.getName();
+					chosenMap = chosenMap.substring(0, chosenMap.lastIndexOf("."));
+					log.log(Level.INFO, "no map specified, chose random map: " + chosenMap);
+				} catch(NullPointerException e) {
+					log.log(Level.SEVERE, "failed to find random map folder");
+		            help();
+				}
 			}
 			else {
 				chosenMap = cmd.getOptionValue("m");
+				log.log(Level.INFO, "using user specified map:" + chosenMap);
 			}
 			
 			if(cmd.hasOption("p") && cmd.hasOption("a")) {
@@ -79,9 +85,9 @@ public class Cli {
 
 	private void help() {
 		// This prints out some help
-		HelpFormatter formater = new HelpFormatter();
+		HelpFormatter formatter = new HelpFormatter();
 
-		formater.printHelp("Main", options);
+		formatter.printHelp("Obsidio-Server", options);
 		System.exit(0);
 	}
 }
