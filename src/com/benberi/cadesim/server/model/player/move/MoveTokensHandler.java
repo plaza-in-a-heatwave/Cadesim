@@ -4,7 +4,6 @@ import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.player.move.token.MoveToken;
 import com.benberi.cadesim.server.model.player.move.token.MoveTokenList;
 import com.benberi.cadesim.server.model.player.Player;
-import com.benberi.cadesim.server.model.player.vessel.Vessel;
 
 import java.util.*;
 

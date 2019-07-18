@@ -1,7 +1,6 @@
 package com.benberi.cadesim.server.model.player;
 
 import com.benberi.cadesim.server.ServerContext;
-import com.benberi.cadesim.server.codec.packet.IncomingPacket;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
@@ -20,16 +19,12 @@ import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Logger;
 
 
 public class Player extends Position {
 
 
-    private Logger logger = Logger.getLogger("Player-Logger");
 
     /**
      * The channel of the player

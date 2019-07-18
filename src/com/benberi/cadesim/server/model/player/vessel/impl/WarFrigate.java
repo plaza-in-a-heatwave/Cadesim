@@ -53,7 +53,7 @@ public class WarFrigate extends Vessel {
     
     @Override
     public double getRockDamage() {
-    	return 1.667;
+        return 1.667;
     }
 
     @Override

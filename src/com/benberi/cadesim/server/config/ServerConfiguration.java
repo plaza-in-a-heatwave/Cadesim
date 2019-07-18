@@ -49,10 +49,10 @@ public class ServerConfiguration {
     }
     
     public static String getMapName() {
-    	return mapName;
+        return mapName;
     }
 
-	public void setMapName(String mapName) {
-		this.mapName = mapName;
-	}
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
+    }
 }

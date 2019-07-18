@@ -4,7 +4,6 @@ import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.codec.util.PacketLength;
 import com.benberi.cadesim.server.model.player.Player;
-import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 
 import java.util.List;
 

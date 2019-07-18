@@ -2,7 +2,6 @@ package com.benberi.cadesim.server.codec.packet.out.impl;
 
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.util.PacketLength;
-import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 

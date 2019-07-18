@@ -3,7 +3,6 @@ package com.benberi.cadesim.server.codec.packet.out.impl;
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.codec.util.PacketLength;
-import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 
 /**
  * Adds a player ship to the game board (position, ship type, player name, and ID)

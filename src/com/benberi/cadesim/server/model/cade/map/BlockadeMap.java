@@ -201,12 +201,12 @@ public class BlockadeMap {
 
         for (int x = player.getX() - squareRadius; x < player.getX() + squareRadius; x++) {
             for (int y = player.getY() - squareRadius; y < player.getY() + squareRadius; y++) {
-            	if((java.lang.Math.pow(x - player.getX(), 2) + java.lang.Math.pow(y - player.getY(), 2)) < java.lang.Math.pow(radius, 2)) {
-	                Flag flag = getFlag(x, y);
-	                if (flag != null) {
-	                    localFlags.add(flag);
-	                }
-            	}
+                if((java.lang.Math.pow(x - player.getX(), 2) + java.lang.Math.pow(y - player.getY(), 2)) < java.lang.Math.pow(radius, 2)) {
+                    Flag flag = getFlag(x, y);
+                    if (flag != null) {
+                        localFlags.add(flag);
+                    }
+                }
             }
         }
 

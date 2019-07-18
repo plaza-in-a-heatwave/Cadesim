@@ -10,20 +10,12 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-import java.util.logging.Logger;
-
 /**
  * Obsidio game server for Blockade Simulator
  *
  * @author Ben Beri <benberi545@gmail.com> | Jony
  */
 public class CadeServer extends ServerBootstrap implements Runnable {
-
-
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger("Server Main");
 
     /**
      * Server event loop worker
@@ -70,7 +62,7 @@ public class CadeServer extends ServerBootstrap implements Runnable {
                 bootstrap.startServices();
             }
             else {
-                logger.warning("Could not bind the server on port " + port + ". Cause: " + f.cause().getMessage());
+                ServerContext.log("Could not bind the server on port " + port + ". Cause: " + f.cause().getMessage());
                 System.exit(0);
             }
 

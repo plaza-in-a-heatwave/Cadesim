@@ -1,9 +1,5 @@
 package com.benberi.cadesim.server.model.player.vessel;
 
-import com.benberi.cadesim.server.util.Position;
-
-import static com.benberi.cadesim.server.model.cade.map.BlockadeMap.*;
-
 public enum VesselFace {
 
     NORTH(14),

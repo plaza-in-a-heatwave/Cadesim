@@ -1,7 +1,6 @@
 package com.benberi.cadesim.server.model.player;
 
 import com.benberi.cadesim.server.ServerContext;
-import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.codec.packet.out.impl.LoginResponsePacket;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
@@ -20,11 +19,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.logging.Logger;
 
 public class PlayerManager {
-
-    private Logger logger = Logger.getLogger("PlayerManager");
 
     /**
      * List of players in the game
@@ -212,7 +208,7 @@ public class PlayerManager {
             for (Player p : listRegisteredPlayers()) {
 
                 if (p.getCollisionStorage().isOnAction()) {
-                    System.out.println(p.getCollisionStorage().getActionTile());
+                    //System.out.println(p.getCollisionStorage().getActionTile());
                     int tile = p.getCollisionStorage().getActionTile();
                     if (p.getCollisionStorage().isCollided(turn)) {
                         p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
@@ -436,8 +432,7 @@ public class PlayerManager {
     public void registerPlayer(Channel c) {
         Player player = new Player(context, c);
         players.add(player);
-        logger.info("A new player attempts to join the game: " + c.remoteAddress());
-        ServerContext.log("Channel registered: " + c.remoteAddress());
+        ServerContext.log("Channel registered: " + c.remoteAddress() + " current players: " + players.size());
     }
 
 
@@ -454,7 +449,7 @@ public class PlayerManager {
             ServerContext.log("Player de-registered: " + player.getName() + " players remaining: " + players.size());
         }
         else {
-            ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " players online: " + players.size());
+            ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " players remaining: " + players.size());
         }
     }
 

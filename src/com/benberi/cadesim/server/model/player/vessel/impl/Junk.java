@@ -53,7 +53,7 @@ public class Junk extends Vessel {
     
     @Override
     public double getRockDamage() {
-    	return 0.833;
+        return 0.833;
     }
 
     @Override

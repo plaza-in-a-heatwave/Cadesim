@@ -8,7 +8,6 @@ import com.benberi.cadesim.server.config.ServerConfiguration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * Obsidio game server bootstrap
@@ -17,8 +16,6 @@ import java.util.logging.Logger;
  *                  <https://github.com/benberi>
  */
 public class GameServerBootstrap {
-
-    private Logger logger = Logger.getLogger("Bootstrap");
 
     /**
      * The service executor
@@ -51,8 +48,8 @@ public class GameServerBootstrap {
     private void startServer() throws InterruptedException {
         start = System.currentTimeMillis();
 
-        logger.info("Starting the Game Server, configuration: " + config.toString());
-        logger.info("Starting up the host server....");
+        ServerContext.log("Starting the Game Server, configuration: " + config.toString());
+        ServerContext.log("Starting up the host server....");
         CadeServer server = new CadeServer(context, this); // to notify back its done
         executorService.execute(server);
 
@@ -63,13 +60,13 @@ public class GameServerBootstrap {
      */
     public void startServices() {
 
-        logger.info("Starting up the game service....");
+        ServerContext.log("Starting up the game service....");
         GameService service = new GameService(context);
         executorService.scheduleAtFixedRate(service, 0, Constants.SERVICE_LOOP_DELAY, TimeUnit.MILLISECONDS);
 
         long time = System.currentTimeMillis() - start;
 
-        logger.info("Game Server loaded successfully in " + (int) (time / 1000) + " seconds.");
+        ServerContext.log("Game Server loaded successfully in " + (int) (time / 1000) + " seconds.");
     }
 
     /**
@@ -79,14 +76,14 @@ public class GameServerBootstrap {
      * @throws NumberFormatException 
      */
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
-    	
-    	new Cli(args).parse();
-    	
+
+        new Cli(args).parse();
+
     }
-    
+
     public static void initiateServerStart(int amount, String mapName, int port) throws InterruptedException {
-    	
-    	ServerConfiguration config = new ServerConfiguration();
+
+        ServerConfiguration config = new ServerConfiguration();
         config.setPlayerLimit(amount);
         config.setMapType(0);
         config.setPort(port);

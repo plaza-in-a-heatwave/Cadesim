@@ -1,6 +1,5 @@
 package com.benberi.cadesim.server.model.cade.map;
 
-import com.benberi.cadesim.server.CadeServer;
 import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.cade.map.flag.FlagSize;

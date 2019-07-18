@@ -43,15 +43,15 @@ public abstract class Vessel {
     /**
      * Appends damage
      *
-     * @param damage    	The damage amount to append
-     * @param damagingTeam	The team that dealt damage to the vessel
+     * @param damage        The damage amount to append
+     * @param damagingTeam    The team that dealt damage to the vessel
      */
     public void appendDamage(double damage, Team damagingTeam) {
         if (player.isInSafe()) {
             return;
         }
         if (player.getTeam() == damagingTeam) {
-        	damage = 0.5 * damage;
+            damage = 0.5 * damage;
         }
         this.damage += damage;
         if (this.damage > getMaxDamage()) {
@@ -189,9 +189,9 @@ public abstract class Vessel {
             case 3:
                 return new WarFrigate(p);
             case 4:
-            	return new Xebec(p);
+                return new Xebec(p);
             case 5:
-            	return new Junk(p);
+                return new Junk(p);
             case 6:
                 return new WarGalleon(p);
         }

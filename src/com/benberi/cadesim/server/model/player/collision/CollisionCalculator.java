@@ -79,7 +79,7 @@ public class CollisionCalculator {
                 next = context.getMap().getNextActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
             }
             if (next.equals(target)) {
-                System.out.println("tile: " + p.getCollisionStorage().getActionTile());
+                //System.out.println("tile: " + p.getCollisionStorage().getActionTile());
                 collided.add(p);
             }
         }
@@ -122,7 +122,7 @@ public class CollisionCalculator {
         if (!position.equals(p)) {
             // Check for bounds collision with the border and increases damage if true
             if (checkBoundCollision(p, turn, phase) || checkRockCollision(p, turn, phase)) {
-            	p.getVessel().appendDamage(p.getVessel().getRockDamage(), Team.NEUTRAL);
+                p.getVessel().appendDamage(p.getVessel().getRockDamage(), Team.NEUTRAL);
                 return true;
             }
             // Check if the next position is claimed by another player, null result if not
@@ -163,8 +163,8 @@ public class CollisionCalculator {
                         }
                     }
                     else if(claimed.isSunk()) {
-                    	collide(p, claimed, turn, phase);
-                    	return true;
+                        collide(p, claimed, turn, phase);
+                        return true;
                     }
                     else if(move == MoveType.FORWARD && outOfBump(p, claimed, turn, phase)) {
                         collide(p, claimed, turn, phase);
@@ -245,7 +245,7 @@ public class CollisionCalculator {
             return false;
         }
         if (player.getCollisionStorage().isCollided(turn) || context.getMap().isRock(target.getX(), target.getY()) || isOutOfBounds(target)) {
-            System.out.println(player.getCollisionStorage().isCollided(turn) + " " + context.getMap().isRock(target.getX(), target.getY()) + " " + isOutOfBounds(target));
+            //System.out.println(player.getCollisionStorage().isCollided(turn) + " " + context.getMap().isRock(target.getX(), target.getY()) + " " + isOutOfBounds(target));
             player.getVessel().appendDamage(player.getVessel().getRockDamage(), Team.NEUTRAL);
             player.getCollisionStorage().setCollided(turn, phase);
             return true;
@@ -489,9 +489,9 @@ public class CollisionCalculator {
     private void bumpPlayer(Player bumped, Player bumper, int turn, int phase) {
         VesselMovementAnimation anim = VesselMovementAnimation.getBumpAnimation(bumper, bumped);
         bumped.getCollisionStorage().setBumpAnimation(anim);
-        System.out.println(bumper.getName() + " bumped: " + bumped.getName());
+        //System.out.println(bumper.getName() + " bumped: " + bumped.getName());
         if (checkCollision(bumped, turn, phase, false)) {
-            System.out.println("Check bump for " + bumped.getName());
+            //System.out.println("Check bump for " + bumped.getName());
             bumped.getCollisionStorage().setBumpAnimation(VesselMovementAnimation.NO_ANIMATION);
         }
     }
@@ -520,8 +520,8 @@ public class CollisionCalculator {
         VesselMovementAnimation anim = VesselMovementAnimation.getBumpAnimation(bumper, bumped);
         Position bumpPosition = anim.getPositionForAnimation(bumped);
         return (bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk()
-        		&& getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0)
-        		&& (context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY())
+                && getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0)
+                && (context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY())
                 || isOutOfBounds(bumpPosition));
     }
  
