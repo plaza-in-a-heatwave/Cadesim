@@ -1,19 +1,13 @@
 package com.benberi.cadesim.server.service;
 
 import com.benberi.cadesim.server.ServerContext;
-import com.benberi.cadesim.server.config.Constants;
-import com.benberi.cadesim.server.model.player.PlayerManager;
-
-import java.util.logging.Logger;
 
 /**
  * This is the "heartbeat" main loop of the game server
  */
 public class GameService implements Runnable {
-	
-	private Logger logger = Logger.getLogger("GameService");
-	
-	public static boolean gameEnded = false;
+
+    public static boolean gameEnded = false;
 
     /**
      * The server context
@@ -33,16 +27,29 @@ public class GameService implements Runnable {
             context.getPlayerManager().tick();
             context.getPlayerManager().queueOutgoing();
             long end = System.currentTimeMillis() - start;
-            
-			if(context.getTimeMachine().getGameTime() == 0 && !gameEnded) {
-            	logger.info("Game has ended!");
-            	gameEnded = true;
-            	logger.info("Starting new segment");
-            	context.getTimeMachine().renewGame();
-            	context.getPlayerManager().renewGame();
-            	gameEnded = false;
+
+            if(context.getTimeMachine().getGameTime() == 0 && !gameEnded) {
+                ServerContext.log("Game has ended");
+                gameEnded = true;
+
+                // if no players... hibernate time machines
+                if (context.getPlayerManager().getPlayers().size() == 0) {
+                    ServerContext.log("No players connected, hibernating to save CPU");
+                    while (context.getPlayerManager().getPlayers().size() == 0) {
+                        try {
+                            Thread.sleep(2000);
+                        } catch(InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+
+                ServerContext.log("Starting new segment!");
+                context.getTimeMachine().renewGame();
+                context.getPlayerManager().renewGame();
+                gameEnded = false;
             }
-						
+
         } catch (Exception e) {
             e.printStackTrace();
             ServerContext.log(e.getMessage());
