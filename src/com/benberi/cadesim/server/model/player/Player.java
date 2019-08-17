@@ -99,6 +99,11 @@ public class Player extends Position {
     private boolean outOfSafe = false;
 
     /**
+     * Count delay for ship to be manauverable again
+     */
+    private int turnsUntilControl = 0; // manauverable now
+
+    /**
      * The collision storage
      */
     private PlayerCollisionStorage collisionStorage;
@@ -392,6 +397,11 @@ public class Player extends Position {
      * @param move  The move to place
      */
     public void placeMove(int slot, int move) {
+        // if we just sunk, return control after x turns
+        if (turnsUntilControl > 0) {
+            return;
+        }
+
         if (vessel.isManuaver() && moves.getManuaverSlot() == slot) {
             return;
         }
@@ -432,6 +442,11 @@ public class Player extends Position {
      * @param side  The side to place
      */
     public void placeCannon(int slot, int side) {
+        // if we just sunk, return control after x turns
+        if (turnsUntilControl > 0) {
+            return;
+        }
+
         if (tokens.getCannons() <= 0) {
             return;
         }
@@ -506,6 +521,11 @@ public class Player extends Position {
     }
 
     public void processAfterTurnUpdate() {
+        // if we just sunk, return control after x turns
+        if (turnsUntilControl > 0) {
+            turnsUntilControl--;
+        }
+
         tokens.clearTemp();
         tokens.tickExpiration();
 
@@ -520,6 +540,10 @@ public class Player extends Position {
 
     public void setSunk(int sunk) {
         this.sunkTurn = sunk;
+
+        // if we just sunk, return control after x turns
+        // +1 - gets deprecated at end of turn
+        this.turnsUntilControl = ServerConfiguration.getRespawnDelay() + 1;
     }
 
     public boolean isSunk() {
