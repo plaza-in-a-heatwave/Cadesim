@@ -11,6 +11,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.benberi.cadesim.server.util.RandomUtils;
+import com.benberi.cadesim.server.config.Constants;
 
 import java.io.File;
 import java.nio.file.*;
@@ -22,13 +23,17 @@ public class Cli {
     private String chosenMap;
 
     public Cli(String[] args) {
+    	log.log(Level.INFO, "starting up " + Constants.name + ".");
 
         this.args = args;
 
-        options.addOption("h", "help", false, "Show overview of functions available");
+        options.addOption("h", "help", false, "Show help");
         options.addOption("a", "amount", true, "Set amount of allowed players");
         options.addOption("p", "port", true, "Set port for server");
-        options.addOption("m", "map", true, "Set name of map. If you don't set this, make sure there is a maps folder.");
+        options.addOption("t", "turn duration", true, "set turn duration (sec)");
+        options.addOption("r", "round duration", true, "set round duration (sec)");
+        options.addOption("d", "respawn delay", true, "set respawn delay after sinking (sec)");
+        options.addOption("m", "map", true, "Set map name. (leave blank for random)");
     }
 
     public void parse() throws NumberFormatException, InterruptedException {
@@ -50,6 +55,18 @@ public class Cli {
                 log.log(Level.SEVERE, "Missing port option");
                 help();
             }
+            
+            if (!cmd.hasOption("t")) {
+            	log.log(Level.SEVERE, "Missing turnDuration option");
+            }
+            
+            if (!cmd.hasOption("r")) {
+            	log.log(Level.SEVERE, "Missing roundDuration option");
+            }
+            
+            if (!cmd.hasOption("d")) {
+            	log.log(Level.SEVERE, "Missing respawnDelay option");
+            }
 
             if (!cmd.hasOption("m")) { // Chooses random map if no map chosen
                 Path currentRelativePath = Paths.get("");
@@ -62,7 +79,7 @@ public class Cli {
                     chosenMap = chosenMap.substring(0, chosenMap.lastIndexOf("."));
                     log.log(Level.INFO, "no map specified, chose random map: " + chosenMap);
                 } catch(NullPointerException e) {
-                    log.log(Level.SEVERE, "failed to find random map folder");
+                    log.log(Level.SEVERE, "failed to find random map folder. create a folder called \"maps\" in the same directory.");
                     help();
                 }
             }
@@ -71,8 +88,19 @@ public class Cli {
                 log.log(Level.INFO, "using user specified map:" + chosenMap);
             }
 
+            // TODO - this is a really stupid way of handling args.
+            // every time you want to add new args you need to modify...
+            //	Cli.java
+            //	GameServerBootstrap.java
+            //	ServerConfiguration.java
             if(cmd.hasOption("p") && cmd.hasOption("a")) {
-                GameServerBootstrap.initiateServerStart(Integer.parseInt(cmd.getOptionValue("a")), chosenMap, Integer.parseInt(cmd.getOptionValue("p")));
+                GameServerBootstrap.initiateServerStart(
+                		Integer.parseInt(cmd.getOptionValue("a")),
+                		chosenMap, Integer.parseInt(cmd.getOptionValue("p")),
+                		Integer.parseInt(cmd.getOptionValue("t")),
+                		Integer.parseInt(cmd.getOptionValue("r")),
+                		Integer.parseInt(cmd.getOptionValue("d"))
+                );
             }
 
         } catch (ParseException e) {

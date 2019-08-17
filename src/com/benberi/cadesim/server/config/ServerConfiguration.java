@@ -17,7 +17,24 @@ public class ServerConfiguration {
      */
     private int port = 4666;
     
-    private static String mapName = "default.txt";
+    /**
+     * Turn duration
+     */
+    private static int turnDuration;
+    
+    /**
+     * Round duration
+     */
+    private static int roundDuration;
+    
+    /**
+     * Respawn delay
+     */
+    private static int respawnDelay;
+    
+   
+
+	private static String mapName = "default.txt";
 
     public int getPlayerLimit() {
         return playerLimit;
@@ -41,6 +58,32 @@ public class ServerConfiguration {
 
     public void setPort(int port) {
         this.port = port;
+    }
+    
+    public static int getTurnDuration() {
+    	return turnDuration;
+    }
+    
+    public static void setTurnDuration(int turnDuration) {
+    	// server works with internal representation in "deci-seconds" - 1/10th of a second
+    	ServerConfiguration.turnDuration = 10 * turnDuration;
+    }
+    
+    public static int getRoundDuration() {
+		return roundDuration;
+	}
+
+	public static void setRoundDuration(int roundDuration) {
+		// server works with internal representation in "deci-seconds" - 1/10th of a second
+		ServerConfiguration.roundDuration = 10 * roundDuration;
+	}
+    
+    public static int getRespawnDelay() {
+    	return respawnDelay;
+    }
+    
+    public void setRespawnDelay(int respawnDelay) {
+    	ServerConfiguration.respawnDelay = respawnDelay;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.benberi.cadesim.server.model.cade;
 
 import com.benberi.cadesim.server.config.Constants;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.ServerContext;
 //import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 
@@ -9,12 +10,12 @@ public class BlockadeTimeMachine {
     /**
      * The timer of the blockade
      */
-    private int gameTime = Constants.BLOCKADE_TIME;
+    private int gameTime = ServerConfiguration.getRoundDuration();
 
     /**
      * The current turn time
      */
-    private int turnTime = Constants.TURN_TIME;
+    private int turnTime = ServerConfiguration.getTurnDuration();
 
     /**
      * The server context
@@ -96,11 +97,11 @@ public class BlockadeTimeMachine {
      * Renewals the turn time
      */
     public void renewTurn() {
-        turnTime = Constants.TURN_TIME;
+        turnTime = ServerConfiguration.getTurnDuration();
         setLock(false);
     }
 
     public void renewGame() {
-        gameTime = Constants.BLOCKADE_TIME;
+        gameTime = ServerConfiguration.getRoundDuration();
     }
 }

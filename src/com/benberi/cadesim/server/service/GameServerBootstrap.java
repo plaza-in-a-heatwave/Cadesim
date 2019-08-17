@@ -81,13 +81,23 @@ public class GameServerBootstrap {
 
     }
 
-    public static void initiateServerStart(int amount, String mapName, int port) throws InterruptedException {
+    public static void initiateServerStart(
+    		int amount,
+    		String mapName,
+    		int port,
+    		int turnDuration,
+    		int roundTime,
+    		int respawnDelay
+    ) throws InterruptedException {
 
         ServerConfiguration config = new ServerConfiguration();
         config.setPlayerLimit(amount);
         config.setMapType(0);
         config.setPort(port);
         config.setMapName(mapName);
+        ServerConfiguration.setTurnDuration(turnDuration);
+        ServerConfiguration.setRoundDuration(roundTime);
+        config.setRespawnDelay(respawnDelay);
 
         GameServerBootstrap bootstrap = new GameServerBootstrap(config);
         bootstrap.startServer();

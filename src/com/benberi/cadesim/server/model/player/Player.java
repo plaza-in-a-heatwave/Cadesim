@@ -1,5 +1,6 @@
 package com.benberi.cadesim.server.model.player;
 
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.config.Constants;
@@ -144,7 +145,7 @@ public class Player extends Position {
         }
 
         if (vessel.getDamagePercentage() > 0) {
-            double rate = jobbersQuality.getFixRate() / Constants.TURN_TIME;
+            double rate = jobbersQuality.getFixRate() / ServerConfiguration.getTurnDuration();
             vessel.decreaseDamage(rate);
             if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
                 packets.sendDamage();
@@ -153,7 +154,7 @@ public class Player extends Position {
         }
 
         if (vessel.getBilgePercentage() > 0) {
-            double rate = (jobbersQuality.getBilgeFixRate() / Constants.TURN_TIME) - (vessel.getDamage() / 10000);
+            double rate = (jobbersQuality.getBilgeFixRate() / ServerConfiguration.getTurnDuration()) - (vessel.getDamage() / 10000);
             vessel.decreaseBilge(rate);
             if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
                 packets.sendDamage();

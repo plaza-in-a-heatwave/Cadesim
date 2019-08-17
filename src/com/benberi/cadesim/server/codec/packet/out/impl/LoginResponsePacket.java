@@ -16,6 +16,12 @@ public class LoginResponsePacket extends OutgoingPacket {
      * The response
      */
     private int response = SUCCESS;
+    
+    /**
+     * Any constants we need to make the client aware of
+     */
+    private int roundDuration;
+    private int turnDuration;
 
     public LoginResponsePacket() {
         super(OutGoingPackets.LOGIN_RESPONSE);
@@ -24,11 +30,21 @@ public class LoginResponsePacket extends OutgoingPacket {
     public void setResponse(int response) {
         this.response = response;
     }
+    
+    public void setTurnDuration(int turnDuration) {
+    	this.turnDuration = turnDuration;
+    }
+    
+    public void setRoundDuration(int roundDuration) {
+    	this.roundDuration = roundDuration;
+    }
 
     @Override
     public void encode() {
         setPacketLengthType(PacketLength.BYTE);
-        setLength(1);
+        setLength(5); // byte + (2 * short)
         writeByte(response);
+        writeShort(turnDuration);   // 2-byte
+        writeShort(roundDuration);  // 2-byte
     }
 }

@@ -113,6 +113,10 @@ public class Packet {
     public void writeInt(int integer) {
         this.dataBuffer.writeInt(integer);
     }
+    
+    public void writeShort(int integer) {
+    	this.dataBuffer.writeShort(integer);
+    }
 
     public void writeBytes(byte[] bytes) {
         this.dataBuffer.writeBytes(bytes);

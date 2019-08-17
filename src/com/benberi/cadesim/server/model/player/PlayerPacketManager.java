@@ -1,4 +1,5 @@
 package com.benberi.cadesim.server.model.player;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 
 import com.benberi.cadesim.server.codec.packet.IncomingPacket;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
@@ -182,8 +183,14 @@ public class PlayerPacketManager {
      */
     public void sendLoginResponse(int responseCode) {
         LoginResponsePacket login = new LoginResponsePacket();
+        
+        // the actual response
         login.setResponse(responseCode);
-
+        
+        // and any constants client needs to know in advance
+        // descale constants before sending
+        login.setTurnDuration(ServerConfiguration.getTurnDuration()   / 10);
+        login.setRoundDuration(ServerConfiguration.getRoundDuration() / 10);
         player.sendPacket(login);
     }
 
