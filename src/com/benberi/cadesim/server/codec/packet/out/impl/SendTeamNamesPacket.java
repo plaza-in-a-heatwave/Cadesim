@@ -16,19 +16,8 @@ public class SendTeamNamesPacket extends OutgoingPacket {
         super(OutGoingPackets.SET_TEAM_NAMES);
     }
 
-    public void getTeamNames() throws Exception {
-      this.attacker = attacker;
-      this.defender = defender;
-    }
-
-
     @Override
     public void encode() {
-        try {
-            getTeamNames();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         String attacker = this.attacker;
         String defender = this.defender;

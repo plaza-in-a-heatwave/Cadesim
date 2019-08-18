@@ -328,6 +328,9 @@ public class PlayerManager {
             case RED:
                 pointsTeamRed += points;
                 break;
+            case NEUTRAL:
+            	ServerContext.log("warning - tried to assign " + Integer.toString(points) + " to NEUTRAL");
+            	break;
         }
     }
 
@@ -432,7 +435,7 @@ public class PlayerManager {
     public void registerPlayer(Channel c) {
         Player player = new Player(context, c);
         players.add(player);
-        ServerContext.log("Channel registered: " + c.remoteAddress() + " current players: " + players.size());
+        ServerContext.log("New player registered on channel " + c.remoteAddress() + " (players remaining: " + players.size() + ")");
     }
 
 
@@ -446,10 +449,10 @@ public class PlayerManager {
         if (player != null) {
             player.setTurnFinished(true);
             queuedLogoutRequests.add(player);
-            ServerContext.log("Player de-registered: " + player.getName() + " players remaining: " + players.size());
+            ServerContext.log("Player " + player.getName() + " de-registered on " + channel.remoteAddress() + " (players remaining: " + (players.size() - 1) + ")");
         }
         else {
-            ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " players remaining: " + players.size());
+            ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " (players remaining: " + (players.size() - 1) + ")");
         }
     }
 

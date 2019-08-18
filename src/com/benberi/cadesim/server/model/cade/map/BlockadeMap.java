@@ -54,13 +54,7 @@ public class BlockadeMap {
      */
     private List<Flag> flags = new ArrayList<>();
 
-    /**
-     * The server context
-     */
-    private ServerContext context;
-
     public BlockadeMap(ServerContext ctx) {
-        this.context = ctx;
         this.map = MapType.DEFAULT.load(this);
     }
 

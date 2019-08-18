@@ -14,10 +14,7 @@ public enum MapType {
 
     DEFAULT("default.txt");
 
-    private String name;
-
     MapType(String name) {
-        this.name = name;
     }
 
     public int[][] load(BlockadeMap bmap) {

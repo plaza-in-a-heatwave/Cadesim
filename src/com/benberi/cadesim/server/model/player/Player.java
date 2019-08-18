@@ -296,6 +296,11 @@ public class Player extends Position {
         this.team = Team.forId(team);
         this.vessel = Vessel.createVesselByType(this, ship);
         this.isRegistered = true;
+        ServerContext.log(
+        		"Registered player \"" + name + "\", " +
+        		Team.teamIDToString(team) + ", " +
+        		Vessel.vesselIDToString(ship) + "."
+        );
         respawn();
     }
 

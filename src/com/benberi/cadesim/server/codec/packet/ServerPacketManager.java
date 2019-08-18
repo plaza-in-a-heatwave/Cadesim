@@ -9,6 +9,8 @@ import io.netty.channel.Channel;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 
 public class ServerPacketManager {
 
@@ -66,13 +68,22 @@ public class ServerPacketManager {
     public boolean process(Channel c, Packet packet) {
         Player p = context.getPlayerManager().getPlayerByChannel(c);
         if (p == null) {
-            ServerContext.log("Player not found! packet: " + packet.getOpcode());
+        	SocketAddress sockaddr = c.remoteAddress();
+        	if (sockaddr instanceof InetSocketAddress) {
+        		String ipaddr = ((InetSocketAddress)sockaddr).getHostString();
+        		String port   = Integer.toString(((InetSocketAddress)sockaddr).getPort());
+        		ServerContext.log("Player not found for channel " + ipaddr + ":" + port + "(packet: " + packet.getOpcode() + ")");
+        	} else {
+        		// SocketAddress is abstract - but usually used with inet...
+        		ServerContext.log("Player not found for non-inet channel (packet: " + packet.getOpcode() + ")");
+        	}
+            
             return false;
         }
 
         // Drop packet if player is not registered and sending other packets than login
         if (!p.isRegistered() && packet.getOpcode() != IncomingPackets.LOGIN_PACKET) {
-            ServerContext.log("Player not registered yet! packet: " + packet.getOpcode());
+            ServerContext.log("Channel not registered yet! packet: " + packet.getOpcode());
             return false;
         }
 
@@ -85,8 +96,14 @@ public class ServerPacketManager {
                     executor.execute(p, packet);
                 }
                 catch (Exception e) {
-                    ServerContext.log("Player error while executing packet: " + packet.getOpcode() + " player: " + p.getName());
-                    ServerContext.log("Error message: " + e.getMessage() + " " + e.getClass().getName());
+                    ServerContext.log(
+                    		"Player error while executing packet: " +
+                    		packet.getOpcode() + ", " +
+                    		"player: " + p.getName() + ", " +
+                    		"error message: " + e.getMessage() + ", " +
+                    		e.getClass().getName()
+                    		
+                    );
                     e.printStackTrace();
                     c.disconnect();
                 }

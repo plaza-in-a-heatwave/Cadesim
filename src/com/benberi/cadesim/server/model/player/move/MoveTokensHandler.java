@@ -1,5 +1,6 @@
 package com.benberi.cadesim.server.model.player.move;
 
+import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.player.move.token.MoveToken;
 import com.benberi.cadesim.server.model.player.move.token.MoveTokenList;
@@ -220,6 +221,9 @@ public class MoveTokensHandler {
                     return  true;
                 }
                 break;
+            case NONE:
+            	ServerContext.log("warning - tried to useTokenForMove where movetype was NONE");
+            	break;
         }
         return  false;
     }
@@ -235,6 +239,9 @@ public class MoveTokensHandler {
             case FORWARD:
                 forward += amount;
                 break;
+			case NONE:
+				ServerContext.log("warning - tried to add " + Integer.toString(amount) + " tokens to movetype NONE");
+				break;
         }
     }
 
@@ -252,6 +259,9 @@ public class MoveTokensHandler {
                 if (!tempForwardTokens.isEmpty())
                     forwardTokens.add(tempForwardTokens.pollFirst());
                 break;
+            case NONE:
+				ServerContext.log("warning - tried to retrieve movetype NONE");
+				break;
         }
     }
 
@@ -288,6 +298,9 @@ public class MoveTokensHandler {
             case FORWARD:
                 forwardTokens.add(new MoveToken(targetTokenGeneration));
                 break;
+            case NONE:
+				ServerContext.log("warning - generated a token with movetype NONE");
+				break;
     }
 
         if (automatic) {
@@ -311,6 +324,9 @@ public class MoveTokensHandler {
                 case RIGHT:
                     setTargetTokenGeneration(MoveType.FORWARD, true);
                     break;
+                case NONE:
+    				ServerContext.log("warning - requesting token generation for movetype NONE");
+    				break;
             }
         }
         else {

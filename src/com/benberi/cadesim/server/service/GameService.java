@@ -13,6 +13,11 @@ public class GameService implements Runnable {
      * The server context
      */
     private ServerContext context;
+    
+    /**
+     * Keep track of how many games we've played
+     */
+    private int gamesCompleted = 0;
 
     public GameService(ServerContext context) {
         this.context = context;
@@ -21,17 +26,16 @@ public class GameService implements Runnable {
     @Override
     public void run() {
         try {
-            long start = System.currentTimeMillis();
             context.getPackets().queuePackets();
             context.getTimeMachine().tick();
             context.getPlayerManager().tick();
             context.getPlayerManager().queueOutgoing();
-            long end = System.currentTimeMillis() - start;
 
             if(context.getTimeMachine().getGameTime() == 0 && !gameEnded) {
-                ServerContext.log("Game has ended");
-                gameEnded = true;
-
+            	gameEnded = true;
+            	gamesCompleted++;
+            	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
+                
                 // if no players... hibernate time machines
                 if (context.getPlayerManager().getPlayers().size() == 0) {
                     ServerContext.log("No players connected, hibernating to save CPU");
@@ -44,7 +48,7 @@ public class GameService implements Runnable {
                     }
                 }
 
-                ServerContext.log("Starting new segment!");
+                ServerContext.log("Starting new game #" + Integer.toString(gamesCompleted) + ".");
                 context.getTimeMachine().renewGame();
                 context.getPlayerManager().renewGame();
                 gameEnded = false;

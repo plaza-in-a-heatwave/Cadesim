@@ -3,6 +3,7 @@ package com.benberi.cadesim.server;
 import com.benberi.cadesim.server.codec.ServerChannelHandler;
 import com.benberi.cadesim.server.codec.util.PacketDecoder;
 import com.benberi.cadesim.server.codec.util.PacketEncoder;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.service.GameServerBootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -24,18 +25,12 @@ public class CadeServer extends ServerBootstrap implements Runnable {
     private EventLoopGroup workerBoss = new NioEventLoopGroup();
 
     /**
-     * The server context
-     */
-    private ServerContext context;
-
-    /**
      * The server bootstrap
      */
     private GameServerBootstrap bootstrap;
 
     public CadeServer(ServerContext context, GameServerBootstrap bootstrap) {
         super();
-        this.context = context;
         this.bootstrap = bootstrap;
         group(workerBoss, worker);
         channel(NioServerSocketChannel.class);
@@ -56,13 +51,13 @@ public class CadeServer extends ServerBootstrap implements Runnable {
      */
     public void run() {
         try {
-            int port = context.getConfiguration().getPort();
+            int port = ServerConfiguration.getPort();
             ChannelFuture f = bind(port).sync();
             if (f.isSuccess()) {
                 bootstrap.startServices();
             }
             else {
-                ServerContext.log("Could not bind the server on port " + port + ". Cause: " + f.cause().getMessage());
+                ServerContext.log("Could not bind the server on local port " + port + ". Cause: " + f.cause().getMessage());
                 System.exit(0);
             }
 

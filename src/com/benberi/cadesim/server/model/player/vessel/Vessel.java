@@ -1,7 +1,6 @@
 package com.benberi.cadesim.server.model.player.vessel;
 
 import com.benberi.cadesim.server.model.player.Player;
-import com.benberi.cadesim.server.model.player.move.TurnMoveHandler;
 import com.benberi.cadesim.server.model.player.vessel.impl.WarBrig;
 import com.benberi.cadesim.server.model.player.vessel.impl.WarFrigate;
 import com.benberi.cadesim.server.model.player.vessel.impl.Xebec;
@@ -25,16 +24,6 @@ public abstract class Vessel {
      * The bilge of the vessel
      */
     private double bilge;
-
-    /**
-     * The level of the jobbers
-     */
-    private int jobbersQuality;
-
-    /**
-     * The select moves handler
-     */
-    private TurnMoveHandler moves;
 
     public Vessel(Player p) {
         this.player = p;
@@ -91,10 +80,6 @@ public abstract class Vessel {
     public int getDamagePercentage() {
         double percentage = damage / getMaxDamage() * 100;
         return (int) percentage;
-    }
-
-    public void setJobbersQuality(int jobbersQuality) {
-        this.jobbersQuality = jobbersQuality;
     }
 
     public int getBilgePercentage() {
@@ -195,6 +180,25 @@ public abstract class Vessel {
             case 6:
                 return new WarGalleon(p);
         }
+    }
+    
+    /**
+     * Convert a vessel ID to a string
+     */
+    public static String vesselIDToString(int vesselID) {
+    	switch (vesselID) {
+	        default:
+	        case 2:
+	            return "War Brig";
+	        case 3:
+	            return "War Frigate";
+	        case 4:
+	            return "Xebec";
+	        case 5:
+	            return "Junk";
+	        case 6:
+	            return "War Galleon";
+	    }
     }
 
     /**

@@ -26,4 +26,16 @@ public enum Team {
                 return RED;
         }
     }
+    
+    public static String teamIDToString(int teamID) {
+    	switch (teamID) {
+	        case 2:
+	            return "NEUTRAL";
+	        case 1:
+	        default:
+	            return "GREEN";
+	        case 0:
+	            return "RED";
+	    }
+    }
 }
