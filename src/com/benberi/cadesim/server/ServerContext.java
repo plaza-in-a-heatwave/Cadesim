@@ -4,12 +4,15 @@ import com.benberi.cadesim.server.model.player.PlayerManager;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.BlockadeTimeMachine;
 import com.benberi.cadesim.server.codec.packet.ServerPacketManager;
+import com.benberi.cadesim.server.config.Constants;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.Date;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The server context containing references to every massive part of the
@@ -32,7 +35,7 @@ public class ServerContext {
      */
     private BlockadeMap map;
 
-    private static File log;
+    private static File logFile;
 
     private ServerPacketManager packets;
 
@@ -44,22 +47,27 @@ public class ServerContext {
     }
 
     static {
-        Date date = new Date();
-        new File("logs/").mkdirs();
-        log = new File("logs/" + date.toString().replace(" ", "_").replace(":", "") + ".txt");
+    	new File(Constants.logDirectory).mkdirs();
+    	logFile = new File(Constants.logDirectory + "/" + Constants.logName);
         try {
-            log.createNewFile();
+            logFile.createNewFile();
+            log("Using logfile: " + logFile.getPath());
         } catch (IOException e) {
-            System.out.println("failed to create log file: " + log.getName() + " , check log directory permissions");
+            System.out.println("failed to create log file: " + logFile.getName() + " , check log directory permissions");
             System.exit(1);
         }
     }
 
     public static void log(String message) {
-        Date date = new Date();
         try {
-            message = "[" + date.toString().replace(" ", "_").replace(":", "") + "]: " + message + "\n";
-            Files.write(ServerContext.log.toPath(), message.getBytes(), StandardOpenOption.APPEND);
+        	String timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+            message = "[" + timestamp + "]: " + message + "\n";
+
+            // put to log file
+            Files.write(ServerContext.logFile.toPath(), message.getBytes(), StandardOpenOption.APPEND);
+
+            // also print to stdout so we can see what's going on...
+            System.out.print(message);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -2,6 +2,9 @@ package com.benberi.cadesim.server.config;
 
 public class Constants {
 	
+	/**
+	 * Name of server
+	 */
 	public static final String name = "Cadesim server v1.9.4";
 
     /**
@@ -9,6 +12,12 @@ public class Constants {
      */
     public static final int PROTOCOL_VERSION = 8;
 
+    /**
+     * Log paths to use
+     */
+    public static final String logDirectory = "logs";
+    public static final String logName      = "cadesim.log";
+    
     /**
      * The delay of the main game service loop in milliseconds
      */

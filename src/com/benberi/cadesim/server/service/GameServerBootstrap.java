@@ -56,7 +56,6 @@ public class GameServerBootstrap {
         ServerContext.log("Starting up the host server....");
         CadeServer server = new CadeServer(context, this); // to notify back its done
         executorService.execute(server);
-
     }
 
     /**
@@ -91,7 +90,7 @@ public class GameServerBootstrap {
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         Options options = new Options();
         
-        ServerContext.log("starting up " + Constants.name + ".");
+        ServerContext.log("Welcome to " + Constants.name + ".");
 
         options.addOption("h", "help", false, "Show help");
         options.addOption("a", "amount", true, "Set max players allowed (default: " + ServerConfiguration.getPlayerLimit() + ")");
@@ -139,15 +138,15 @@ public class GameServerBootstrap {
                     		0, randomMap.getName().lastIndexOf(".")
                     	)
                     );
-                    ServerContext.log("no map specified, automatically chose random map: " + ServerConfiguration.getMapName());
+                    ServerContext.log("No map specified, automatically chose random map: " + ServerConfiguration.getMapName());
                 } catch(NullPointerException e) {
-                	ServerContext.log("failed to find random map folder. create a folder called \"maps\" in the same directory.");
+                	ServerContext.log("Failed to find random map folder. create a folder called \"maps\" in the same directory.");
                     help(options);
                 }
             }
             else {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
-                ServerContext.log("using user specified map:" + ServerConfiguration.getMapName());
+                ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
             }
 
             GameServerBootstrap bootstrap = new GameServerBootstrap();
