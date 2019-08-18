@@ -57,6 +57,7 @@ public class ServerPacketManager {
         executors.put(IncomingPackets.SEAL_TOGGLE, new SealTogglePacket(context));
         executors.put(IncomingPackets.SET_SEAL_TARGET, new SetSealGenerationTargetPacket(context));
         executors.put(IncomingPackets.TURN_FINISH_NOTIFICATION, new TurnFinishNotification(context));
+        executors.put(IncomingPackets.OCEANSIDE_REQUEST, new OceansideRequestPacket(context));
     }
 
     /**
