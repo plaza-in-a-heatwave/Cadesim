@@ -419,11 +419,6 @@ public class Player extends Position {
      * @param move  The move to place
      */
     public void placeMove(int slot, int move) {
-        // if we just sunk, return control after x turns
-        if (turnsUntilControl > 0) {
-            return;
-        }
-
         if (vessel.isManuaver() && moves.getManuaverSlot() == slot) {
             return;
         }
@@ -464,11 +459,6 @@ public class Player extends Position {
      * @param side  The side to place
      */
     public void placeCannon(int slot, int side) {
-        // if we just sunk, return control after x turns
-        if (turnsUntilControl > 0) {
-            return;
-        }
-
         if (tokens.getCannons() <= 0) {
             return;
         }
@@ -544,8 +534,13 @@ public class Player extends Position {
 
     public void processAfterTurnUpdate() {
         // if we just sunk, return control after x turns
-        if (turnsUntilControl > 0) {
-            turnsUntilControl--;
+        if (getTurnsUntilControl() > 0) {
+            setTurnsUntilControl(getTurnsUntilControl() - 1);
+
+            // reset tokens once we're allowed to move again
+            if (getTurnsUntilControl() == 0) {
+            	tokens = new MoveTokensHandler(this);
+            }
         }
 
         tokens.clearTemp();
@@ -565,7 +560,7 @@ public class Player extends Position {
 
         // if we just sunk, return control after x turns
         // +1 - gets deprecated at end of turn
-        this.turnsUntilControl = ServerConfiguration.getRespawnDelay() + 1;
+        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay() + 1);
     }
 
     public boolean isSunk() {
@@ -621,4 +616,12 @@ public class Player extends Position {
     public void setFlags(List<Flag> flags) {
         this.flags = flags;
     }
+
+	public int getTurnsUntilControl() {
+		return turnsUntilControl;
+	}
+
+	public void setTurnsUntilControl(int turnsUntilControl) {
+		this.turnsUntilControl = turnsUntilControl;
+	}
 }

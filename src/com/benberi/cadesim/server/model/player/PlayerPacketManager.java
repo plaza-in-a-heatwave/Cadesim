@@ -83,11 +83,20 @@ public class PlayerPacketManager {
      * Sends move tokens to the client from the token handler
      */
     public void sendTokens() {
-        SendMoveTokensPacket packet = new SendMoveTokensPacket();
-        packet.setLeft(player.getMoveTokens().countLeftMoves());
-        packet.setRight(player.getMoveTokens().countRightMoves());
-        packet.setForward(player.getMoveTokens().countForwardMoves());
-        packet.setCannons(player.getMoveTokens().getCannons());
+    	SendMoveTokensPacket packet = new SendMoveTokensPacket();
+    	// disallow all moves until player is allowed to move again
+    	if (player.getTurnsUntilControl() > 0) {
+    		packet.setLeft(0);
+    		packet.setRight(0);
+    		packet.setForward(0);
+    		packet.setCannons(0);
+    	} else
+    	{
+            packet.setLeft(player.getMoveTokens().countLeftMoves());
+            packet.setRight(player.getMoveTokens().countRightMoves());
+            packet.setForward(player.getMoveTokens().countForwardMoves());
+            packet.setCannons(player.getMoveTokens().getCannons());
+    	}
 
         player.sendPacket(packet);
     }
