@@ -308,23 +308,26 @@ public class Player extends Position {
      * Respawns the player
      */
     public void respawn() {
-        respawn(false);
+        respawnHandler(false);
     }
     
     /**
      * respawn oceanside - when button pressed
      */
-    public void respawnToOceanSide() {
-    	respawn(true);
+    public void requestRespawnToOceanSide() {
+    	if (isInSafe()) { // only if in safe
+	    	respawnHandler(true);
+	    	packets.sendRespawn(this);
+    	}
     }
     
     /**
      * Handle respawn logic
      */
-    private void respawn(boolean oceanSide) {
+    private void respawnHandler(boolean oceanSide) {
     	int x;
         int y;
-        if ((team == Team.GREEN) || oceanSide) {
+        if ((team == Team.GREEN) && (!oceanSide)) {
             y = BlockadeMap.MAP_HEIGHT-1;
             x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
             setFace(VesselFace.SOUTH);
