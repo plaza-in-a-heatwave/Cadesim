@@ -551,6 +551,7 @@ public class Player extends Position {
 
         packets.sendDamage();
         moves.resetTurn();
+        context.getPlayerManager().sendMoveBar(this);
         packets.sendTokens();
 
     }
