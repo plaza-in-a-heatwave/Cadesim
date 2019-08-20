@@ -560,6 +560,8 @@ public class PlayerManager {
                     for (Player p : players) {
                         // Respawn all players
                         p.setNeedsRespawn(true);
+                        // don't force players to endure respawn delay
+                        p.setFirstEntry(true);
                     }
                     context.getTimeMachine().endGame();
                     context.getTimeMachine().endTurn();

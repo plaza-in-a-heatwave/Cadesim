@@ -90,7 +90,7 @@ public class GameServerBootstrap {
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         Options options = new Options();
         
-        ServerContext.log("Welcome to " + Constants.name + ".");
+        ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
         options.addOption("h", "help", false, "Show help");
         options.addOption("a", "amount", true, "Set max players allowed (default: " + ServerConfiguration.getPlayerLimit() + ")");

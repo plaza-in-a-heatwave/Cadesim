@@ -106,6 +106,14 @@ public class Player extends Position {
     private int turnsUntilControl = 0;  // manauverable now
     private boolean firstEntry = true; // first time is fine
 
+    public boolean isFirstEntry() {
+		return firstEntry;
+	}
+
+	public void setFirstEntry(boolean firstEntry) {
+		this.firstEntry = firstEntry;
+	}
+
     /**
      * The collision storage
      */
@@ -312,7 +320,7 @@ public class Player extends Position {
      */
     public void respawn() {
     	// where to respawn?
-    	if (firstEntry) {
+    	if (isFirstEntry()) {
     		// start on native 'team' side
     		respawnOnLandside(team == Team.GREEN);
     	} else if (context.getMap().isSafeLandside(this)) { // drove into safe
@@ -323,17 +331,16 @@ public class Player extends Position {
     		// sunk, respawn on native 'team' side
     		respawnOnLandside(team == Team.GREEN);
     	}
-
-    	// set flag after down respawning - don't nerf first spawn
-    	firstEntry = false;
     }
 
-    /**
+	/**
      * respawn on one of two sides
      */
     private void respawnOnLandside(boolean landSide) {
     	// after respawn, return control after x turns
-    	if (!firstEntry) {
+    	if (isFirstEntry()) {
+        	setFirstEntry(false);
+    	} else {
 	        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay());
     	}
 
@@ -350,6 +357,9 @@ public class Player extends Position {
         outOfSafe = false;
         vessel.resetDamageAndBilge();
         packets.sendRespawn(this);
+        for (Player p:context.getPlayerManager().getPlayers()) {
+        	p.packets.sendPositions();
+        }
     }
 
     /**

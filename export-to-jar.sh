@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # export to jar in . after project built in bin
 
+# constants
+NAME="cadesim-server.jar"
+
 # extract deps into bin temporarily
 while read line; do
 cd bin
@@ -11,7 +14,7 @@ cd ..
 done < "jar.deps"
 
 # zip jar
-jar cvfm obsidio-server.jar ./src/META-INF/MANIFEST.MF -C ./bin/ .
+jar cvfm "$NAME" ./src/META-INF/MANIFEST.MF -C ./bin/ .
 
 # cleanup bin
 cd bin
@@ -24,4 +27,4 @@ for file in ./*; do
 done
 cd ..
 
-echo "jar exported to $(pwd)/obsidio-server.jar"
+echo "jar exported to $(pwd)/$NAME"
