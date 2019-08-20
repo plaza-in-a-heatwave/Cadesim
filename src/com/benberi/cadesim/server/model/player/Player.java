@@ -100,8 +100,11 @@ public class Player extends Position {
 
     /**
      * Count delay for ship to be manauverable again
+     * Any respawn (except the first entry) will leave it
+     * Unable to be manauvered for n turns
      */
-    private int turnsUntilControl = 0; // manauverable now
+    private int turnsUntilControl = 0;  // manauverable now
+    private boolean firstEntry = true; // first time is fine
 
     /**
      * The collision storage
@@ -316,10 +319,6 @@ public class Player extends Position {
      */
     public void requestRespawnToOceanSide() {
     	if (isInSafe()) { // only if in safe
-    		// after respawn, return control after x turns
-            // +1 - gets deprecated at end of turn
-            this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay() + 1);
-
 	    	respawnHandler(true);
     	}
     }
@@ -328,6 +327,14 @@ public class Player extends Position {
      * Handle respawn logic
      */
     private void respawnHandler(boolean oceanSide) {
+    	if (firstEntry) {
+    		firstEntry = false;
+    	} else {
+	    	// after respawn, return control after x turns
+	        // +1 - gets deprecated at end of turn
+	        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay() + 1);
+    	}
+
     	int x;
         int y;
         if ((team == Team.GREEN) && (!oceanSide)) {
@@ -348,7 +355,6 @@ public class Player extends Position {
         outOfSafe = false;
         vessel.resetDamageAndBilge();
         packets.sendRespawn(this);
-        
     }
 
     /**
@@ -562,10 +568,6 @@ public class Player extends Position {
 
     public void setSunk(int sunk) {
         this.sunkTurn = sunk;
-
-        // if we just sunk, return control after x turns
-        // +1 - gets deprecated at end of turn
-        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay() + 1);
     }
 
     public boolean isSunk() {
