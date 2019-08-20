@@ -76,8 +76,17 @@ public class BlockadeMap {
          return this.map[x][y] == BIG_ROCK;
     }
 
+    /**
+     * Determine position within safe zones (and which safe zone)
+     */
     public boolean isSafe(Position p) {
-        return p.getY() <= 2 || p.getY() >= 33;
+        return isSafeLandside(p) || isSafeOceanside(p);
+    }
+    public boolean isSafeLandside(Position p) {
+    	return p.getY() >= 33;
+    }
+    public boolean isSafeOceanside(Position p) {
+    	return p.getY() <= 2;
     }
 
     public boolean isOutOfBounds(int x, int y) {

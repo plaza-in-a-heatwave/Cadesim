@@ -308,44 +308,38 @@ public class Player extends Position {
     }
 
     /**
-     * Respawns the player
+     * Respawns the player to the correct side.
      */
     public void respawn() {
-        respawnHandler(false);
-    }
-    
-    /**
-     * respawn oceanside - when button pressed
-     */
-    public void requestRespawnToOceanSide() {
-    	if (isInSafe()) { // only if in safe
-	    	respawnHandler(true);
-    	}
-    }
-    
-    /**
-     * Handle respawn logic
-     */
-    private void respawnHandler(boolean oceanSide) {
-    	if (firstEntry) {
-    		firstEntry = false;
-    	} else {
-	    	// after respawn, return control after x turns
-	        // +1 - gets deprecated at end of turn
+    	// after respawn, return control after x turns
+    	if (!firstEntry) {
+    		// +1 - gets deprecated at end of turn
 	        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay() + 1);
     	}
 
-    	int x;
-        int y;
-        if ((team == Team.GREEN) && (!oceanSide)) {
-            y = BlockadeMap.MAP_HEIGHT-1;
-            x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
-            setFace(VesselFace.SOUTH);
-        } else {
-            y = 0;
-            x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
-            setFace(VesselFace.NORTH);
-        }
+    	// where to respawn?
+    	if (firstEntry) {
+    		// start on native 'team' side
+    		firstEntry = false;
+    		respawnOnLandside(team == Team.GREEN);
+    	} else if (context.getMap().isSafeLandside(this)) { // drove into safe
+    		respawnOnLandside(true);
+    	} else if (context.getMap().isSafeOceanside(this)) { // drove into safe
+    		respawnOnLandside(false);
+    	} else {
+    		// sunk, respawn on native 'team' side
+    		respawnOnLandside(team == Team.GREEN);
+    	}
+    }
+
+    /**
+     * respawn on one of two sides
+     */
+    private void respawnOnLandside(boolean landSide) {
+    	int x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
+    	int y = landSide?(BlockadeMap.MAP_HEIGHT-1):0;
+        setFace(landSide?VesselFace.SOUTH:VesselFace.NORTH);
+
         while(context.getPlayerManager().getPlayerByPosition(x, y) != null) {
             x++;
             x = x % BlockadeMap.MAP_WIDTH;
@@ -355,6 +349,15 @@ public class Player extends Position {
         outOfSafe = false;
         vessel.resetDamageAndBilge();
         packets.sendRespawn(this);
+    }
+
+    /**
+     * respawn oceanside - when button pressed
+     */
+    public void requestRespawnToOceanSide() {
+    	if (isInSafe()) { // only if in safe
+	    	respawnOnLandside(false);
+    	}
     }
 
     /**
