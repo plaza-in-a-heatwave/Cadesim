@@ -316,8 +316,11 @@ public class Player extends Position {
      */
     public void requestRespawnToOceanSide() {
     	if (isInSafe()) { // only if in safe
+    		// after respawn, return control after x turns
+            // +1 - gets deprecated at end of turn
+            this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay() + 1);
+
 	    	respawnHandler(true);
-	    	packets.sendRespawn(this);
     	}
     }
     
@@ -344,6 +347,8 @@ public class Player extends Position {
         setNeedsRespawn(false);
         outOfSafe = false;
         vessel.resetDamageAndBilge();
+        packets.sendRespawn(this);
+        
     }
 
     /**
@@ -551,7 +556,6 @@ public class Player extends Position {
 
         packets.sendDamage();
         moves.resetTurn();
-        context.getPlayerManager().sendMoveBar(this);
         packets.sendTokens();
 
     }
