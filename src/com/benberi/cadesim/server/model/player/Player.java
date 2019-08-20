@@ -311,16 +311,9 @@ public class Player extends Position {
      * Respawns the player to the correct side.
      */
     public void respawn() {
-    	// after respawn, return control after x turns
-    	if (!firstEntry) {
-    		// +1 - gets deprecated at end of turn
-	        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay() + 1);
-    	}
-
     	// where to respawn?
     	if (firstEntry) {
     		// start on native 'team' side
-    		firstEntry = false;
     		respawnOnLandside(team == Team.GREEN);
     	} else if (context.getMap().isSafeLandside(this)) { // drove into safe
     		respawnOnLandside(true);
@@ -330,12 +323,20 @@ public class Player extends Position {
     		// sunk, respawn on native 'team' side
     		respawnOnLandside(team == Team.GREEN);
     	}
+
+    	// set flag after down respawning - don't nerf first spawn
+    	firstEntry = false;
     }
 
     /**
      * respawn on one of two sides
      */
     private void respawnOnLandside(boolean landSide) {
+    	// after respawn, return control after x turns
+    	if (!firstEntry) {
+	        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay());
+    	}
+
     	int x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
     	int y = landSide?(BlockadeMap.MAP_HEIGHT-1):0;
         setFace(landSide?VesselFace.SOUTH:VesselFace.NORTH);
