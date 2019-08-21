@@ -1,6 +1,7 @@
 package com.benberi.cadesim.server.model.cade.map;
 
 import com.benberi.cadesim.server.ServerContext;
+import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
@@ -62,11 +63,26 @@ public class BlockadeMap {
         return this.map;
     }
 
-    public boolean isRock(int x, int y) {
+    /** determine whether item is rock
+     *
+     * @param x x coord
+     * @param y y coord
+     * @param p player colliding
+     *
+     * note: p is required because attackers can't access
+     * landside safe zone
+     * @return
+     */
+    public boolean isRock(int x, int y, Player p) {
         if (isOutOfBounds(x,y)) {
+        	// out of bounds xy is not rock
             return false;
+        } else if (this.isSafeLandside(new Position(x,y))) {
+        	// attackers cannot port in landside safe zone
+        	return (!(p.getTeam() == Team.GREEN) && (!p.isInSafe()));
+        } else {
+        	return this.map[x][y] == BIG_ROCK || this.map[x][y] == SMALL_ROCK;
         }
-        return this.map[x][y] == BIG_ROCK || this.map[x][y] == SMALL_ROCK;
     }
 
     public boolean isBigRock(int x, int y) {

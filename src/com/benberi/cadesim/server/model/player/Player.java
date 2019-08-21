@@ -321,15 +321,18 @@ public class Player extends Position {
     public void respawn() {
     	// where to respawn?
     	if (isFirstEntry()) {
-    		// start on native 'team' side
-    		respawnOnLandside(team == Team.GREEN);
+    		// start on land side
+    		respawnOnLandside(true);
     	} else if (context.getMap().isSafeLandside(this)) { // drove into safe
+    		// only defenders may use the landside safe zone
+    		// so only defenders should be respawned here
     		respawnOnLandside(true);
     	} else if (context.getMap().isSafeOceanside(this)) { // drove into safe
+    		// both teams may use the oceanside safe zone
     		respawnOnLandside(false);
     	} else {
-    		// sunk, respawn on native 'team' side
-    		respawnOnLandside(team == Team.GREEN);
+    		// sunk, respawn on land side
+    		respawnOnLandside(true);
     	}
     }
 
@@ -366,9 +369,14 @@ public class Player extends Position {
      * respawn oceanside - when button pressed
      */
     public void requestRespawnToOceanSide() {
-    	if (isInSafe()) { // only if in safe
+    	// strictly, in a cade only the attacker would be
+    	// able to do this. However we provide the ability for the
+    	// defender to go Oceanside too to keep things fair.
+    	if (context.getMap().isSafeLandside(this)) { // only if in safe landside
 	    	respawnOnLandside(false);
     	}
+
+    	// TODO send disable goOceanside button here
     }
 
     /**
@@ -577,6 +585,10 @@ public class Player extends Position {
         packets.sendDamage();
         moves.resetTurn();
         packets.sendTokens();
+
+        if (context.getMap().isSafeLandside(this)) {
+        	// TODO send enable goOceanside button here
+        }
 
     }
 

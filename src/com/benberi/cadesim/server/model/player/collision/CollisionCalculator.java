@@ -244,7 +244,7 @@ public class CollisionCalculator {
         if (player.equals(target)) {
             return false;
         }
-        if (player.getCollisionStorage().isCollided(turn) || context.getMap().isRock(target.getX(), target.getY()) || isOutOfBounds(target)) {
+        if (player.getCollisionStorage().isCollided(turn) || context.getMap().isRock(target.getX(), target.getY(), player) || isOutOfBounds(target)) {
             //System.out.println(player.getCollisionStorage().isCollided(turn) + " " + context.getMap().isRock(target.getX(), target.getY()) + " " + isOutOfBounds(target));
             player.getVessel().appendDamage(player.getVessel().getRockDamage(), Team.NEUTRAL);
             player.getCollisionStorage().setCollided(turn, phase);
@@ -267,7 +267,7 @@ public class CollisionCalculator {
                 player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
                 Position bumpPos = context.getMap().getNextActionTilePositionForTile(claimed, context.getMap().getTile(player.getX(), player.getY()));
                 if (players.getPlayerByPosition(bumpPos.getX(), bumpPos.getY()) == null && !isOutOfBounds(bumpPos)
-                        && !context.getMap().isRock(bumpPos.getX(), bumpPos.getY()) && player.getVessel().getSize() >= claimed.getVessel().getSize()) {
+                        && !context.getMap().isRock(bumpPos.getX(), bumpPos.getY(), player) && player.getVessel().getSize() >= claimed.getVessel().getSize()) {
                     claimed.set(bumpPos);
                     claimed.getVessel().appendDamage(player.getVessel().getRamDamage(), player.getTeam());
                     claimed.getCollisionStorage().setPositionChanged(true);
@@ -311,7 +311,7 @@ public class CollisionCalculator {
         if (!player.getCollisionStorage().isPositionChanged()) {
             pos = move.getNextPositionWithPhase(player, player.getFace(), phase);
         }
-        if (context.getMap().isRock(pos.getX(), pos.getY())) {
+        if (context.getMap().isRock(pos.getX(), pos.getY(), player)) {
             player.getCollisionStorage().setCollided(turn, phase);
             return true;
         }
@@ -507,7 +507,7 @@ public class CollisionCalculator {
         Position bumpPosition = anim.getPositionForAnimation(bumped);
         return bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk() &&
                 !isOutOfBounds(bumpPosition) && getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0 &&
-                !context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY());
+                !context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumper);
     }
     
     /**
@@ -521,7 +521,7 @@ public class CollisionCalculator {
         Position bumpPosition = anim.getPositionForAnimation(bumped);
         return (bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk()
                 && getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0)
-                && (context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY())
+                && (context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumper)
                 || isOutOfBounds(bumpPosition));
     }
  
