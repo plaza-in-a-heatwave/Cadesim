@@ -104,7 +104,12 @@ public class Player extends Position {
      * Unable to be manauvered for n turns
      */
     private int turnsUntilControl = 0;  // manauverable now
-    private boolean firstEntry = true; // first time is fine
+
+    /**
+     * Resolve bug spawning in - ship has bad coords first time
+     * so flag first run to ensure landside sailing
+     */
+    private boolean firstEntry = true;
 
     public boolean isFirstEntry() {
 		return firstEntry;
@@ -316,12 +321,19 @@ public class Player extends Position {
     }
 
     /**
-     * Respawns the player to the correct side.
+     * Respawns the player to the correct side. It is
+     * triggered by the server requiring an action e.g.
+     * a player entering safe zone or sinking or spawning.
+     * This is 1 of 2 wrappers around respawnOnLandside().
+     * The other wrapper is requestRespawnToOceanside()
+     * which is triggered by a player clicking Go Oceanside.
      */
     public void respawn() {
     	// where to respawn?
     	if (isFirstEntry()) {
-    		// start on land side
+    		setFirstEntry(false);
+    		// start on land side regardless of where
+    		// map says we are currently - it's wrong
     		respawnOnLandside(true);
     	} else if (context.getMap().isSafeLandside(this)) { // drove into safe
     		// only defenders may use the landside safe zone
@@ -331,6 +343,9 @@ public class Player extends Position {
     		// both teams may use the oceanside safe zone
     		respawnOnLandside(false);
     	} else {
+    		// after sink, return control after x turns
+    		this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay());
+
     		// sunk, respawn on land side
     		respawnOnLandside(true);
     	}
@@ -338,15 +353,9 @@ public class Player extends Position {
 
 	/**
      * respawn on one of two sides
+     * @param landSide true if want to spawn on landside else false
      */
     private void respawnOnLandside(boolean landSide) {
-    	// after respawn, return control after x turns
-    	if (isFirstEntry()) {
-        	setFirstEntry(false);
-    	} else {
-	        this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay());
-    	}
-
     	int x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
     	int y = landSide?(BlockadeMap.MAP_HEIGHT-1):0;
         setFace(landSide?VesselFace.SOUTH:VesselFace.NORTH);
@@ -373,7 +382,7 @@ public class Player extends Position {
     	// able to do this. However we provide the ability for the
     	// defender to go Oceanside too to keep things fair.
     	if (context.getMap().isSafeLandside(this)) { // only if in safe landside
-	    	respawnOnLandside(false);
+            respawnOnLandside(false);
     	}
 
     	// TODO send disable goOceanside button here
