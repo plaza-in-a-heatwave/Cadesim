@@ -19,7 +19,7 @@ public class MoveGenerator {
     }
 
     public void update() {
-        if (player.getMoveTokens().getCannons() + player.getMoves().countAllShoots() < 24) {
+        if (player.getMoveTokens().getCannons() + player.getMoves().countAllShoots() < player.getVessel().getMaxCannons()) {
             updateCannonGeneration();
         }
         updateMoveGeneration();
