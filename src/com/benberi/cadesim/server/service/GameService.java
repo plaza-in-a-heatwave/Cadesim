@@ -1,6 +1,9 @@
 package com.benberi.cadesim.server.service;
 
 import com.benberi.cadesim.server.ServerContext;
+import com.benberi.cadesim.server.config.Constants;
+import com.benberi.cadesim.server.config.ServerConfiguration;
+import com.benberi.cadesim.server.util.RandomUtils;
 
 /**
  * This is the "heartbeat" main loop of the game server
@@ -49,6 +52,20 @@ public class GameService implements Runnable {
                 }
 
                 ServerContext.log("Starting new game #" + Integer.toString(gamesCompleted) + ".");
+                // rotate a new mapname if parameter > 0
+                int t = ServerConfiguration.getMapRotationPeriod();
+                if (t > 0) {
+	                if ((gamesCompleted % t) == 0) {
+	                	ServerConfiguration.setMapName(
+	                		RandomUtils.getRandomMapName(Constants.mapDirectory)
+	                	);
+	                	context.renewMap();
+	                	
+	                	ServerContext.log("Rotated map after " + Integer.toString(t) + " games, automatically chose random map: " + ServerConfiguration.getMapName());
+	                }
+                }
+                
+                // complete the game refresh
                 context.getTimeMachine().renewGame();
                 context.getPlayerManager().renewGame();
                 gameEnded = false;

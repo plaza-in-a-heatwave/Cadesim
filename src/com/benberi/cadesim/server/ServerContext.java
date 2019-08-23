@@ -96,6 +96,13 @@ public class ServerContext {
     public BlockadeMap getMap() {
         return map;
     }
+    
+    /** Sets the map handler
+     * @return {@link #map}
+     */
+    public void renewMap() {
+    	map = new BlockadeMap(this);
+    }
 
     /**
      * Gets the packet manager

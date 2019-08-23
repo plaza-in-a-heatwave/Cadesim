@@ -654,5 +654,10 @@ public class PlayerManager {
     {
         pointsTeamRed = 0;
         pointsTeamGreen = 0;
+
+        for (Player p : listRegisteredPlayers()) {
+        	p.setFirstEntry(true);
+        	p.setNeedsRespawn(true);
+        }
     }
 }

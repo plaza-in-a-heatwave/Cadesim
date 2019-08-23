@@ -13,7 +13,8 @@ public class ServerConfiguration {
     private static int turnDuration  = 300;        // "deciseconds"
     private static int roundDuration = 18000;      // "deciseconds"
     private static int respawnDelay  = 2;          // turns
-	private static String mapName = "default.map";
+    private static int mapRotationPeriod = 5;      // turns
+    private static String mapName = "default.map";
 
     public static int getPlayerLimit() {
         return playerLimit;
@@ -68,7 +69,8 @@ public class ServerConfiguration {
         		"Port:" + getPort() + ", " +
         		"turn duration:" + getTurnDuration() / 10 + "s, " +
         		"round duration:" + getRoundDuration() / 10 + "s, " +
-        		"respawn delay:" + getRespawnDelay() + " turns" +
+        		"sink delay:" + getRespawnDelay() + " turns, " +
+        		"map rotation period:" + getMapRotationPeriod() + " turns " +
         		"]";
     }
     
@@ -79,4 +81,12 @@ public class ServerConfiguration {
     public static void setMapName(String mapName) {
         ServerConfiguration.mapName = mapName;
     }
+
+	public static int getMapRotationPeriod() {
+		return mapRotationPeriod;
+	}
+
+	public static void setMapRotationPeriod(int mapRotationPeriod) {
+		ServerConfiguration.mapRotationPeriod = mapRotationPeriod;
+	}
 }

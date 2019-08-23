@@ -24,6 +24,11 @@ public class Constants {
     public static final String logName      = "cadesim.log";
     
     /**
+     * map paths to use
+     */
+    public static final String mapDirectory = "maps";
+    
+    /**
      * The delay of the main game service loop in milliseconds
      */
     public static final int SERVICE_LOOP_DELAY = 100; // ms

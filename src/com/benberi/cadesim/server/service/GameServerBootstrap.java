@@ -99,7 +99,8 @@ public class GameServerBootstrap {
         options.addOption("r", "round duration", true, "round duration seconds (default: " + ServerConfiguration.getRoundDuration() + ")");
         options.addOption("d", "respawn delay", true, "respawn delay (in turns) after sinking (default: " + ServerConfiguration.getRespawnDelay() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
-
+        options.addOption("o", "map rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
+        
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -128,16 +129,20 @@ public class GameServerBootstrap {
             {
             	ServerConfiguration.setRespawnDelay(Integer.parseInt(cmd.getOptionValue("d")));
             }
+            if (cmd.hasOption("o"))
+            {
+            	ServerConfiguration.setMapRotationPeriod(Integer.parseInt(cmd.getOptionValue("o")));
+            	if (ServerConfiguration.getMapRotationPeriod() == 0) {
+            		help(options);
+            	}
+            }
             if (!cmd.hasOption("m")) { // Chooses random map if no map chosen
-                Path currentRelativePath = Paths.get("");
-                File[] mapList = currentRelativePath.resolveSibling("maps").toFile().listFiles();
                 try {
-                    File randomMap = mapList[RandomUtils.randInt(0, mapList.length-1)];
-                    ServerConfiguration.setMapName(
-                    	randomMap.getName().substring(
-                    		0, randomMap.getName().lastIndexOf(".")
-                    	)
-                    );
+                	ServerConfiguration.setMapName(
+                		RandomUtils.getRandomMapName(
+                			Constants.mapDirectory
+                		)
+                	);
                     ServerContext.log("No map specified, automatically chose random map: " + ServerConfiguration.getMapName());
                 } catch(NullPointerException e) {
                 	ServerContext.log("Failed to find random map folder. create a folder called \"maps\" in the same directory.");

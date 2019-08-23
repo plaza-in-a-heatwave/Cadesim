@@ -56,7 +56,7 @@ public class BlockadeMap {
     private List<Flag> flags = new ArrayList<>();
 
     public BlockadeMap(ServerContext ctx) {
-        this.map = MapType.DEFAULT.load(this);
+    	this.map = MapType.DEFAULT.load(this);
     }
 
     public int[][] getMap() {
