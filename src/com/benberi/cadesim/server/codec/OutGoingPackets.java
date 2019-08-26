@@ -92,4 +92,9 @@ public class OutGoingPackets {
     public static final int SET_PLAYER_FLAGS = 17;
     
     public static final int SET_TEAM_NAMES = 18;
+    
+    /**
+     * delivers messages to clients
+     */
+    public static final int RECEIVE_MESSAGE = 19;
 }

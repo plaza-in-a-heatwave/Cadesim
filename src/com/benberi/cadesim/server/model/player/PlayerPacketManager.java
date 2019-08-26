@@ -269,6 +269,13 @@ public class PlayerPacketManager {
 
         player.sendPacket(packet);
     }
+    
+    public void sendReceiveMessage(String player, String message) {
+    	ReceiveMessagePacket packet = new ReceiveMessagePacket();
+    	packet.setPlayer(player);
+    	packet.setMessage(message);
+    	this.player.sendPacket(packet);
+    }
 
     public void queueOutgoing(OutgoingPacket packet) {
         outgoingPackets.add(packet);

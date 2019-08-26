@@ -1,6 +1,5 @@
 package com.benberi.cadesim.server.model.player.domain;
 
-import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.player.Player;
 
 public class MoveGenerator {

@@ -14,4 +14,5 @@ public class IncomingPackets {
     public static final int SET_SEAL_TARGET = 5;
     public static final int TURN_FINISH_NOTIFICATION = 6;
     public static final int OCEANSIDE_REQUEST = 7;
+    public static final int POST_MESSAGE = 8;
 }

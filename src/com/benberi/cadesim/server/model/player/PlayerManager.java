@@ -473,7 +473,7 @@ public class PlayerManager {
      */
     public Player getPlayerByChannel(Channel c) {
         for(Player p : players) {
-            if (p.equals(c)) {
+            if (p.getChannel().equals(c)) {
                 return p;
             }
         }
