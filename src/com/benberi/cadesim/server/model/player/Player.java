@@ -166,7 +166,7 @@ public class Player extends Position {
         }
 
         if (vessel.getDamagePercentage() > 0) {
-            double rate = jobbersQuality.getFixRate() / ServerConfiguration.getTurnDuration();
+            double rate = jobbersQuality.getFixRate();
             vessel.decreaseDamage(rate);
             if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
                 packets.sendDamage();
@@ -175,7 +175,7 @@ public class Player extends Position {
         }
 
         if (vessel.getBilgePercentage() > 0) {
-            double rate = (jobbersQuality.getBilgeFixRate() / ServerConfiguration.getTurnDuration()) - (vessel.getDamage() / 10000);
+            double rate = (jobbersQuality.getBilgeFixRate()) - (vessel.getDamage() / 10000);
             vessel.decreaseBilge(rate);
             if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
                 packets.sendDamage();
@@ -381,7 +381,9 @@ public class Player extends Position {
     	// strictly, in a cade only the attacker would be
     	// able to do this. However we provide the ability for the
     	// defender to go Oceanside too to keep things fair.
-        respawnOnLandside(false);
+    	if (!outOfSafe) {
+    		respawnOnLandside(false);
+    	}
 
     	// TODO send disable goOceanside button here
     }

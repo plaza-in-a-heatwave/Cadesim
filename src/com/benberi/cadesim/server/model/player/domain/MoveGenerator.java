@@ -26,9 +26,9 @@ public class MoveGenerator {
     }
 
     private void updateMoveGeneration() {
-        double movesPerTurn = player.getJobbersQuality().getMovesPerTurn();
-        double movesPerTurnAffectBilge = movesPerTurn - 0.009 * player.getVessel().getBilgePercentage() * movesPerTurn;
-        double rate = movesPerTurnAffectBilge / ServerConfiguration.getTurnDuration();
+        double movesPerSec = player.getJobbersQuality().getMovesPerSec();
+        double movesPerSecAffectBilge = movesPerSec - 0.009 * player.getVessel().getBilgePercentage() * movesPerSec;
+        double rate = movesPerSecAffectBilge;
 
         moveGenerationPercentage += rate;
         if (moveGenerationPercentage >= 1) {
@@ -39,7 +39,7 @@ public class MoveGenerator {
     }
 
     private void updateCannonGeneration() {
-        double rate = player.getJobbersQuality().getCannonsPerTurn() / ServerConfiguration.getTurnDuration();
+        double rate = player.getJobbersQuality().getCannonsPerSec();
         cannonGenerationPercentage += rate;
         if (cannonGenerationPercentage >= 1) {
             cannonGenerationPercentage -= Math.floor(cannonGenerationPercentage);

@@ -1,17 +1,30 @@
 package com.benberi.cadesim.server.model.player.domain;
 
 public enum JobbersQuality {
-
-    BASIC(0.5, 4, 40, 1.7, 11.5, 0.15),
-    ELITE(1, 7, 50, 2.4, 17, 0.3);
+	BASIC(
+		0.00333, // fixRate              per sec
+		0.02666, // bilgeFixRate         per sec
+		40,      // minBilgeForDamage
+		0.01133, // moves                per sec
+		0.07666, // cannons              per sec
+		0.00100  // full bilge move rate per sec
+    ),
+	ELITE(
+		0.00666, // "
+		0.04666, // "
+		50,      // "
+		0.01600, // "
+		1.01333, // "
+		0.00200  // "
+	);
 
     /**
-     *  The fix amount per turn
+     *  The fix amount per sec
      */
     private double fixRate;
 
     /**
-     * The fix bilge amount per turn
+     * The fix bilge amount per sec
      */
     private double bilgeFixRate;
 
@@ -21,23 +34,23 @@ public enum JobbersQuality {
     private double minBilgeForDamamge;
 
     /**
-     * Move generation per turn
+     * Move generation per sec
      */
-    private double movesPerTurn;
+    private double movesRate;
 
     /**
-     * Cannon generation per turn
+     * Cannon generation per sec
      */
-    private double cannonsPerTurn;
+    private double cannonsRate;
 
     private double fullBilgeMoveRate;
 
-    JobbersQuality(double fixRate, double bilgeFixRate, double minBilgeForDamage,  double movesPerTurn, double cannonsPerTurn, double fullBilgeMoveRate) {
+    JobbersQuality(double fixRate, double bilgeFixRate, double minBilgeForDamage,  double movesRate, double cannonsRate, double fullBilgeMoveRate) {
         this.fixRate = fixRate;
         this.bilgeFixRate = bilgeFixRate;
         this.minBilgeForDamamge = minBilgeForDamage;
-        this.movesPerTurn = movesPerTurn;
-        this.cannonsPerTurn = cannonsPerTurn;
+        this.movesRate = movesRate;
+        this.cannonsRate = cannonsRate;
         this.fullBilgeMoveRate = fullBilgeMoveRate;
     }
 
@@ -45,8 +58,8 @@ public enum JobbersQuality {
         return fixRate;
     }
 
-    public double getCannonsPerTurn() {
-        return this.cannonsPerTurn;
+    public double getCannonsPerSec() {
+        return this.cannonsRate;
     }
 
     public double getBilgeFixRate() {
@@ -61,7 +74,7 @@ public enum JobbersQuality {
         return fullBilgeMoveRate;
     }
 
-    public double getMovesPerTurn() {
-        return movesPerTurn;
+    public double getMovesPerSec() {
+        return movesRate;
     }
 }
