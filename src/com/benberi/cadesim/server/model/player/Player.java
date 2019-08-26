@@ -593,6 +593,9 @@ public class Player extends Position {
         moves.resetTurn();
         packets.sendTokens();
 
+        // reset any glitched moves/guns that remain set by client
+        packets.sendSelectedMoves();
+
         if (context.getMap().isSafeLandside(this)) {
         	// TODO send enable goOceanside button here
         }
