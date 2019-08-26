@@ -346,7 +346,7 @@ public class Player extends Position {
     		// after sink, return control after x turns
     		this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay());
 
-    		// sunk, respawn on land side
+            // sunk, 'respawn' on land side with new ship
     		respawnOnLandside(true);
     	}
     }
@@ -381,9 +381,7 @@ public class Player extends Position {
     	// strictly, in a cade only the attacker would be
     	// able to do this. However we provide the ability for the
     	// defender to go Oceanside too to keep things fair.
-    	if (context.getMap().isSafeLandside(this)) { // only if in safe landside
-            respawnOnLandside(false);
-    	}
+        respawnOnLandside(false);
 
     	// TODO send disable goOceanside button here
     }
