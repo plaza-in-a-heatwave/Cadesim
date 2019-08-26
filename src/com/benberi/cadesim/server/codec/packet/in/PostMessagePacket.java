@@ -19,11 +19,7 @@ public class PostMessagePacket extends ServerPacketExecutor {
     @Override
     public void execute(Player pl, Packet p) {
     	String message = p.readIntString();
-
-        System.out.println("message from \"" + pl.getName() + "\":" + message);
-        // TODO handle this by sending a message to all players
         ServerContext.log("[chat] " + pl.getName() + ":" + message);
-        
         for(Player player : context.getPlayerManager().getPlayers()) {
             player.getPackets().sendReceiveMessage(pl.getName(), message);
         }
