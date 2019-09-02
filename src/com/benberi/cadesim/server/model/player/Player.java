@@ -166,7 +166,7 @@ public class Player extends Position {
         }
 
         if (vessel.getDamagePercentage() > 0) {
-            double rate = jobbersQuality.getFixRate();
+            double rate = jobbersQuality.getFixRatePerTick();
             vessel.decreaseDamage(rate);
             if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
                 packets.sendDamage();
@@ -600,6 +600,10 @@ public class Player extends Position {
 
         if (context.getMap().isSafeLandside(this)) {
         	// TODO send enable goOceanside button here
+        }
+        else
+        {
+        	// TODO send disable goOceanside button here
         }
 
     }

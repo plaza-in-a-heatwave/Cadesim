@@ -2,6 +2,11 @@ package com.benberi.cadesim.server.model.player.domain;
 
 import com.benberi.cadesim.server.config.Constants;
 
+/**
+ * the rates of various ship constants in Seconds.
+ * compensation is applied for the service loop rate, which is
+ * typically greater than 1 tick per second.
+ */
 public enum JobbersQuality {
 	BASIC(
 		0.03333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // fixRate              per tick
@@ -21,12 +26,12 @@ public enum JobbersQuality {
 	);
 
     /**
-     *  The fix amount per sec
+     *  The fix amount per tick
      */
     private double fixRate;
 
     /**
-     * The fix bilge amount per sec
+     * The fix bilge amount per tick
      */
     private double bilgeFixRate;
 
@@ -36,15 +41,18 @@ public enum JobbersQuality {
     private double minBilgeForDamamge;
 
     /**
-     * Move generation per sec
+     * Move generation per tick
      */
     private double movesRate;
 
     /**
-     * Cannon generation per sec
+     * Cannon generation per tick
      */
     private double cannonsRate;
 
+    /**
+     * Move generation on full bilge per tick
+     */
     private double fullBilgeMoveRate;
 
     JobbersQuality(double fixRate, double bilgeFixRate, double minBilgeForDamage,  double movesRate, double cannonsRate, double fullBilgeMoveRate) {
@@ -56,7 +64,7 @@ public enum JobbersQuality {
         this.fullBilgeMoveRate = fullBilgeMoveRate;
     }
 
-    public double getFixRate() {
+    public double getFixRatePerTick() {
         return fixRate;
     }
 
