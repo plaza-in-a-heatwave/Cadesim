@@ -1,21 +1,23 @@
 package com.benberi.cadesim.server.model.player.domain;
 
+import com.benberi.cadesim.server.config.Constants;
+
 public enum JobbersQuality {
 	BASIC(
-		0.00333, // fixRate              per sec
-		0.02666, // bilgeFixRate         per sec
-		40,      // minBilgeForDamage
-		0.01133, // moves                per sec
-		0.07666, // cannons              per sec
-		0.00100  // full bilge move rate per sec
+		0.03333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // fixRate              per tick
+		0.26666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // bilgeFixRate         per tick
+		40,                                                     // minBilgeForDamage
+		0.11333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // moves                per tick
+		0.3     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // cannons              per tick
+		0.01000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // full bilge move rate per tick
     ),
 	ELITE(
-		0.00666, // "
-		0.04666, // "
-		50,      // "
-		0.01600, // "
-		1.01333, // "
-		0.00200  // "
+		0.06666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		0.46666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		50,                                                     // "
+		0.16000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		0.4     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		0.02000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // "
 	);
 
     /**
@@ -58,11 +60,11 @@ public enum JobbersQuality {
         return fixRate;
     }
 
-    public double getCannonsPerSec() {
+    public double getCannonsPerTick() {
         return this.cannonsRate;
     }
 
-    public double getBilgeFixRate() {
+    public double getBilgeFixPerTick() {
         return bilgeFixRate;
     }
 
@@ -70,11 +72,11 @@ public enum JobbersQuality {
         return minBilgeForDamamge;
     }
 
-    public double getFullBilgeMoveRate() {
+    public double getFullBilgeMovesPerTick() {
         return fullBilgeMoveRate;
     }
 
-    public double getMovesPerSec() {
+    public double getMovesPerTick() {
         return movesRate;
     }
 }

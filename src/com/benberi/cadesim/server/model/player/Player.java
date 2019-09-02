@@ -175,7 +175,7 @@ public class Player extends Position {
         }
 
         if (vessel.getBilgePercentage() > 0) {
-            double rate = (jobbersQuality.getBilgeFixRate()) - (vessel.getDamage() / 10000);
+            double rate = (jobbersQuality.getBilgeFixPerTick()) - (vessel.getDamage() / 10000);
             vessel.decreaseBilge(rate);
             if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
                 packets.sendDamage();
