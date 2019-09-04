@@ -5,6 +5,7 @@ import com.benberi.cadesim.server.codec.packet.out.impl.LoginResponsePacket;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
+import com.benberi.cadesim.server.model.player.Vote.VOTE_RESULT;
 import com.benberi.cadesim.server.model.player.collision.CollisionCalculator;
 import com.benberi.cadesim.server.model.player.domain.PlayerLoginRequest;
 import com.benberi.cadesim.server.model.player.move.MoveAnimationTurn;
@@ -61,6 +62,11 @@ public class PlayerManager {
      * The last time time packet was sent
      */
     private long lastTimeSend;
+    
+    /**
+     * is a vote in progress
+     */
+    private Vote currentVote = null;
 
     public PlayerManager(ServerContext context) {
         this.context = context;
@@ -659,5 +665,100 @@ public class PlayerManager {
         	p.setFirstEntry(true);
         	p.setNeedsRespawn(true);
         }
+    }
+    
+    public void handleMessage(Player pl, String message)
+    {
+    	// log here, and beacon to all other players
+        ServerContext.log("[chat] " + pl.getName() + ":" + message);
+        for(Player player : context.getPlayerManager().getPlayers()) {
+            player.getPackets().sendReceiveMessage(pl.getName(), message);
+        }
+
+    	// if it starts with /cadesim, it is a server command
+    	if (message.startsWith("/cadesim "))
+    	{
+    		if (message.startsWith("/cadesim vote "))
+    		{
+    			if (message.startsWith("/cadesim vote restart"))
+        		{
+    				// first person to request vote creates it
+    				if (currentVote == null)
+    				{
+    					currentVote = new Vote((PlayerManager)this, "restart");
+    					// TODO send all players notice that the vote has been initiated
+    				}
+    				
+    				// subsequent people (including originator) may vote on it
+    				if (currentVote.getDescription() == "restart")
+    				{
+    					VOTE_RESULT v = currentVote.castVote(pl, true);
+    					switch(v)
+    					{
+    					case TBD:
+    						break;
+    					case TIMEDOUT:
+    						currentVote = null;
+    						break;
+    					case FOR:
+    						// TODO restart server here
+    						currentVote = null;
+    						break;
+    					case AGAINST:
+    						currentVote = null;
+    						break;
+						default:
+							// no action
+							break;
+    					}
+    				}
+        		}
+        		else if (message.startsWith("/cadesim vote nextmap"))
+        		{
+        			// first person to request vote creates it
+    				if (currentVote == null)
+    				{
+    					currentVote = new Vote((PlayerManager)this, "nextmap");
+    					// TODO send all players notice that the vote has been initiated
+    				}
+    				
+    				// subsequent people (including originator) may vote on it
+    				if (currentVote.getDescription() == "nextmap")
+    				{
+    					VOTE_RESULT v = currentVote.castVote(pl, true);
+    					switch(v)
+    					{
+    					case TBD:
+    						break;
+    					case TIMEDOUT:
+    						currentVote = null;
+    						break;
+    					case FOR:
+    						// TODO send nextmap here
+    						currentVote = null;
+    						break;
+    					case AGAINST:
+    						currentVote = null;
+    						break;
+						default:
+							// no action
+							break;
+    					}
+    				}
+        		}
+    		}
+    		else if (message.startsWith("/cadesim nextmap"))
+    		{
+    			// TODO display the next map which will be used.
+    		}
+    		else if (message.startsWith("/cadesim help"))
+    		{
+    			// TODO send list of all commands to the player who asked
+    		}
+    		else if (message.startsWith("/cadesim parameters"))
+    		{
+    			// TODO send list of all parameters to player who asked
+    		}
+    	}
     }
 }

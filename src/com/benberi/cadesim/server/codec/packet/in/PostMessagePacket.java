@@ -18,11 +18,7 @@ public class PostMessagePacket extends ServerPacketExecutor {
 
     @Override
     public void execute(Player pl, Packet p) {
-    	String message = p.readIntString();
-        ServerContext.log("[chat] " + pl.getName() + ":" + message);
-        for(Player player : context.getPlayerManager().getPlayers()) {
-            player.getPackets().sendReceiveMessage(pl.getName(), message);
-        }
-        
+        // pass to message handler
+        context.getPlayerManager().handleMessage(pl, p.readIntString());
     }
 }

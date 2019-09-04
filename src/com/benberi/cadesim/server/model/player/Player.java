@@ -318,6 +318,8 @@ public class Player extends Position {
         		Vessel.vesselIDToString(ship) + "."
         );
         respawn();
+        
+        // TODO send player a chat message listing all commands available
     }
 
     /**
