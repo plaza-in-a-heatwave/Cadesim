@@ -65,6 +65,7 @@ public class GameService implements Runnable {
                 ServerContext.log("Starting new game #" + Integer.toString(gamesCompleted) + ".");
                 
                 // switch map if players have demanded it, or if we're rotating maps
+                String oldMap = ServerConfiguration.getMapName();
                 if (context.getPlayerManager().shouldSwitchMap())
                 {
                 	randomRotateMap();
@@ -84,6 +85,13 @@ public class GameService implements Runnable {
                 		" games, automatically chose random map: " +
                 		ServerConfiguration.getMapName()
                 	);
+                }
+                
+                // message if map changed
+                String newMap = ServerConfiguration.getMapName();
+                if (!newMap.contentEquals(oldMap))
+                {
+                	context.getPlayerManager().beaconMessageFromServer("The map was changed to " + newMap);
                 }
                 
                 // complete the game refresh
