@@ -200,6 +200,11 @@ public abstract class Vessel {
 	            return "War Galleon";
 	    }
     }
+    
+    public String getName()
+    {
+    	return vesselIDToString(getID());
+    }
 
     /**
      * Checks if the vessel type exists

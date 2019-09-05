@@ -393,6 +393,7 @@ public class PlayerManager {
                 if (!p.isTurnFinished()) {
                     if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
                         ServerContext.log(p.getName() +  " kicked for timing out while animating!");
+                        beaconMessageFromServer(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
                         p.getChannel().disconnect();
                     }
                     else {
@@ -599,6 +600,9 @@ public class PlayerManager {
                     context.getTimeMachine().endGame();
                     context.getTimeMachine().endTurn();
                 }
+                
+                // send chat message
+                beaconMessageFromServer("Welcome " + pl.getName() + " (" + pl.getTeam() + ", " + pl.getVessel().getName() + ")");
             }
         }
     }
@@ -616,6 +620,7 @@ public class PlayerManager {
                 }
             }
 
+            beaconMessageFromServer("Goodbye " + player.getName() + " (" + player.getTeam() + ", " + player.getVessel().getName() + ")");
             players.remove(player);
         }
     }
@@ -692,6 +697,7 @@ public class PlayerManager {
         for (Player p : listRegisteredPlayers()) {
         	p.setFirstEntry(true);
         	p.setNeedsRespawn(true);
+        	p.getPackets().sendBoard();
         }
     }
     
@@ -710,7 +716,7 @@ public class PlayerManager {
      */
     public void serverMessage(Player pl, String message)
     {
-    	ServerContext.log("[chat] " + "<" + Constants.name + ">" + ":" + message);
+    	ServerContext.log("[chat] " + "<" + Constants.name + ">" + " (to " + pl.getName() + "):" + message);
         pl.getPackets().sendReceiveMessage("<" + Constants.name + ">", message);
     }
     
