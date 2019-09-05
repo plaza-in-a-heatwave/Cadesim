@@ -3,17 +3,23 @@ package com.benberi.cadesim.server.model.player;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.benberi.cadesim.server.ServerContext;
+
 public class Vote {
 	private int votesFor     = 0;              // count votes for
 	private int votesAgainst = 0;              // count votes against
-	private static final int MIN_TURNOUT_PERCENT = 75; // turnout must be >= 75%
-	private static final int CARRY_PERCENT = 50; // vote carried at >50%
-	private static final int VOTE_TIMEOUT_MILLIS = 30000; // timeout after 30s
+	public static final int MIN_TURNOUT_PERCENT = 75; // turnout must be >= 75%
+	public static final int CARRY_PERCENT = 50; // vote carried at >50%
+	public static final int VOTE_TIMEOUT_MILLIS = 30000; // timeout after 30s
+	public static final int PRINT_SCORE_MILLIS = 5000; // ms
 	private List<String> eligibleIPs = new ArrayList<String>(); // restrict to players present when vote started
 	private List<String> voterIPs    = new ArrayList<String>(); // prevent multi ip voting
 	private long voteStartTime; // system time in millis() since vote started
 	private boolean voteInProgress = true; // is vote in progress? true initially
 	private String description;            // describe what the vote relates to
+	private VOTE_RESULT result = VOTE_RESULT.TBD; // the result
+	private PlayerManager context; // the context
+	private long lastPrintUpdate = System.currentTimeMillis();
 	
 	/**
 	 * the kind of vote result which could be returned
@@ -25,12 +31,84 @@ public class Vote {
 	    TIMEDOUT
 	}
 	
+	private int getEligibleVoters() {
+		return eligibleIPs.size();
+	}
+	
+	private String printProgress() {
+		return "Vote on " + getDescription() + " :" + printScore() + ", " +
+			(int)((float)(VOTE_TIMEOUT_MILLIS - (System.currentTimeMillis() - voteStartTime)) / 1000.0) +
+			" seconds remaining";
+	}
+	
+	private String printScore() {
+		return Integer.toString(votesFor) + "-" + Integer.toString(votesAgainst);
+	}
+	
 	/**
-	 * get the internal vote threshold percentage
-	 * @return threshold as a percentage
+	 * get the result of the vote
+	 * performs timeout check, so can keep polling this method
 	 */
-	public float getVoteThreshold() {
-		return (float)MIN_TURNOUT_PERCENT;
+	public VOTE_RESULT getResult() {
+		if (voteInProgress)
+		{
+			if (!hasTimedOut())
+			{
+				// print update every 5 seconds
+				long now = System.currentTimeMillis();
+				if ((now - lastPrintUpdate) >= PRINT_SCORE_MILLIS)
+				{
+		            lastPrintUpdate = now;
+		            context.beaconMessageFromServer(printProgress());
+				}
+			}
+			else
+			{
+				this.setResult(VOTE_RESULT.TIMEDOUT);
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * set the result of the vote
+	 * 
+	 * if anything other than TBD, sets voteInProgress to false
+	 */
+	private void setResult(VOTE_RESULT value) {
+		if (voteInProgress)
+		{
+			result = value;
+			
+			if (result != VOTE_RESULT.TBD)
+			{
+				voteInProgress = false;
+			}
+			
+			// printout
+			switch(result)
+			{
+			case TBD:
+				break;
+			case FOR:
+				context.beaconMessageFromServer(
+					"Vote " + getDescription() + " passed " + printScore()
+				);
+				break;
+			case AGAINST:
+				context.beaconMessageFromServer(
+						"Vote " + getDescription() + " didn't pass " + printScore()
+					);
+				break;
+			case TIMEDOUT:
+				context.beaconMessageFromServer(
+					"Vote " + getDescription() + " didn't pass (timed out)" + printScore()
+				);
+				break;
+			default:
+				break; // dont care
+			}
+		}
 	}
 	
 	/**
@@ -39,7 +117,8 @@ public class Vote {
 	 */
 	public Vote(PlayerManager pm, String description)
 	{
-		this.voteStartTime = System.currentTimeMillis();
+		this.context = pm;
+		voteStartTime = System.currentTimeMillis();
 		
 		for (Player p:pm.getPlayers())
 		{
@@ -47,6 +126,8 @@ public class Vote {
 		}
 		
 		this.description = description;
+		
+		printProgress();
 	}
 	
 	/**
@@ -65,6 +146,44 @@ public class Vote {
 	}
 	
 	/**
+	 * get whether the minimum percentage has voted.
+	 */
+	private boolean haveMinThresholdVoted() {
+		return (
+			(((float)(votesFor + votesAgainst) / (float)getEligibleVoters()) * 100.0)
+			>= MIN_TURNOUT_PERCENT
+		);
+	}
+	
+	/**
+	 * get whether the 'for' voters have a majority.
+	 * note this is only valid if min threshold have voted.
+	 */
+	private boolean doesForHaveMajority() {
+		return (((float)votesFor / (float)getEligibleVoters()) * 100.0) > CARRY_PERCENT;
+	}
+	
+	private boolean couldForWin() {
+		return (((float)(votesFor + (getEligibleVoters() - votesAgainst - votesFor)) / (float)getEligibleVoters()) * 100.0) > CARRY_PERCENT;
+	}
+	
+	/**
+	 * helper method to calculate timeout for vote
+	 * @return true if has timed out; false otherwise
+	 */
+	private boolean hasTimedOut() {
+		// timeout after n seconds
+		if ((System.currentTimeMillis() - voteStartTime) > VOTE_TIMEOUT_MILLIS)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	/**
 	 * a player casts a vote.
 	 * @param pl      the player
 	 * @param voteFor true->for, false->against
@@ -73,50 +192,68 @@ public class Vote {
 	public VOTE_RESULT castVote(Player pl, boolean voteFor)
 	{
 		// timeout after n seconds
-		if ((voteStartTime + System.currentTimeMillis()) > VOTE_TIMEOUT_MILLIS)
+		if (hasTimedOut())
 		{
-			voteInProgress = false;
-			return VOTE_RESULT.TIMEDOUT;
+			setResult(VOTE_RESULT.TIMEDOUT);
+			return result;
 		}
 
 		// restrict based on IP - can only vote if were around when vote was cast
 		if (!eligibleIPs.contains(pl.getChannel().remoteAddress().toString()))
 		{
-			// TODO warn [to player] this IP can't vote as it wasn't in the original list
-			return VOTE_RESULT.TBD;
+			pl.getContext().getPlayerManager().serverMessage(
+				pl,
+				"Couldn't process this vote - you joined the game after the vote started."
+			);
+			return result;
 		}
 		
 		// prevent duplicate IPs
 		if (voterIPs.contains(pl.getChannel().remoteAddress().toString()))
 		{
-			// TODO warn [to player] this IP can't vote as it's a duplicate
-			return VOTE_RESULT.TBD;
+			pl.getContext().getPlayerManager().serverMessage(
+				pl,
+				"Couldn't process this vote - you can't vote twice!"
+			);
+			return result;
 		}
-		
+
 		if (voteFor)
 		{
 			votesFor++;
 			voterIPs.add(pl.getChannel().remoteAddress().toString());
+			pl.getContext().getPlayerManager().beaconMessageFromServer(printProgress());
+			pl.getContext().getPlayerManager().serverMessage(pl, "You voted: FOR " + getDescription());
 		}
 		else
 		{
 			votesAgainst++;
 			voterIPs.add(pl.getChannel().remoteAddress().toString());
+			pl.getContext().getPlayerManager().beaconMessageFromServer(printProgress());
+			pl.getContext().getPlayerManager().serverMessage(pl, "You voted: AGAINST " + getDescription());
 		}
 		
+		
 		// MIN_TURNOUT% of the players must have voted
-		if ((((float)(votesFor + votesAgainst) / (float)eligibleIPs.size()) * 100.0) >= MIN_TURNOUT_PERCENT)
+		if (haveMinThresholdVoted())
 		{
-			// simple majority of > CARRY_VOTE_BEYOND% carries the vote
-			if ((((float)votesFor / (float)eligibleIPs.size()) * 100.0) > CARRY_PERCENT)
+			// is it possible for a vote to be won? if not, exit early
+			if (!couldForWin())
 			{
-				voteInProgress = false;
-				return VOTE_RESULT.FOR;
+				setResult(VOTE_RESULT.AGAINST);
+				return result;
+			}
+			
+			// simple majority of > CARRY_VOTE_BEYOND% carries the vote
+			if (doesForHaveMajority())
+			{
+				setResult(VOTE_RESULT.FOR);
+				return result;
 			}
 			else
 			{
-				voteInProgress = false;
-				return VOTE_RESULT.AGAINST;
+				setResult(VOTE_RESULT.AGAINST);
+				return result;
 			}
 		}
 		else

@@ -11,6 +11,7 @@ public class LoginResponsePacket extends OutgoingPacket {
     public static final int SERVER_FULL = 2;
     public static final int BAD_VERSION = 3;
     public static final int BAD_SHIP = 4;
+    public static final int BAD_NAME = 5;
 
     /**
      * The response

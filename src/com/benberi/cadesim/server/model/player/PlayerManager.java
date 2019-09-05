@@ -17,6 +17,7 @@ import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -67,10 +68,29 @@ public class PlayerManager {
      * is a vote in progress
      */
     private Vote currentVote = null;
+    
+    /**
+     * should we switch map? (typically requested by player vote)
+     */
+    private boolean shouldSwitchMap = false;
 
+    /**
+     * constructor
+     */
     public PlayerManager(ServerContext context) {
         this.context = context;
         this.collision = new CollisionCalculator(context, this);
+    }
+    
+    /**
+     * gets whether the map should be updated
+     */
+    public boolean shouldSwitchMap() {
+    	return this.shouldSwitchMap;
+    }
+    
+    public void setShouldSwitchMap(boolean value) {
+    	this.shouldSwitchMap = value;
     }
 
     /**
@@ -79,9 +99,16 @@ public class PlayerManager {
     public void tick() {
 
         // Send time ~ every second
-        if (System.currentTimeMillis() - lastTimeSend >= 1000) {
-            lastTimeSend = System.currentTimeMillis();
+    	long now = System.currentTimeMillis();
+        if (now - lastTimeSend >= 1000) {
+            lastTimeSend = now;
             handleTime();
+            
+            // also check for vote results while here
+            if (currentVote != null)
+            {
+            	currentVote.getResult();
+            }
         }
 
         // Update players (for stuff like damage fixing, bilge fixing and move token generation)
@@ -541,9 +568,15 @@ public class PlayerManager {
             if (version != Constants.PROTOCOL_VERSION) {
                 response = LoginResponsePacket.BAD_VERSION;
             }
-
             else if (getPlayerByName(name) != null) {
                 response = LoginResponsePacket.NAME_IN_USE;
+            }
+            else if (
+            	(name.toLowerCase().equals(Constants.name)) ||
+            	(name.length() <= 0) ||
+            	(name.length() > Constants.MAX_NAME_SIZE))
+            {
+            	response = LoginResponsePacket.BAD_NAME;
             }
             else if (!Vessel.vesselExists(ship)) {
                 response = LoginResponsePacket.BAD_SHIP;
@@ -563,12 +596,6 @@ public class PlayerManager {
                 sendPlayerForAll(pl);
                 // If a new player joins and there are now 2 players in the server, end this round so a new one will start
                 if (players.size() == 2) {
-                    for (Player p : players) {
-                        // Respawn all players
-                        p.setNeedsRespawn(true);
-                        // don't force players to endure respawn delay
-                        p.setFirstEntry(true);
-                    }
                     context.getTimeMachine().endGame();
                     context.getTimeMachine().endTurn();
                 }
@@ -658,6 +685,7 @@ public class PlayerManager {
 
     public void renewGame()
     {
+    	shouldSwitchMap = false;
         pointsTeamRed = 0;
         pointsTeamGreen = 0;
 
@@ -667,98 +695,141 @@ public class PlayerManager {
         }
     }
     
+    /**
+     * send message to all players from server
+     */
+    public void beaconMessageFromServer(String message)
+    {
+        for(Player player : context.getPlayerManager().getPlayers()) {
+            serverMessage(player, message);
+        }
+    }
+    
+    /**
+     * send a message to a single player from the server
+     */
+    public void serverMessage(Player pl, String message)
+    {
+    	ServerContext.log("[chat] " + "<" + Constants.name + ">" + ":" + message);
+        pl.getPackets().sendReceiveMessage("<" + Constants.name + ">", message);
+    }
+    
+    /**
+     * helper method to handle vote yes/no messages
+     * @param pl      the player who sent the message
+     * @param message either /yes or /no
+     */
+    private void handleVote(Player pl, String message)
+    {
+    	// subsequent people (including originator) may vote on it
+		boolean voteFor = (message.equals("/yes"));
+		if (currentVote == null)
+		{
+			serverMessage(pl, "There is no vote in progress");
+		}
+		else if (currentVote.getDescription().equals("restart"))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:
+				handleStopVote();
+				context.getTimeMachine().endGame();
+                context.getTimeMachine().endTurn();
+				break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
+		else if (currentVote.getDescription().equals("nextmap"))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:
+				handleStopVote();
+				setShouldSwitchMap(true);
+				context.getTimeMachine().endGame();
+                context.getTimeMachine().endTurn();
+				break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
+    }
+    
+    private void handleStartVote(Player pl, String message, String voteDescription)
+    {
+    	// first person to request vote creates it (and votes for it)
+		if (currentVote == null)
+		{
+			currentVote = new Vote((PlayerManager)this, voteDescription);
+			handleVote(pl, "/yes");
+		}
+		else
+		{
+			serverMessage(pl, "Can't start a new vote, there is one in progress: " + currentVote.getDescription());
+		}
+    }
+    
+    private void handleStopVote()
+    {
+    	// print out the final scores
+    	if (currentVote != null)
+    	{
+    		VOTE_RESULT result = currentVote.getResult();
+    	}
+    	
+    	currentVote = null;
+    }
+    
     public void handleMessage(Player pl, String message)
     {
-    	// log here, and beacon to all other players
+    	// log here (always)
         ServerContext.log("[chat] " + pl.getName() + ":" + message);
-        for(Player player : context.getPlayerManager().getPlayers()) {
-            player.getPackets().sendReceiveMessage(pl.getName(), message);
-        }
 
-    	// if it starts with /cadesim, it is a server command
-    	if (message.startsWith("/cadesim "))
-    	{
-    		if (message.startsWith("/cadesim vote "))
+    	// if it starts with /, it is a server command
+		if (message.startsWith("/"))
+		{
+			// cleanup
+			message = message.toLowerCase();
+
+			// voting on a current vote
+			if (message.equals("/yes") || message.equals("/no"))
+			{
+				handleVote(pl, message);				
+			}
+			else if (message.equals("/restart"))
     		{
-    			if (message.startsWith("/cadesim vote restart"))
-        		{
-    				// first person to request vote creates it
-    				if (currentVote == null)
-    				{
-    					currentVote = new Vote((PlayerManager)this, "restart");
-    					// TODO send all players notice that the vote has been initiated
-    				}
-    				
-    				// subsequent people (including originator) may vote on it
-    				if (currentVote.getDescription() == "restart")
-    				{
-    					VOTE_RESULT v = currentVote.castVote(pl, true);
-    					switch(v)
-    					{
-    					case TBD:
-    						break;
-    					case TIMEDOUT:
-    						currentVote = null;
-    						break;
-    					case FOR:
-    						// TODO restart server here
-    						currentVote = null;
-    						break;
-    					case AGAINST:
-    						currentVote = null;
-    						break;
-						default:
-							// no action
-							break;
-    					}
-    				}
-        		}
-        		else if (message.startsWith("/cadesim vote nextmap"))
-        		{
-        			// first person to request vote creates it
-    				if (currentVote == null)
-    				{
-    					currentVote = new Vote((PlayerManager)this, "nextmap");
-    					// TODO send all players notice that the vote has been initiated
-    				}
-    				
-    				// subsequent people (including originator) may vote on it
-    				if (currentVote.getDescription() == "nextmap")
-    				{
-    					VOTE_RESULT v = currentVote.castVote(pl, true);
-    					switch(v)
-    					{
-    					case TBD:
-    						break;
-    					case TIMEDOUT:
-    						currentVote = null;
-    						break;
-    					case FOR:
-    						// TODO send nextmap here
-    						currentVote = null;
-    						break;
-    					case AGAINST:
-    						currentVote = null;
-    						break;
-						default:
-							// no action
-							break;
-    					}
-    				}
-        		}
+				handleStartVote(pl, message, "restart");
     		}
-    		else if (message.startsWith("/cadesim nextmap"))
+    		else if (message.equals("/nextmap"))
     		{
-    			// TODO display the next map which will be used.
+    			handleStartVote(pl, message, "nextmap");
     		}
-    		else if (message.startsWith("/cadesim help"))
-    		{
-    			// TODO send list of all commands to the player who asked
-    		}
-    		else if (message.startsWith("/cadesim parameters"))
-    		{
-    			// TODO send list of all parameters to player who asked
-    		}
-    	}
+			else
+			{
+				serverMessage(pl, "commands: [/nextmap, /restart, /yes, /no]");
+			}
+		}
+		else
+		{
+			// dont beacon server commands, but beacon everything else
+			for(Player player : context.getPlayerManager().getPlayers()) {
+	            player.getPackets().sendReceiveMessage(pl.getName(), message);
+	        }
+		}
     }
 }

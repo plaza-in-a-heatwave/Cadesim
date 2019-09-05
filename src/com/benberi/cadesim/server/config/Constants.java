@@ -54,4 +54,6 @@ public class Constants {
     public static final int TURN_EXTRA_TIME = 13;
     public static final int OUTGOING_PACKETS_PLAYER_PER_TICK = 100;
     public static final int INCOMING_PACKETS_PLAYER_PER_TICK = 100;
+
+	public static final int MAX_NAME_SIZE = 19;
 }

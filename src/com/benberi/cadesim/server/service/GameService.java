@@ -25,6 +25,16 @@ public class GameService implements Runnable {
     public GameService(ServerContext context) {
         this.context = context;
     }
+    
+    /**
+     * helper method to randomly rotate the map
+     */
+    private void randomRotateMap() {
+    	ServerConfiguration.setMapName(
+    		RandomUtils.getRandomMapName(Constants.mapDirectory)
+    	);
+    	context.renewMap();
+    }
 
     @Override
     public void run() {
@@ -36,8 +46,8 @@ public class GameService implements Runnable {
 
             if(context.getTimeMachine().getGameTime() == 0 && !gameEnded) {
             	gameEnded = true;
-            	gamesCompleted++;
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
+            	gamesCompleted++;
                 
                 // if no players... hibernate time machines
                 if (context.getPlayerManager().getPlayers().size() == 0) {
@@ -49,20 +59,31 @@ public class GameService implements Runnable {
                             Thread.currentThread().interrupt();
                         }
                     }
+                    ServerContext.log("New player joined, waking up...");
                 }
 
                 ServerContext.log("Starting new game #" + Integer.toString(gamesCompleted) + ".");
-                // rotate a new mapname if parameter > 0
-                int t = ServerConfiguration.getMapRotationPeriod();
-                if (t > 0) {
-	                if ((gamesCompleted % t) == 0) {
-	                	ServerConfiguration.setMapName(
-	                		RandomUtils.getRandomMapName(Constants.mapDirectory)
-	                	);
-	                	context.renewMap();
-	                	
-	                	ServerContext.log("Rotated map after " + Integer.toString(t) + " games, automatically chose random map: " + ServerConfiguration.getMapName());
-	                }
+                
+                // switch map if players have demanded it, or if we're rotating maps
+                if (context.getPlayerManager().shouldSwitchMap())
+                {
+                	randomRotateMap();
+                	ServerContext.log(
+                		"Players voted to switch map; rotated map to: " +
+                		ServerConfiguration.getMapName()
+                	);
+                }
+                else if (
+                	(ServerConfiguration.getMapRotationPeriod() > 0) &&
+                	((gamesCompleted % ServerConfiguration.getMapRotationPeriod()) == 0)
+                ) {
+                	randomRotateMap();
+                	ServerContext.log(
+                		"Rotated map after " +
+                		Integer.toString(ServerConfiguration.getMapRotationPeriod()) +
+                		" games, automatically chose random map: " +
+                		ServerConfiguration.getMapName()
+                	);
                 }
                 
                 // complete the game refresh
