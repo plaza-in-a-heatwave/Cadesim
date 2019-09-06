@@ -93,8 +93,8 @@ public class GameServerBootstrap {
         options.addOption("h", "help", false, "Show help");
         options.addOption("a", "amount", true, "Set max players allowed (default: " + ServerConfiguration.getPlayerLimit() + ")");
         options.addOption("p", "port", true, "Local port to bind (default: " + ServerConfiguration.getPort() + ")");
-        options.addOption("t", "turn duration", true, "turn duration seconds (default: " + ServerConfiguration.getTurnDuration() + ")");
-        options.addOption("r", "round duration", true, "round duration seconds (default: " + ServerConfiguration.getRoundDuration() + ")");
+        options.addOption("t", "turn duration", true, "turn duration seconds (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
+        options.addOption("r", "round duration", true, "round duration seconds (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
         options.addOption("d", "respawn delay", true, "respawn delay (in turns) after sinking (default: " + ServerConfiguration.getRespawnDelay() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("o", "map rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
