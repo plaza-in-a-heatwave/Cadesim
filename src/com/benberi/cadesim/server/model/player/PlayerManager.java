@@ -320,7 +320,7 @@ public class PlayerManager {
 
             Team team = null;
             for (Player p : listRegisteredPlayers()) {
-                if (p.isSunk()) {
+                if (p.isSunk() || p.isNeedsRespawn()) { // bugfix flags are retained on reset
                     continue;
                 }
                 if (p.getFlags().contains(flag)) {
@@ -698,6 +698,8 @@ public class PlayerManager {
         	p.setFirstEntry(true);
         	p.setNeedsRespawn(true);
         	p.getPackets().sendBoard();
+        	p.getMoveTokens().setAutomaticSealGeneration(true); // bugfix disparity between client and server
+        	p.getPackets().sendFlags();
         }
     }
     

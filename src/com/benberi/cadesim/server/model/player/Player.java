@@ -371,6 +371,7 @@ public class Player extends Position {
         packets.sendRespawn(this);
         for (Player p:context.getPlayerManager().getPlayers()) {
         	p.packets.sendPositions();
+        	p.getContext().getMap().resetFlags(); // bugfix animated flags persisting after reset
         }
     }
 
