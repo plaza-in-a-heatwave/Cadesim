@@ -104,10 +104,15 @@ public class PlayerManager {
             lastTimeSend = now;
             handleTime();
             
-            // also check for vote results while here
+            // also check for vote results - may have timed out
+            // other cases handled elsewhere
             if (currentVote != null)
             {
-            	currentVote.getResult();
+            	if (currentVote.getResult() == VOTE_RESULT.TIMEDOUT)
+            	{
+            		handleStopVote();
+            		currentVote = null;
+            	}
             }
         }
 
@@ -797,10 +802,9 @@ public class PlayerManager {
     	// print out the final scores
     	if (currentVote != null)
     	{
-    		VOTE_RESULT result = currentVote.getResult();
+    		currentVote.getResult();
+    		currentVote = null;
     	}
-    	
-    	currentVote = null;
     }
     
     public void handleMessage(Player pl, String message)

@@ -3,15 +3,17 @@ package com.benberi.cadesim.server.model.player;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.benberi.cadesim.server.ServerContext;
-
+/**
+ * Provide a means for players to vote on resolutions
+ * A simple majority threshold carries the vote.
+ *
+ */
 public class Vote {
 	private int votesFor     = 0;              // count votes for
 	private int votesAgainst = 0;              // count votes against
-	public static final int MIN_TURNOUT_PERCENT = 75; // turnout must be >= 75%
-	public static final int CARRY_PERCENT = 50; // vote carried at >50%
+	public static final int MAJORITY_THRESHOLD = 50; // vote carried at >50%
 	public static final int VOTE_TIMEOUT_MILLIS = 30000; // timeout after 30s
-	public static final int PRINT_SCORE_MILLIS = 5000; // ms
+	public static final int PRINT_SCORE_MILLIS = 10000; // ms
 	private List<String> eligibleIPs = new ArrayList<String>(); // restrict to players present when vote started
 	private List<String> voterIPs    = new ArrayList<String>(); // prevent multi ip voting
 	private long voteStartTime; // system time in millis() since vote started
@@ -35,10 +37,17 @@ public class Vote {
 		return eligibleIPs.size();
 	}
 	
+	private int getSecondsRemaining() {
+		return (int)((float)(VOTE_TIMEOUT_MILLIS - (System.currentTimeMillis() - voteStartTime)) / 1000.0);
+	}
+	
 	private String printProgress() {
-		return "Vote on " + getDescription() + " :" + printScore() + ", " +
-			(int)((float)(VOTE_TIMEOUT_MILLIS - (System.currentTimeMillis() - voteStartTime)) / 1000.0) +
-			" seconds remaining";
+		return 
+			"Vote on " + getDescription() + ":\n    " +
+			getEligibleVoters() + " players eligible\n    " +
+			getVotesCast() + " votes cast (" + printScore() + ")\n    " +
+			getVotesToWin() + " votes is majority\n    "+
+			getSecondsRemaining() + " seconds left to vote";
 	}
 	
 	private String printScore() {
@@ -146,25 +155,44 @@ public class Vote {
 	}
 	
 	/**
-	 * get whether the minimum percentage has voted.
+	 * get the miniumum number of votes to win
 	 */
-	private boolean haveMinThresholdVoted() {
-		return (
-			(((float)(votesFor + votesAgainst) / (float)getEligibleVoters()) * 100.0)
-			>= MIN_TURNOUT_PERCENT
-		);
+	public int getVotesToWin() {
+		return (int)Math.ceil(((float)getEligibleVoters() / 100.0) * MAJORITY_THRESHOLD);
+	}
+	
+	/**
+	 * get the number of votes still to be cast
+	 */
+	public int getVotesRemaining() {
+		return getEligibleVoters() - (getVotesCast());
+	}
+	
+	public int getVotesCast() {
+		return votesFor + votesAgainst;
 	}
 	
 	/**
 	 * get whether the 'for' voters have a majority.
 	 * note this is only valid if min threshold have voted.
 	 */
-	private boolean doesForHaveMajority() {
-		return (((float)votesFor / (float)getEligibleVoters()) * 100.0) > CARRY_PERCENT;
+	private boolean hasForWon() {
+		return (((float)votesFor / (float)getEligibleVoters()) * 100.0) > MAJORITY_THRESHOLD;
 	}
 	
+	/**
+	 * get whether the 'for' voters have a majority.
+	 * note this is only valid if min threshold have voted.
+	 */
+	private boolean hasAgainstWon() {
+		return (((float)votesAgainst / (float)getEligibleVoters()) * 100.0) > MAJORITY_THRESHOLD;
+	}
+	
+	/**
+	 * get whether For could win
+	 */
 	private boolean couldForWin() {
-		return (((float)(votesFor + (getEligibleVoters() - votesAgainst - votesFor)) / (float)getEligibleVoters()) * 100.0) > CARRY_PERCENT;
+		return (((float)(votesFor + (getEligibleVoters() - votesAgainst - votesFor)) / (float)getEligibleVoters()) * 100.0) > MAJORITY_THRESHOLD;
 	}
 	
 	/**
@@ -222,43 +250,37 @@ public class Vote {
 		{
 			votesFor++;
 			voterIPs.add(pl.getChannel().remoteAddress().toString());
-			pl.getContext().getPlayerManager().beaconMessageFromServer(printProgress());
 			pl.getContext().getPlayerManager().serverMessage(pl, "You voted: FOR " + getDescription());
 		}
 		else
 		{
 			votesAgainst++;
 			voterIPs.add(pl.getChannel().remoteAddress().toString());
-			pl.getContext().getPlayerManager().beaconMessageFromServer(printProgress());
 			pl.getContext().getPlayerManager().serverMessage(pl, "You voted: AGAINST " + getDescription());
 		}
-		
-		
-		// MIN_TURNOUT% of the players must have voted
-		if (haveMinThresholdVoted())
+
+		// is it possible for a vote to be won? if not, exit early
+		if (!couldForWin())
 		{
-			// is it possible for a vote to be won? if not, exit early
-			if (!couldForWin())
-			{
-				setResult(VOTE_RESULT.AGAINST);
-				return result;
-			}
-			
-			// simple majority of > CARRY_VOTE_BEYOND% carries the vote
-			if (doesForHaveMajority())
-			{
-				setResult(VOTE_RESULT.FOR);
-				return result;
-			}
-			else
-			{
-				setResult(VOTE_RESULT.AGAINST);
-				return result;
-			}
+			setResult(VOTE_RESULT.AGAINST);
+			return result;
+		}
+		
+		// simple majority of > CARRY_VOTE_BEYOND% carries the vote
+		if (hasForWon())
+		{
+			setResult(VOTE_RESULT.FOR);
+			return result;
+		}
+		else if (hasAgainstWon())
+		{
+			setResult(VOTE_RESULT.AGAINST);
+			return result;
 		}
 		else
 		{
 			// if not timed out, and not resolved, must be TBD
+			pl.getContext().getPlayerManager().beaconMessageFromServer(printProgress());
 			return VOTE_RESULT.TBD;
 		}
 	}
