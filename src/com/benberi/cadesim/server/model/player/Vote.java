@@ -24,6 +24,18 @@ public class Vote {
 	private long lastPrintUpdate = System.currentTimeMillis();
 	
 	/**
+	 * helper method to extract an IP from a remoteAddress
+	 * they are formatted like:
+	 *     /127.0.0.1:1004
+	 * we return:
+	 *     127.0.0.1
+	 */
+	private String getIPFromRemoteAddress(String remoteAddress)
+	{
+		return remoteAddress.replace("/", "").split(":")[0];
+	}
+	
+	/**
 	 * the kind of vote result which could be returned
 	 */
 	public static enum VOTE_RESULT {
@@ -237,7 +249,9 @@ public class Vote {
 		}
 		
 		// prevent duplicate IPs
-		if (voterIPs.contains(pl.getChannel().remoteAddress().toString()))
+		if (voterIPs.contains(
+				getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()))
+		)
 		{
 			pl.getContext().getPlayerManager().serverMessage(
 				pl,
@@ -246,18 +260,13 @@ public class Vote {
 			return result;
 		}
 
-		if (voteFor)
-		{
-			votesFor++;
-			voterIPs.add(pl.getChannel().remoteAddress().toString());
-			pl.getContext().getPlayerManager().serverMessage(pl, "You voted: FOR " + getDescription());
-		}
-		else
-		{
-			votesAgainst++;
-			voterIPs.add(pl.getChannel().remoteAddress().toString());
-			pl.getContext().getPlayerManager().serverMessage(pl, "You voted: AGAINST " + getDescription());
-		}
+		// add votes
+		if (voteFor) { votesFor++; } else { votesAgainst++; }
+		pl.getContext().getPlayerManager().serverMessage(
+				pl,
+				"You voted: " + (voteFor?"FOR":"AGAINST") + " " + getDescription()
+		);
+		voterIPs.add(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()));
 
 		// is it possible for a vote to be won? if not, exit early
 		if (!couldForWin())
