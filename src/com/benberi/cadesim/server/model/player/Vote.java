@@ -3,6 +3,8 @@ package com.benberi.cadesim.server.model.player;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.benberi.cadesim.server.ServerContext;
+
 /**
  * Provide a means for players to vote on resolutions
  * A simple majority threshold carries the vote.
@@ -143,7 +145,12 @@ public class Vote {
 		
 		for (Player p:pm.getPlayers())
 		{
-			eligibleIPs.add(p.getChannel().remoteAddress().toString());
+			String ip = getIPFromRemoteAddress(p.getChannel().remoteAddress().toString());
+			if (!eligibleIPs.contains(ip))
+			{
+				// only one player from each IP is eligible
+				eligibleIPs.add(ip);
+			}
 		}
 		
 		this.description = description;
@@ -224,6 +231,37 @@ public class Vote {
 	}
 	
 	/**
+	 * Check the result.
+	 * @return VOTE_RESULT
+	 */
+	private VOTE_RESULT checkResult()
+	{
+		// is it possible for a vote to be won? if not, exit early
+		if (!couldForWin())
+		{
+			setResult(VOTE_RESULT.AGAINST);
+			return result;
+		}
+		
+		// simple majority of > CARRY_VOTE_BEYOND% carries the vote
+		if (hasForWon())
+		{
+			setResult(VOTE_RESULT.FOR);
+			return result;
+		}
+		else if (hasAgainstWon())
+		{
+			setResult(VOTE_RESULT.AGAINST);
+			return result;
+		}
+		else
+		{
+			// if not timed out, and not resolved, must be TBD
+			return VOTE_RESULT.TBD;
+		}
+	}
+	
+	/**
 	 * a player casts a vote.
 	 * @param pl      the player
 	 * @param voteFor true->for, false->against
@@ -239,7 +277,7 @@ public class Vote {
 		}
 
 		// restrict based on IP - can only vote if were around when vote was cast
-		if (!eligibleIPs.contains(pl.getChannel().remoteAddress().toString()))
+		if (!eligibleIPs.contains(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString())))
 		{
 			pl.getContext().getPlayerManager().serverMessage(
 				pl,
@@ -268,29 +306,12 @@ public class Vote {
 		);
 		voterIPs.add(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()));
 
-		// is it possible for a vote to be won? if not, exit early
-		if (!couldForWin())
+		// check the result
+		VOTE_RESULT r = checkResult();
+		if (r == VOTE_RESULT.TBD)
 		{
-			setResult(VOTE_RESULT.AGAINST);
-			return result;
-		}
-		
-		// simple majority of > CARRY_VOTE_BEYOND% carries the vote
-		if (hasForWon())
-		{
-			setResult(VOTE_RESULT.FOR);
-			return result;
-		}
-		else if (hasAgainstWon())
-		{
-			setResult(VOTE_RESULT.AGAINST);
-			return result;
-		}
-		else
-		{
-			// if not timed out, and not resolved, must be TBD
 			pl.getContext().getPlayerManager().beaconMessageFromServer(printProgress());
-			return VOTE_RESULT.TBD;
 		}
+		return r;
 	}
 }

@@ -492,6 +492,7 @@ public class PlayerManager {
         }
         else {
             ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " (players remaining: " + (players.size() - 1) + ")");
+            players.remove(player); // try to remove them regardless
         }
     }
 
@@ -794,7 +795,7 @@ public class PlayerManager {
 		}
 		else
 		{
-			serverMessage(pl, "Can't start a new vote, there is one in progress: " + currentVote.getDescription());
+			serverMessage(pl, "Can't start a new vote, there is one in progress, use /yes or /no to vote: " + currentVote.getDescription());
 		}
     }
     
