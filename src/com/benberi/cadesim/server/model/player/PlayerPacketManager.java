@@ -147,10 +147,11 @@ public class PlayerPacketManager {
      * Sends the time to the player
      */
     public void sendTime() {
-        BlockadeTimeMachine machine = player.getContext().getTimeMachine();
+        int gameTime = player.getContext().getTimeMachine().getGameTime();
+        int turnTime = player.getContext().getTimeMachine().getTurnTime();
         SendTimePacket packet = new SendTimePacket();
-        packet.setGameTime(machine.getGameTime());
-        packet.setTurnTime(machine.getTurnTime());
+        packet.setGameTime((gameTime>0)?gameTime:0);
+        packet.setTurnTime((turnTime>0)?turnTime:0);
 
         player.sendPacket(packet);
     }

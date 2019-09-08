@@ -3,19 +3,18 @@ package com.benberi.cadesim.server.service;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
+import com.benberi.cadesim.server.model.player.PlayerManager;
 import com.benberi.cadesim.server.util.RandomUtils;
 
 /**
  * This is the "heartbeat" main loop of the game server
  */
 public class GameService implements Runnable {
-
-    public static boolean gameEnded = false;
-
     /**
      * The server context
      */
     private ServerContext context;
+    private PlayerManager playerManager; // this called so often, should cache
     
     /**
      * Keep track of how many games we've played
@@ -24,6 +23,7 @@ public class GameService implements Runnable {
 
     public GameService(ServerContext context) {
         this.context = context;
+        this.playerManager = context.getPlayerManager();
     }
     
     /**
@@ -41,18 +41,24 @@ public class GameService implements Runnable {
         try {
             context.getPackets().queuePackets();
             context.getTimeMachine().tick();
-            context.getPlayerManager().tick();
-            context.getPlayerManager().queueOutgoing();
+            playerManager.tick();
+            playerManager.queueOutgoing();
 
-            if(context.getTimeMachine().getGameTime() == 0 && !gameEnded) {
-            	gameEnded = true;
+            if(playerManager.isGameEnded()) {
+            	// print out the scores for the game
+            	playerManager.beaconMessageFromServer(
+            			"Round ended, final scores were:\n" +
+            			"    Defender:" + playerManager.getPointsGreen() + "\n" + 
+            			"    Attacker:" + playerManager.getPointsRed()
+            	);
+
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
             	gamesCompleted++;
                 
                 // if no players... hibernate time machines
-                if (context.getPlayerManager().getPlayers().size() == 0) {
-                    ServerContext.log("No players connected, hibernating to save CPU");
-                    while (context.getPlayerManager().getPlayers().size() == 0) {
+                if (playerManager.listRegisteredPlayers().size() == 0) {
+                    ServerContext.log("No players registered, hibernating to save CPU");
+                    while (playerManager.listRegisteredPlayers().size() == 0) {
                         try {
                             Thread.sleep(2000);
                         } catch(InterruptedException e) {
@@ -61,12 +67,10 @@ public class GameService implements Runnable {
                     }
                     ServerContext.log("New player joined, waking up...");
                 }
-
-                ServerContext.log("Starting new game #" + Integer.toString(gamesCompleted) + ".");
                 
                 // switch map if players have demanded it, or if we're rotating maps
                 String oldMap = ServerConfiguration.getMapName();
-                if (context.getPlayerManager().shouldSwitchMap())
+                if (playerManager.shouldSwitchMap())
                 {
                 	randomRotateMap();
                 	ServerContext.log(
@@ -91,13 +95,15 @@ public class GameService implements Runnable {
                 String newMap = ServerConfiguration.getMapName();
                 if (!newMap.contentEquals(oldMap))
                 {
-                	context.getPlayerManager().beaconMessageFromServer("The map was changed to " + newMap);
+                	playerManager.beaconMessageFromServer("The map was changed to " + newMap);
                 }
                 
                 // complete the game refresh
                 context.getTimeMachine().renewGame();
-                context.getPlayerManager().renewGame();
-                gameEnded = false;
+                playerManager.renewGame();
+                playerManager.setGameEnded(false);
+
+                playerManager.beaconMessageFromServer("Started new round: #" + (gamesCompleted + 1));
             }
 
         } catch (Exception e) {

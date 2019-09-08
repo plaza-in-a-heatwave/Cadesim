@@ -143,7 +143,7 @@ public class Vote {
 		this.context = pm;
 		voteStartTime = System.currentTimeMillis();
 		
-		for (Player p:pm.getPlayers())
+		for (Player p:pm.listRegisteredPlayers())
 		{
 			String ip = getIPFromRemoteAddress(p.getChannel().remoteAddress().toString());
 			if (!eligibleIPs.contains(ip))
@@ -155,7 +155,7 @@ public class Vote {
 		
 		this.description = description;
 		
-		printProgress();
+		context.beaconMessageFromServer("Started vote on " + description);
 	}
 	
 	/**
@@ -279,7 +279,7 @@ public class Vote {
 		// restrict based on IP - can only vote if were around when vote was cast
 		if (!eligibleIPs.contains(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString())))
 		{
-			pl.getContext().getPlayerManager().serverMessage(
+			context.serverMessage(
 				pl,
 				"Couldn't process this vote - you joined the game after the vote started."
 			);
@@ -291,7 +291,7 @@ public class Vote {
 				getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()))
 		)
 		{
-			pl.getContext().getPlayerManager().serverMessage(
+			context.serverMessage(
 				pl,
 				"Couldn't process this vote - you can't vote twice!"
 			);
@@ -300,18 +300,18 @@ public class Vote {
 
 		// add votes
 		if (voteFor) { votesFor++; } else { votesAgainst++; }
-		pl.getContext().getPlayerManager().serverMessage(
+		
+		context.serverMessage(
 				pl,
 				"You voted " + (voteFor?"FOR":"AGAINST") + " " + getDescription()
 		);
 		voterIPs.add(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()));
 
+		// notify
+		context.beaconMessageFromServer(printProgress());
+
 		// check the result
 		VOTE_RESULT r = checkResult();
-		if (r == VOTE_RESULT.TBD)
-		{
-			pl.getContext().getPlayerManager().beaconMessageFromServer(printProgress());
-		}
 		return r;
 	}
 }

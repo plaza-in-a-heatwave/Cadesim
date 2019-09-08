@@ -17,7 +17,6 @@ import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -74,7 +73,17 @@ public class PlayerManager {
      */
     private boolean shouldSwitchMap = false;
 
-    /**
+	private boolean gameEnded;
+
+    public boolean isGameEnded() {
+		return gameEnded;
+	}
+
+	public void setGameEnded(boolean gameEnded) {
+		this.gameEnded = gameEnded;
+	}
+
+	/**
      * constructor
      */
     public PlayerManager(ServerContext context) {
@@ -299,9 +308,18 @@ public class PlayerManager {
      */
     private void handleTurnEnd() {
         calculateInfluenceFlags();
-        context.getTimeMachine().renewTurn();
-        sendAfterTurn();
-        context.getTimeMachine().setLock(false);
+        
+	    // end game only after flags calculated, animations done etc
+        if (context.getTimeMachine().getGameTime() < 0)
+        {
+        	setGameEnded(true);
+        }
+        else
+        {
+        	context.getTimeMachine().renewTurn();
+            sendAfterTurn();
+            context.getTimeMachine().setLock(false);
+        }
     }
 
     private void calculateInfluenceFlags() {
@@ -390,6 +408,8 @@ public class PlayerManager {
 
     /**
      * Handles the time
+     * TODO there must be a way to parallelise this - e.g. just add constant onto everyone's time
+     * TODO so that the timeouts dont stack up
      */
     private void handleTime() {
         if (context.getTimeMachine().hasLock()) {
@@ -474,7 +494,7 @@ public class PlayerManager {
     public void registerPlayer(Channel c) {
         Player player = new Player(context, c);
         players.add(player);
-        ServerContext.log("New player registered on channel " + c.remoteAddress() + " (players remaining: " + players.size() + ")");
+        ServerContext.log("New player registered on channel " + c.remoteAddress() + " (registered players: " + listRegisteredPlayers().size() + ")");
     }
 
 
@@ -488,10 +508,10 @@ public class PlayerManager {
         if (player != null) {
             player.setTurnFinished(true);
             queuedLogoutRequests.add(player);
-            ServerContext.log("Player " + player.getName() + " de-registered on " + channel.remoteAddress() + " (players remaining: " + (players.size() - 1) + ")");
+            ServerContext.log("Player " + player.getName() + " de-registered on " + channel.remoteAddress() + " (players remaining: " + (listRegisteredPlayers().size() - 1) + ")");
         }
         else {
-            ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " (players remaining: " + (players.size() - 1) + ")");
+            ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " (players remaining: " + (listRegisteredPlayers().size() - 1) + ")");
             players.remove(player); // try to remove them regardless
         }
     }
@@ -601,14 +621,13 @@ public class PlayerManager {
                 pl.getPackets().sendFlags();
                 pl.getPackets().sendPlayerFlags();
                 sendPlayerForAll(pl);
+                beaconMessageFromServer("Welcome " + pl.getName() + " (" + pl.getTeam() + ", " + pl.getVessel().getName() + ")");
                 // If a new player joins and there are now 2 players in the server, end this round so a new one will start
-                if (players.size() == 2) {
+                if (listRegisteredPlayers().size() == 2) {
+                	beaconMessageFromServer("There are now 2 players in the sim. Starting a new round");
                     context.getTimeMachine().endGame();
                     context.getTimeMachine().endTurn();
                 }
-                
-                // send chat message
-                beaconMessageFromServer("Welcome " + pl.getName() + " (" + pl.getTeam() + ", " + pl.getVessel().getName() + ")");
             }
         }
     }
@@ -636,10 +655,7 @@ public class PlayerManager {
      */
     private void sendTime() {
 
-        for (Player player : players) {
-            if (!player.isRegistered()) {
-                continue;
-            }
+        for (Player player : listRegisteredPlayers()) {
             player.getPackets().sendTime();
         }
     }
@@ -715,7 +731,7 @@ public class PlayerManager {
     public void beaconMessageFromServer(String message)
     {
     	ServerContext.log("[chat] " + Constants.serverBroadcast + ":" + message);
-        for(Player player : context.getPlayerManager().getPlayers()) {
+        for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
             player.getPackets().sendReceiveMessage(Constants.serverBroadcast, message);
         }
     }
@@ -841,7 +857,7 @@ public class PlayerManager {
 		else
 		{
 			// dont beacon server commands, but beacon everything else
-			for(Player player : context.getPlayerManager().getPlayers()) {
+			for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
 	            player.getPackets().sendReceiveMessage(pl.getName(), message);
 	        }
 		}

@@ -206,6 +206,7 @@ public class Player extends Position {
      * @param packet The packet to send
      */
     public void sendPacket(OutgoingPacket packet) {
+    	System.out.println("sent packet to :" + this.name +  ":" + packet.toString());
         packets.queueOutgoing(packet);
     }
 
@@ -368,13 +369,14 @@ public class Player extends Position {
         while(context.getPlayerManager().getPlayerByPosition(x, y) != null) {
             x++;
             x = x % BlockadeMap.MAP_WIDTH;
+            // TODO what if cant enter the map?
         }
         set(x, y);
         setNeedsRespawn(false);
         outOfSafe = false;
         vessel.resetDamageAndBilge();
         packets.sendRespawn(this);
-        for (Player p:context.getPlayerManager().getPlayers()) {
+        for (Player p:context.getPlayerManager().listRegisteredPlayers()) {
         	p.packets.sendPositions();
         	p.getContext().getMap().resetFlags(); // bugfix animated flags persisting after reset
         }
@@ -388,10 +390,20 @@ public class Player extends Position {
     	// able to do this. However we provide the ability for the
     	// defender to go Oceanside too to keep things fair.
     	if (!outOfSafe) {
+    		if (context.getMap().isSafeLandside(this))
+    		{
+    			context.getPlayerManager().serverMessage(this, "Going Oceanside");
+    		}
     		respawnOnLandside(false);
+    		
+    	}
+    	else
+    	{
+    		// TODO send disable goOceanside button here instead of showing this message
+    		context.getPlayerManager().serverMessage(this, "You must be in a safe zone to disengage");
     	}
 
-    	// TODO send disable goOceanside button here
+    	
     }
 
     /**

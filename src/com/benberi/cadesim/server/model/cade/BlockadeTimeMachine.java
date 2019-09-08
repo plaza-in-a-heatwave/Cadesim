@@ -28,6 +28,8 @@ public class BlockadeTimeMachine {
 
     private boolean lock;
 
+	private boolean isLastTurn = false;
+
     /**
      * The main tick of blockade time machine
      */
@@ -36,8 +38,20 @@ public class BlockadeTimeMachine {
             // TODO end?
         }
 
-        if (!isLock() && gameTime > 0)
+        if (!isLock())
+        {
             gameTime--; // Tick blockade time
+            
+            // if in final turn, use turnTime instead of gameTime
+            // gives players a last whole turn
+            System.out.println("gametime:" + gameTime + " turnTime:" + turnTime);
+            if ((!isLastTurn) && (gameTime < turnTime) && (turnTime > 0))
+            {
+            	isLastTurn  = true;
+            	gameTime = turnTime;
+            }
+        }
+        	
 
         if (turnTime <= -Constants.TURN_EXTRA_TIME) {
             if (!lock) {
@@ -103,5 +117,6 @@ public class BlockadeTimeMachine {
 
     public void renewGame() {
         gameTime = ServerConfiguration.getRoundDuration();
+        isLastTurn = false;
     }
 }

@@ -17,7 +17,7 @@ public class ServerConfiguration {
     private static String mapName = "default.map";
 
     public static int getPlayerLimit() {
-        return playerLimit;
+        return ServerConfiguration.playerLimit;
     }
 
     public static void setPlayerLimit(int playerLimit) {
@@ -25,7 +25,7 @@ public class ServerConfiguration {
     }
 
     public static int getPort() {
-        return port;
+        return ServerConfiguration.port;
     }
 
     public static void setPort(int port) {
@@ -33,7 +33,7 @@ public class ServerConfiguration {
     }
     
     public static int getTurnDuration() {
-    	return turnDuration;
+    	return ServerConfiguration.turnDuration;
     }
     
     public static void setTurnDuration(int turnDurationInDeciseconds) {
@@ -41,7 +41,7 @@ public class ServerConfiguration {
     }
     
     public static int getRoundDuration() {
-		return roundDuration;
+		return ServerConfiguration.roundDuration;
 	}
 
 	public static void setRoundDuration(int roundDurationInDeciseconds) {
@@ -49,7 +49,7 @@ public class ServerConfiguration {
 	}
     
     public static int getRespawnDelay() {
-    	return respawnDelay;
+    	return ServerConfiguration.respawnDelay;
     }
     
     public static void setRespawnDelay(int respawnDelay) {
@@ -75,7 +75,7 @@ public class ServerConfiguration {
     }
     
     public static String getMapName() {
-        return mapName;
+        return ServerConfiguration.mapName;
     }
 
     public static void setMapName(String mapName) {
@@ -83,7 +83,7 @@ public class ServerConfiguration {
     }
 
 	public static int getMapRotationPeriod() {
-		return mapRotationPeriod;
+		return ServerConfiguration.mapRotationPeriod;
 	}
 
 	public static void setMapRotationPeriod(int mapRotationPeriod) {
