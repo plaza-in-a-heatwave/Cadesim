@@ -15,17 +15,17 @@ public class MoveTokensHandler {
     /**
      * Left move tokens
      */
-    private int left = 100;
+    private int left;
 
     /**
      * Forward move tokens
      */
-    private int forward = 100;
+    private int forward;
 
     /**
      * Right move tokens
      */
-    private int right = 100;
+    private int right;
 
     /**
      * List of moves
@@ -41,7 +41,7 @@ public class MoveTokensHandler {
     /**
      * Cannons
      */
-    private int cannons = 10;
+    private int cannons;
 
     /**
      * The target token to generate
@@ -52,19 +52,38 @@ public class MoveTokensHandler {
      * If the token generation is automatic or not
      */
     private boolean automatic = true;
+    
+    /**
+     * add the default move tokens received at the start.
+     */
+    public void assignDefaultTokens() {
+    	// remove all pieces
+    	leftTokens.clear();
+    	forwardTokens.clear();
+    	rightTokens.clear();
 
-
-
-    public MoveTokensHandler(Player player) {
-        this.player = player;
-
-        for (int i = 0; i < 4; i++) {
+    	// assign starter pieces
+    	for (int i = 0; i < 4; i++) {
             forwardTokens.add(new MoveToken(MoveType.FORWARD));
             if (i % 2 == 0) {
                 rightTokens.add(new MoveToken(MoveType.RIGHT));
                 leftTokens.add(new MoveToken(MoveType.LEFT));
             }
         }
+    }
+    
+    /**
+     * add the vessel-appropriate max number of cannons
+     * no guarantee at this class instantiation time that vessel
+     * will be non-null
+     */
+    public void assignCannons(int numCannons) {
+    	removeCannons(getCannons());
+    	cannons = numCannons;
+    }
+
+    public MoveTokensHandler(Player player) {
+        this.player = player;
     }
 
     public int countLeftMoves() {

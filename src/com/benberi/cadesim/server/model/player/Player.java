@@ -329,6 +329,11 @@ public class Player extends Position {
      * which is triggered by a player clicking Go Oceanside.
      */
     public void respawn() {
+    	// give a fresh complement of tokens and guns
+    	tokens.assignDefaultTokens();
+        tokens.assignCannons(vessel.getMaxCannons());
+        this.getPackets().sendTokens();
+
     	// where to respawn?
     	if (isFirstEntry()) {
     		setFirstEntry(false);
