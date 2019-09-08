@@ -44,7 +44,6 @@ public class BlockadeTimeMachine {
             
             // if in final turn, use turnTime instead of gameTime
             // gives players a last whole turn
-            System.out.println("gametime:" + gameTime + " turnTime:" + turnTime);
             if ((!isLastTurn) && (gameTime < turnTime) && (turnTime > 0))
             {
             	isLastTurn  = true;

@@ -206,7 +206,6 @@ public class Player extends Position {
      * @param packet The packet to send
      */
     public void sendPacket(OutgoingPacket packet) {
-    	System.out.println("sent packet to :" + this.name +  ":" + packet.toString());
         packets.queueOutgoing(packet);
     }
 
@@ -375,9 +374,8 @@ public class Player extends Position {
         setNeedsRespawn(false);
         outOfSafe = false;
         vessel.resetDamageAndBilge();
-        packets.sendRespawn(this);
         for (Player p:context.getPlayerManager().listRegisteredPlayers()) {
-        	p.packets.sendPositions();
+            p.packets.sendRespawn(this); // bugfix players' moves disappearing when anyone else (re)spawns
         	p.getContext().getMap().resetFlags(); // bugfix animated flags persisting after reset
         }
     }
