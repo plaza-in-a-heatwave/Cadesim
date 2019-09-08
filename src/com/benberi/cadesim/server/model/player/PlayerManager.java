@@ -578,7 +578,7 @@ public class PlayerManager {
                 response = LoginResponsePacket.NAME_IN_USE;
             }
             else if (
-            	(name.toLowerCase().equals(Constants.name)) ||
+            	(name.contains(Constants.bannedSubstring)) ||
             	(name.length() <= 0) ||
             	(name.length() > Constants.MAX_NAME_SIZE))
             {
@@ -713,8 +713,9 @@ public class PlayerManager {
      */
     public void beaconMessageFromServer(String message)
     {
+    	ServerContext.log("[chat] " + Constants.serverBroadcast + ":" + message);
         for(Player player : context.getPlayerManager().getPlayers()) {
-            serverMessage(player, message);
+            player.getPackets().sendReceiveMessage(Constants.serverBroadcast, message);
         }
     }
     
@@ -723,8 +724,8 @@ public class PlayerManager {
      */
     public void serverMessage(Player pl, String message)
     {
-    	ServerContext.log("[chat] " + "<" + Constants.name + ">" + " (to " + pl.getName() + "):" + message);
-        pl.getPackets().sendReceiveMessage("<" + Constants.name + ">", message);
+    	ServerContext.log("[chat] " + Constants.serverPrivate + "(to " + pl.getName() + "):" + message);
+        pl.getPackets().sendReceiveMessage(Constants.serverPrivate, message);
     }
     
     /**

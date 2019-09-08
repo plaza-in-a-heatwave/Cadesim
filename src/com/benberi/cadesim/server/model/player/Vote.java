@@ -55,7 +55,7 @@ public class Vote {
 	
 	private String printProgress() {
 		return 
-			"Vote on " + getDescription() + ":\n    " +
+			"Vote on " + getDescription() + "-\n    " +
 			getEligibleVoters() + " players eligible\n    " +
 			getVotesCast() + " votes cast (" + printScore() + ")\n    " +
 			getVotesToWin() + " votes is majority\n    "+
@@ -264,7 +264,7 @@ public class Vote {
 		if (voteFor) { votesFor++; } else { votesAgainst++; }
 		pl.getContext().getPlayerManager().serverMessage(
 				pl,
-				"You voted: " + (voteFor?"FOR":"AGAINST") + " " + getDescription()
+				"You voted " + (voteFor?"FOR":"AGAINST") + " " + getDescription()
 		);
 		voterIPs.add(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()));
 

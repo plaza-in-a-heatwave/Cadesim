@@ -1,11 +1,21 @@
 package com.benberi.cadesim.server.config;
 
-public class Constants {
-	
+public class Constants {	
 	/**
 	 * Name of server
 	 */
 	public static final String name = "Cadesim server";
+	
+	/**
+	 * server broadcast/private sender ids
+	 * these must match the ones specified in the client for colors to
+	 * show correctly.
+	 * Banned prefix should contain substring of the ids.
+	 */
+	public static final String bannedSubstring  = "cadesim";
+	public static final String serverBroadcast  = "<cadesim_broadcast>";
+	public static final String serverPrivate    = "<cadesim_private>";
+	
 
 	/**
 	 * Version of server
