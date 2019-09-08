@@ -3,6 +3,7 @@ package com.benberi.cadesim.server.model.player;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.codec.packet.out.impl.LoginResponsePacket;
 import com.benberi.cadesim.server.config.Constants;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.player.Vote.VOTE_RESULT;
@@ -418,7 +419,7 @@ public class PlayerManager {
                 if (!p.isTurnFinished()) {
                     if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
                         ServerContext.log(p.getName() +  " kicked for timing out while animating!");
-                        beaconMessageFromServer(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
+                        serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
                         p.getChannel().disconnect();
                     }
                     else {
@@ -621,10 +622,11 @@ public class PlayerManager {
                 pl.getPackets().sendFlags();
                 pl.getPackets().sendPlayerFlags();
                 sendPlayerForAll(pl);
-                beaconMessageFromServer("Welcome " + pl.getName() + " (" + pl.getTeam() + ", " + pl.getVessel().getName() + ")");
+                serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ", " + pl.getVessel().getName() + ")");
+                printCommandHelp(pl); // private message with commands
                 // If a new player joins and there are now 2 players in the server, end this round so a new one will start
                 if (listRegisteredPlayers().size() == 2) {
-                	beaconMessageFromServer("There are now 2 players in the sim. Starting a new round");
+                	serverBroadcastMessage("There are now 2 players in the sim. Starting a new round");
                     context.getTimeMachine().endGame();
                     context.getTimeMachine().endTurn();
                 }
@@ -645,7 +647,7 @@ public class PlayerManager {
                 }
             }
 
-            beaconMessageFromServer("Goodbye " + player.getName() + " (" + player.getTeam() + ", " + player.getVessel().getName() + ")");
+            serverBroadcastMessage("Goodbye " + player.getName() + " (" + player.getTeam() + ", " + player.getVessel().getName() + ")");
             players.remove(player);
         }
     }
@@ -728,7 +730,7 @@ public class PlayerManager {
     /**
      * send message to all players from server
      */
-    public void beaconMessageFromServer(String message)
+    public void serverBroadcastMessage(String message)
     {
     	ServerContext.log("[chat] " + Constants.serverBroadcast + ":" + message);
         for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
@@ -739,7 +741,7 @@ public class PlayerManager {
     /**
      * send a message to a single player from the server
      */
-    public void serverMessage(Player pl, String message)
+    public void serverPrivateMessage(Player pl, String message)
     {
     	ServerContext.log("[chat] " + Constants.serverPrivate + "(to " + pl.getName() + "):" + message);
         pl.getPackets().sendReceiveMessage(Constants.serverPrivate, message);
@@ -748,15 +750,14 @@ public class PlayerManager {
     /**
      * helper method to handle vote yes/no messages
      * @param pl      the player who sent the message
-     * @param message either /yes or /no
+     * @param voteFor true if voting for, else false
      */
-    private void handleVote(Player pl, String message)
+    private void handleVote(Player pl, boolean voteFor)
     {
     	// subsequent people (including originator) may vote on it
-		boolean voteFor = (message.equals("/yes"));
 		if (currentVote == null)
 		{
-			serverMessage(pl, "There is no vote in progress");
+			serverPrivateMessage(pl, "There is no vote in progress");
 		}
 		else if (currentVote.getDescription().equals("restart"))
 		{
@@ -807,11 +808,11 @@ public class PlayerManager {
 		if (currentVote == null)
 		{
 			currentVote = new Vote((PlayerManager)this, voteDescription);
-			handleVote(pl, "/yes");
+			handleVote(pl, true);
 		}
 		else
 		{
-			serverMessage(pl, "Can't start a new vote, there is one in progress, use /yes or /no to vote: " + currentVote.getDescription());
+			serverPrivateMessage(pl, "Can't start a new vote, there is one in progress, use /vote yes or /vote no to vote: " + currentVote.getDescription());
 		}
     }
     
@@ -825,6 +826,14 @@ public class PlayerManager {
     	}
     }
     
+    private void printCommandHelp(Player pl)
+    {
+    	serverPrivateMessage(
+    			pl,
+    			"The following Cadesim commands are supported: /propose (restart|nextmap), /vote (yes|no), /info"
+    	);
+    }
+    
     public void handleMessage(Player pl, String message)
     {
     	// log here (always)
@@ -835,28 +844,54 @@ public class PlayerManager {
 		{
 			// cleanup
 			message = message.toLowerCase();
-
-			// voting on a current vote
-			if (message.equals("/yes") || message.equals("/no"))
+			
+			if (message.startsWith("/vote"))
 			{
-				handleVote(pl, message);				
+				// voting on a current vote
+				if (message.equals("/vote yes") || message.equals("/vote no"))
+				{
+					handleVote(pl, (message.equals("/vote yes")));				
+				}
+	    		else
+	    		{
+	    			serverPrivateMessage(pl, "usage: /vote (yes|no) - used to vote on a proposal");
+	    		}
 			}
-			else if (message.equals("/restart"))
-    		{
-				handleStartVote(pl, message, "restart");
-    		}
-    		else if (message.equals("/nextmap"))
-    		{
-    			handleStartVote(pl, message, "nextmap");
-    		}
+			else if (message.startsWith("/propose"))
+			{
+				if (message.equals("/propose restart"))
+	    		{
+					handleStartVote(pl, message, "restart");
+	    		}
+	    		else if (message.equals("/propose nextmap"))
+	    		{
+	    			handleStartVote(pl, message, "nextmap");
+	    		}
+	    		else
+	    		{
+	    			serverPrivateMessage(pl, "usage: /propose (restart|nextmap)");
+	    		}
+			}
+    		else if (message.equals("/info"))
+			{
+    			serverPrivateMessage(
+    					pl,
+    					Constants.name + " version " + Constants.VERSION + ", " +
+    					"turn length " + (ServerConfiguration.getTurnDuration() / 10) + "s, " +
+    					"round length " + (ServerConfiguration.getRoundDuration() / 10) + "s, " +
+    					"sink penalty " + ServerConfiguration.getRespawnDelay() + " turns without moves, " +
+    					"map rotation " + ServerConfiguration.getMapRotationPeriod() + " rounds, " +
+    					"current map " + ServerConfiguration.getMapName()
+    			);
+			}
 			else
 			{
-				serverMessage(pl, "commands: [/nextmap, /restart, /yes, /no]");
+				printCommandHelp(pl);
 			}
 		}
 		else
 		{
-			// dont beacon server commands, but beacon everything else
+			// dont broadcast server commands, but broadcast everything else
 			for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
 	            player.getPackets().sendReceiveMessage(pl.getName(), message);
 	        }

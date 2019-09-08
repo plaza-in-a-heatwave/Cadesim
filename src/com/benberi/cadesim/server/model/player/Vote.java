@@ -82,7 +82,7 @@ public class Vote {
 				if ((now - lastPrintUpdate) >= PRINT_SCORE_MILLIS)
 				{
 		            lastPrintUpdate = now;
-		            context.beaconMessageFromServer(printProgress());
+		            context.serverBroadcastMessage(printProgress());
 				}
 			}
 			else
@@ -114,17 +114,17 @@ public class Vote {
 			case TBD:
 				break;
 			case FOR:
-				context.beaconMessageFromServer(
+				context.serverBroadcastMessage(
 					"Vote " + getDescription() + " passed " + printScore()
 				);
 				break;
 			case AGAINST:
-				context.beaconMessageFromServer(
+				context.serverBroadcastMessage(
 						"Vote " + getDescription() + " didn't pass " + printScore()
 					);
 				break;
 			case TIMEDOUT:
-				context.beaconMessageFromServer(
+				context.serverBroadcastMessage(
 					"Vote " + getDescription() + " didn't pass (timed out)" + printScore()
 				);
 				break;
@@ -155,7 +155,7 @@ public class Vote {
 		
 		this.description = description;
 		
-		context.beaconMessageFromServer("Started vote on " + description);
+		context.serverBroadcastMessage("Started vote on " + description);
 	}
 	
 	/**
@@ -279,7 +279,7 @@ public class Vote {
 		// restrict based on IP - can only vote if were around when vote was cast
 		if (!eligibleIPs.contains(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString())))
 		{
-			context.serverMessage(
+			context.serverPrivateMessage(
 				pl,
 				"Couldn't process this vote - you joined the game after the vote started."
 			);
@@ -291,7 +291,7 @@ public class Vote {
 				getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()))
 		)
 		{
-			context.serverMessage(
+			context.serverPrivateMessage(
 				pl,
 				"Couldn't process this vote - you can't vote twice!"
 			);
@@ -301,14 +301,14 @@ public class Vote {
 		// add votes
 		if (voteFor) { votesFor++; } else { votesAgainst++; }
 		
-		context.serverMessage(
+		context.serverPrivateMessage(
 				pl,
 				"You voted " + (voteFor?"FOR":"AGAINST") + " " + getDescription()
 		);
 		voterIPs.add(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()));
 
 		// notify
-		context.beaconMessageFromServer(printProgress());
+		context.serverBroadcastMessage(printProgress());
 
 		// check the result
 		VOTE_RESULT r = checkResult();

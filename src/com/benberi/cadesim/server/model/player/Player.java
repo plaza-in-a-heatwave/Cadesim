@@ -390,7 +390,7 @@ public class Player extends Position {
     	if (!outOfSafe) {
     		if (context.getMap().isSafeLandside(this))
     		{
-    			context.getPlayerManager().serverMessage(this, "Going Oceanside");
+    			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
     		}
     		respawnOnLandside(false);
     		
@@ -398,7 +398,7 @@ public class Player extends Position {
     	else
     	{
     		// TODO send disable goOceanside button here instead of showing this message
-    		context.getPlayerManager().serverMessage(this, "You must be in a safe zone to disengage");
+    		context.getPlayerManager().serverPrivateMessage(this, "You must be in a safe zone to disengage");
     	}
 
     	

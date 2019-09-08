@@ -12,7 +12,7 @@ public class Constants {
 	 * show correctly.
 	 * Banned prefix should contain substring of the ids.
 	 */
-	public static final String bannedSubstring  = "cadesim";
+	public static final String bannedSubstring  = "cadesim"; // players not allowed to use this in their name
 	public static final String serverBroadcast  = "<cadesim_broadcast>";
 	public static final String serverPrivate    = "<cadesim_private>";
 	
@@ -20,7 +20,7 @@ public class Constants {
 	/**
 	 * Version of server
 	 */
-	public static final String VERSION = "1.9.5";
+	public static final String VERSION = "1.9.6";
 
     /**
      * The protocol version to allow connections from
@@ -65,5 +65,8 @@ public class Constants {
     public static final int OUTGOING_PACKETS_PLAYER_PER_TICK = 100;
     public static final int INCOMING_PACKETS_PLAYER_PER_TICK = 100;
 
+    /**
+     * largest possible player name
+     */
 	public static final int MAX_NAME_SIZE = 19;
 }

@@ -46,7 +46,7 @@ public class GameService implements Runnable {
 
             if(playerManager.isGameEnded()) {
             	// print out the scores for the game
-            	playerManager.beaconMessageFromServer(
+            	playerManager.serverBroadcastMessage(
             			"Round ended, final scores were:\n" +
             			"    Defender:" + playerManager.getPointsGreen() + "\n" + 
             			"    Attacker:" + playerManager.getPointsRed()
@@ -95,7 +95,7 @@ public class GameService implements Runnable {
                 String newMap = ServerConfiguration.getMapName();
                 if (!newMap.contentEquals(oldMap))
                 {
-                	playerManager.beaconMessageFromServer("The map was changed to " + newMap);
+                	playerManager.serverBroadcastMessage("Changed map to " + newMap);
                 }
                 
                 // complete the game refresh
@@ -103,7 +103,7 @@ public class GameService implements Runnable {
                 playerManager.renewGame();
                 playerManager.setGameEnded(false);
 
-                playerManager.beaconMessageFromServer("Started new round: #" + (gamesCompleted + 1));
+                playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
             }
 
         } catch (Exception e) {
