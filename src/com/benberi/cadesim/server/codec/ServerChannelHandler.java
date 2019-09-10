@@ -46,7 +46,7 @@ public class ServerChannelHandler implements ChannelInboundHandler {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ServerContext.log("Channel went inactive: " + ctx.channel().remoteAddress());
+
     }
 
     @Override

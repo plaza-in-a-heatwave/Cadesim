@@ -4,6 +4,7 @@ import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.codec.packet.out.impl.LoginResponsePacket;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
+import com.benberi.cadesim.server.model.cade.BlockadeTimeMachine;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.player.Vote.VOTE_RESULT;
@@ -28,6 +29,11 @@ public class PlayerManager {
      * List of players in the game
      */
     private List<Player> players = new ArrayList<>();
+    
+    /**
+     * List of temporarily banned IPs in the game
+     */
+    private List<String> temporaryBannedIPs = new ArrayList<>();
 
     /**
      * Queued players login
@@ -494,8 +500,23 @@ public class PlayerManager {
      */
     public void registerPlayer(Channel c) {
         Player player = new Player(context, c);
-        players.add(player);
-        ServerContext.log("New player registered on channel " + c.remoteAddress() + " (registered players: " + listRegisteredPlayers().size() + ")");
+        if (temporaryBannedIPs.contains(player.getIP()))
+        {
+        	// dont allow banned IPs into the server until the next round begins
+        	player.getChannel().disconnect();
+        	return;
+        }
+        else
+        {
+        	players.add(player);
+            ServerContext.log(
+            	"New player registered on channel " +
+            	c.remoteAddress() +
+            	" (registered players: " +
+            	listRegisteredPlayers().size() +
+            	")"
+            );
+        }
     }
 
 
@@ -512,8 +533,7 @@ public class PlayerManager {
             ServerContext.log("Player " + player.getName() + " de-registered on " + channel.remoteAddress() + " (players remaining: " + (listRegisteredPlayers().size() - 1) + ")");
         }
         else {
-            ServerContext.log("Channel DE-registered but player object was not found: " + channel.remoteAddress() + " (players remaining: " + (listRegisteredPlayers().size() - 1) + ")");
-            players.remove(player); // try to remove them regardless
+            // pass - don't care if player is null
         }
     }
 
@@ -714,6 +734,9 @@ public class PlayerManager {
 
     public void renewGame()
     {
+    	// empty temporary ban list
+    	temporaryBannedIPs.clear();
+
     	shouldSwitchMap = false;
         pointsTeamRed = 0;
         pointsTeamGreen = 0;
@@ -800,6 +823,107 @@ public class PlayerManager {
 				break;
 			}
 		}
+		else if (currentVote.getDescription().startsWith("kick "))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:
+				Player playerToKick = getPlayerByName(currentVote.getDescription().substring("kick ".length()));
+				if (playerToKick != null)
+				{
+					serverBroadcastMessage("Player " + playerToKick.getName() + " was kicked by vote!");
+					temporaryBannedIPs.add(playerToKick.getIP());
+					playerToKick.getChannel().disconnect();
+				}
+				handleStopVote();
+				break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
+		else if (currentVote.getDescription().startsWith("set turntime "))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:
+				handleStopVote();
+				BlockadeTimeMachine tm = context.getTimeMachine();
+				tm.endGame();
+	            tm.endTurn();
+//	            tm.setTemporaryTurnTime(
+//	            	Integer.parseInt(
+//	            		currentVote.getDescription().substring("set turntime ".length())
+//	            	)
+//	            );
+				break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
+		else if (currentVote.getDescription().startsWith("set roundtime "))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:
+				handleStopVote();
+				BlockadeTimeMachine tm = context.getTimeMachine();
+				tm.endGame();
+	            tm.endTurn();
+//	            tm.setTemporaryGameTime(
+//	            	Integer.parseInt(
+//	            		currentVote.getDescription().substring("set roundtime ".length())
+//	            	)
+//	            );
+	            break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
+		else if (currentVote.getDescription().startsWith("set sinkpenalty "))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:
+				handleStopVote();
+				
+				// TODO handle here
+	            break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
+		else
+		{
+			ServerContext.log("got a vote description that wasn't understood: " + currentVote.getDescription());
+		}
     }
     
     private void handleStartVote(Player pl, String message, String voteDescription)
@@ -830,8 +954,16 @@ public class PlayerManager {
     {
     	serverPrivateMessage(
     			pl,
-    			"The following Cadesim commands are supported: /propose (restart|nextmap), /vote (yes|no), /info"
+    			"The following Cadesim commands are supported: /propose, /vote, /info"
     	);
+    }
+    
+    private String proposeSetHelp()
+    {
+    	return "usage: /propose set <parameter> <value> (sets until next round)\n" +
+		"    turntime <positive>\n" +
+		"    roundtime <positive>\n" +
+		"    sinkpenalty <nonnegative>";
     }
     
     public void handleMessage(Player pl, String message)
@@ -867,9 +999,97 @@ public class PlayerManager {
 	    		{
 	    			handleStartVote(pl, message, "nextmap");
 	    		}
+	    		else if (message.startsWith("/propose kick"))
+	    		{
+	    			boolean found = false;
+	    			for (Player registeredPlayer : listRegisteredPlayers())
+	    			{
+	    				if (message.equals("/propose kick " + registeredPlayer.getName()))
+	    				{
+	    					handleStartVote(pl, message, "kick " + registeredPlayer.getName());
+	    					found = true;
+	    					break;
+	    				}
+	    			}
+	    			
+	    			// cant kick player who doesnt exist
+	    			if (!found)
+	    			{
+	    				serverPrivateMessage(pl, "usage: /propose kick <player>");
+	    			}
+	    		}
+	    		else if (message.startsWith("/propose set"))
+	    		{
+	    			if (message.startsWith("/propose set turntime"))
+	    			{
+	    				try {
+	    					int value = Integer.parseInt((message.substring("/propose set turntime ".length())));
+	    					if (value > 0) // GTR
+	    					{
+	    						handleStartVote(pl, message, "set turntime " + value);
+	    					}
+	    					else
+	    					{
+	    						proposeSetHelp();
+	    					}
+	    				}
+	    				catch(Exception e)
+	    				{
+	    					proposeSetHelp();
+	    				}
+	    			}
+	    			else if (message.startsWith("/propose set roundtime"))
+	    			{
+	    				try {
+	    					int value = Integer.parseInt((message.substring("/propose set roundtime ".length())));
+	    					if (value > 0) // GTR
+	    					{
+	    						handleStartVote(pl, message, "set roundtime " + value);
+	    					}
+	    					else
+	    					{
+	    						proposeSetHelp();
+	    					}
+	    				}
+	    				catch(Exception e)
+	    				{
+	    					proposeSetHelp();
+	    				}
+	    			}
+	    			else if (message.startsWith("/propose set sinkpenalty"))
+	    			{
+	    				try {
+	    					int value = Integer.parseInt((message.substring("/propose set sinkpenalty ".length())));
+	    					if (value >= 0) // GEQ
+	    					{
+	    						handleStartVote(pl, message, "set sinkpenalty " + value);
+	    					}
+	    					else
+	    					{
+	    						proposeSetHelp();
+	    					}
+	    				}
+	    				catch(Exception e)
+	    				{
+	    					proposeSetHelp();
+	    				}
+	    			}
+	    			else
+	    			{
+	    				serverPrivateMessage(
+	    					pl,
+	    					proposeSetHelp()
+	    				);
+	    			}
+	    		}
 	    		else
 	    		{
-	    			serverPrivateMessage(pl, "usage: /propose (restart|nextmap)");
+	    			serverPrivateMessage(pl, "usage: /propose\n" +
+	    				"    restart (restarts round)\n" +
+	    				"    nextmap (restarts round with new map)\n" +
+	    				"    kick <player>\n" +
+	    				"    set <parameter> <value> (sets until next round)\n"
+	    			);
 	    		}
 			}
     		else if (message.equals("/info"))
@@ -893,7 +1113,7 @@ public class PlayerManager {
 		{
 			// dont broadcast server commands, but broadcast everything else
 			for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
-	            player.getPackets().sendReceiveMessage(pl.getName(), message);
+				player.getPackets().sendReceiveMessage(pl.getName(), message);
 	        }
 		}
     }

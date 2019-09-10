@@ -471,6 +471,19 @@ public class Player extends Position {
         }
         return super.equals(o);
     }
+    
+    /**
+	 * helper method to extract an IP from a remoteAddress
+	 * they are formatted like:
+	 *     /127.0.0.1:1004
+	 * we return:
+	 *     127.0.0.1
+	 */
+	public String getIP()
+	{
+		return getChannel().remoteAddress().toString().replace("/", "").split(":")[0];
+	}
+    
     /**
      * Places a move
      * @param slot  The slot to place at

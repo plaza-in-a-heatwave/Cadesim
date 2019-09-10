@@ -26,18 +26,6 @@ public class Vote {
 	private long lastPrintUpdate = System.currentTimeMillis();
 	
 	/**
-	 * helper method to extract an IP from a remoteAddress
-	 * they are formatted like:
-	 *     /127.0.0.1:1004
-	 * we return:
-	 *     127.0.0.1
-	 */
-	private String getIPFromRemoteAddress(String remoteAddress)
-	{
-		return remoteAddress.replace("/", "").split(":")[0];
-	}
-	
-	/**
 	 * the kind of vote result which could be returned
 	 */
 	public static enum VOTE_RESULT {
@@ -145,7 +133,7 @@ public class Vote {
 		
 		for (Player p:pm.listRegisteredPlayers())
 		{
-			String ip = getIPFromRemoteAddress(p.getChannel().remoteAddress().toString());
+			String ip = p.getIP();
 			if (!eligibleIPs.contains(ip))
 			{
 				// only one player from each IP is eligible
@@ -277,7 +265,7 @@ public class Vote {
 		}
 
 		// restrict based on IP - can only vote if were around when vote was cast
-		if (!eligibleIPs.contains(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString())))
+		if (!eligibleIPs.contains(pl.getIP()))
 		{
 			context.serverPrivateMessage(
 				pl,
@@ -288,7 +276,7 @@ public class Vote {
 		
 		// prevent duplicate IPs
 		if (voterIPs.contains(
-				getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()))
+				pl.getIP())
 		)
 		{
 			context.serverPrivateMessage(
@@ -305,7 +293,7 @@ public class Vote {
 				pl,
 				"You voted " + (voteFor?"FOR":"AGAINST") + " " + getDescription()
 		);
-		voterIPs.add(getIPFromRemoteAddress(pl.getChannel().remoteAddress().toString()));
+		voterIPs.add(pl.getIP());
 
 		// notify
 		context.serverBroadcastMessage(printProgress());
