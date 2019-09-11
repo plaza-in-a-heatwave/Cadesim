@@ -82,11 +82,79 @@ public class PlayerManager {
 
 	private boolean gameEnded;
 
+	/**
+	 * temporary variables for various server config settings
+	 */
+	private boolean persistTemporarySettings = false; // across rounds
+	private int respawnDelay;
+	private int turnDuration;
+	private int roundDuration;
+	private String disengageBehavior;
+
+	/**
+	 * helper method to reset tmp settings
+	 */
+	private void resetTemporarySettings()
+	{
+		setRespawnDelay(ServerConfiguration.getRespawnDelay());
+		setTurnDuration(ServerConfiguration.getTurnDuration());
+		setRoundDuration(ServerConfiguration.getRoundDuration());
+		setDisengageBehavior(ServerConfiguration.getDisengageBehavior());
+	}
+	
+    private void setPersistTemporarySettings(boolean value)
+    {
+    	persistTemporarySettings  = value;
+    }
+
+    /**
+     * these methods work like a dirty flag - if set true
+     * during a round, settings are persisted.
+     * Otherwise settings are reverted in the following round.
+     */
+    private boolean getPersistTemporarySettings()
+    {
+    	return persistTemporarySettings;
+    }
+
+	public int getRespawnDelay() {
+		return respawnDelay;
+	}
+
+	private void setRespawnDelay(int respawnDelay) {
+		this.respawnDelay = respawnDelay;
+	}
+
+	public int getTurnDuration() {
+		return turnDuration;
+	}
+
+	private void setTurnDuration(int turnDuration) {
+		this.turnDuration = turnDuration;
+	}
+
+	public int getRoundDuration() {
+		return roundDuration;
+	}
+
+	private void setRoundDuration(int roundDuration) {
+		this.roundDuration = roundDuration;
+	}
+	
+	public String getDisengageBehavior() {
+		return disengageBehavior;
+	}
+
+	private void setDisengageBehavior(String disengageBehavior) {
+		this.disengageBehavior = disengageBehavior;
+	}
+
+
     public boolean isGameEnded() {
 		return gameEnded;
 	}
 
-	public void setGameEnded(boolean gameEnded) {
+	private void setGameEnded(boolean gameEnded) {
 		this.gameEnded = gameEnded;
 	}
 
@@ -96,6 +164,7 @@ public class PlayerManager {
     public PlayerManager(ServerContext context) {
         this.context = context;
         this.collision = new CollisionCalculator(context, this);
+        resetTemporarySettings();
     }
     
     /**
@@ -262,7 +331,6 @@ public class PlayerManager {
             for (Player p : listRegisteredPlayers()) {
 
                 if (p.getCollisionStorage().isOnAction()) {
-                    //System.out.println(p.getCollisionStorage().getActionTile());
                     int tile = p.getCollisionStorage().getActionTile();
                     if (p.getCollisionStorage().isCollided(turn)) {
                         p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
@@ -317,7 +385,7 @@ public class PlayerManager {
         calculateInfluenceFlags();
         
 	    // end game only after flags calculated, animations done etc
-        if (context.getTimeMachine().getGameTime() < 0)
+        if (context.getTimeMachine().getRoundTime() < 0)
         {
         	setGameEnded(true);
         }
@@ -644,12 +712,6 @@ public class PlayerManager {
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ", " + pl.getVessel().getName() + ")");
                 printCommandHelp(pl); // private message with commands
-                // If a new player joins and there are now 2 players in the server, end this round so a new one will start
-                if (listRegisteredPlayers().size() == 2) {
-                	serverBroadcastMessage("There are now 2 players in the sim. Starting a new round");
-                    context.getTimeMachine().endGame();
-                    context.getTimeMachine().endTurn();
-                }
             }
         }
     }
@@ -736,7 +798,24 @@ public class PlayerManager {
     {
     	// empty temporary ban list
     	temporaryBannedIPs.clear();
-
+    	
+    	// initially dont plan to persist temporary values beyond next round
+    	// votes must actively opt-in to change this
+    	if (!getPersistTemporarySettings())
+    	{
+    		// reset to defaults
+    		resetTemporarySettings();
+    		serverBroadcastMessage("the temporary settings were reverted");
+    	}
+    	else
+    	{
+    		serverBroadcastMessage(
+    			"the temporary settings are still applied this round. " +
+    			"Vote restart to clear them, or wait for the round to end naturally."
+    		);
+    	}
+    	setPersistTemporarySettings(false);
+    	
     	shouldSwitchMap = false;
         pointsTeamRed = 0;
         pointsTeamGreen = 0;
@@ -748,6 +827,9 @@ public class PlayerManager {
         	p.getMoveTokens().setAutomaticSealGeneration(true); // bugfix disparity between client and server
         	p.getPackets().sendFlags();
         }
+        
+        // game no longer ended
+        setGameEnded(false);
     }
     
     /**
@@ -791,8 +873,8 @@ public class PlayerManager {
 				break;
 			case FOR:
 				handleStopVote();
-				context.getTimeMachine().endGame();
-                context.getTimeMachine().endTurn();
+				context.getTimeMachine().stop();
+				setPersistTemporarySettings(false); // restart cancels temporary settings
 				break;
 			case AGAINST:
 			case TIMEDOUT:
@@ -812,8 +894,8 @@ public class PlayerManager {
 			case FOR:
 				handleStopVote();
 				setShouldSwitchMap(true);
-				context.getTimeMachine().endGame();
-                context.getTimeMachine().endTurn();
+				setPersistTemporarySettings(true);
+				context.getTimeMachine().stop();
 				break;
 			case AGAINST:
 			case TIMEDOUT:
@@ -848,7 +930,7 @@ public class PlayerManager {
 				break;
 			}
 		}
-		else if (currentVote.getDescription().startsWith("set turntime "))
+		else if (currentVote.getDescription().startsWith("set turnduration "))
 		{
 			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
 			switch(v)
@@ -856,15 +938,22 @@ public class PlayerManager {
 			case TBD:
 				break;
 			case FOR:
-				handleStopVote();
 				BlockadeTimeMachine tm = context.getTimeMachine();
-				tm.endGame();
-	            tm.endTurn();
-//	            tm.setTemporaryTurnTime(
-//	            	Integer.parseInt(
-//	            		currentVote.getDescription().substring("set turntime ".length())
-//	            	)
-//	            );
+				setPersistTemporarySettings(true);
+				tm.stop();
+	            setTurnDuration(
+	            	Integer.parseInt(
+	            		currentVote.getDescription().substring("set turnduration ".length())
+	            	) * 10
+	            );
+
+	            serverBroadcastMessage(
+	            	"The turn duration was changed to " + (getTurnDuration() / 10) +
+	            	". It will revert back to " + (ServerConfiguration.getTurnDuration() / 10) +
+	            	" when the round times out, or when players vote restart."
+	            );
+	            
+	            handleStopVote(); // handle this afterwards, otherwise currentVote == null
 				break;
 			case AGAINST:
 			case TIMEDOUT:
@@ -874,7 +963,7 @@ public class PlayerManager {
 				break;
 			}
 		}
-		else if (currentVote.getDescription().startsWith("set roundtime "))
+		else if (currentVote.getDescription().startsWith("set roundduration "))
 		{
 			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
 			switch(v)
@@ -882,15 +971,21 @@ public class PlayerManager {
 			case TBD:
 				break;
 			case FOR:
-				handleStopVote();
 				BlockadeTimeMachine tm = context.getTimeMachine();
-				tm.endGame();
-	            tm.endTurn();
-//	            tm.setTemporaryGameTime(
-//	            	Integer.parseInt(
-//	            		currentVote.getDescription().substring("set roundtime ".length())
-//	            	)
-//	            );
+				setPersistTemporarySettings(true);
+				tm.stop();
+	            setRoundDuration(Integer.parseInt(
+	            		currentVote.getDescription().substring("set roundduration ".length())
+	            	) * 10
+	            );
+
+	            serverBroadcastMessage(
+	            	"The round duration was changed to " + (getRoundDuration() / 10) +
+	            	". It will revert back to " + (ServerConfiguration.getRoundDuration() / 10) +
+	            	" when the round times out, or when players vote restart."
+	            );
+	            
+	            handleStopVote();
 	            break;
 			case AGAINST:
 			case TIMEDOUT:
@@ -907,10 +1002,56 @@ public class PlayerManager {
 			{
 			case TBD:
 				break;
-			case FOR:
-				handleStopVote();
+			case FOR:				
+				BlockadeTimeMachine tm = context.getTimeMachine();
+				setPersistTemporarySettings(true);
+				tm.stop();
+
+				setRespawnDelay(
+					Integer.parseInt(
+						currentVote.getDescription().substring("set sinkpenalty ".length())
+					)
+				);
 				
-				// TODO handle here
+				serverBroadcastMessage(
+	            	"The sinking penalty was changed to " + getRespawnDelay() +
+	            	". It will revert back to " + ServerConfiguration.getRespawnDelay() +
+	            	" when the round times out, or when players vote restart."
+	            );
+				
+				handleStopVote();
+	            break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
+		else if (currentVote.getDescription().startsWith("set disengage-behavior "))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:				
+				BlockadeTimeMachine tm = context.getTimeMachine();
+				setPersistTemporarySettings(true);
+				tm.stop();
+
+				setDisengageBehavior(
+					currentVote.getDescription().substring("set disengage-behavior ".length())
+				);
+				
+				serverBroadcastMessage(
+	            	"The disengage button behavior was changed to " + getDisengageBehavior() +
+	            	". It will revert back to " + ServerConfiguration.getDisengageBehavior() +
+	            	" when the round times out, or when players vote restart."
+	            );
+				
+				handleStopVote();
 	            break;
 			case AGAINST:
 			case TIMEDOUT:
@@ -925,8 +1066,8 @@ public class PlayerManager {
 			ServerContext.log("got a vote description that wasn't understood: " + currentVote.getDescription());
 		}
     }
-    
-    private void handleStartVote(Player pl, String message, String voteDescription)
+
+	private void handleStartVote(Player pl, String message, String voteDescription)
     {
     	// first person to request vote creates it (and votes for it)
 		if (currentVote == null)
@@ -960,10 +1101,12 @@ public class PlayerManager {
     
     private String proposeSetHelp()
     {
-    	return "usage: /propose set <parameter> <value> (sets until next round)\n" +
-		"    turntime <positive>\n" +
-		"    roundtime <positive>\n" +
-		"    sinkpenalty <nonnegative>";
+    	return "usage: /propose set <parameter> <value> -\n" +
+		"    turnduration (between 1 and 10000 inclusive)\n" +
+		"    roundduration (between 1 and 10000 inclusive)\n" +
+		"    sinkpenalty (between 0 and 10000 inclusive)\n" +
+		"    disengage-behavior (off|realistic|simple)\n" +
+		" values persist until you vote restart or a round ends naturally.";
     }
     
     public void handleMessage(Player pl, String message)
@@ -1020,66 +1163,81 @@ public class PlayerManager {
 	    		}
 	    		else if (message.startsWith("/propose set"))
 	    		{
-	    			if (message.startsWith("/propose set turntime"))
+	    			if (message.startsWith("/propose set turnduration"))
 	    			{
 	    				try {
-	    					int value = Integer.parseInt((message.substring("/propose set turntime ".length())));
-	    					if (value > 0) // GTR
+	    					int value = Integer.parseInt((message.substring("/propose set turnduration ".length())));
+	    					if (value > 0 && value <= 10000)
 	    					{
-	    						handleStartVote(pl, message, "set turntime " + value);
+	    						handleStartVote(pl, message, "set turnduration " + value);
 	    					}
 	    					else
 	    					{
-	    						proposeSetHelp();
+	    						serverPrivateMessage(pl, proposeSetHelp());
 	    					}
 	    				}
 	    				catch(Exception e)
 	    				{
-	    					proposeSetHelp();
+	    					serverPrivateMessage(pl, proposeSetHelp());
 	    				}
 	    			}
-	    			else if (message.startsWith("/propose set roundtime"))
+	    			else if (message.startsWith("/propose set roundduration"))
 	    			{
 	    				try {
-	    					int value = Integer.parseInt((message.substring("/propose set roundtime ".length())));
-	    					if (value > 0) // GTR
+	    					int value = Integer.parseInt((message.substring("/propose set roundduration ".length())));
+	    					if (value > 0 && value <= 10000)
 	    					{
-	    						handleStartVote(pl, message, "set roundtime " + value);
+	    						handleStartVote(pl, message, "set roundduration " + value);
 	    					}
 	    					else
 	    					{
-	    						proposeSetHelp();
+	    						serverPrivateMessage(pl, proposeSetHelp());
 	    					}
 	    				}
 	    				catch(Exception e)
 	    				{
-	    					proposeSetHelp();
+	    					serverPrivateMessage(pl, proposeSetHelp());
 	    				}
 	    			}
 	    			else if (message.startsWith("/propose set sinkpenalty"))
 	    			{
 	    				try {
 	    					int value = Integer.parseInt((message.substring("/propose set sinkpenalty ".length())));
-	    					if (value >= 0) // GEQ
+	    					if (value >= 0 && value <= 10000)
 	    					{
 	    						handleStartVote(pl, message, "set sinkpenalty " + value);
 	    					}
 	    					else
 	    					{
-	    						proposeSetHelp();
+	    						serverPrivateMessage(pl, proposeSetHelp());
 	    					}
 	    				}
 	    				catch(Exception e)
 	    				{
-	    					proposeSetHelp();
+	    					serverPrivateMessage(pl, proposeSetHelp());
+	    				}
+	    			}
+	    			else if (message.startsWith("/propose set disengage-behavior"))
+	    			{
+	    				try {
+	    					String behavior = (message.substring("/propose set disengage-behavior ".length()));
+	    					if (behavior.equals("simple") || behavior.equals("realistic") || behavior.equals("off"))
+	    					{
+	    						handleStartVote(pl, message, "set disengage-behavior " + behavior);
+	    					}
+	    					else
+	    					{
+	    						serverPrivateMessage(pl, proposeSetHelp());
+	    					}
+	    				}
+	    				catch(Exception e)
+	    				{
+	    					serverPrivateMessage(pl, proposeSetHelp());
 	    				}
 	    			}
 	    			else
 	    			{
-	    				serverPrivateMessage(
-	    					pl,
-	    					proposeSetHelp()
-	    				);
+	    				serverPrivateMessage(pl, proposeSetHelp());
 	    			}
 	    		}
 	    		else
@@ -1088,18 +1246,28 @@ public class PlayerManager {
 	    				"    restart (restarts round)\n" +
 	    				"    nextmap (restarts round with new map)\n" +
 	    				"    kick <player>\n" +
-	    				"    set <parameter> <value> (sets until next round)\n"
+	    				"    set <parameter> <value> (temporarily set value)\n"
 	    			);
 	    		}
 			}
     		else if (message.equals("/info"))
 			{
+    			// format messages nicely
+    			int normalTurnDuration  = ServerConfiguration.getTurnDuration();
+    			int normalRoundDuration = ServerConfiguration.getRoundDuration();
+    			int normalRespawnDelay  = ServerConfiguration.getRespawnDelay();
+    			String normalDisengageBehavior = ServerConfiguration.getDisengageBehavior();
+    			String tmpTurnDuration  = (getTurnDuration()  != normalTurnDuration )?("[temporarily " + (getTurnDuration()  / 10) + "s] "    ):"";
+    			String tmpRoundDuration = (getRoundDuration() != normalRoundDuration)?("[temporarily " + (getRoundDuration() / 10) + "s] "    ):"";
+    			String tmpRespawnDelay  = (getRespawnDelay()  != normalRespawnDelay )?("[temporarily " + getRespawnDelay()         + " turns] "):"";
+    			String tmpDisengageBehavior = (!getDisengageBehavior().equals(normalDisengageBehavior))?("[temporarily " + getDisengageBehavior() + "] "):"";
     			serverPrivateMessage(
     					pl,
     					Constants.name + " version " + Constants.VERSION + ", " +
-    					"turn length " + (ServerConfiguration.getTurnDuration() / 10) + "s, " +
-    					"round length " + (ServerConfiguration.getRoundDuration() / 10) + "s, " +
-    					"sink penalty " + ServerConfiguration.getRespawnDelay() + " turns without moves, " +
+    					"turn length " + tmpTurnDuration + (normalTurnDuration / 10) + "s, " +
+    					"round length " + tmpRoundDuration + (normalRoundDuration / 10) + "s, " +
+    					"sink penalty " + tmpRespawnDelay + normalRespawnDelay + " turns without moves, " +
+    					"disengage behavior " + tmpDisengageBehavior + normalDisengageBehavior + ", " +
     					"map rotation " + ServerConfiguration.getMapRotationPeriod() + " rounds, " +
     					"current map " + ServerConfiguration.getMapName()
     			);

@@ -9,8 +9,10 @@ import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
  */
 public class SendTimePacket extends OutgoingPacket {
 
-    private int gameTime;
-    private int turnTime;
+    private int gameTime;     // current time position within a round
+    private int turnTime;     // current time position within a turn
+	private int turnDuration; // how long a turn lasts
+	private int roundDuration;// how long a round lasts
 
     public SendTimePacket() {
         super(OutGoingPackets.TIME_PACKET);
@@ -26,18 +28,22 @@ public class SendTimePacket extends OutgoingPacket {
             this.turnTime = 0;
         }
     }
+    
+    public void setTurnDuration(int turnDuration) {
+    	this.turnDuration = turnDuration;
+    }
+    
+    public void setRoundDuration(int roundDuration) {
+    	this.roundDuration = roundDuration;
+    }
 
     @Override
     public void encode() {
-        // The blockade time
-        int blockadeTime = gameTime;
-
-        // The turn time
-        int turnTime = this.turnTime;
-
         setPacketLengthType(PacketLength.BYTE);
-        writeInt(blockadeTime); // blockade time
-        writeInt(turnTime); // turn time
-        setLength(getBuffer().readableBytes()); // 2 integers 8 bits
+        writeInt(gameTime);
+        writeInt(turnTime);
+        writeInt(turnDuration);
+        writeInt(roundDuration);
+        setLength(getBuffer().readableBytes()); // 4 x byte
     }
 }

@@ -349,7 +349,7 @@ public class Player extends Position {
     		respawnOnLandside(false);
     	} else {
     		// after sink, return control after x turns
-    		this.setTurnsUntilControl(ServerConfiguration.getRespawnDelay());
+    		this.setTurnsUntilControl(context.getPlayerManager().getRespawnDelay());
 
             // sunk, 'respawn' on land side with new ship
     		respawnOnLandside(true);
@@ -384,24 +384,75 @@ public class Player extends Position {
      * respawn oceanside - when button pressed
      */
     public void requestRespawnToOceanSide() {
-    	// strictly, in a cade only the attacker would be
-    	// able to do this. However we provide the ability for the
-    	// defender to go Oceanside too to keep things fair.
-    	if (!outOfSafe) {
-    		if (context.getMap().isSafeLandside(this))
-    		{
-    			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
-    		}
-    		respawnOnLandside(false);
-    		
+    	// disengage has several modes.
+    	String mode = context.getPlayerManager().getDisengageBehavior();
+    	if (mode.equals("off"))
+    	{
+    		// do nothing - can't use the button at all
+    		context.getPlayerManager().serverPrivateMessage(
+    			this,
+    			"Disengage is not enabled at the moment. Start a vote to enable it."
+    		);
+    	}
+    	else if (mode.equals("simple"))
+    	{
+    		// strictly, in a cade only the attacker would be
+        	// able to do this. However in simple mode we provide the ability
+    		// for the defender to go Oceanside too to keep things fair.
+        	if (!outOfSafe) {
+        		if (context.getMap().isSafeLandside(this))
+        		{
+        			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
+        		}
+        		respawnOnLandside(false);
+        	}
+        	else
+        	{
+        		context.getPlayerManager().serverPrivateMessage(this, "You must be in a safe zone to disengage");
+        	}
+    	}
+    	else if (mode.equals("realistic"))
+    	{
+    		// can only dis/re if in safe
+    		if (!outOfSafe) {
+        		if (context.getMap().isSafeLandside(this))
+        		{
+        			if (getTeam() == Team.RED)
+        			{
+        				// attackers in the landside can go oceanside
+            			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
+            			respawnOnLandside(false);
+        			}
+        			else
+        			{
+        				// defenders in the landside can just respawn landside
+        				respawnOnLandside(true);
+        			}
+        			
+        		}
+        		else
+        		{
+        			if (getTeam() == Team.RED)
+        			{
+        				// attackers in the oceanside can just respawn oceanside
+            			respawnOnLandside(false);
+        			}
+        			else
+        			{
+        				// defenders in the oceanside can just respawn oceanside
+        				respawnOnLandside(false);
+        			}
+        		}
+        	}
+        	else
+        	{
+        		context.getPlayerManager().serverPrivateMessage(this, "You must be in a safe zone to disengage");
+        	}
     	}
     	else
     	{
-    		// TODO send disable goOceanside button here instead of showing this message
-    		context.getPlayerManager().serverPrivateMessage(this, "You must be in a safe zone to disengage");
+    		ServerContext.log("WARNING - unhandled mode for disengageBehavior: " + mode);
     	}
-
-    	
     }
 
     /**

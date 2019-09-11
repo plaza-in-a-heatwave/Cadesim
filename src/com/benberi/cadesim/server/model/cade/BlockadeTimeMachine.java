@@ -3,14 +3,13 @@ package com.benberi.cadesim.server.model.cade;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.ServerContext;
-//import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 
 public class BlockadeTimeMachine {
 
     /**
      * The timer of the blockade
      */
-    private int gameTime = ServerConfiguration.getRoundDuration();
+    private int roundTime = ServerConfiguration.getRoundDuration();
 
     /**
      * The current turn time
@@ -34,20 +33,20 @@ public class BlockadeTimeMachine {
      * The main tick of blockade time machine
      */
     public void tick() {
-        if (gameTime == 0) {
+        if (roundTime == 0) {
             // TODO end?
         }
 
         if (!isLock())
         {
-            gameTime--; // Tick blockade time
+            roundTime--; // Tick blockade time
             
-            // if in final turn, use turnTime instead of gameTime
+            // if in final turn, use turnTime instead of roundTime
             // gives players a last whole turn
-            if ((!isLastTurn) && (gameTime < turnTime) && (turnTime > 0))
+            if ((!isLastTurn) && (roundTime < turnTime) && (turnTime > 0))
             {
             	isLastTurn  = true;
-            	gameTime = turnTime;
+            	roundTime = turnTime;
             }
         }
         	
@@ -80,13 +79,13 @@ public class BlockadeTimeMachine {
 
     /**
      * Gets the blockade time
-     * @return {@link #gameTime}
+     * @return {@link #roundTime}
      */
-    public int getGameTime() {
-        return gameTime / 10;
+    public int getRoundTime() {
+        return roundTime / 10;
     }
 
-    public void endGame() { gameTime = 0;}
+    private void endRound() { roundTime = 0;}
 
     /**
      * Gets the current turn time
@@ -96,7 +95,16 @@ public class BlockadeTimeMachine {
         return turnTime / 10;
     }
 
-    public void endTurn() { turnTime = 0; }
+    private void endTurn() { turnTime = 0; }
+    
+    /**
+     * helper method to combine endRound and endTurn
+     * while persisting some of the temporary time config settings
+     */
+    public void stop() {
+    	endRound();
+    	endTurn();
+    }
 
     /**
      * Checks if the time is locked
@@ -110,12 +118,13 @@ public class BlockadeTimeMachine {
      * Renewals the turn time
      */
     public void renewTurn() {
-        turnTime = ServerConfiguration.getTurnDuration();
+    	turnTime = context.getPlayerManager().getTurnDuration();
+
         setLock(false);
     }
 
-    public void renewGame() {
-        gameTime = ServerConfiguration.getRoundDuration();
+    public void renewRound() {
+    	roundTime = context.getPlayerManager().getRoundDuration();
         isLastTurn = false;
     }
 }

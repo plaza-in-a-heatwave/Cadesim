@@ -15,6 +15,7 @@ public class ServerConfiguration {
     private static int respawnDelay  = 2;          // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
+	private static String disengageBehavior = "simple";
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -70,7 +71,8 @@ public class ServerConfiguration {
         		"turn duration:" + getTurnDuration() / 10 + "s, " +
         		"round duration:" + getRoundDuration() / 10 + "s, " +
         		"sink delay:" + getRespawnDelay() + " turns, " +
-        		"map rotation period:" + getMapRotationPeriod() + " turns " +
+        		"map rotation period:" + getMapRotationPeriod() + " turns, " +
+        		"disengage behavior:" + getDisengageBehavior() +
         		"]";
     }
     
@@ -88,5 +90,13 @@ public class ServerConfiguration {
 
 	public static void setMapRotationPeriod(int mapRotationPeriod) {
 		ServerConfiguration.mapRotationPeriod = mapRotationPeriod;
+	}
+
+	public static String getDisengageBehavior() {
+		return ServerConfiguration.disengageBehavior ;
+	}
+	
+	public static void setDisengageBehavior(String disengageBehavior) {
+		ServerConfiguration.disengageBehavior = disengageBehavior;
 	}
 }
