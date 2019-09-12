@@ -13,8 +13,8 @@ import com.benberi.cadesim.server.ServerContext;
 public class Vote {
 	private int votesFor     = 0;              // count votes for
 	private int votesAgainst = 0;              // count votes against
-	public static final int MAJORITY_THRESHOLD = 50; // vote carried at >50%
-	public static final int VOTE_TIMEOUT_MILLIS = 30000; // timeout after 30s
+	private int majorityThreshold; // vote carried at > n%
+	public static final int VOTE_TIMEOUT_MILLIS = 30000; // timeout after n%
 	public static final int PRINT_SCORE_MILLIS = 10000; // ms
 	private List<String> eligibleIPs = new ArrayList<String>(); // restrict to players present when vote started
 	private List<String> voterIPs    = new ArrayList<String>(); // prevent multi ip voting
@@ -126,7 +126,7 @@ public class Vote {
 	 * create a new vote
 	 * @param totalPlayers the number of players currently active
 	 */
-	public Vote(PlayerManager pm, String description)
+	public Vote(PlayerManager pm, String description, int majorityThreshold)
 	{
 		this.context = pm;
 		voteStartTime = System.currentTimeMillis();
@@ -142,6 +142,7 @@ public class Vote {
 		}
 		
 		this.description = description;
+		this.majorityThreshold= majorityThreshold;
 		
 		context.serverBroadcastMessage("Started vote on " + description);
 	}
@@ -165,7 +166,7 @@ public class Vote {
 	 * get the miniumum number of votes to win
 	 */
 	public int getVotesToWin() {
-		return (int)Math.ceil(((float)getEligibleVoters() / 100.0) * MAJORITY_THRESHOLD);
+		return (int)Math.ceil(((float)getEligibleVoters() / 100.0) * majorityThreshold);
 	}
 	
 	/**
@@ -184,7 +185,7 @@ public class Vote {
 	 * note this is only valid if min threshold have voted.
 	 */
 	private boolean hasForWon() {
-		return (((float)votesFor / (float)getEligibleVoters()) * 100.0) > MAJORITY_THRESHOLD;
+		return (((float)votesFor / (float)getEligibleVoters()) * 100.0) > majorityThreshold;
 	}
 	
 	/**
@@ -192,14 +193,14 @@ public class Vote {
 	 * note this is only valid if min threshold have voted.
 	 */
 	private boolean hasAgainstWon() {
-		return (((float)votesAgainst / (float)getEligibleVoters()) * 100.0) > MAJORITY_THRESHOLD;
+		return (((float)votesAgainst / (float)getEligibleVoters()) * 100.0) > majorityThreshold;
 	}
 	
 	/**
 	 * get whether For could win
 	 */
 	private boolean couldForWin() {
-		return (((float)(votesFor + (getEligibleVoters() - votesAgainst - votesFor)) / (float)getEligibleVoters()) * 100.0) > MAJORITY_THRESHOLD;
+		return (((float)(votesFor + (getEligibleVoters() - votesAgainst - votesFor)) / (float)getEligibleVoters()) * 100.0) > majorityThreshold;
 	}
 	
 	/**

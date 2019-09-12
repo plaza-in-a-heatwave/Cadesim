@@ -99,6 +99,7 @@ public class GameServerBootstrap {
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("o", "map rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
         options.addOption("b", "disengage-behavior", true, "disengage button behavior (default: " + ServerConfiguration.getDisengageBehavior() + ")");
+        options.addOption("v", "voting majority", true, "voting majority percent, or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
         
         CommandLineParser parser = new DefaultParser();
 
@@ -131,6 +132,10 @@ public class GameServerBootstrap {
             if (cmd.hasOption("b"))
             {
             	ServerConfiguration.setDisengageBehavior(cmd.getOptionValue("b"));
+            }
+            if (cmd.hasOption("v"))
+            {
+            	ServerConfiguration.setVotingMajority(Integer.parseInt(cmd.getOptionValue("v")));
             }
             if (cmd.hasOption("o"))
             {

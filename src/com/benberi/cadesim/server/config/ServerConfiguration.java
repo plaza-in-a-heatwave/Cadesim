@@ -16,6 +16,7 @@ public class ServerConfiguration {
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
 	private static String disengageBehavior = "simple";
+	private static int votingMajority = 75;        // percent
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -72,7 +73,8 @@ public class ServerConfiguration {
         		"round duration:" + getRoundDuration() / 10 + "s, " +
         		"sink delay:" + getRespawnDelay() + " turns, " +
         		"map rotation period:" + getMapRotationPeriod() + " turns, " +
-        		"disengage behavior:" + getDisengageBehavior() +
+        		"disengage behavior:" + getDisengageBehavior() + ", " +
+        		"vote majority percentage: " + (isVotingEnabled()?"[voting on] ":"[voting off] ") + getVotingMajority() + "%" +
         		"]";
     }
     
@@ -98,5 +100,18 @@ public class ServerConfiguration {
 	
 	public static void setDisengageBehavior(String disengageBehavior) {
 		ServerConfiguration.disengageBehavior = disengageBehavior;
+	}
+
+	public static void setVotingMajority(int votingMajority)
+	{
+		ServerConfiguration.votingMajority = votingMajority;
+	}
+	
+	public static int getVotingMajority() {
+		return ServerConfiguration.votingMajority;
+	}
+	
+	public static boolean isVotingEnabled() {
+		return ServerConfiguration.votingMajority != -1;
 	}
 }

@@ -862,7 +862,7 @@ public class PlayerManager {
     	// subsequent people (including originator) may vote on it
 		if (currentVote == null)
 		{
-			serverPrivateMessage(pl, "There is no vote in progress");
+			serverPrivateMessage(pl, "There is no vote in progress, start one with /propose");
 		}
 		else if (currentVote.getDescription().equals("restart"))
 		{
@@ -1070,9 +1070,13 @@ public class PlayerManager {
 	private void handleStartVote(Player pl, String message, String voteDescription)
     {
     	// first person to request vote creates it (and votes for it)
-		if (currentVote == null)
+		if (!ServerConfiguration.isVotingEnabled())
 		{
-			currentVote = new Vote((PlayerManager)this, voteDescription);
+			serverPrivateMessage(pl, "Can't start a new vote, voting is disabled on this server");
+		}
+		else if (currentVote == null)
+		{
+			currentVote = new Vote((PlayerManager)this, voteDescription, ServerConfiguration.getVotingMajority());
 			handleVote(pl, true);
 		}
 		else
@@ -1269,7 +1273,8 @@ public class PlayerManager {
     					"sink penalty " + tmpRespawnDelay + normalRespawnDelay + " turns without moves, " +
     					"disengage behavior " + tmpDisengageBehavior + normalDisengageBehavior + ", " +
     					"map rotation " + ServerConfiguration.getMapRotationPeriod() + " rounds, " +
-    					"current map " + ServerConfiguration.getMapName()
+    					"current map " + ServerConfiguration.getMapName() + ", " +
+    					"voting majority " + (ServerConfiguration.isVotingEnabled()?ServerConfiguration.getVotingMajority() + "%":"N/A [voting off]")
     			);
 			}
 			else
