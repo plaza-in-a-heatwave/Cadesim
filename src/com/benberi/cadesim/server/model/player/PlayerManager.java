@@ -1274,7 +1274,8 @@ public class PlayerManager {
     					"disengage behavior " + tmpDisengageBehavior + normalDisengageBehavior + ", " +
     					"map rotation " + ServerConfiguration.getMapRotationPeriod() + " rounds, " +
     					"current map " + ServerConfiguration.getMapName() + ", " +
-    					"voting majority " + (ServerConfiguration.isVotingEnabled()?ServerConfiguration.getVotingMajority() + "%":"N/A [voting off]")
+    					"voting majority " + (ServerConfiguration.isVotingEnabled()?ServerConfiguration.getVotingMajority() + "%, ":"N/A [voting off], ") +
+    					"jobbers quality " + ServerConfiguration.getJobbersQualityAsString()
     			);
 			}
 			else

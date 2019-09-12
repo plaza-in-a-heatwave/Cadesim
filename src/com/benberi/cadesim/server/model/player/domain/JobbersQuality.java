@@ -13,7 +13,7 @@ public enum JobbersQuality {
 		0.26666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // bilgeFixRate         per tick
 		40,                                                     // minBilgeForDamage
 		0.06000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // moves                per tick
-		0.08333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // cannons              per tick
+		0.25000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // cannons              per tick
 		0.01000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // full bilge move rate per tick
     ),
 	ELITE(
@@ -21,7 +21,7 @@ public enum JobbersQuality {
 		0.46666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
 		50,                                                     // "
 		0.08983 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
-		0.11666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		0.35000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
 		0.02000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // "
 	);
 

@@ -98,9 +98,9 @@ public class GameServerBootstrap {
         options.addOption("d", "respawn delay", true, "respawn delay (in turns) after sinking (default: " + ServerConfiguration.getRespawnDelay() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("o", "map rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
-        options.addOption("b", "disengage-behavior", true, "disengage button behavior (default: " + ServerConfiguration.getDisengageBehavior() + ")");
+        options.addOption("b", "disengage-behavior", true, "disengage button behavior (\"off\", \"simple\", \"realistic\") (default: " + ServerConfiguration.getDisengageBehavior() + ")");
         options.addOption("v", "voting majority", true, "voting majority percent, or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
-        
+        options.addOption("q", "jobbers quality", true, "quality of jobbers (\"basic\", \"elite\") (default: " + ServerConfiguration.getJobbersQuality() + ")");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -136,6 +136,14 @@ public class GameServerBootstrap {
             if (cmd.hasOption("v"))
             {
             	ServerConfiguration.setVotingMajority(Integer.parseInt(cmd.getOptionValue("v")));
+            }
+            if (cmd.hasOption("v"))
+            {
+            	ServerConfiguration.setVotingMajority(Integer.parseInt(cmd.getOptionValue("v")));
+            }
+            if (cmd.hasOption("q"))
+            {
+            	ServerConfiguration.setJobbersQuality(cmd.getOptionValue("q"));
             }
             if (cmd.hasOption("o"))
             {

@@ -1,5 +1,7 @@
 package com.benberi.cadesim.server.config;
 
+import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
+
 public class ServerConfiguration {
 	/**
 	 * Store/retrieve/overwrite server gameplay defaults.
@@ -17,6 +19,7 @@ public class ServerConfiguration {
     private static String mapName = "default.map";
 	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
+	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -74,7 +77,8 @@ public class ServerConfiguration {
         		"sink delay:" + getRespawnDelay() + " turns, " +
         		"map rotation period:" + getMapRotationPeriod() + " turns, " +
         		"disengage behavior:" + getDisengageBehavior() + ", " +
-        		"vote majority percentage: " + (isVotingEnabled()?"[voting on] ":"[voting off] ") + getVotingMajority() + "%" +
+        		"vote majority percentage: " + (isVotingEnabled()?"[voting on] ":"[voting off] ") + getVotingMajority() + "%" + ", " +
+        		"jobbers quality: " + getJobbersQualityAsString() +
         		"]";
     }
     
@@ -113,5 +117,34 @@ public class ServerConfiguration {
 	
 	public static boolean isVotingEnabled() {
 		return ServerConfiguration.votingMajority != -1;
+	}
+	
+	/**
+	 * set with string so can load from cli
+	 */
+	public static void setJobbersQuality(String value) throws java.lang.IllegalArgumentException
+	{
+		if (value.toLowerCase().equals("elite"))
+		{
+			ServerConfiguration.jobbersQuality = JobbersQuality.ELITE;
+		}
+		else if (value.toLowerCase().equals("basic"))
+		{
+			ServerConfiguration.jobbersQuality = JobbersQuality.BASIC;
+		}
+		else
+		{
+			throw new java.lang.IllegalArgumentException("jobbersQuality was unexpectedly \"" + value + "\"");
+		}
+		
+	}
+
+	public static JobbersQuality getJobbersQuality() {
+		
+		return ServerConfiguration.jobbersQuality;
+	}
+	
+	public static String getJobbersQualityAsString() {
+		return jobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
 	}
 }

@@ -67,7 +67,7 @@ public class Player extends Position {
      */
     private MoveAnimationStructure animation = new MoveAnimationStructure();
 
-    private JobbersQuality jobbersQuality = JobbersQuality.ELITE;
+    private JobbersQuality jobbersQuality = ServerConfiguration.getJobbersQuality();
 
     /**
      * The face of the player (rotation id)
