@@ -9,19 +9,19 @@ import com.benberi.cadesim.server.config.Constants;
  */
 public enum JobbersQuality {
 	BASIC(
-		0.03333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // fixRate              per tick
+		0.06666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // fixRate              per tick
 		0.26666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // bilgeFixRate         per tick
 		40,                                                     // minBilgeForDamage
-		0.11333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // moves                per tick
-		0.3     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // cannons              per tick
+		0.06000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // moves                per tick
+		0.08333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // cannons              per tick
 		0.01000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // full bilge move rate per tick
     ),
 	ELITE(
-		0.06666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		0.13333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
 		0.46666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
 		50,                                                     // "
-		0.16000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
-		0.4     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		0.08983 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
+		0.11666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // "
 		0.02000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // "
 	);
 
