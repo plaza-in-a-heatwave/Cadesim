@@ -50,21 +50,25 @@ public class CadeServer extends ServerBootstrap implements Runnable {
      * On server startup
      */
     public void run() {
+    	int port = ServerConfiguration.getPort();
         try {
-            int port = ServerConfiguration.getPort();
             ChannelFuture f = bind(port).sync();
             if (f.isSuccess()) {
                 bootstrap.startServices();
             }
             else {
-                ServerContext.log("Could not bind the server on local port " + port + ". Cause: " + f.cause().getMessage());
-                System.exit(0);
+            	ServerContext.log("Could not bind the server on local port " + port + ". Cause: " + f.cause().getMessage());
+            	throw new java.net.BindException();
             }
 
             f.channel().closeFuture().sync();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+        } catch (java.net.BindException e) {
+            ServerContext.log("Couldn't bind to the server on local port " + port + ". Maybe another instance is running?");
+            System.exit(0);
+        } catch (Exception e)
+        {
+        	ServerContext.log("Couldn't start server, reason unknown");
+    	}finally {
             worker.shutdownGracefully();
         }
     }
