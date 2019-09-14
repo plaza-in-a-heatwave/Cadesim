@@ -313,9 +313,11 @@ public class Player extends Position {
         this.vessel = Vessel.createVesselByType(this, ship);
         this.isRegistered = true;
         ServerContext.log(
-        		"Registered player \"" + name + "\", " +
+        		"[player-joined] Registered player \"" + name + "\", " +
         		Team.teamIDToString(team) + ", " +
-        		Vessel.vesselIDToString(ship) + "."
+        		Vessel.vesselIDToString(ship) + ", on " +
+        		channel.remoteAddress() + ". " +
+        		context.getPlayerManager().printPlayers()
         );
         respawn();
     }

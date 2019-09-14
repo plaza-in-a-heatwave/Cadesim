@@ -56,9 +56,9 @@ public class GameService implements Runnable {
             	gamesCompleted++;
                 
                 // if no players... hibernate time machines
-                if (playerManager.listRegisteredPlayers().size() == 0) {
+                if (playerManager.getPlayers().size() == 0) {
                     ServerContext.log("No players registered, hibernating to save CPU");
-                    while (playerManager.listRegisteredPlayers().size() == 0) {
+                    while (playerManager.getPlayers().size() == 0) {
                         try {
                             Thread.sleep(2000);
                         } catch(InterruptedException e) {

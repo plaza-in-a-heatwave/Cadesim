@@ -560,6 +560,14 @@ public class PlayerManager {
     public List<Player> getPlayers() {
         return this.players;
     }
+    
+    /**
+     * prints registered/players
+     */
+    public String printPlayers() {
+    	return "Registered players:" + Integer.toString(listRegisteredPlayers().size()) + "/" +
+    		Integer.toString(getPlayers().size()) + ".";
+    }
 
     /**
      * Registers a new player to the server, puts him in a hold until he sends the protocol handshake packet
@@ -578,11 +586,9 @@ public class PlayerManager {
         {
         	players.add(player);
             ServerContext.log(
-            	"New player registered on channel " +
-            	c.remoteAddress() +
-            	" (registered players: " +
-            	listRegisteredPlayers().size() +
-            	")"
+            	"[player joined] New player added to channel " +
+            	c.remoteAddress() + ". " +
+            	printPlayers()
             );
         }
     }
@@ -598,7 +604,6 @@ public class PlayerManager {
         if (player != null) {
             player.setTurnFinished(true);
             queuedLogoutRequests.add(player);
-            ServerContext.log("Player " + player.getName() + " de-registered on " + channel.remoteAddress() + " (players remaining: " + (listRegisteredPlayers().size() - 1) + ")");
         }
         else {
             // pass - don't care if player is null
@@ -731,6 +736,12 @@ public class PlayerManager {
 
             serverBroadcastMessage("Goodbye " + player.getName() + " (" + player.getTeam() + ", " + player.getVessel().getName() + ")");
             players.remove(player);
+            
+            ServerContext.log(
+            	"[player left] De-registered and logged out player \"" + player.getName() + "\", on " +
+            	player.getChannel().remoteAddress() + ". " +
+            	printPlayers()
+            );
         }
     }
 
@@ -805,7 +816,7 @@ public class PlayerManager {
     	{
     		// reset to defaults
     		resetTemporarySettings();
-    		serverBroadcastMessage("the temporary settings were reverted");
+    		serverBroadcastMessage("all temporary settings were reverted");
     	}
     	else
     	{
