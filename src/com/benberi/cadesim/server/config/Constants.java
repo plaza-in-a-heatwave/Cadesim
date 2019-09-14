@@ -69,4 +69,14 @@ public class Constants {
      * largest possible player name
      */
 	public static final int MAX_NAME_SIZE = 19;
+
+	/**
+	 * n seconds to register
+	 */
+	public static final long REGISTER_TIME_MILLIS = 2000;
+
+	/**
+	 * server does misc tasks every n seconds
+	 */
+	public static final int SERVER_ADMIN_INTERVAL_MILLIS = 3000;
 }

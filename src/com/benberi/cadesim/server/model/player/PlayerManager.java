@@ -71,6 +71,11 @@ public class PlayerManager {
     private long lastTimeSend;
     
     /**
+     * The last time time the server did some admin
+     */
+    private long lastAdminCheck;
+    
+    /**
      * is a vote in progress
      */
     private Vote currentVote = null;
@@ -188,8 +193,14 @@ public class PlayerManager {
         if (now - lastTimeSend >= 1000) {
             lastTimeSend = now;
             handleTime();
-            
-            // also check for vote results - may have timed out
+        }
+        
+        // do admin - every n seconds
+        if (now - lastAdminCheck >= Constants.SERVER_ADMIN_INTERVAL_MILLIS)
+        {
+        	lastAdminCheck = now;
+
+        	// also check for vote results - may have timed out
             // other cases handled elsewhere
             if (currentVote != null)
             {
@@ -199,6 +210,10 @@ public class PlayerManager {
             		currentVote = null;
             	}
             }
+            
+            // also check for players who might have logged in but not
+            // registered - then timed out
+            timeoutUnregisteredPlayers();
         }
 
         // Update players (for stuff like damage fixing, bilge fixing and move token generation)
@@ -492,7 +507,7 @@ public class PlayerManager {
             for (Player p : listRegisteredPlayers()) {
                 if (!p.isTurnFinished()) {
                     if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
-                        ServerContext.log(p.getName() +  " kicked for timing out while animating!");
+                        ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
                         serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
                         p.getChannel().disconnect();
                     }
@@ -551,6 +566,34 @@ public class PlayerManager {
         }
 
         return registered;
+    }
+    
+    /**
+     * unregistered players get a few seconds to properly register.
+     */
+    public void timeoutUnregisteredPlayers() {
+    	long now = System.currentTimeMillis();
+    	List<Player> l= new ArrayList<Player>();
+    	for (Player p : players)
+    	{
+    		if (!p.isRegistered())
+    		{
+    			if ((p.getJoinTime() + Constants.REGISTER_TIME_MILLIS) < (now ))
+    			{
+    				// add to kick list
+    				l.add(p);
+    			}
+    		}
+    	}
+    	
+    	// kick!
+    	for (Player p : l)
+    	{
+    		ServerContext.log("WARNING - " + p.getChannel().remoteAddress() + " timed out while registering, and was kicked.");
+            p.getChannel().disconnect();
+            players.remove(p);
+            ServerContext.log(printPlayers());
+    	}
     }
 
     /**
@@ -727,21 +770,33 @@ public class PlayerManager {
     private void handleLogoutRequests() {
         while(!queuedLogoutRequests.isEmpty()) {
             Player player = queuedLogoutRequests.poll();
-
-            for (Player p : listRegisteredPlayers()) {
-                if (p != player) {
-                    p.getPackets().sendRemovePlayer(player);
-                }
-            }
-
-            serverBroadcastMessage("Goodbye " + player.getName() + " (" + player.getTeam() + ", " + player.getVessel().getName() + ")");
             players.remove(player);
-            
-            ServerContext.log(
-            	"[player left] De-registered and logged out player \"" + player.getName() + "\", on " +
-            	player.getChannel().remoteAddress() + ". " +
-            	printPlayers()
-            );
+
+            if (player.isRegistered()) {
+            	// notify everyone else
+	            for (Player p : listRegisteredPlayers()) {
+	                if (p != player) {
+	                    p.getPackets().sendRemovePlayer(player);
+	                }
+	            }
+	            serverBroadcastMessage("Goodbye " + player.getName() + " (" + player.getTeam() + ", " + player.getVessel().getName() + ")");
+	            
+	            // log
+	            ServerContext.log(
+	            	"[player left] De-registered and logged out player \"" + player.getName() + "\", on " +
+	            	player.getChannel().remoteAddress() + ". " +
+	            	printPlayers()
+	            );
+            }
+            else
+            {
+            	// just log
+            	ServerContext.log(
+	            	"[player left] unregistered player disconnected on " +
+	            	player.getChannel().remoteAddress() + ". " +
+	            	printPlayers()
+	            );
+            }
         }
     }
 
@@ -1120,8 +1175,7 @@ public class PlayerManager {
 		"    turnduration (between 1 and 10000 inclusive)\n" +
 		"    roundduration (between 1 and 10000 inclusive)\n" +
 		"    sinkpenalty (between 0 and 10000 inclusive)\n" +
-		"    disengage-behavior (off|realistic|simple)\n" +
-		" values persist until you vote restart or a round ends naturally.";
+		"    disengage-behavior (off|realistic|simple)\n";
     }
     
     public void handleMessage(Player pl, String message)

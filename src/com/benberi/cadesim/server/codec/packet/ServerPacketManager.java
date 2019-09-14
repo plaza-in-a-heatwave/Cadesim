@@ -88,7 +88,6 @@ public class ServerPacketManager {
             ServerContext.log("Channel not registered yet! packet: " + packet.getOpcode());
             return false;
         }
-
         for(Map.Entry<Integer, ServerPacketExecutor> entry : executors.entrySet()) {
             int opcode = entry.getKey();
             ServerPacketExecutor executor = entry.getValue();
@@ -99,14 +98,11 @@ public class ServerPacketManager {
                 }
                 catch (Exception e) {
                     ServerContext.log(
-                    		"Player error while executing packet: " +
-                    		packet.getOpcode() + ", " +
-                    		"player: " + p.getName() + ", " +
-                    		"error message: " + e.getMessage() + ", " +
-                    		e.getClass().getName()
-                    		
+                    		"WARNING - malformed high-level packet from " +
+                    		p.getChannel().remoteAddress() +
+                    		" error message: " + e.getMessage() + ", " +
+                    		e.getClass().getName() + " (player was kicked)"
                     );
-                    e.printStackTrace();
                     c.disconnect();
                 }
                 return true;

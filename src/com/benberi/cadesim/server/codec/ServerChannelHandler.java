@@ -31,7 +31,6 @@ public class ServerChannelHandler implements ChannelInboundHandler {
             ServerContext.log("Channel register error: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
     @Override

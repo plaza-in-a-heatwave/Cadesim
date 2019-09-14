@@ -84,7 +84,13 @@ public class Player extends Position {
     /**
      * If the player is registered
      */
-    private boolean isRegistered;
+    private boolean isRegistered = false;
+    
+    /**
+     * When the player joined
+     * Used to timeout players who join but never register
+     */
+    private long joinTime;
 
     /**
      * The last damage update
@@ -141,6 +147,7 @@ public class Player extends Position {
     private List<Flag> flags;
 
     public Player(ServerContext ctx, Channel c) {
+    	this.joinTime = System.currentTimeMillis();
         this.channel = c;
         this.context = ctx;
         this.packets = new PlayerPacketManager(this);
@@ -498,6 +505,13 @@ public class Player extends Position {
      */
     public boolean isRegistered() {
         return this.isRegistered;
+    }
+    
+    /**
+     * Get join time
+     */
+    public long getJoinTime() {
+    	return this.joinTime;
     }
 
     /**
