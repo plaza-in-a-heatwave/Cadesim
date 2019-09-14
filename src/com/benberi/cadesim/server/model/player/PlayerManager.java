@@ -56,14 +56,14 @@ public class PlayerManager {
     private CollisionCalculator collision;
 
     /**
-     * The points of the green team
+     * The points of the defender team
      */
-    private int pointsTeamGreen;
+    private int pointsDefender;
 
     /**
-     * The points of the red team
+     * The points of the attacker team
      */
-    private int pointsTeamRed;
+    private int pointsAttacker;
 
     /**
      * The last time time packet was sent
@@ -468,11 +468,11 @@ public class PlayerManager {
      */
     private void addPointsToTeam(Team team, int points) {
         switch (team) {
-            case GREEN:
-                pointsTeamGreen += points;
+            case DEFENDER:
+                pointsDefender += points;
                 break;
-            case RED:
-                pointsTeamRed += points;
+            case ATTACKER:
+                pointsAttacker += points;
                 break;
             case NEUTRAL:
             	ServerContext.log("warning - tried to assign " + Integer.toString(points) + " to NEUTRAL");
@@ -845,12 +845,12 @@ public class PlayerManager {
         }
     }
 
-    public int getPointsGreen() {
-        return pointsTeamGreen;
+    public int getPointsDefender() {
+        return pointsDefender;
     }
 
-    public int getPointsRed() {
-        return pointsTeamRed;
+    public int getPointsAttacker() {
+        return pointsAttacker;
     }
 
     public void queueOutgoing() {
@@ -883,8 +883,8 @@ public class PlayerManager {
     	setPersistTemporarySettings(false);
     	
     	shouldSwitchMap = false;
-        pointsTeamRed = 0;
-        pointsTeamGreen = 0;
+        pointsAttacker = 0;
+        pointsDefender = 0;
 
         for (Player p : listRegisteredPlayers()) {
         	p.setFirstEntry(true);

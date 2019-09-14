@@ -101,6 +101,7 @@ public class GameServerBootstrap {
         options.addOption("b", "disengage-behavior", true, "disengage button behavior (\"off\", \"simple\", \"realistic\") (default: " + ServerConfiguration.getDisengageBehavior() + ")");
         options.addOption("v", "voting majority", true, "voting majority percent, or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
         options.addOption("q", "jobbers quality", true, "quality of jobbers (\"basic\", \"elite\") (default: " + ServerConfiguration.getJobbersQuality() + ")");
+        options.addOption("n", "team names", true, "names for the attacker and defender, comma separated, 12 characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -144,6 +145,25 @@ public class GameServerBootstrap {
             if (cmd.hasOption("q"))
             {
             	ServerConfiguration.setJobbersQuality(cmd.getOptionValue("q"));
+            }
+            if (cmd.hasOption("n"))
+            {
+            	try {
+            		String[] names = cmd.getOptionValue("n").split(",");
+            		if (
+            			(names[0].length() > Constants.MAX_TEAMNAME_SIZE) ||
+            			(names[1].length() > Constants.MAX_TEAMNAME_SIZE)
+            		)
+            		{
+            			help(options);
+            		}
+            		ServerConfiguration.setAttackerName(names[0]);
+            		ServerConfiguration.setDefenderName(names[1]);
+            	}
+            	catch (Exception e)
+            	{
+            		help(options);
+            	}
             }
             if (cmd.hasOption("o"))
             {

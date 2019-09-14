@@ -48,8 +48,8 @@ public class GameService implements Runnable {
             	// print out the scores for the game
             	playerManager.serverBroadcastMessage(
             			"Round ended, final scores were:\n" +
-            			"    Defender:" + playerManager.getPointsGreen() + "\n" + 
-            			"    Attacker:" + playerManager.getPointsRed()
+            			"    Defender:" + playerManager.getPointsDefender() + "\n" + 
+            			"    Attacker:" + playerManager.getPointsAttacker()
             	);
 
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
@@ -102,7 +102,7 @@ public class GameService implements Runnable {
                 playerManager.renewGame();
                 context.getTimeMachine().renewRound(); // bugfix - order matters
 
-                playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
+                playerManager.serverBroadcastMessage("Started new round: #" + gamesCompleted);
             }
 
         } catch (Exception e) {

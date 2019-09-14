@@ -257,8 +257,8 @@ public class PlayerPacketManager {
 
     public void sendFlags() {
         SetFlagsPacket packet = new SetFlagsPacket();
-        packet.setPointsGreen(player.getContext().getPlayerManager().getPointsGreen());
-        packet.setPointsRed(player.getContext().getPlayerManager().getPointsRed());
+        packet.setPointsDefender(player.getContext().getPlayerManager().getPointsDefender());
+        packet.setPointsAttacker(player.getContext().getPlayerManager().getPointsAttacker());
         packet.setFlags(player.getContext().getMap().getFlags());
 
         player.sendPacket(packet);

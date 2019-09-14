@@ -426,7 +426,7 @@ public class Player extends Position {
     		if (!outOfSafe) {
         		if (context.getMap().isSafeLandside(this))
         		{
-        			if (getTeam() == Team.RED)
+        			if (getTeam() == Team.ATTACKER)
         			{
         				// attackers in the landside can go oceanside
             			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
@@ -441,7 +441,7 @@ public class Player extends Position {
         		}
         		else
         		{
-        			if (getTeam() == Team.RED)
+        			if (getTeam() == Team.ATTACKER)
         			{
         				// attackers in the oceanside can just respawn oceanside
             			respawnOnLandside(false);

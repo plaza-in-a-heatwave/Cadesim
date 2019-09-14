@@ -79,4 +79,9 @@ public class Constants {
 	 * server does misc tasks every n seconds
 	 */
 	public static final int SERVER_ADMIN_INTERVAL_MILLIS = 3000;
+
+	/**
+	 * how big can team names (e.g. attacker, defender) be?
+	 */
+	public static final int MAX_TEAMNAME_SIZE = 12;
 }

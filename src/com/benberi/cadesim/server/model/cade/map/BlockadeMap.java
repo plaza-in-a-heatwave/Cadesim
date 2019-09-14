@@ -79,7 +79,7 @@ public class BlockadeMap {
             return false;
         } else if (this.isSafeLandside(new Position(x,y))) {
         	// attackers cannot port in landside safe zone
-        	return (!(p.getTeam() == Team.GREEN) && (!p.isInSafe()));
+        	return (!(p.getTeam() == Team.DEFENDER) && (!p.isInSafe()));
         } else {
         	return this.map[x][y] == BIG_ROCK || this.map[x][y] == SMALL_ROCK;
         }

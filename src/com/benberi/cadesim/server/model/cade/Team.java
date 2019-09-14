@@ -1,9 +1,11 @@
 package com.benberi.cadesim.server.model.cade;
 
+import com.benberi.cadesim.server.config.ServerConfiguration;
+
 public enum Team {
     NEUTRAL(2),
-    GREEN(1),
-    RED(0);
+    DEFENDER(1),
+    ATTACKER(0);
 
     private int team;
 
@@ -21,10 +23,16 @@ public enum Team {
                 return NEUTRAL;
             case 1:
             default:
-                return GREEN;
+                return DEFENDER;
             case 0:
-                return RED;
+                return ATTACKER;
         }
+    }
+    
+    @Override
+    public String toString()
+    {
+    	return teamIDToString(getID());
     }
     
     public static String teamIDToString(int teamID) {
@@ -33,9 +41,9 @@ public enum Team {
 	            return "NEUTRAL";
 	        case 1:
 	        default:
-	            return "GREEN";
+	            return ServerConfiguration.getDefenderName();
 	        case 0:
-	            return "RED";
+	            return ServerConfiguration.getAttackerName();
 	    }
     }
 }

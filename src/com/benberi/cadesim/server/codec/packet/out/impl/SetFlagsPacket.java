@@ -13,8 +13,8 @@ import java.util.List;
 public class SetFlagsPacket extends OutgoingPacket {
 
     private List<Flag> flags;
-    private int pointsRed;
-    private int pointsGreen;
+    private int pointsAttacker;
+    private int pointsDefender;
 
     public SetFlagsPacket() {
         super(OutGoingPackets.SET_FLAGS);
@@ -29,8 +29,8 @@ public class SetFlagsPacket extends OutgoingPacket {
     public void encode() {
         setPacketLengthType(PacketLength.SHORT);
 
-        writeInt(pointsGreen);
-        writeInt(pointsRed);
+        writeInt(pointsDefender);
+        writeInt(pointsAttacker);
 
         writeByte(flags.size());
         for (Flag flag : flags) {
@@ -43,11 +43,11 @@ public class SetFlagsPacket extends OutgoingPacket {
         setLength(getBuffer().readableBytes());
     }
 
-    public void setPointsGreen(int pointsGreen) {
-        this.pointsGreen = pointsGreen;
+    public void setPointsDefender(int pointsDefender) {
+        this.pointsDefender = pointsDefender;
     }
 
-    public void setPointsRed(int pointsRed) {
-        this.pointsRed = pointsRed;
+    public void setPointsAttacker(int pointsAttacker) {
+        this.pointsAttacker = pointsAttacker;
     }
 }

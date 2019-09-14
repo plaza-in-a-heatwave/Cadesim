@@ -2,6 +2,7 @@ package com.benberi.cadesim.server.codec.packet.out.impl;
 
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.util.PacketLength;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 
 /**
@@ -9,8 +10,8 @@ import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
  */
 public class SendTeamNamesPacket extends OutgoingPacket {
 
-    private String attacker = "Attacker";
-    private String defender = "Defender";
+    private String attacker = ServerConfiguration.getAttackerName();
+    private String defender = ServerConfiguration.getDefenderName();
 
     public SendTeamNamesPacket() {
         super(OutGoingPackets.SET_TEAM_NAMES);

@@ -20,6 +20,8 @@ public class ServerConfiguration {
 	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
+	private static String attackerName = "attacker";
+	private static String defenderName = "defender";
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -77,8 +79,10 @@ public class ServerConfiguration {
         		"sink delay:" + getRespawnDelay() + " turns, " +
         		"map rotation period:" + getMapRotationPeriod() + " turns, " +
         		"disengage behavior:" + getDisengageBehavior() + ", " +
-        		"vote majority percentage: " + (isVotingEnabled()?"[voting on] ":"[voting off] ") + getVotingMajority() + "%" + ", " +
-        		"jobbers quality: " + getJobbersQualityAsString() +
+        		"vote majority percentage: " +
+        		(isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ", " +
+        		"jobbers quality: " + getJobbersQualityAsString() + ", " +
+        		"team names: " + getAttackerName() + "," + getDefenderName() +
         		"]";
     }
     
@@ -146,5 +150,22 @@ public class ServerConfiguration {
 	
 	public static String getJobbersQualityAsString() {
 		return jobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
+	}
+
+	public static void setDefenderName(String string) {
+		defenderName = string;
+		
+	}
+	
+	public static String getDefenderName() {
+		return defenderName;
+	}
+
+	public static void setAttackerName(String string) {
+		attackerName = string;
+	}
+	
+	public static String getAttackerName() {
+		return attackerName;
 	}
 }
