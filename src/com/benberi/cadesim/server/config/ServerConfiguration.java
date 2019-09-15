@@ -22,6 +22,7 @@ public class ServerConfiguration {
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
+	private static String authCode = ""; // by default no auth code
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -82,7 +83,8 @@ public class ServerConfiguration {
         		"vote majority percentage: " +
         		(isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ", " +
         		"jobbers quality: " + getJobbersQualityAsString() + ", " +
-        		"team names: " + getAttackerName() + "," + getDefenderName() +
+        		"team names: " + getAttackerName() + "," + getDefenderName() + ", " +
+        		"auth code: \"" + getAuthCode() + "\"" +
         		"]";
     }
     
@@ -149,23 +151,31 @@ public class ServerConfiguration {
 	}
 	
 	public static String getJobbersQualityAsString() {
-		return jobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
+		return ServerConfiguration.jobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
 	}
 
 	public static void setDefenderName(String string) {
-		defenderName = string;
+		ServerConfiguration.defenderName = string;
 		
 	}
 	
 	public static String getDefenderName() {
-		return defenderName;
+		return ServerConfiguration.defenderName;
 	}
 
 	public static void setAttackerName(String string) {
-		attackerName = string;
+		ServerConfiguration.attackerName = string;
 	}
 	
 	public static String getAttackerName() {
-		return attackerName;
+		return ServerConfiguration.attackerName;
+	}
+
+	public static String getAuthCode() {
+		return ServerConfiguration.authCode;
+	}
+	
+	public static void setAuthCode(String authcode) {
+		ServerConfiguration.authCode = authCode;
 	}
 }

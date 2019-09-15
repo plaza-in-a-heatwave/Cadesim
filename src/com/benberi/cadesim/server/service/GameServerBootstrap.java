@@ -102,6 +102,7 @@ public class GameServerBootstrap {
         options.addOption("v", "voting majority", true, "voting majority percent, or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
         options.addOption("q", "jobbers quality", true, "quality of jobbers (\"basic\", \"elite\") (default: " + ServerConfiguration.getJobbersQuality() + ")");
         options.addOption("n", "team names", true, "names for the attacker and defender, comma separated, 12 characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
+        options.addOption("c", "auth-code", true, "provide a text authcode to limit access. This is NOT a password, it WILL be written to logs etc. (default: \"" + ServerConfiguration.getAuthCode() + "\")");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -163,6 +164,18 @@ public class GameServerBootstrap {
             	catch (Exception e)
             	{
             		help(options);
+            	}
+            }
+            if (cmd.hasOption("c"))
+            {
+            	String authCode = cmd.getOptionValue("c");
+            	if (authCode.length() > Constants.MAX_CODE_SIZE)
+            	{
+            		help(options);
+            	}
+            	else
+            	{
+            		ServerConfiguration.setAuthCode(authCode);
             	}
             }
             if (cmd.hasOption("o"))
