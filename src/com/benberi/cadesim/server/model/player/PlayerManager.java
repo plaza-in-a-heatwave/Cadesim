@@ -622,6 +622,7 @@ public class PlayerManager {
         if (temporaryBannedIPs.contains(player.getIP()))
         {
         	// dont allow banned IPs into the server until the next round begins
+        	ServerContext.log("Kicked player " + c.remoteAddress() + " attempted to rejoin, and was kicked again.");
         	player.getChannel().disconnect();
         	return;
         }
@@ -867,7 +868,11 @@ public class PlayerManager {
     	
     	// initially dont plan to persist temporary values beyond next round
     	// votes must actively opt-in to change this
-    	if (!getPersistTemporarySettings())
+    	if (!ServerConfiguration.isVotingEnabled())
+    	{
+    		// dont need to do anything if no voting
+    	}
+    	else if (!getPersistTemporarySettings())
     	{
     		// reset to defaults
     		resetTemporarySettings();
@@ -1136,11 +1141,7 @@ public class PlayerManager {
 	private void handleStartVote(Player pl, String message, String voteDescription)
     {
     	// first person to request vote creates it (and votes for it)
-		if (!ServerConfiguration.isVotingEnabled())
-		{
-			serverPrivateMessage(pl, "Can't start a new vote, voting is disabled on this server");
-		}
-		else if (currentVote == null)
+		if (currentVote == null)
 		{
 			currentVote = new Vote((PlayerManager)this, voteDescription, ServerConfiguration.getVotingMajority());
 			handleVote(pl, true);
@@ -1163,10 +1164,21 @@ public class PlayerManager {
     
     private void printCommandHelp(Player pl)
     {
-    	serverPrivateMessage(
-    			pl,
-    			"The following Cadesim commands are supported: /propose, /vote, /info"
-    	);
+    	if (!ServerConfiguration.isVotingEnabled())
+		{
+    		serverPrivateMessage(
+        			pl,
+        			"The following Cadesim commands are supported: /info"
+        	);
+		}
+    	else
+    	{
+    		serverPrivateMessage(
+        			pl,
+        			"The following Cadesim commands are supported: /propose, /vote, /info"
+        	);
+    	}
+    	
     }
     
     private String proposeSetHelp()
@@ -1188,13 +1200,17 @@ public class PlayerManager {
 		{
 			// cleanup
 			message = message.toLowerCase();
-			
+
 			if (message.startsWith("/vote"))
 			{
 				// voting on a current vote
-				if (message.equals("/vote yes") || message.equals("/vote no"))
+				if (!ServerConfiguration.isVotingEnabled())
 				{
-					handleVote(pl, (message.equals("/vote yes")));				
+					serverPrivateMessage(pl, "Voting is disabled on this server");
+				}
+				else if (message.equals("/vote yes") || message.equals("/vote no"))
+				{
+					handleVote(pl, (message.equals("/vote yes")));	
 				}
 	    		else
 	    		{
@@ -1203,7 +1219,11 @@ public class PlayerManager {
 			}
 			else if (message.startsWith("/propose"))
 			{
-				if (message.equals("/propose restart"))
+				if (!ServerConfiguration.isVotingEnabled())
+				{
+					serverPrivateMessage(pl, "Voting is disabled on this server");
+				}
+				else if (message.equals("/propose restart"))
 	    		{
 					handleStartVote(pl, message, "restart");
 	    		}

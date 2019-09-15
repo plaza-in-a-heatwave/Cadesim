@@ -93,13 +93,13 @@ public class GameServerBootstrap {
         options.addOption("h", "help", false, "Show help");
         options.addOption("a", "amount", true, "Set max players allowed (default: " + ServerConfiguration.getPlayerLimit() + ")");
         options.addOption("p", "port", true, "Local port to bind (default: " + ServerConfiguration.getPort() + ")");
-        options.addOption("t", "turn duration", true, "turn duration seconds (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
-        options.addOption("r", "round duration", true, "round duration seconds (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
+        options.addOption("t", "turn duration", true, "turn duration seconds, minimum 5, (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
+        options.addOption("r", "round duration", true, "round duration seconds, minimum 60, must be >= turn duration, (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
         options.addOption("d", "respawn delay", true, "respawn delay (in turns) after sinking (default: " + ServerConfiguration.getRespawnDelay() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("o", "map rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
         options.addOption("b", "disengage-behavior", true, "disengage button behavior (\"off\", \"simple\", \"realistic\") (default: " + ServerConfiguration.getDisengageBehavior() + ")");
-        options.addOption("v", "voting majority", true, "voting majority percent, or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
+        options.addOption("v", "voting majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
         options.addOption("q", "jobbers quality", true, "quality of jobbers (\"basic\", \"elite\") (default: " + ServerConfiguration.getJobbersQuality() + ")");
         options.addOption("n", "team names", true, "names for the attacker and defender, comma separated, 12 characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
         options.addOption("c", "auth-code", true, "provide a text authcode to limit access. This is NOT a password, it WILL be written to logs etc. (default: \"" + ServerConfiguration.getAuthCode() + "\")");
@@ -109,7 +109,7 @@ public class GameServerBootstrap {
         try {
             cmd = parser.parse(options, args);
 
-            // assign parameters from cli. all optional
+            // check independent options
             if (cmd.hasOption("h")) {
                 help(options);
             }
@@ -121,11 +121,27 @@ public class GameServerBootstrap {
             }
             if (cmd.hasOption("t"))
             {
-            	ServerConfiguration.setTurnDuration(10 * Integer.parseInt(cmd.getOptionValue("t")));
+            	int turnDuration = Integer.parseInt(cmd.getOptionValue("t"));
+            	if (turnDuration >= 5)
+            	{
+            		ServerConfiguration.setTurnDuration(10 * turnDuration);
+            	}
+            	else
+            	{
+            		help(options);
+            	}
             }
             if (cmd.hasOption("r"))
             {
-            	ServerConfiguration.setRoundDuration(10 * Integer.parseInt(cmd.getOptionValue("r")));
+            	int roundDuration = Integer.parseInt(cmd.getOptionValue("r"));
+            	if (roundDuration >= 60)
+            	{
+            		ServerConfiguration.setRoundDuration(10 * roundDuration);
+            	}
+            	else
+            	{
+            		help(options);
+            	}
             }
             if (cmd.hasOption("d"))
             {
@@ -137,7 +153,15 @@ public class GameServerBootstrap {
             }
             if (cmd.hasOption("v"))
             {
-            	ServerConfiguration.setVotingMajority(Integer.parseInt(cmd.getOptionValue("v")));
+            	int votingMajority = Integer.parseInt(cmd.getOptionValue("v"));
+            	if (votingMajority >= -1 && votingMajority <= 100)
+            	{
+            		ServerConfiguration.setVotingMajority(votingMajority);
+            	}
+            	else
+            	{
+            		help(options);
+            	}
             }
             if (cmd.hasOption("v"))
             {
@@ -202,11 +226,17 @@ public class GameServerBootstrap {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
                 ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
             }
+            
+            // check co-dependent arguments e.g. turn/round time
+            if (ServerConfiguration.getRoundDuration() < ServerConfiguration.getTurnDuration())
+            {
+            	help(options);
+            }
 
             GameServerBootstrap bootstrap = new GameServerBootstrap();
             bootstrap.startServer();
 
-        } catch (ParseException e) {
+        } catch (ParseException | NumberFormatException e) {
             ServerContext.log("Failed to parse comand line properties" + e.toString());
             help(options);
         }
