@@ -76,7 +76,7 @@ public class GameServerBootstrap {
         HelpFormatter formatter = new HelpFormatter();
 
         formatter.printHelp("Obsidio-Server", options);
-        System.exit(0);
+        System.exit(Constants.EXIT_ERROR_BAD_CONFIG);
     }
 
     /**
@@ -103,6 +103,7 @@ public class GameServerBootstrap {
         options.addOption("q", "jobbers quality", true, "quality of jobbers (\"basic\", \"elite\") (default: " + ServerConfiguration.getJobbersQuality() + ")");
         options.addOption("n", "team names", true, "names for the attacker and defender, comma separated, 12 characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
         options.addOption("c", "auth-code", true, "provide a text authcode to limit access. This is NOT a password, it WILL be written to logs etc. (default: \"" + ServerConfiguration.getAuthCode() + "\")");
+        options.addOption("s", "server name", true, "provide a name for the server, 19 characters max (default: " + ServerConfiguration.getServerName() + ")");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -202,6 +203,18 @@ public class GameServerBootstrap {
             		ServerConfiguration.setAuthCode(authCode);
             	}
             }
+            if (cmd.hasOption("s"))
+            {
+            	String serverName = cmd.getOptionValue("s");
+            	if (serverName.length() > Constants.MAX_SERVER_NAME_SIZE)
+            	{
+            		help(options);
+            	}
+            	else
+            	{
+            		ServerConfiguration.setServerName(serverName);
+            	}
+            }
             if (cmd.hasOption("o"))
             {
             	ServerConfiguration.setMapRotationPeriod(Integer.parseInt(cmd.getOptionValue("o")));
@@ -219,7 +232,7 @@ public class GameServerBootstrap {
                     ServerContext.log("No map specified, automatically chose random map: " + ServerConfiguration.getMapName());
                 } catch(NullPointerException e) {
                 	ServerContext.log("Failed to find random map folder. create a folder called \"maps\" in the same directory.");
-                    help(options);
+                    System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
                 }
             }
             else {

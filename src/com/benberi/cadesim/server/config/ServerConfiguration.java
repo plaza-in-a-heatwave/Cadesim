@@ -23,6 +23,7 @@ public class ServerConfiguration {
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
 	private static String authCode = ""; // by default no auth code
+	private static String serverName = Constants.name;
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -175,7 +176,15 @@ public class ServerConfiguration {
 		return ServerConfiguration.authCode;
 	}
 	
-	public static void setAuthCode(String authcode) {
+	public static void setAuthCode(String authCode) {
 		ServerConfiguration.authCode = authCode;
+	}
+	
+	public static String getServerName() {
+		return ServerConfiguration.serverName;
+	}
+
+	public static void setServerName(String serverName) {
+		ServerConfiguration.serverName = serverName;
 	}
 }

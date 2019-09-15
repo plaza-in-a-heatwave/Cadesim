@@ -54,7 +54,7 @@ public class ServerContext {
             log("Using logfile: " + logFile.getPath());
         } catch (IOException e) {
             System.out.println("failed to create log file: " + logFile.getName() + " , check log directory permissions");
-            System.exit(1);
+            System.exit(Constants.EXIT_ERROR_CANT_CREATE_LOGS);
         }
     }
 

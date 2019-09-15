@@ -39,6 +39,16 @@ public class Constants {
     public static final String mapDirectory = "maps";
     
     /**
+     * return types
+     */
+    public static final int EXIT_ERROR_UNKNOWN          = 13;
+    public static final int EXIT_ERROR_BAD_CONFIG       =  6;
+    public static final int EXIT_ERROR_CANT_FIND_MAPS   =  3;
+    public static final int EXIT_ERROR_CANT_CREATE_LOGS =  2;
+    public static final int EXIT_ERROR_CANT_BIND_LOCAL  =  1;
+    public static final int EXIT_SUCCESS                =  0;
+    
+    /**
      * The delay of the main game service loop in milliseconds
      */
     public static final int SERVICE_LOOP_DELAY = 100; // ms
@@ -74,7 +84,12 @@ public class Constants {
 	 * largest possible auth code
 	 */
 	public static final int MAX_CODE_SIZE = 30;
-	
+
+	/**
+	 * largest possible server name
+	 */
+	public static final int MAX_SERVER_NAME_SIZE = 19;
+
 	/**
 	 * n seconds to register
 	 */
