@@ -516,7 +516,6 @@ public class PlayerManager {
                 else {
                     p.updateTurnFinishWaitingTicks();
                     allFinished = false;
-                    System.out.println("Waiting on " + p.getName() + ": " + p.getTurnFinishWaitingTicks());
                 }
             }
         }

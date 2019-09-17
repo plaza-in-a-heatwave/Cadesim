@@ -1,5 +1,4 @@
 package com.benberi.cadesim.server.model.player.domain;
-
 import com.benberi.cadesim.server.model.player.Player;
 
 public class MoveGenerator {
@@ -39,8 +38,9 @@ public class MoveGenerator {
 
     private void updateCannonGeneration() {
         double rate = player.getJobbersQuality().getCannonsPerTick();
+        double threshold = 100.0 / (double)player.getVessel().getMaxCannons();
         cannonGenerationPercentage += rate;
-        if (cannonGenerationPercentage >= 1) {
+        if (cannonGenerationPercentage >= threshold) {
             cannonGenerationPercentage -= Math.floor(cannonGenerationPercentage);
             player.getMoveTokens().addCannons(1);
             player.getPackets().sendTokens();
