@@ -164,6 +164,8 @@ public class Player extends Position {
      */
     public void update() {
         if (vessel.getDamagePercentage() >= jobbersQuality.getMinDamageForBilge()) {
+        	// TODO this appends 30-60% bilge per turn once damaged.
+        	// this seems a little extreme - what are the real values?
             double bilge = Constants.BILGE_INCREASE_RATE_PER_TICK + (vessel.getDamagePercentage() / 100) / 10; // Rate increases as damage is higher
             vessel.appendBilge(bilge);
             if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {

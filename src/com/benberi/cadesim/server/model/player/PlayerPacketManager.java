@@ -63,8 +63,8 @@ public class PlayerPacketManager {
      */
     public void sendDamage() {
         SendDamagePacket packet = new SendDamagePacket();
-        packet.setDamage(player.getVessel().getDamagePercentage());
-        packet.setBilge(player.getVessel().getBilgePercentage());
+        packet.setDamage((int)player.getVessel().getDamagePercentage());
+        packet.setBilge((int)player.getVessel().getBilgePercentage());
         player.sendPacket(packet);
     }
 

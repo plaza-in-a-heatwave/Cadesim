@@ -192,7 +192,12 @@ public class PlayerManager {
     	long now = System.currentTimeMillis();
         if (now - lastTimeSend >= 1000) {
             lastTimeSend = now;
-            handleTime();
+            sendTime();
+        }
+        
+        // turn finished
+        if (context.getTimeMachine().hasLock()) {
+        	handleTime();
         }
         
         // do admin - every n seconds
@@ -498,32 +503,31 @@ public class PlayerManager {
 
     /**
      * Handles the time
-     * TODO there must be a way to parallelise this - e.g. just add constant onto everyone's time
-     * TODO so that the timeouts dont stack up
      */
     private void handleTime() {
-        if (context.getTimeMachine().hasLock()) {
-            boolean failed = false;
-            for (Player p : listRegisteredPlayers()) {
-                if (!p.isTurnFinished()) {
-                    if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
-                        ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
-                        serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
-                        p.getChannel().disconnect();
-                    }
-                    else {
-                        p.updateTurnFinishWaitingTicks();
-                        failed = true;
-                    }
+        boolean allFinished = true;
+        for (Player p : listRegisteredPlayers()) {
+            if (!p.isTurnFinished()) {
+                if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
+                    ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
+                    serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
+                    p.getChannel().disconnect();
                 }
-            }
-
-            if (!failed) {
-                handleTurnEnd();
+                else {
+                    p.updateTurnFinishWaitingTicks();
+                    allFinished = false;
+                    System.out.println("Waiting on " + p.getName() + ": " + p.getTurnFinishWaitingTicks());
+                }
             }
         }
 
-        sendTime();
+        if (allFinished) {
+            handleTurnEnd();
+        }
+        else
+        {
+        	
+        }
     }
 
     /**

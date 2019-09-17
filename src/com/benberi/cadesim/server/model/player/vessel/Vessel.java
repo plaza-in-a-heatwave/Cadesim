@@ -77,17 +77,26 @@ public abstract class Vessel {
         return this.damage;
     }
 
-    public int getDamagePercentage() {
-        double percentage = damage / getMaxDamage() * 100;
-        return (int) percentage;
+    public double getDamagePercentage() {
+        return (damage * 100.0) / getMaxDamage();
     }
 
-    public int getBilgePercentage() {
-        return (int) (bilge / 100 * 100);
+    public double getBilgePercentage() {
+        return bilge;
+    }
+    
+    /**
+     * helper method to convert percent maxed into damage
+     */
+    private double getDamageFromPercentage(double percentage)
+    {
+    	return (percentage * getMaxDamage()) / 100.0;
     }
 
     public void decreaseDamage(double rate) {
-        damage -= rate;
+    	// apply rate decrease to the percentage, not the value
+        damage = getDamageFromPercentage(getDamagePercentage() - rate);
+
         if (damage < 0) {
             damage = 0;
         }
