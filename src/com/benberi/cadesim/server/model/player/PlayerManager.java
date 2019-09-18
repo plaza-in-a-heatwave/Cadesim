@@ -196,7 +196,7 @@ public class PlayerManager {
         }
         
         // turn finished
-        if (context.getTimeMachine().hasLock()) {
+        if (context.getTimeMachine().isLock()) {
         	handleTime();
         }
         
