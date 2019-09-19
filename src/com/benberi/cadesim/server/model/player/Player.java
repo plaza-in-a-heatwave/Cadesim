@@ -143,7 +143,7 @@ public class Player extends Position {
     /**
      * The waiting time for animation to finish
      */
-    private int turnFinishWaitingTicks;
+    private int turnFinishWaitingTicks = 0;
     private List<Flag> flags;
 
     public Player(ServerContext ctx, Channel c) {

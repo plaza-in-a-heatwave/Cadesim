@@ -194,7 +194,7 @@ public class PlayerManager {
             lastTimeSend = now;
             sendTime();
         }
-        
+
         // turn finished
         if (context.getTimeMachine().isLock()) {
         	handleTime();
@@ -232,7 +232,7 @@ public class PlayerManager {
         }
 
         // Handle login requests
-        if (!context.getTimeMachine().hasLock()) {
+        if (!context.getTimeMachine().isLock()) {
             handlePlayerLoginRequests();
             handleLogoutRequests();
         }
@@ -630,7 +630,7 @@ public class PlayerManager {
         	return;
         }
         else
-        {
+        {        	
         	players.add(player);
             ServerContext.log(
             	"[player joined] New player added to channel " +
@@ -791,6 +791,12 @@ public class PlayerManager {
 	            	player.getChannel().remoteAddress() + ". " +
 	            	printPlayers()
 	            );
+	            
+	            // end game if applicable
+	            if (listRegisteredPlayers().size() == 0)
+	            {
+	            	this.setGameEnded(true);
+	            }
             }
             else
             {

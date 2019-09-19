@@ -40,9 +40,9 @@ public class GameService implements Runnable {
     public void run() {
         try {
             context.getPackets().queuePackets();
-            context.getTimeMachine().tick();
             playerManager.tick();
             playerManager.queueOutgoing();
+            context.getTimeMachine().tick();
 
             if(playerManager.isGameEnded()) {
             	// print out the scores for the game
@@ -57,7 +57,9 @@ public class GameService implements Runnable {
                 
                 // if no players... hibernate time machines
                 if (playerManager.listRegisteredPlayers().size() == 0) {
+                	context.getTimeMachine().renewTurn(); // bugfix: we're not in the middle of an animation
                     ServerContext.log("No players registered, hibernating to save CPU");
+
                     while (playerManager.listRegisteredPlayers().size() == 0) {
                         try {
                             Thread.sleep(2000);
@@ -67,7 +69,6 @@ public class GameService implements Runnable {
                         
                         // every n seconds, do some admin
                         context.getPackets().queuePackets();
-                        context.getTimeMachine().tick();
                         playerManager.tick();
                         playerManager.queueOutgoing();
                     }
@@ -108,7 +109,7 @@ public class GameService implements Runnable {
                 playerManager.renewGame();
                 context.getTimeMachine().renewRound(); // bugfix - order matters
 
-                playerManager.serverBroadcastMessage("Started new round: #" + gamesCompleted);
+                playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
             }
 
         } catch (Exception e) {

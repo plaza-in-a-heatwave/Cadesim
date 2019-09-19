@@ -52,7 +52,7 @@ public class BlockadeTimeMachine {
         	
 
         if (turnTime <= -Constants.TURN_EXTRA_TIME) {
-            if (!lock) {
+            if (!isLock()) {
                 try {
                     context.getPlayerManager().handleTurns();
                 }
@@ -68,13 +68,6 @@ public class BlockadeTimeMachine {
 
     public void setLock(boolean lock) {
         this.lock = lock;
-    }
-
-    /**
-     * @return Checks if there is a turn delay
-     */
-    public boolean hasLock() {
-        return lock;
     }
 
     /**

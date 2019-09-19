@@ -93,17 +93,17 @@ public class GameServerBootstrap {
         options.addOption("h", "help", false, "Show help");
         options.addOption("a", "amount", true, "Set max players allowed (default: " + ServerConfiguration.getPlayerLimit() + ")");
         options.addOption("p", "port", true, "Local port to bind (default: " + ServerConfiguration.getPort() + ")");
-        options.addOption("t", "turn duration", true, "turn duration seconds, minimum 5, (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
-        options.addOption("r", "round duration", true, "round duration seconds, minimum 60, must be >= turn duration, (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
+        options.addOption("t", "turn duration", true, "turn duration seconds, minimum " + Constants.MIN_TURN_DURATION + ", (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
+        options.addOption("r", "round duration", true, "round duration seconds, minimum " + Constants.MIN_ROUND_DURATION + ", must be >= turn duration, (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
         options.addOption("d", "respawn delay", true, "respawn delay (in turns) after sinking (default: " + ServerConfiguration.getRespawnDelay() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("o", "map rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
         options.addOption("b", "disengage-behavior", true, "disengage button behavior (\"off\", \"simple\", \"realistic\") (default: " + ServerConfiguration.getDisengageBehavior() + ")");
         options.addOption("v", "voting majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
         options.addOption("q", "jobbers quality", true, "quality of jobbers (\"basic\", \"elite\") (default: " + ServerConfiguration.getJobbersQuality() + ")");
-        options.addOption("n", "team names", true, "names for the attacker and defender, comma separated, 12 characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
+        options.addOption("n", "team names", true, "names for the attacker and defender, comma separated, " + Constants.MAX_TEAMNAME_SIZE + " characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
         options.addOption("c", "auth-code", true, "provide a text authcode to limit access. This is NOT a password, it WILL be written to logs etc. (default: \"" + ServerConfiguration.getAuthCode() + "\")");
-        options.addOption("s", "server name", true, "provide a name for the server, 19 characters max (default: " + ServerConfiguration.getServerName() + ")");
+        options.addOption("s", "server name", true, "provide a name for the server, " + Constants.MAX_SERVER_NAME_SIZE + " characters max (default: " + ServerConfiguration.getServerName() + ")");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -123,7 +123,7 @@ public class GameServerBootstrap {
             if (cmd.hasOption("t"))
             {
             	int turnDuration = Integer.parseInt(cmd.getOptionValue("t"));
-            	if (turnDuration >= 5)
+            	if (turnDuration >= Constants.MIN_TURN_DURATION)
             	{
             		ServerConfiguration.setTurnDuration(10 * turnDuration);
             	}
@@ -135,7 +135,7 @@ public class GameServerBootstrap {
             if (cmd.hasOption("r"))
             {
             	int roundDuration = Integer.parseInt(cmd.getOptionValue("r"));
-            	if (roundDuration >= 60)
+            	if (roundDuration >= Constants.MIN_ROUND_DURATION)
             	{
             		ServerConfiguration.setRoundDuration(10 * roundDuration);
             	}

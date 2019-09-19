@@ -104,4 +104,10 @@ public class Constants {
 	 * how big can team names (e.g. attacker, defender) be?
 	 */
 	public static final int MAX_TEAMNAME_SIZE = 12;
+	
+	/**
+	 * minimum times
+	 */
+	public static final int MIN_TURN_DURATION = 5;
+	public static final int MIN_ROUND_DURATION = 10; // TODO temporary edit - undo :)
 }
