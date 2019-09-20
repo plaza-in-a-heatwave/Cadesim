@@ -104,6 +104,7 @@ public class GameServerBootstrap {
         options.addOption("n", "team names", true, "names for the attacker and defender, comma separated, " + Constants.MAX_TEAMNAME_SIZE + " characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
         options.addOption("c", "auth-code", true, "provide a text authcode to limit access. This is NOT a password, it WILL be written to logs etc. (default: \"" + ServerConfiguration.getAuthCode() + "\")");
         options.addOption("s", "server name", true, "provide a name for the server, " + Constants.MAX_SERVER_NAME_SIZE + " characters max (default: " + ServerConfiguration.getServerName() + ")");
+        options.addOption("e", "token expiry in turns", true, "set token expiry, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getTokenExpiry() + ")");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -213,6 +214,13 @@ public class GameServerBootstrap {
             	else
             	{
             		ServerConfiguration.setServerName(serverName);
+            	}
+            }
+            if (cmd.hasOption("e"))
+            {
+            	ServerConfiguration.setTokenExpiry((Integer.parseInt(cmd.getOptionValue("e"))));
+            	if (ServerConfiguration.getTokenExpiry() == 0) {
+            		help(options);
             	}
             }
             if (cmd.hasOption("o"))

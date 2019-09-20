@@ -61,11 +61,6 @@ public class Constants {
     public static final double BILGE_INCREASE_RATE_PER_TICK = 0.1;
 
     /**
-     * The tokens life after generating
-     */
-    public static final int TOKEN_LIFE = 4; // turns
-
-    /**
      * This is used to timeout players that did not notify the server about their animation finish for the given
      * timeout value
      */
@@ -98,7 +93,7 @@ public class Constants {
 	/**
 	 * server does misc tasks every n seconds
 	 */
-	public static final int SERVER_ADMIN_INTERVAL_MILLIS = 3000;
+	public static final int SERVER_ADMIN_INTERVAL_MILLIS = 2000;
 
 	/**
 	 * how big can team names (e.g. attacker, defender) be?
@@ -108,6 +103,6 @@ public class Constants {
 	/**
 	 * minimum times
 	 */
-	public static final int MIN_TURN_DURATION = 5;
-	public static final int MIN_ROUND_DURATION = 10; // TODO temporary edit - undo :)
+	public static final int MIN_TURN_DURATION = 10;
+	public static final int MIN_ROUND_DURATION = 60; // TODO temporary edit - undo :)
 }

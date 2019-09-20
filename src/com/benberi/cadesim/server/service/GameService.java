@@ -62,7 +62,7 @@ public class GameService implements Runnable {
 
                     while (playerManager.listRegisteredPlayers().size() == 0) {
                         try {
-                            Thread.sleep(2000);
+                            Thread.sleep(Constants.SERVER_ADMIN_INTERVAL_MILLIS);
                         } catch(InterruptedException e) {
                             Thread.currentThread().interrupt();
                         }

@@ -24,6 +24,7 @@ public class ServerConfiguration {
 	private static String defenderName = "defender";
 	private static String authCode = ""; // by default no auth code
 	private static String serverName = Constants.name;
+	private static int tokenExpiry = 4;
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -186,5 +187,13 @@ public class ServerConfiguration {
 
 	public static void setServerName(String serverName) {
 		ServerConfiguration.serverName = serverName;
+	}
+
+	public static int getTokenExpiry() {
+		return ServerConfiguration.tokenExpiry ;
+	}
+
+	public static void setTokenExpiry(int value) {
+		ServerConfiguration.tokenExpiry = value;
 	}
 }

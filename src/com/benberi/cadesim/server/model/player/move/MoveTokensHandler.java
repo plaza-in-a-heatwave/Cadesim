@@ -2,6 +2,7 @@ package com.benberi.cadesim.server.model.player.move;
 
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.player.move.token.MoveToken;
 import com.benberi.cadesim.server.model.player.move.token.MoveTokenList;
 import com.benberi.cadesim.server.model.player.Player;
@@ -300,7 +301,9 @@ public class MoveTokensHandler {
         while(itr.hasNext()) {
             MoveToken token = itr.next();
             token.tickTurn();
-            if (token.getTurns() > Constants.TOKEN_LIFE) {
+            
+            int tokenExpiry = ServerConfiguration.getTokenExpiry();
+            if ((tokenExpiry >=0) && (token.getTurns() > tokenExpiry)) {
                 itr.remove();
             }
         }
