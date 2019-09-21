@@ -25,6 +25,7 @@ public class ServerConfiguration {
 	private static String authCode = ""; // by default no auth code
 	private static String serverName = Constants.name;
 	private static int tokenExpiry = 4;
+	private static boolean powerSavingMode = false;
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -86,7 +87,8 @@ public class ServerConfiguration {
         		(isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ", " +
         		"jobbers quality: " + getJobbersQualityAsString() + ", " +
         		"team names: " + getAttackerName() + "," + getDefenderName() + ", " +
-        		"auth code: \"" + getAuthCode() + "\"" +
+        		"auth code: \"" + getAuthCode() + "\"" + ", " +
+        		"power saving: " + getPowerSavingMode() +
         		"]";
     }
     
@@ -195,5 +197,13 @@ public class ServerConfiguration {
 
 	public static void setTokenExpiry(int value) {
 		ServerConfiguration.tokenExpiry = value;
+	}
+	
+	public static boolean getPowerSavingMode() {
+		return ServerConfiguration.powerSavingMode;
+	}
+	
+	public static void setPowerSavingMode(boolean value) {
+		ServerConfiguration.powerSavingMode = value;
 	}
 }

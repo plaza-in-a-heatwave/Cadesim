@@ -105,6 +105,7 @@ public class GameServerBootstrap {
         options.addOption("c", "auth-code", true, "provide a text authcode to limit access. This is NOT a password, it WILL be written to logs etc. (default: \"" + ServerConfiguration.getAuthCode() + "\")");
         options.addOption("s", "server name", true, "provide a name for the server, " + Constants.MAX_SERVER_NAME_SIZE + " characters max (default: " + ServerConfiguration.getServerName() + ")");
         options.addOption("e", "token expiry in turns", true, "set token expiry, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getTokenExpiry() + ")");
+        options.addOption("i", "enable power saving", true, "enable power saving (default: " + ServerConfiguration.getPowerSavingMode() + ")");
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -227,6 +228,23 @@ public class GameServerBootstrap {
             {
             	ServerConfiguration.setMapRotationPeriod(Integer.parseInt(cmd.getOptionValue("o")));
             	if (ServerConfiguration.getMapRotationPeriod() == 0) {
+            		help(options);
+            	}
+            }
+            if (cmd.hasOption("i"))
+            {
+            	String v = cmd.getOptionValue("i").toLowerCase();
+            	System.out.println("v: " + v + " and it is " + v.length() + " chars long.");
+            	if (v.equals("on"))
+            	{
+            		ServerConfiguration.setPowerSavingMode(true);
+            	}
+            	else if (v.equals("off"))
+            	{
+            		ServerConfiguration.setPowerSavingMode(false);
+            	}
+            	else
+            	{
             		help(options);
             	}
             }

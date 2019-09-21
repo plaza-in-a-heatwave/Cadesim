@@ -55,24 +55,29 @@ public class GameService implements Runnable {
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
             	gamesCompleted++;
                 
-                // if no players... hibernate time machines
-                if (playerManager.listRegisteredPlayers().size() == 0) {
-                	context.getTimeMachine().renewTurn(); // bugfix: we're not in the middle of an animation
-                    ServerContext.log("No players registered, hibernating to save CPU");
+            	// provide a way to hibernate machines if no players.
+            	// optional as it's quite buggy.
+                if (ServerConfiguration.getPowerSavingMode())
+                {
+                	// if no players... hibernate time machines
+                    if (playerManager.listRegisteredPlayers().size() == 0) {
+                    	context.getTimeMachine().renewTurn(); // bugfix: we're not in the middle of an animation
+                        ServerContext.log("No players registered, hibernating to save CPU");
 
-                    while (playerManager.listRegisteredPlayers().size() == 0) {
-                        try {
-                            Thread.sleep(Constants.SERVER_ADMIN_INTERVAL_MILLIS);
+                        while (playerManager.listRegisteredPlayers().size() == 0) {
+                            try {
+                                Thread.sleep(Constants.SERVER_ADMIN_INTERVAL_MILLIS);
 
-                            // every n seconds, do some admin
-                            context.getPackets().queuePackets();
-                            playerManager.tick();
-                            playerManager.queueOutgoing();
-                        } catch(InterruptedException e) {
-                            Thread.currentThread().interrupt();
+                                // every n seconds, do some admin
+                                context.getPackets().queuePackets();
+                                playerManager.tick();
+                                playerManager.queueOutgoing();
+                            } catch(InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
                         }
+                        ServerContext.log("New player joined, waking up...");
                     }
-                    ServerContext.log("New player joined, waking up...");
                 }
                 
                 // switch map if players have demanded it, or if we're rotating maps
