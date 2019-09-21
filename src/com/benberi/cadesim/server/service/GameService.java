@@ -63,14 +63,14 @@ public class GameService implements Runnable {
                     while (playerManager.listRegisteredPlayers().size() == 0) {
                         try {
                             Thread.sleep(Constants.SERVER_ADMIN_INTERVAL_MILLIS);
+
+                            // every n seconds, do some admin
+                            context.getPackets().queuePackets();
+                            playerManager.tick();
+                            playerManager.queueOutgoing();
                         } catch(InterruptedException e) {
                             Thread.currentThread().interrupt();
                         }
-                        
-                        // every n seconds, do some admin
-                        context.getPackets().queuePackets();
-                        playerManager.tick();
-                        playerManager.queueOutgoing();
                     }
                     ServerContext.log("New player joined, waking up...");
                 }

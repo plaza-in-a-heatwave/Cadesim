@@ -104,5 +104,5 @@ public class Constants {
 	 * minimum times
 	 */
 	public static final int MIN_TURN_DURATION = 10;
-	public static final int MIN_ROUND_DURATION = 60; // TODO temporary edit - undo :)
+	public static final int MIN_ROUND_DURATION = 60;
 }
