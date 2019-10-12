@@ -56,9 +56,12 @@ public class Constants {
     public static final int DEFAULT_VESSEL_TYPE = 0;
 
     /**
-     * Bilge increasing rate after X damage
+     * Rates of bilge increase (pct)
      */
-    public static final double BILGE_INCREASE_RATE_PER_TICK = 0.1;
+    // observed 1.06-1.12% per second natural bilge growth, max damage // max bilge growth
+    // observed 0.0555%    per second natural bilge growth, 0   damage // min bilge growth
+    public static final double MIN_BILGE_INCREASE_PERCENT_PER_SEC = 0.0555;
+    public static final double MAX_BILGE_INCREASE_PERCENT_PER_SEC = 1.08;
 
     /**
      * This is used to timeout players that did not notify the server about their animation finish for the given

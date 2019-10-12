@@ -163,33 +163,55 @@ public class Player extends Position {
      * Logical updates during the game
      */
     public void update() {
+    	// model bilge additions/reductions as piecewise linear, 3 segments:
+    	// ----------------+-----------------------------------------------
+    	// b <= 0          | no change
+    	// ----------------+-----------------------------------------------
+    	// 0  <  b < t1    | bilge reducing   at a constant (maximum)  rate
+    	// t1 <= b < t2    | bilge reducing   at a linearly-increasing rate
+    	// t2 <= b < 100   | bilge increasing at a linearly-increasing rate
+    	// ----------------+-----------------------------------------------
+    	// b >= 100        | no change
         if (vessel.getDamagePercentage() >= jobbersQuality.getMinDamageForBilge()) {
-        	// TODO this appends 30-60% bilge per turn once damaged.
-        	// this seems a little extreme - what are the real values?
-            double bilge = Constants.BILGE_INCREASE_RATE_PER_TICK + (vessel.getDamagePercentage() / 100) / 10; // Rate increases as damage is higher
-            vessel.appendBilge(bilge);
-            if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
-                packets.sendDamage();
-                lastDamageUpdate = System.currentTimeMillis();
-            }
+            // add bilge, scaling up linearly beyond MinDamageForBilge until 100% (e.g. 60-100%)
+        	double t2 = jobbersQuality.getMinDamageForBilge();
+            double scale = (vessel.getDamagePercentage() - t2) / (100.0 - t2);            
+            double min = Constants.MIN_BILGE_INCREASE_PERCENT_PER_SEC / (1000.0 / Constants.SERVICE_LOOP_DELAY);
+            double max = Constants.MAX_BILGE_INCREASE_PERCENT_PER_SEC / (1000.0 / Constants.SERVICE_LOOP_DELAY);
+  
+            vessel.appendBilge((scale * (max - min)) + min);
+            System.out.println("phase 3; scale: " + scale);
+        }
+        else if (vessel.getDamagePercentage() >= jobbersQuality.getBilgeMaxReductionThreshold() && vessel.getBilgePercentage() > 0)
+        {
+        	// remove bilge, scaling down linearly from MinDamageForBilge() to BilgeMaxReductionThreshold
+        	double t2 = jobbersQuality.getMinDamageForBilge();
+        	double t1 = jobbersQuality.getBilgeMaxReductionThreshold();
+        	double scale = (t2 - vessel.getDamagePercentage()) / (t2 - t1);
+        	double min = 0;
+        	double max = jobbersQuality.getBilgeFixPerTick();
+        	
+        	vessel.decreaseBilge((scale * (max - min)) + min);
+        	System.out.println("phase 2; scale: " + scale);
+        }
+        else if (vessel.getBilgePercentage() > 0) {
+        	// remove bilge at the maximum rate permitted per tick
+            vessel.decreaseBilge(jobbersQuality.getBilgeFixPerTick());
+            System.out.println("phase 1; constant");
+        }
+        else {
+        	// no change
         }
 
+        // reduce carp if needed
         if (vessel.getDamagePercentage() > 0) {
-            double rate = jobbersQuality.getFixRatePerTick();
-            vessel.decreaseDamage(rate);
-            if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
-                packets.sendDamage();
-                lastDamageUpdate = System.currentTimeMillis();
-            }
+            vessel.decreaseDamage(jobbersQuality.getFixRatePerTick());
         }
 
-        if (vessel.getBilgePercentage() > 0) {
-            double rate = (jobbersQuality.getBilgeFixPerTick()) - (vessel.getDamage() / 10000);
-            vessel.decreaseBilge(rate);
-            if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
-                packets.sendDamage();
-                lastDamageUpdate = System.currentTimeMillis();
-            }
+        // send packets if needed
+        if (System.currentTimeMillis() - lastDamageUpdate >= 2000) {
+            packets.sendDamage();
+            lastDamageUpdate = System.currentTimeMillis();
         }
 
         moveGenerator.update();
