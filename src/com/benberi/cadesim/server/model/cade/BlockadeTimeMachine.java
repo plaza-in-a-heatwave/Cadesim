@@ -33,10 +33,6 @@ public class BlockadeTimeMachine {
      * The main tick of blockade time machine
      */
     public void tick() {
-        if (roundTime == 0) {
-            // TODO end?
-        }
-
         if (!isLock())
         {
             roundTime--; // Tick blockade time
