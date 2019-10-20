@@ -1,0 +1,115 @@
+Release changelog for the client & server
+    partial release progress also documented here.
+
+1.9.8 (pending)
+    bugfix (server) - defenders can't be bumped into the island safe zone
+    bugfix (server) - power save mode not working - can't properly shut down a game until new players join
+    feature (both)  - add new ships
+1.9.8 (complete)
+    bugfix (server) - bilge values seem low: both damage threshold for bilge creep, and also the ratcheting increment rate (between 30%-60% per turn) seems way too high.
+    bugfix (server) - resets rapidly (like 10x a second) until a player times out while registering. (fixed: the presence of an unregistered player would start a game, but the lack of a registered player would stop one)
+    bugfix (server) - People are kicked for timing out while animating while on power save mode. (Mitigation: option to disable powersave mode)
+    bugfix (server) - gunners should fill at some percentage of max cannons (e.g: 75% of all available per turn) rather than constant number of cannons (i.e. 10.5)
+    bugfix (server) - player timeout takes too long (improved code for this)
+    bugfix (server) - damage heals too fast (set damage heal to actual observed values)
+1.9.8 (wontfix):
+    bugfix (server) - Whenever a wind blows a big ship onto a little ship., the big ship takes the little ship's spot. (closed as cant replicate)
+    bugfix (server) - investigated guns, sails being too fast to load but actually these numbers seem reasonable, no action taken.
+1.9.7
+    bugfix (server) - provide consistent error codes
+    bugfix (server) - if voting disabled for server, don't print any voting related messages (including new player help)
+    bugfix (server) - validate turn, round, voting
+    bugfix (client) - scores not resetting on vote restart
+    bugfix (client) - moves didn't drag properly from valid slot to invalid slot. they should have been removed from the valid slot. They weren't.
+    feature (both) - both password protect a running server. If the password is leaked, simply rerun the server with a parameterised new password (via cli).
+    bugfix (both) remove all reference to red/green teams in favour of attacker/defender
+    feature (server) - specify team names via CLI, pushed to client automatically
+    feature (client) - add attacker/contender icons to cadesim ui
+    bugfix (server) - log whenever invalid connect attempts are made. Additionally make the rest of packet validation robust
+    bugfix (client) - when scrolling an almost empty chat window, the text jumps around severely
+    bugfix (server) - help message for parameter set exceeded max message length and wasn't sendable
+    bugfix (client) - click area is whole of gun area even if small ship (not a bug - this is genuine PP behaviour)
+    bugfix (server) - inaccurate reporting of number of players present
+        should work off players and registered/not
+    bugfix (client) - if dragging, then hover over a move, it picks it up. Shouldn't do!
+    bugfix (server) - crashes on hibernate
+    bugfix (both) - go oceanside should be disengage
+    feature (server) - select kind of jobbers via commandline interface
+    bugfix (server) - moves/guns fill way too fast/slow, figure out what this should be
+        see dachimpy hints https://yppedia.puzzlepirates.com/Blockade_Simulator
+    feature (server) - adjust threshold for voting to be higher e.g. 75% 66%. (make this configurable)
+    feature (server) - allow a way to enable/disable voting on a server (to pave the way to rooms)
+    feature (client) - add custom resolutions, more resolutions...
+    bugfix (client) - resolutions aren't in proper order (800x600 should come after)
+    feature (both) - vote to change turn length / round length for that one round
+    feature (server) - vote on sink delay and disengage button behavior
+    feature (server) - variable disengage button behaviors (simple, off, realistic)
+    feature (server) - vote to kick players
+1.9.7 (wontfix)
+    bugfix (both) - players cant login while a turn is playing out (too hard to fix; not big impact)
+    bugfix (server) - temporary settings message after no temporary settings were set (no one cares)
+    feature (client) - can't drag cannons on/off move slots; dragging from nowhere to a gun slot places a gun (no one cares)
+    bugfix (both) - when all cannons filled, cant click off them (cant reproduce)
+    feature (client) - allow user to mouseover field (and change cursor when they do) (no longer relevant)
+    bugfix (client) - hide disengage/go oceanside buttons when that action isn't available anymore (no longer relevant, completed by disabling it optionally and server messages)
+    bugfix (server) - starting a vote for nextmap but dead players are eligible, cant pass it (can't reproduce this)
+1.9.6
+    bugfix (client) - want to move seamlessly from old res to new res when changing
+    bugfix (both) - one ship going oceanside appears to clear someone else's moves. This was actually caused by an erroneous use of sendPosition serverside, and an error in clientside sendRespawn. fixed both clientside + serverside.
+    bugfix (server) - when a round ends it can happen mid-turn. this is not nice. fix to allow turn to end and points from that turn to be counted.
+    bugfix (client) - restart doesnt reset guns, tokens, and spawns in with lower guns than full
+    bugfix (client) - test big ships shots reload correctly
+    bugfix (client) - tweak low framerate background fps to not interfere with round timer
+    bugfix (client) - single shot vessels are borked; cannons dont reload properly
+    bugfix (client) - simple player-to-player text needs to clip on the text window
+    bugfix (client) - performance sticks at 5-7%
+    feature (client) - handle other keys (shift+arrow, home, end)
+    feature (client) - link to github url
+    bugfix (client) - background needs stretchy for the default res
+    bugfix (client) - improvements to scrollbar and chat window alignment
+    bugfix (server) - scores don't reset immediately after round ends
+    bugfix (server) - after restart the scores don't reset if we were sitting on a flag
+    bugfix (server) - after restart the move indicator doesnt jump around
+    bugfix (both) - check all usages of string equality are safe
+    bugfix (server) - map tiles don't actually rotate
+    feature (both) - server/message notifications via chat
+    feature (both) - server voting via chat
+    bugfix (server) - fix floating point string representation in server message
+    bugfix (server) - can't collide in safe zone (this didn't seem to be a bug anymore)
+    bugfix (client) - move dragging (this didn't seem to be a bug anymore)
+    bugfix (server) - guns load way too fast
+    feature (both) - simple player-to-player chat
+    feature (client) - shift and ctrl+A/C/V keys for chat
+    bugfix (client) - cannons off by 2px
+    feature (client) - keyboard acceleration for chat textbox
+    bugfix (server) - bilge works properly with 30s rounds, but not 5s rounds
+    bugfix (client) - default resolutions weren't suitable for client
+    bugfix (both) - clear any cannons leftover after the turn ends
+    bugfix (client) - increase area of cannon move place clickyness
+    bugfix (server) - disengage allows oceanside players to jump around
+    bugfix (client) - move tokens off by 2 when clicking/dragging
+    bugfix (client) - reduce client control display technical debt
+    feature (client) - better parity with bnav UI
+    bugfix (server) - rotated maps shouldn't overlay onto one another after each rotation
+    feature (server) - a way to rotate maps every n turns
+    bugfix (server) - respawn players after the end of every round
+    bugfix (client) - can drag moves even though the slot is disabled
+    feature (client) - make radio buttons select autotoken rather than clicking the tokens themselves
+    bugfix (server) - no delay on going oceanside on respawn - only delay on sink
+    bugfix (server) - cannons shouldnt start reloading as soon as they're placed
+    feature (both) - disengage/go oceanside buttons - and redo oceanside/landside logic
+1.9.5
+    bugfix (server) - Empty moves/guns (or mark locked) for the turns that respawnDelay is active
+    bugfix (client) - disengage button should change colour on click
+    feature (client) - camera should follow vessel around
+    bugfix (both) - movement/token behaviours
+    bugfix (client) - rendering
+    feature (server) - vessels respawn from the side they entered, unless they sunk/entered the board (use team side) or swapped to ocean side
+    feature (server) - vessels can 'disengage' to oceanside (but can't go back to landside if they came from there)
+    bugfix (both) - major cleanup of logging, args and parameter handling between server and client
+1.9.4
+    feature (both) - Turn time, round time parameters
+    feature (both) - After sinking, add delay before ships can move
+    bugfix (both) - make parameters easier to add
+1.9.3
+    feature (client) - Improve piece drag and drop
