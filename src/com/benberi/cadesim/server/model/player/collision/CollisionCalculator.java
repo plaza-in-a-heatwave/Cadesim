@@ -507,7 +507,7 @@ public class CollisionCalculator {
         Position bumpPosition = anim.getPositionForAnimation(bumped);
         return bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk() &&
                 !isOutOfBounds(bumpPosition) && getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0 &&
-                !context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumper);
+                !context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumped);
     }
     
     /**
@@ -521,7 +521,7 @@ public class CollisionCalculator {
         Position bumpPosition = anim.getPositionForAnimation(bumped);
         return (bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk()
                 && getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0)
-                && (context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumper)
+                && (context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumped)
                 || isOutOfBounds(bumpPosition));
     }
  
