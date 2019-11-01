@@ -7,18 +7,24 @@ import com.benberi.cadesim.server.model.player.vessel.Vessel;
 
 public class Xebec extends Vessel {
 
+	private String name = "xebec";
+	private int    id   = -1;
+	
     public Xebec(Player p) {
         super(p);
+        
+        // hacky way to avoid using bidirectional map
+        id = getIdFromName(name);
     }
 
     @Override
     public int getID() {
-        return 4;
+        return id;
     }
 
     @Override
     public int getSize() {
-        return 3;
+        return 2;
     }
 
     @Override
@@ -37,13 +43,13 @@ public class Xebec extends Vessel {
     }
 
     @Override
-    public boolean isManuaver() {
+    public boolean has3Moves() {
         return true;
     }
 
     @Override
     public double getMaxDamage() {
-        return 23.33;
+        return 23.333;
     }
 
     @Override

@@ -5,30 +5,35 @@ import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.CannonType;
 import com.benberi.cadesim.server.model.player.vessel.Vessel;
 
-public class WarGalleon extends Vessel {
-
-    public WarGalleon(Player p) {
+public class Longship extends Vessel {	
+	private String name = "longship";
+	private int    id   = -1;
+	
+    public Longship(Player p) {
         super(p);
+        
+        // hacky way to avoid using bidirectional map
+        id = getIdFromName(name);
     }
 
     @Override
     public int getID() {
-        return 6;
+        return id;
     }
 
     @Override
     public int getSize() {
-        return 3;
+        return 1;
     }
 
     @Override
     public int getInfluenceDiameter() {
-        return 6;
+        return 2;
     }
 
     @Override
     public int getMaxCannons() {
-        return 24;
+        return 12;
     }
 
     @Override
@@ -37,27 +42,27 @@ public class WarGalleon extends Vessel {
     }
 
     @Override
-    public boolean isManuaver() {
-        return true;
+    public boolean has3Moves() {
+        return false;
     }
 
     @Override
     public double getMaxDamage() {
-        return 16.66;
+        return 10;
     }
 
     @Override
     public double getRamDamage() {
-        return 1.667;
+        return 0.333;
     }
     
     @Override
     public double getRockDamage() {
-        return 0.833;
+        return 0.5;
     }
 
     @Override
     public CannonType getCannonType() {
-        return CannonType.LARGE;
+        return CannonType.SMALL;
     }
 }

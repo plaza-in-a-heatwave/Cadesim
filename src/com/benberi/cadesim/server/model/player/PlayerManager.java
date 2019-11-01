@@ -746,7 +746,7 @@ public class PlayerManager {
             {
             	response = LoginResponsePacket.BAD_NAME;
             }
-            else if (!Vessel.vesselExists(ship)) {
+            else if (!Vessel.VESSEL_IDS.containsKey(ship)) {
                 response = LoginResponsePacket.BAD_SHIP;
             }
 
@@ -762,7 +762,7 @@ public class PlayerManager {
                 pl.getPackets().sendFlags();
                 pl.getPackets().sendPlayerFlags();
                 sendPlayerForAll(pl);
-                serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ", " + pl.getVessel().getName() + ")");
+                serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
                 printCommandHelp(pl); // private message with commands
             }
         }
@@ -783,7 +783,7 @@ public class PlayerManager {
 	                    p.getPackets().sendRemovePlayer(player);
 	                }
 	            }
-	            serverBroadcastMessage("Goodbye " + player.getName() + " (" + player.getTeam() + ", " + player.getVessel().getName() + ")");
+	            serverBroadcastMessage("Goodbye " + player.getName() + " (" + player.getTeam() + ")");
 	            
 	            // log
 	            ServerContext.log(

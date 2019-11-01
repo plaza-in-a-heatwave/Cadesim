@@ -5,11 +5,12 @@ import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.CannonType;
 import com.benberi.cadesim.server.model.player.vessel.Vessel;
 
-public class Junk extends Vessel {	
-	private String name = "junk";
+public class Warfrig extends Vessel {
+
+	private String name = "warfrig";
 	private int    id   = -1;
 	
-    public Junk(Player p) {
+    public Warfrig(Player p) {
         super(p);
         
         // hacky way to avoid using bidirectional map
@@ -23,22 +24,22 @@ public class Junk extends Vessel {
 
     @Override
     public int getSize() {
-        return 1;
+        return 2;
     }
 
     @Override
     public int getInfluenceDiameter() {
-        return 4;
+        return 8;
     }
 
     @Override
     public int getMaxCannons() {
-        return 12;
+        return 24;
     }
 
     @Override
     public boolean isDualCannon() {
-        return false;
+        return true;
     }
 
     @Override
@@ -48,17 +49,17 @@ public class Junk extends Vessel {
 
     @Override
     public double getMaxDamage() {
-        return 16.66;
+        return 33.333;
     }
 
     @Override
     public double getRamDamage() {
-        return 1;
+        return 2;
     }
     
     @Override
     public double getRockDamage() {
-        return 0.833;
+        return 1.667;
     }
 
     @Override
