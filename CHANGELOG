@@ -1,10 +1,14 @@
 Release changelog for the client & server
     partial release progress also documented here.
+    See most recent issues at: github.com/plaza-in-a-heatwave/Obsidio-Server/issues
 
 1.9.8 (pending)
     bugfix (server) - power save mode not working - can't properly shut down a game until new players join
-    feature (both)  - add new ships
+
 1.9.8 (complete)
+    feature (both)  - add new ships
+    bugfix (server) - ships no longer marked as sunk when sailing through a safe zone
+    bugfix (client) - ship move bars didn't align properly (or work on small ships)
     bugfix (client) - fix misaligned might rings
     bugfix (server) - cant change gun placement when all guns are placed
     bugfix (server) - increase sail rates based on observations
