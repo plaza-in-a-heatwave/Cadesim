@@ -132,8 +132,11 @@ public class Player extends Position {
 
     /**
      * If the player needs a respawn
+     * TODO convert to enum
      */
-    private boolean needsRespawn;
+    private boolean needsRespawn;                 // we need a respawn
+    private boolean enteredSafeLandside = false;  // reason why
+    private boolean enteredSafeOceanside = false; // "
 
     /**
      * Mark turn animation finished client-sided notification
@@ -223,8 +226,24 @@ public class Player extends Position {
 
             if (outOfSafe && context.getMap().isSafe(pos)) {
                 needsRespawn = true;
+                outOfSafe = false;
+
+                // mark which safe zone we sailed through
+                if (context.getMap().isSafeLandside(pos))
+                {
+                    enteredSafeLandside = true;
+                }
+                else if (context.getMap().isSafeOceanside(pos))
+                {
+                    enteredSafeOceanside = true;
+                }
+                else
+                {
+                    ServerContext.log("ERROR - safe zone type was neither land or ocean. Treating it as sink.");
+                }
             }
         }
+
         return super.set(pos);
     }
 
@@ -370,11 +389,11 @@ public class Player extends Position {
     		// start on land side regardless of where
     		// map says we are currently - it's wrong
     		respawnOnLandside(true);
-    	} else if (context.getMap().isSafeLandside(this)) { // drove into safe
+        } else if (enteredSafeLandside) { // drove into safe
     		// only defenders may use the landside safe zone
     		// so only defenders should be respawned here
     		respawnOnLandside(true);
-    	} else if (context.getMap().isSafeOceanside(this)) { // drove into safe
+        } else if (enteredSafeOceanside) { // drove into safe
     		// both teams may use the oceanside safe zone
     		respawnOnLandside(false);
     	} else {
@@ -390,7 +409,7 @@ public class Player extends Position {
     				" turns after sinking"
     			);
     		}
-    		
+
             // sunk, 'respawn' on land side with new ship
     		respawnOnLandside(true);
     	}
@@ -411,9 +430,15 @@ public class Player extends Position {
             // TODO what if cant enter the map?
         }
         set(x, y);
+
+        // reset flags
         setNeedsRespawn(false);
         outOfSafe = false;
+        enteredSafeLandside = false;
+        enteredSafeOceanside = false;
         vessel.resetDamageAndBilge();
+
+        // send packets
         for (Player p:context.getPlayerManager().listRegisteredPlayers()) {
             p.packets.sendRespawn(this); // bugfix players' moves disappearing when anyone else (re)spawns
         	p.getContext().getMap().resetFlags(); // bugfix animated flags persisting after reset

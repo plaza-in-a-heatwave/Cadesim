@@ -46,7 +46,7 @@ public class Vote {
 			"Vote on " + getDescription() + " -\n    " +
 			getEligibleVoters() + " players eligible\n    " +
 			getVotesCast() + " votes cast (" + printScore() + ")\n    " +
-			getVotesToWin() + " votes is majority\n    "+
+			getVotesToWin() + "+ votes wins\n    "+
 			getSecondsRemaining() + " seconds left to vote";
 	}
 	
