@@ -222,7 +222,7 @@ public class BlockadeMap {
             for (int y = player.getY() - squareRadius; y < player.getY() + squareRadius; y++) {
                 if((java.lang.Math.pow(x - player.getX(), 2) + java.lang.Math.pow(y - player.getY(), 2)) < java.lang.Math.pow(radius, 2)) {
                     Flag flag = getFlag(x, y);
-                    if (flag != null) {
+                    if ((flag != null) && (!localFlags.contains(flag))) { // add once only
                         localFlags.add(flag);
                     }
                 }
@@ -234,16 +234,19 @@ public class BlockadeMap {
         Flag west = getFlag(player.getX() - radius, player.getY());
         Flag east = getFlag(player.getX() + radius, player.getY());
 
-        if (north != null) {
+        // add the four cardinal flags.
+        // in case radius is 0, our cardinal flags will be 4x identical.
+        // avoid adding 4x in this case.
+        if ((north != null) && (!localFlags.contains(north))) {
             localFlags.add(north);
         }
-        if (south != null) {
+        if ((south != null) && (!localFlags.contains(south))) {
             localFlags.add(south);
         }
-        if (west != null) {
+        if ((west != null) && (!localFlags.contains(west))) {
             localFlags.add(west);
         }
-        if (east != null) {
+        if ((east != null) && (!localFlags.contains(east))) {
             localFlags.add(east);
         }
 

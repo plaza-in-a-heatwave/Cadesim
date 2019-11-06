@@ -132,8 +132,11 @@ public class Player extends Position {
 
     /**
      * If the player needs a respawn
+     * TODO convert to enum
      */
-    private boolean needsRespawn;
+    private boolean needsRespawn;                 // we need a respawn
+    private boolean enteredSafeLandside = false;  // reason why
+    private boolean enteredSafeOceanside = false; // "
 
     /**
      * Mark turn animation finished client-sided notification
@@ -180,7 +183,6 @@ public class Player extends Position {
             double max = Constants.MAX_BILGE_INCREASE_PERCENT_PER_SEC / (1000.0 / Constants.SERVICE_LOOP_DELAY);
   
             vessel.appendBilge((scale * (max - min)) + min);
-            System.out.println("phase 3; scale: " + scale);
         }
         else if (vessel.getDamagePercentage() >= jobbersQuality.getBilgeMaxReductionThreshold() && vessel.getBilgePercentage() > 0)
         {
@@ -192,12 +194,10 @@ public class Player extends Position {
         	double max = jobbersQuality.getBilgeFixPerTick();
         	
         	vessel.decreaseBilge((scale * (max - min)) + min);
-        	System.out.println("phase 2; scale: " + scale);
         }
         else if (vessel.getBilgePercentage() > 0) {
         	// remove bilge at the maximum rate permitted per tick
             vessel.decreaseBilge(jobbersQuality.getBilgeFixPerTick());
-            System.out.println("phase 1; constant");
         }
         else {
         	// no change
@@ -226,8 +226,24 @@ public class Player extends Position {
 
             if (outOfSafe && context.getMap().isSafe(pos)) {
                 needsRespawn = true;
+                outOfSafe = false;
+
+                // mark which safe zone we sailed through
+                if (context.getMap().isSafeLandside(pos))
+                {
+                    enteredSafeLandside = true;
+                }
+                else if (context.getMap().isSafeOceanside(pos))
+                {
+                    enteredSafeOceanside = true;
+                }
+                else
+                {
+                    ServerContext.log("ERROR - safe zone type was neither land or ocean. Treating it as sink.");
+                }
             }
         }
+
         return super.set(pos);
     }
 
@@ -346,7 +362,7 @@ public class Player extends Position {
         ServerContext.log(
         		"[player-joined] Registered player \"" + name + "\", " +
         		Team.teamIDToString(team) + ", " +
-        		Vessel.vesselIDToString(ship) + ", on " +
+        		Vessel.VESSEL_IDS.get(ship) + ", on " +
         		channel.remoteAddress() + ". " +
         		context.getPlayerManager().printPlayers()
         );
@@ -373,16 +389,26 @@ public class Player extends Position {
     		// start on land side regardless of where
     		// map says we are currently - it's wrong
     		respawnOnLandside(true);
-    	} else if (context.getMap().isSafeLandside(this)) { // drove into safe
+        } else if (enteredSafeLandside) { // drove into safe
     		// only defenders may use the landside safe zone
     		// so only defenders should be respawned here
     		respawnOnLandside(true);
-    	} else if (context.getMap().isSafeOceanside(this)) { // drove into safe
+        } else if (enteredSafeOceanside) { // drove into safe
     		// both teams may use the oceanside safe zone
     		respawnOnLandside(false);
     	} else {
+    		context.getPlayerManager().serverBroadcastMessage(this.getName() + " was sunk!");
+
     		// after sink, return control after x turns
     		this.setTurnsUntilControl(context.getPlayerManager().getRespawnDelay());
+    		if (getTurnsUntilControl() > 0)
+    		{
+    			context.getPlayerManager().serverPrivateMessage(
+    				this, "You can't move for " +
+    				getTurnsUntilControl() +
+    				" turns after sinking"
+    			);
+    		}
 
             // sunk, 'respawn' on land side with new ship
     		respawnOnLandside(true);
@@ -404,9 +430,15 @@ public class Player extends Position {
             // TODO what if cant enter the map?
         }
         set(x, y);
+
+        // reset flags
         setNeedsRespawn(false);
         outOfSafe = false;
+        enteredSafeLandside = false;
+        enteredSafeOceanside = false;
         vessel.resetDamageAndBilge();
+
+        // send packets
         for (Player p:context.getPlayerManager().listRegisteredPlayers()) {
             p.packets.sendRespawn(this); // bugfix players' moves disappearing when anyone else (re)spawns
         	p.getContext().getMap().resetFlags(); // bugfix animated flags persisting after reset
@@ -581,7 +613,7 @@ public class Player extends Position {
      * @param move  The move to place
      */
     public void placeMove(int slot, int move) {
-        if (vessel.isManuaver() && moves.getManuaverSlot() == slot) {
+        if (vessel.has3Moves() && moves.getManuaverSlot() == slot) {
             return;
         }
         MoveType moveType = MoveType.forId(move);
@@ -621,18 +653,15 @@ public class Player extends Position {
      * @param side  The side to place
      */
     public void placeCannon(int slot, int side) {
-        if (tokens.getCannons() <= 0) {
-            return;
-        }
-        if (side == 0) {
+    	if (side == 0) {
             int shoots = moves.getLeftCannons(slot);
-            if (shoots == 0) {
+            if (shoots == 0 && tokens.getCannons() > 0) {
                 moves.setLeftCannons(slot, 1);
                 tokens.removeCannons(1);
             }
-            else {
+            else if (shoots > 0) {
                 if (vessel.isDualCannon()) {
-                    if (shoots < 2) {
+                    if (shoots < 2 && tokens.getCannons() > 0) {
                         moves.setLeftCannons(slot, 2);
                         tokens.removeCannons(1);
                     }
@@ -652,13 +681,13 @@ public class Player extends Position {
         }
         else {
             int shoots = moves.getRightCannons(slot);
-            if (shoots == 0) {
+            if (shoots == 0 && tokens.getCannons() > 0) {
                 moves.setRightCannons(slot, 1);
                 tokens.removeCannons(1);
             }
-            else {
+            else if (shoots > 0) {
                 if (vessel.isDualCannon()) {
-                    if (shoots < 2) {
+                    if (shoots < 2 && tokens.getCannons() > 0) {
                         moves.setRightCannons(slot, 2);
                         tokens.removeCannons(1);
                     }
@@ -702,6 +731,8 @@ public class Player extends Position {
             // reset tokens once we're allowed to move again
             if (getTurnsUntilControl() == 0) {
             	tokens = new MoveTokensHandler(this);
+            	tokens.assignDefaultTokens();
+                tokens.assignCannons(vessel.getMaxCannons());
             }
         }
 

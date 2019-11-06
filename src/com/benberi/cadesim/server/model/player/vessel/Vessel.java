@@ -1,18 +1,93 @@
 package com.benberi.cadesim.server.model.player.vessel;
 
 import com.benberi.cadesim.server.model.player.Player;
-import com.benberi.cadesim.server.model.player.vessel.impl.WarBrig;
-import com.benberi.cadesim.server.model.player.vessel.impl.WarFrigate;
-import com.benberi.cadesim.server.model.player.vessel.impl.Xebec;
-import com.benberi.cadesim.server.model.player.vessel.impl.Junk;
-import com.benberi.cadesim.server.model.player.vessel.impl.WarGalleon;
+import com.benberi.cadesim.server.model.player.vessel.impl.*;
 import com.benberi.cadesim.server.model.cade.Team;
+
+import java.util.HashMap;
 
 /**
  * Abstraction of vessel
  */
 public abstract class Vessel {
+	/**
+     * Creates a vessel by given vessel type
+     * @param type  The vessel type
+     * @return The created vessel, or null if can't do it
+     */
+    public static Vessel createVesselByType(Player p, int type) {
+        switch (type) {
+            case 0:
+            	return new Smsloop(p);
+            case 1:
+            	return new Lgsloop(p);
+            case 2:
+            	return new Dhow(p);
+            case 3:
+            	return new Fanchuan(p);
+            case 4:
+            	return new Longship(p);
+            case 5:
+            	return new Junk(p);
+            case 6:
+            	return new Baghlah(p);
+            case 7:
+            	return new Merchbrig(p);
+            case 8:
+            	return new Warbrig(p);
+            case 9:
+            	return new Xebec(p);
+            case 10:
+            	return new Merchgal(p);
+            case 11:
+            	return new Warfrig(p);
+            case 12:
+            	return new Wargal(p);
+            case 13:
+            	return new Grandfrig(p);
+            case 14:
+            	return new Blackship(p);
+            default:
+            	return null;
+        }
+    }
 
+	/**
+	 * map integer ids to human readable ship ids
+	 */
+	public static final HashMap<Integer, String> VESSEL_IDS = new HashMap<Integer, String>() {{
+		put(0, "smsloop");
+		put(1, "lgsloop");
+		put(2, "dhow");
+		put(3, "fanchuan");
+		put(4, "longship");
+		put(5, "junk");
+		put(6, "baghlah");
+		put(7, "merchbrig");
+		put(8, "warbrig");
+		put(9, "xebec");
+		put(10, "merchgal");
+		put(11, "warfrig");
+		put(12, "wargal");
+		put(13, "grandfrig");
+		put(14, "blackship");
+	}};
+	
+	/**
+	 * @param name the name to search
+	 * @return id, or -1 if not found
+	 */
+	protected static int getIdFromName(String name) {
+        for (int i : VESSEL_IDS.keySet())
+        {
+        	if (VESSEL_IDS.get(i).equals(name))
+        	{
+        		return i;
+        	}
+        }
+        return -1;
+	}	
+	
     private Player player;
 
     /**
@@ -131,20 +206,20 @@ public abstract class Vessel {
     /**
      * @return If the vessel is 3-move only
      */
-    public abstract boolean isManuaver();
+    public abstract boolean has3Moves();
 
     /**
-     * @return  The maximum damage
+     * @return  The maximum damage. (med CB)
      */
     public abstract double getMaxDamage();
 
     /**
-     * @return The damage dealt when ramming a ship.
+     * @return The damage dealt when ramming a ship. (med CB)
      */
     public abstract double getRamDamage();
     
     /**
-     * @return The damage received when ramming a rock.
+     * @return The damage received when ramming a rock. (med CB)
      */
     public abstract double getRockDamage();
 
@@ -169,66 +244,4 @@ public abstract class Vessel {
      * @return  The diameter
      */
     public abstract int getInfluenceDiameter();
-
-    /**
-     * Creates a vessel by given vessel type
-     * @param type  The vessel type
-     * @return The created vessel
-     */
-    public static Vessel createVesselByType(Player p, int type) {
-        switch (type) {
-            default:
-            case 2:
-                return new WarBrig(p);
-            case 3:
-                return new WarFrigate(p);
-            case 4:
-                return new Xebec(p);
-            case 5:
-                return new Junk(p);
-            case 6:
-                return new WarGalleon(p);
-        }
-    }
-    
-    /**
-     * Convert a vessel ID to a string
-     */
-    public static String vesselIDToString(int vesselID) {
-    	switch (vesselID) {
-	        default:
-	        case 2:
-	            return "War Brig";
-	        case 3:
-	            return "War Frigate";
-	        case 4:
-	            return "Xebec";
-	        case 5:
-	            return "Junk";
-	        case 6:
-	            return "War Galleon";
-	    }
-    }
-    
-    public String getName()
-    {
-    	return vesselIDToString(getID());
-    }
-
-    /**
-     * Checks if the vessel type exists
-     * @param type  The vessel type
-     * @return
-     */
-    public static boolean vesselExists(int type) {
-        switch (type) {
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                return true;
-        }
-        return false;
-    }
 }

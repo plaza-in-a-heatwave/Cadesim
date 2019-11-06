@@ -13,7 +13,7 @@ public enum JobbersQuality {
 		0.41666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // bilgeFixRate      %  per tick
 		50,                                                     // minBilgeForDamage
 		40,                                                     // bilgeMaxReductionThreshold
-		0.06000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // moves                per tick
+		0.08983 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // moves                per tick
 		1.33333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // % guns filled        per tick
 		0.01000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // full bilge num moves per tick
     ),
@@ -22,7 +22,7 @@ public enum JobbersQuality {
 		0.83333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " // 25% per turn ish (full clear in 4 turns )
 		60,                                                     // " //  actual figure from Napi Peak cade
 		50,                                                     // " //  guessed
-		0.08983 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  2.7 ish
+		0.11666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  3.5/turn, observed on a cit run
 		2.5     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  75% per 30s ish (i.e. wb 4 gunners, each fills 3 guns)
 		0.02000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // " //  0.6 ish
 	);

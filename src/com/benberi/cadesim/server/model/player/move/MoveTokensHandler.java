@@ -1,7 +1,6 @@
 package com.benberi.cadesim.server.model.player.move;
 
 import com.benberi.cadesim.server.ServerContext;
-import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.player.move.token.MoveToken;
 import com.benberi.cadesim.server.model.player.move.token.MoveTokenList;

@@ -3,8 +3,6 @@ package com.benberi.cadesim.server.model.player;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.benberi.cadesim.server.ServerContext;
-
 /**
  * Provide a means for players to vote on resolutions
  * A simple majority threshold carries the vote.
@@ -48,7 +46,7 @@ public class Vote {
 			"Vote on " + getDescription() + " -\n    " +
 			getEligibleVoters() + " players eligible\n    " +
 			getVotesCast() + " votes cast (" + printScore() + ")\n    " +
-			getVotesToWin() + " votes is majority\n    "+
+			getVotesToWin() + "+ votes wins\n    "+
 			getSecondsRemaining() + " seconds left to vote";
 	}
 	

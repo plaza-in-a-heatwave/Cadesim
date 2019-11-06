@@ -6,6 +6,10 @@ import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.Vessel;
 import com.benberi.cadesim.server.codec.packet.ServerPacketExecutor;
 
+/**
+ * the manuaver slot in this case is the piece which blocks
+ * larger ships moving more than 3x in a turn.
+ */
 public class ManuaverSlotChanged extends ServerPacketExecutor {
 
     public ManuaverSlotChanged(ServerContext ctx) {
@@ -16,7 +20,7 @@ public class ManuaverSlotChanged extends ServerPacketExecutor {
     public void execute(Player pl, Packet p) {
         int newSlot = p.readByte();
         Vessel v = pl.getVessel();
-        if (v.isManuaver()) {
+        if (v.has3Moves()) {
             pl.getMoves().setManuaverSlot(newSlot);
         }
     }

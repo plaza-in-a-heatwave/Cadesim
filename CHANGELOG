@@ -1,15 +1,33 @@
 Release changelog for the client & server
     partial release progress also documented here.
+    See most recent issues at: github.com/plaza-in-a-heatwave/Obsidio-Server/issues
 
 1.9.8 (pending)
     feature (client)- show token tooltips
-    bugfix (server) - ships don't get full moves after end of sink delay
-    bugfix (both)   - when guns all placed, can't add/remove guns
-    bugfix (client) - influence rings don't display correct distance
     bugfix (server) - power save mode not working - can't properly shut down a game until new players join
-    feature (both)  - add new ships
+
 1.9.8 (complete)
     bugfix (server) - fix broken whirlpool in Loggerhead_XXIX_Round_5
+    feature (both)  - add new ships
+    bugfix (server) - ships no longer marked as sunk when sailing through a safe zone
+    bugfix (client) - ship move bars didn't align properly (or work on small ships)
+    bugfix (server) - ships don't get full moves after end of sink delay
+    bugfix (client) - fix misaligned might rings
+    bugfix (server) - cant change gun placement when all guns are placed
+    bugfix (server) - increase sail rates based on observations
+    bugfix (client) - properly align shipnames and damage bar
+    bugfix (client) - fix wrong default ship display
+    bugfix (server) - fix no moves after sinking penalty ends
+    bugfix (server) - flags appear 4x
+    bugfix (client) - flags should center on vessels
+    bugfix (client) - some sprites not aligned properly
+    feature (server) - notify players about sinks, and about delays before moves are re-enabled
+    bugfix (client) - fix crash on some shiptypes when firing cannons
+    bugfix (server) - ships once again receive a full set of move tokens when the sink timeout penalty expires
+    bugfix (server) - sloops no longer multiply their flag claims by 4x
+    bugfix (client) - 
+    bugfix (client) - fix display of double shot ships and large ships
+    feature (client) - introduce all ship types
     bugfix (server) - defenders can't be bumped into the island safe zone
     bugfix (server) - bilge values seem low: both damage threshold for bilge creep, and also the ratcheting increment rate (between 30%-60% per turn) seems way too high.
     bugfix (server) - resets rapidly (like 10x a second) until a player times out while registering. (fixed: the presence of an unregistered player would start a game, but the lack of a registered player would stop one)
