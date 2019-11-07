@@ -59,6 +59,7 @@ public class ServerPacketManager {
         executors.put(IncomingPackets.TURN_FINISH_NOTIFICATION, new TurnFinishNotification(context));
         executors.put(IncomingPackets.OCEANSIDE_REQUEST, new OceansideRequestPacket(context));
         executors.put(IncomingPackets.POST_MESSAGE, new PostMessagePacket(context));
+        executors.put(IncomingPackets.SWAP_MOVE, new PlayerSwapMovesPacket(context));
     }
 
     /**

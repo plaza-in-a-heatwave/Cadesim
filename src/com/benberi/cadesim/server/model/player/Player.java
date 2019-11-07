@@ -645,6 +645,18 @@ public class Player extends Position {
             context.getPlayerManager().sendMoveBar(this);
         }
     }
+    
+    /**
+     * swaps two existing already-placed moves
+     */
+    public void swapMove(int slot1, int slot2) {
+        MoveType tmpMove = moves.getMove(slot1);
+        moves.setMove(slot1, moves.getMove(slot2));
+        moves.setMove(slot2, tmpMove);
+        
+        System.out.println("set slot1 to " + moves.getMove(slot1).getId() + ", slot2 to " + moves.getMove(slot2).getId());
+        packets.sendSelectedMoves();
+    }
 
     /**
      * Attempts to place a cannon
