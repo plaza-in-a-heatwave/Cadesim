@@ -622,22 +622,40 @@ public class PlayerManager {
      */
     public void registerPlayer(Channel c) {
         Player player = new Player(context, c);
-        if (temporaryBannedIPs.contains(player.getIP()))
+        String ip = player.getIP();
+        if (temporaryBannedIPs.contains(ip))
         {
         	// dont allow banned IPs into the server until the next round begins
         	ServerContext.log("Kicked player " + c.remoteAddress() + " attempted to rejoin, and was kicked again.");
         	player.getChannel().disconnect();
         	return;
         }
-        else
-        {        	
-        	players.add(player);
-            ServerContext.log(
-            	"[player joined] New player added to channel " +
-            	c.remoteAddress() + ". " +
-            	printPlayers()
-            );
+        
+        // don't allow multiclients if settings forbid it
+        if (!ServerConfiguration.getMultiClientMode())
+        {
+            for (Player p : players)
+            {
+                if (p.getIP().equals(ip))
+                {
+                    ServerContext.log(
+                        "Warning - " +
+                        ip + " (currently logged in as " + p.getName() + ")" +
+                        " attempted login on a second client, but multiclient is not permitted"
+                    );
+                    player.getChannel().disconnect();
+                    return;
+                }
+            }
         }
+     	
+        // otherwise ok
+    	players.add(player);
+        ServerContext.log(
+        	"[player joined] New player added to channel " +
+        	c.remoteAddress() + ". " +
+        	printPlayers()
+        );
     }
 
 

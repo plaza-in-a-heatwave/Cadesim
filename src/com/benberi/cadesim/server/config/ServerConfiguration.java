@@ -26,6 +26,7 @@ public class ServerConfiguration {
 	private static String serverName = Constants.name;
 	private static int tokenExpiry = 4;
 	private static boolean powerSavingMode = false;
+    private static boolean multiClientMode = true;
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -88,7 +89,8 @@ public class ServerConfiguration {
         		"jobbers quality: " + getJobbersQualityAsString() + ", " +
         		"team names: " + getAttackerName() + "," + getDefenderName() + ", " +
         		"auth code: \"" + getAuthCode() + "\"" + ", " +
-        		"power saving: " + getPowerSavingMode() +
+        		"power saving: " + getPowerSavingMode() + ", " +
+        		"multiclient permitted: " + getMultiClientMode() +
         		"]";
     }
     
@@ -206,4 +208,12 @@ public class ServerConfiguration {
 	public static void setPowerSavingMode(boolean value) {
 		ServerConfiguration.powerSavingMode = value;
 	}
+
+    public static boolean getMultiClientMode() {
+        return ServerConfiguration.multiClientMode ;
+    }
+    
+    public static void setMultiClientMode(boolean value) {
+        ServerConfiguration.multiClientMode = value;
+    }
 }
