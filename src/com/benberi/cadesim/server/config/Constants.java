@@ -20,12 +20,8 @@ public class Constants {
 	/**
 	 * Version of server
 	 */
-	public static final String VERSION = "1.9.7";
-
-    /**
-     * The protocol version to allow connections from
-     */
-    public static final int PROTOCOL_VERSION = 9;
+	public static final String VERSION = "1.9.8";
+    public static final int PROTOCOL_VERSION = 10; // MUST match client
 
     /**
      * Log paths to use
@@ -67,7 +63,7 @@ public class Constants {
      * This is used to timeout players that did not notify the server about their animation finish for the given
      * timeout value
      */
-    public static final int TURN_FINISH_TIMEOUT = 200; // deciseconds
+    public static final int TURN_FINISH_TIMEOUT = 300; // deciseconds
 
     public static final int TURN_EXTRA_TIME = 13; // deciseconds
     public static final int OUTGOING_PACKETS_PLAYER_PER_TICK = 100;
