@@ -14,7 +14,7 @@ public enum JobbersQuality {
 		50,                                                     // minBilgeForDamage
 		40,                                                     // bilgeMaxReductionThreshold
 		0.08983 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // moves                per tick
-		1.33333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // % guns filled        per tick
+		2.5     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // % guns filled        per tick
 		0.01000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // full bilge num moves per tick
     ),
 	ELITE(
@@ -23,7 +23,7 @@ public enum JobbersQuality {
 		60,                                                     // " //  actual figure from Napi Peak cade
 		50,                                                     // " //  guessed
 		0.11666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  3.5/turn, observed on a cit run
-		2.5     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  75% per 30s ish (i.e. wb 4 gunners, each fills 3 guns)
+		3.0     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  90% per 30s ish (i.e. wb 4 gunners, each fills 3 and a bit guns)
 		0.02000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // " //  0.6 ish
 	);
 
