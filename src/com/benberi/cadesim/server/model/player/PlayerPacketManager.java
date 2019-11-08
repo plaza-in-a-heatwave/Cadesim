@@ -5,6 +5,7 @@ import com.benberi.cadesim.server.codec.packet.IncomingPacket;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.codec.packet.out.impl.*;
+import com.benberi.cadesim.server.model.player.move.MoveTokensHandler;
 import com.benberi.cadesim.server.model.player.move.MoveType;
 
 import java.util.List;
@@ -91,10 +92,12 @@ public class PlayerPacketManager {
     		packet.setCannons(0);
     	} else
     	{
-            packet.setLeft(player.getMoveTokens().countLeftMoves());
-            packet.setRight(player.getMoveTokens().countRightMoves());
-            packet.setForward(player.getMoveTokens().countForwardMoves());
-            packet.setCannons(player.getMoveTokens().getCannons());
+    	    MoveTokensHandler m = player.getMoveTokens();
+            packet.setLeft(m.countLeftMoves());
+            packet.setRight(m.countRightMoves());
+            packet.setForward(m.countForwardMoves());
+            packet.setNew(m.getNewLeft(), m.getNewForward(), m.getNewRight());
+            packet.setCannons(m.getCannons());
     	}
 
         player.sendPacket(packet);

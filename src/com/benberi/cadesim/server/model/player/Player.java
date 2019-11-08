@@ -382,6 +382,7 @@ public class Player extends Position {
     	tokens.assignDefaultTokens();
         tokens.assignCannons(vessel.getMaxCannons());
         this.getPackets().sendTokens();
+        getMoveTokens().setTargetTokenGeneration(MoveType.FORWARD, true);
 
     	// where to respawn?
     	if (isFirstEntry()) {

@@ -13,19 +13,18 @@ public class MoveTokensHandler {
     private Player player;
 
     /**
-     * Left move tokens
+     * move tokens
      */
     private int left;
-
-    /**
-     * Forward move tokens
-     */
     private int forward;
-
-    /**
-     * Right move tokens
-     */
     private int right;
+    
+    /**
+     * number of tokens generated since last asked
+     */
+    private int newLeft    = 0;
+    private int newForward = 0;
+    private int newRight   = 0;
 
     /**
      * List of moves
@@ -65,9 +64,12 @@ public class MoveTokensHandler {
     	// assign starter pieces
     	for (int i = 0; i < 4; i++) {
             forwardTokens.add(new MoveToken(MoveType.FORWARD));
+            newForward += 1;
             if (i % 2 == 0) {
                 rightTokens.add(new MoveToken(MoveType.RIGHT));
+                newRight += 1;
                 leftTokens.add(new MoveToken(MoveType.LEFT));
+                newLeft += 1;
             }
         }
     }
@@ -212,6 +214,24 @@ public class MoveTokensHandler {
     public int getRight() {
         return right;
     }
+    
+    public int getNewLeft() {
+        int i = newLeft;
+        newLeft = 0;
+        return i;
+    }
+    
+    public int getNewForward() {
+        int i = newForward;
+        newForward = 0;
+        return i;
+    }
+    
+    public int getNewRight() {
+        int i = newRight;
+        newRight = 0;
+        return i;
+    }
 
     public int getCannons() {
         return cannons;
@@ -312,12 +332,15 @@ public class MoveTokensHandler {
         switch (targetTokenGeneration) {
             case RIGHT:
                 rightTokens.add(new MoveToken(targetTokenGeneration));
+                newRight += 1;
                 break;
             case LEFT:
                 leftTokens.add(new MoveToken(targetTokenGeneration));
+                newLeft += 1;
                 break;
             case FORWARD:
                 forwardTokens.add(new MoveToken(targetTokenGeneration));
+                newForward += 1;
                 break;
             case NONE:
 				ServerContext.log("warning - generated a token with movetype NONE");
