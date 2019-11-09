@@ -104,12 +104,10 @@ public class BlockadeTimeMachine {
     }
 
     /**
-     * Renewals the turn time
+     * Renews the turn time
      */
     public void renewTurn() {
-    	turnTime = context.getPlayerManager().getTurnDuration();
-
-        setLock(false);
+        turnTime = context.getPlayerManager().getTurnDuration();
     }
 
     public void renewRound() {

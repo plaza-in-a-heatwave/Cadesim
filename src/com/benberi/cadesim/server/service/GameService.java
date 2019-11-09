@@ -62,6 +62,7 @@ public class GameService implements Runnable {
                 	// if no players... hibernate time machines
                     if (playerManager.listRegisteredPlayers().size() == 0) {
                     	context.getTimeMachine().renewTurn(); // bugfix: we're not in the middle of an animation
+                        context.getTimeMachine().setLock(false);
                         ServerContext.log("No players registered, hibernating to save CPU");
 
                         while (playerManager.listRegisteredPlayers().size() == 0) {

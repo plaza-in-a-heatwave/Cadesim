@@ -654,8 +654,7 @@ public class Player extends Position {
         MoveType tmpMove = moves.getMove(slot1);
         moves.setMove(slot1, moves.getMove(slot2));
         moves.setMove(slot2, tmpMove);
-        
-        System.out.println("set slot1 to " + moves.getMove(slot1).getId() + ", slot2 to " + moves.getMove(slot2).getId());
+
         packets.sendSelectedMoves();
     }
 

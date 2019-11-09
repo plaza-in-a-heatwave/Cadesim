@@ -231,7 +231,7 @@ public class PlayerManager {
             }
         }
 
-        // Handle login requests
+        // Handle login/logout requests (only when not animating)
         if (!context.getTimeMachine().isLock()) {
             handlePlayerLoginRequests();
             handleLogoutRequests();
@@ -242,6 +242,8 @@ public class PlayerManager {
      * Handles and executes all turns
      */
     public void handleTurns() {
+
+        context.getTimeMachine().renewTurn();
 
         for (Player player : listRegisteredPlayers()) {
             player.getPackets().sendSelectedMoves();
@@ -411,9 +413,12 @@ public class PlayerManager {
         }
         else
         {
-        	context.getTimeMachine().renewTurn();
-            sendAfterTurn();
+            // purge all unregistered ships
+            players.removeIf(p -> (!p.isRegistered()));
+
             context.getTimeMachine().setLock(false);
+            sendAfterTurn();
+
         }
     }
 
@@ -508,7 +513,7 @@ public class PlayerManager {
         boolean allFinished = true;
         for (Player p : listRegisteredPlayers()) {
             if (!p.isTurnFinished()) {
-                if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
+                if (p.getTurnFinishWaitingTicks() > ServerConfiguration.getTurnDuration()) {
                     ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
                     serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
                     p.getChannel().disconnect();
@@ -748,6 +753,22 @@ public class PlayerManager {
             int version = request.getVersion();
             int ship = request.getShip();
             int team = request.getTeam();
+
+            // skip any players that aren't in our player list - these
+            // are glitches left over from login attempts
+            boolean found = false;
+            for (Player p : players)
+            {
+                if (p.getName() == pl.getName())
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                continue;
+            }
 
             int response = LoginResponsePacket.SUCCESS;
 

@@ -16,7 +16,6 @@ public class PlayerSwapMovesPacket extends ServerPacketExecutor {
         int slot1 = p.readByte();
         int slot2 = p.readByte();
 
-        System.out.println("swapping moves:" + slot1 + ", " + slot2); // TODO DEBUG REMOVE THIS
         pl.swapMove(slot1, slot2);
     }
 }
