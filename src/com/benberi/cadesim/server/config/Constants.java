@@ -85,6 +85,11 @@ public class Constants {
 	public static final int MAX_SERVER_NAME_SIZE = 19;
 
 	/**
+	 * split large messages at this value (advisory only)
+	 */
+	public static final int SPLIT_CHAT_MESSAGES_THRESHOLD = 240;
+
+	/**
 	 * n seconds to register
 	 */
 	public static final long REGISTER_TIME_MILLIS = 2000;
@@ -104,4 +109,10 @@ public class Constants {
 	 */
 	public static final int MIN_TURN_DURATION = 10;
 	public static final int MIN_ROUND_DURATION = 60;
+
+	/**
+	 * minimum values for breaks
+	 */
+    public static final int MIN_BREAK_DURATION = 10;
+    public static final int MIN_BREAK_INTERVAL = 60;
 }

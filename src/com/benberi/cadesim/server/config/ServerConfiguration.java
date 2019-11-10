@@ -6,7 +6,7 @@ public class ServerConfiguration {
 	/**
 	 * Store/retrieve/overwrite server gameplay defaults.
 	 */
-	
+
     /**
      * Server defaults. Overridden by CLI during initialisation.
      */
@@ -27,6 +27,7 @@ public class ServerConfiguration {
 	private static int tokenExpiry = 4;
 	private static boolean powerSavingMode = false;
     private static boolean multiClientMode = true;
+    private static int[] breakInfo = {-1, -1}; // seconds
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -43,15 +44,15 @@ public class ServerConfiguration {
     public static void setPort(int port) {
         ServerConfiguration.port = port;
     }
-    
+
     public static int getTurnDuration() {
     	return ServerConfiguration.turnDuration;
     }
-    
+
     public static void setTurnDuration(int turnDurationInDeciseconds) {
     	ServerConfiguration.turnDuration = turnDurationInDeciseconds;
     }
-    
+
     public static int getRoundDuration() {
 		return ServerConfiguration.roundDuration;
 	}
@@ -59,11 +60,11 @@ public class ServerConfiguration {
 	public static void setRoundDuration(int roundDurationInDeciseconds) {
 		ServerConfiguration.roundDuration = roundDurationInDeciseconds;
 	}
-    
+
     public static int getRespawnDelay() {
     	return ServerConfiguration.respawnDelay;
     }
-    
+
     public static void setRespawnDelay(int respawnDelay) {
     	ServerConfiguration.respawnDelay = respawnDelay;
     }
@@ -75,25 +76,27 @@ public class ServerConfiguration {
 	 * deciseconds.
 	 */
     public static String getConfig() {
-        return "[" + 
-        		"Player limit:" + getPlayerLimit() + ", " +
-        		"Map Name:" + getMapName() + ", " +
-        		"Port:" + getPort() + ", " +
-        		"turn duration:" + getTurnDuration() / 10 + "s, " +
-        		"round duration:" + getRoundDuration() / 10 + "s, " +
-        		"sink delay:" + getRespawnDelay() + " turns, " +
-        		"map rotation period:" + getMapRotationPeriod() + " turns, " +
-        		"disengage behavior:" + getDisengageBehavior() + ", " +
-        		"vote majority percentage: " +
-        		(isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ", " +
-        		"jobbers quality: " + getJobbersQualityAsString() + ", " +
-        		"team names: " + getAttackerName() + "," + getDefenderName() + ", " +
-        		"auth code: \"" + getAuthCode() + "\"" + ", " +
-        		"power saving: " + getPowerSavingMode() + ", " +
-        		"multiclient permitted: " + getMultiClientMode() +
-        		"]";
+        return "\n[\n" +
+                "    Cadesim server version:" + Constants.VERSION + ",\n" +
+                "    Player limit:" + getPlayerLimit() + ",\n" +
+                "    Map Name:" + getMapName() + ",\n" +
+                "    Port:" + getPort() + ",\n" +
+                "    Turn duration:" + getTurnDuration() / 10 + "s,\n" +
+                "    Round duration:" + getRoundDuration() / 10 + "s,\n" +
+                "    Sink delay:" + getRespawnDelay() + " turns,\n" +
+                "    Map rotation period:" + getMapRotationPeriod() + " turns,\n" +
+                "    Disengage behavior:" + getDisengageBehavior() + ",\n" +
+                "    Vote majority percentage: " +
+                (isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ",\n" +
+                "    Jobbers quality: " + getJobbersQualityAsString() + ",\n" +
+                "    Team names: " + getAttackerName() + "," + getDefenderName() + ",\n" +
+                "    Auth code: \"" + getAuthCode() + "\"" + ",\n" +
+                "    Power saving: " + getPowerSavingMode() + ",\n" +
+                "    Multiclient permitted: " + getMultiClientMode() + ",\n" +
+                "    Breaks duration/interval: " + getBreak()[0] + ":" + getBreak()[1] + ",\n" +
+                "]";
     }
-    
+
     public static String getMapName() {
         return ServerConfiguration.mapName;
     }
@@ -113,7 +116,7 @@ public class ServerConfiguration {
 	public static String getDisengageBehavior() {
 		return ServerConfiguration.disengageBehavior ;
 	}
-	
+
 	public static void setDisengageBehavior(String disengageBehavior) {
 		ServerConfiguration.disengageBehavior = disengageBehavior;
 	}
@@ -122,15 +125,15 @@ public class ServerConfiguration {
 	{
 		ServerConfiguration.votingMajority = votingMajority;
 	}
-	
+
 	public static int getVotingMajority() {
 		return ServerConfiguration.votingMajority;
 	}
-	
+
 	public static boolean isVotingEnabled() {
 		return ServerConfiguration.votingMajority != -1;
 	}
-	
+
 	/**
 	 * set with string so can load from cli
 	 */
@@ -155,7 +158,7 @@ public class ServerConfiguration {
 		
 		return ServerConfiguration.jobbersQuality;
 	}
-	
+
 	public static String getJobbersQualityAsString() {
 		return ServerConfiguration.jobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
 	}
@@ -164,7 +167,7 @@ public class ServerConfiguration {
 		ServerConfiguration.defenderName = string;
 		
 	}
-	
+
 	public static String getDefenderName() {
 		return ServerConfiguration.defenderName;
 	}
@@ -172,7 +175,7 @@ public class ServerConfiguration {
 	public static void setAttackerName(String string) {
 		ServerConfiguration.attackerName = string;
 	}
-	
+
 	public static String getAttackerName() {
 		return ServerConfiguration.attackerName;
 	}
@@ -180,11 +183,11 @@ public class ServerConfiguration {
 	public static String getAuthCode() {
 		return ServerConfiguration.authCode;
 	}
-	
+
 	public static void setAuthCode(String authCode) {
 		ServerConfiguration.authCode = authCode;
 	}
-	
+
 	public static String getServerName() {
 		return ServerConfiguration.serverName;
 	}
@@ -200,11 +203,11 @@ public class ServerConfiguration {
 	public static void setTokenExpiry(int value) {
 		ServerConfiguration.tokenExpiry = value;
 	}
-	
+
 	public static boolean getPowerSavingMode() {
 		return ServerConfiguration.powerSavingMode;
 	}
-	
+
 	public static void setPowerSavingMode(boolean value) {
 		ServerConfiguration.powerSavingMode = value;
 	}
@@ -212,8 +215,17 @@ public class ServerConfiguration {
     public static boolean getMultiClientMode() {
         return ServerConfiguration.multiClientMode ;
     }
-    
+
     public static void setMultiClientMode(boolean value) {
         ServerConfiguration.multiClientMode = value;
+    }
+
+    public static int[] getBreak() {
+        return ServerConfiguration.breakInfo;
+    }
+
+    public static void setBreak(int duration, int interval) {
+        ServerConfiguration.breakInfo[0] = duration;
+        ServerConfiguration.breakInfo[1] = interval;
     }
 }

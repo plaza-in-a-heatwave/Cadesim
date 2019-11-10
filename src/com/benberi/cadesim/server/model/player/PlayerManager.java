@@ -97,6 +97,19 @@ public class PlayerManager {
 	private String disengageBehavior;
 
 	/**
+	 * helper method to split string into parts
+	 * https://stackoverflow.com/a/3760193
+	 */
+	public static List<String> splitEqually(String text, int size) {
+	    List<String> ret = new ArrayList<String>((text.length() + size - 1) / size);
+
+	    for (int start = 0; start < text.length(); start += size) {
+	        ret.add(text.substring(start, Math.min(text.length(), start + size)));
+	    }
+	    return ret;
+	}
+
+	/**
 	 * helper method to reset tmp settings
 	 */
 	private void resetTemporarySettings()
@@ -187,6 +200,7 @@ public class PlayerManager {
      * Ticks all players
      */
     public void tick() {
+        BlockadeTimeMachine tm = context.getTimeMachine();
 
         // Send time ~ every second
     	long now = System.currentTimeMillis();
@@ -222,7 +236,9 @@ public class PlayerManager {
         }
 
         // Update players (for stuff like damage fixing, bilge fixing and move token generation)
-        if (!context.getTimeMachine().isLock()) {
+        // but don't do this in breaks, or when locked
+        if ((!tm.isBreak()) && (!tm.isLock()))
+        {
             for (Player p : listRegisteredPlayers()) {
                 if (p.isSunk()) {
                     continue;
@@ -1389,27 +1405,15 @@ public class PlayerManager {
 			}
     		else if (message.equals("/info"))
 			{
-    			// format messages nicely
-    			int normalTurnDuration  = ServerConfiguration.getTurnDuration();
-    			int normalRoundDuration = ServerConfiguration.getRoundDuration();
-    			int normalRespawnDelay  = ServerConfiguration.getRespawnDelay();
-    			String normalDisengageBehavior = ServerConfiguration.getDisengageBehavior();
-    			String tmpTurnDuration  = (getTurnDuration()  != normalTurnDuration )?("[temporarily " + (getTurnDuration()  / 10) + "s] "    ):"";
-    			String tmpRoundDuration = (getRoundDuration() != normalRoundDuration)?("[temporarily " + (getRoundDuration() / 10) + "s] "    ):"";
-    			String tmpRespawnDelay  = (getRespawnDelay()  != normalRespawnDelay )?("[temporarily " + getRespawnDelay()         + " turns] "):"";
-    			String tmpDisengageBehavior = (!getDisengageBehavior().equals(normalDisengageBehavior))?("[temporarily " + getDisengageBehavior() + "] "):"";
-    			serverPrivateMessage(
-    					pl,
-    					Constants.name + " version " + Constants.VERSION + ", " +
-    					"turn length " + tmpTurnDuration + (normalTurnDuration / 10) + "s, " +
-    					"round length " + tmpRoundDuration + (normalRoundDuration / 10) + "s, " +
-    					"sink penalty " + tmpRespawnDelay + normalRespawnDelay + " turns without moves, " +
-    					"disengage behavior " + tmpDisengageBehavior + normalDisengageBehavior + ", " +
-    					"map rotation " + ServerConfiguration.getMapRotationPeriod() + " rounds, " +
-    					"current map " + ServerConfiguration.getMapName() + ", " +
-    					"voting majority " + (ServerConfiguration.isVotingEnabled()?ServerConfiguration.getVotingMajority() + "%, ":"N/A [voting off], ") +
-    					"jobbers quality " + ServerConfiguration.getJobbersQualityAsString()
-    			);
+                List<String> messageParts = splitEqually(
+                    ServerConfiguration.getConfig(),
+                    Constants.SPLIT_CHAT_MESSAGES_THRESHOLD
+                );
+
+                for (String s : messageParts)
+                {
+                    serverPrivateMessage(pl, s);
+                }
 			}
 			else
 			{

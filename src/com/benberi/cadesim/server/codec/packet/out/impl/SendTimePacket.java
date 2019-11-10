@@ -11,8 +11,13 @@ public class SendTimePacket extends OutgoingPacket {
 
     private int gameTime;     // current time position within a round
     private int turnTime;     // current time position within a turn
+
+    private int timeUntilBreak; // current time position until next break
+    private int breakTime;      // current time position within a break
+
 	private int turnDuration; // how long a turn lasts
 	private int roundDuration;// how long a round lasts
+
 
     public SendTimePacket() {
         super(OutGoingPackets.TIME_PACKET);
@@ -28,11 +33,25 @@ public class SendTimePacket extends OutgoingPacket {
             this.turnTime = 0;
         }
     }
-    
+
+    /**
+     * @param value -1 if breaks not used, 0 if in break, >0 otherwise
+     */
+    public void setTimeUntilBreak(int value) {
+        this.timeUntilBreak = value;
+    }
+
+    /**
+     * @param value -1 if breaks not used. ignored if not in break
+     */
+    public void setBreakTime(int value) {
+        this.breakTime= value;
+    }
+
     public void setTurnDuration(int turnDuration) {
     	this.turnDuration = turnDuration;
     }
-    
+
     public void setRoundDuration(int roundDuration) {
     	this.roundDuration = roundDuration;
     }
@@ -42,8 +61,10 @@ public class SendTimePacket extends OutgoingPacket {
         setPacketLengthType(PacketLength.BYTE);
         writeInt(gameTime);
         writeInt(turnTime);
+        writeInt(timeUntilBreak);
+        writeInt(breakTime);
         writeInt(turnDuration);
         writeInt(roundDuration);
-        setLength(getBuffer().readableBytes()); // 4 x byte
+        setLength(getBuffer().readableBytes());
     }
 }

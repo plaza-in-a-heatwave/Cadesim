@@ -7,14 +7,22 @@ import com.benberi.cadesim.server.ServerContext;
 public class BlockadeTimeMachine {
 
     /**
-     * The timer of the blockade
+     * Round time and turn time
      */
     private int roundTime = ServerConfiguration.getRoundDuration();
-
-    /**
-     * The current turn time
-     */
     private int turnTime = ServerConfiguration.getTurnDuration();
+
+    /*
+     * Break duration and break interval
+     */
+    private int breakTime      = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
+    private int timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
+
+    /*
+     * Are we currently breaking
+     */
+    private boolean inBreak = false;
+    private boolean breakPending = false;
 
     /**
      * The server context
@@ -29,23 +37,75 @@ public class BlockadeTimeMachine {
 
 	private boolean isLastTurn = false;
 
+	/**
+	 * helper method to print whether it's a break or not
+	 */
+	public boolean isBreak() {
+	    return inBreak;
+	}
+
     /**
      * The main tick of blockade time machine
      */
     public void tick() {
         if (!isLock())
         {
-            roundTime--; // Tick blockade time
-            
-            // if in final turn, use turnTime instead of roundTime
-            // gives players a last whole turn
-            if ((!isLastTurn) && (roundTime < turnTime) && (turnTime > 0))
+            // if breaks enabled, count down towards the break too
+            if (timeUntilBreak > 0)
             {
-            	isLastTurn  = true;
-            	roundTime = turnTime;
+                timeUntilBreak -= 1;
+            }
+            else if (timeUntilBreak == 0)
+            {
+                if (breakTime > 0)
+                {
+                    // at the start of the break period:
+                    //     schedule it
+                    //     notify people
+                    if (breakTime == (ServerConfiguration.getBreak()[0] * 10))
+                    {
+                        if (!inBreak)
+                        {
+                            breakPending = true;
+                        }
+                    }
+
+                    if (inBreak)
+                    {
+                        breakTime -= 1;
+                    }
+                }
+                else if (breakTime == 0)
+                {
+                    // break's over!
+                    breakTime    = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
+                    timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
+                    inBreak = false;
+                }
+            }
+
+            if (!inBreak)
+            {
+                roundTime--; // Tick blockade time
+
+                // if in final turn, use turnTime instead of roundTime
+                // gives players a last whole turn
+                if ((!isLastTurn) && (roundTime < turnTime) && (turnTime > 0))
+                {
+                    isLastTurn  = true;
+                    roundTime = turnTime;
+                }
             }
         }
-        	
+        else // if isLock()
+        {
+            // if locked, we can schedule a break.
+            if (breakPending)
+            {
+                breakPending = false;
+                inBreak = true;
+            }
+        }
 
         if (turnTime <= -Constants.TURN_EXTRA_TIME) {
             if (!isLock()) {
@@ -59,7 +119,10 @@ public class BlockadeTimeMachine {
             return;
         }
 
-        turnTime--; // Tick turn time
+        if (!inBreak)
+        {
+            turnTime--; // Tick turn time
+        }
     }
 
     public void setLock(boolean lock) {
@@ -82,6 +145,14 @@ public class BlockadeTimeMachine {
      */
     public int getTurnTime() {
         return turnTime / 10;
+    }
+
+    public int getTimeUntilBreak() {
+        return timeUntilBreak;
+    }
+
+    public int getBreakTime() {
+        return breakTime;
     }
 
     private void endTurn() { turnTime = 0; }

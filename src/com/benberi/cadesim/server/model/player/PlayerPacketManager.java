@@ -5,6 +5,7 @@ import com.benberi.cadesim.server.codec.packet.IncomingPacket;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.codec.packet.out.impl.*;
+import com.benberi.cadesim.server.model.cade.BlockadeTimeMachine;
 import com.benberi.cadesim.server.model.player.move.MoveTokensHandler;
 import com.benberi.cadesim.server.model.player.move.MoveType;
 
@@ -149,15 +150,18 @@ public class PlayerPacketManager {
      * Sends the time to the player
      */
     public void sendTime() {
-        int gameTime = player.getContext().getTimeMachine().getRoundTime();
-        int turnTime = player.getContext().getTimeMachine().getTurnTime();
-        int turnDuration = player.getContext().getPlayerManager().getTurnDuration();
-        int roundDuration = player.getContext().getPlayerManager().getRoundDuration();
+        BlockadeTimeMachine tm = player.getContext().getTimeMachine();
+        PlayerManager pm = player.getContext().getPlayerManager();
+        int gameTime = tm.getRoundTime();
+        int turnTime = tm.getTurnTime();
         SendTimePacket packet = new SendTimePacket();
+
         packet.setGameTime((gameTime>0)?gameTime:0);
         packet.setTurnTime((turnTime>0)?turnTime:0);
-        packet.setTurnDuration(turnDuration / 10);
-        packet.setRoundDuration(roundDuration / 10);
+        packet.setTimeUntilBreak(tm.getTimeUntilBreak() / 10);
+        packet.setBreakTime(tm.getBreakTime() / 10);
+        packet.setTurnDuration(pm.getTurnDuration() / 10);
+        packet.setRoundDuration(pm.getRoundDuration() / 10);
 
         player.sendPacket(packet);
     }
