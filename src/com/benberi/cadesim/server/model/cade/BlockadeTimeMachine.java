@@ -184,5 +184,11 @@ public class BlockadeTimeMachine {
     public void renewRound() {
     	roundTime = context.getPlayerManager().getRoundDuration();
         isLastTurn = false;
+
+        // reset breaks
+        breakTime      = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
+        timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
+        inBreak = false;
+        breakPending = false;
     }
 }

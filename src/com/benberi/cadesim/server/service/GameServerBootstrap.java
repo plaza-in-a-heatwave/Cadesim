@@ -233,7 +233,6 @@ public class GameServerBootstrap {
                     int[] i = ServerConfiguration.getBreak();
                     i[0] = Integer.parseInt(b[0]);
                     i[1] = Integer.parseInt(b[1]);
-                    System.out.println("i:" + i[0] + ":" + i[1]);
                     if (
                         (i[0] < Constants.MIN_BREAK_DURATION) ||
                         (i[1] < Constants.MIN_BREAK_INTERVAL)
@@ -242,7 +241,6 @@ public class GameServerBootstrap {
                         help(options);
                     }
                     ServerConfiguration.setBreak(i[0], i[1]);
-                    System.out.println("done it!");
                 }
                 catch (Exception e)
                 {
