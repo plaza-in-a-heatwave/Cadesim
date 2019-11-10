@@ -11,7 +11,7 @@ public class ServerConfiguration {
      * Server defaults. Overridden by CLI during initialisation.
      */
     private static int playerLimit = 5;
-    private static int port = 4666;
+    private static int port = 4970;
     private static int turnDuration  = 300;        // "deciseconds"
     private static int roundDuration = 18000;      // "deciseconds"
     private static int respawnDelay  = 2;          // turns
