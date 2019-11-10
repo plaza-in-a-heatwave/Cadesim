@@ -2,11 +2,16 @@ Release changelog for the client & server
     partial release progress also documented here.
     See most recent issues at: github.com/plaza-in-a-heatwave/Obsidio-Server/issues
 
-1.9.8 (pending)
+1.9.9
+    feature (both)  - this and all subsequent releases will feature unique ports to allow simultaneous serving
+    feature (client)- improve chat message readability
+    feature (both)  - add release build scripts
+    feature (both)  - add breaks configurable server-side
+    bugfix (both)   - more realistic round timing
+    feature (server)- improve gunning rates to 90%/75% for elite/basic
+    bugfix (client) - right hand guns fill in wrong direction
     feature (client)- show token tooltips
-    bugfix (server) - power save mode not working - can't properly shut down a game until new players join
-
-1.9.8 (complete)
+1.9.8
     bugfix (both)   - fix token dragging
     feature (server)- add multiclient optarg
     bugfix (server) - fix commandline arguments
