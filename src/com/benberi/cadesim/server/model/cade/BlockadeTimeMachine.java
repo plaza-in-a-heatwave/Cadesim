@@ -81,6 +81,7 @@ public class BlockadeTimeMachine {
                     breakTime    = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
                     timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
                     inBreak = false;
+                    context.getPlayerManager().serverBroadcastMessage("Break's over!");
                 }
             }
 
@@ -104,6 +105,7 @@ public class BlockadeTimeMachine {
             {
                 breakPending = false;
                 inBreak = true;
+                context.getPlayerManager().serverBroadcastMessage("Arr, time to rest a moment. (" + getBreakTime() / 10 + "s)");
             }
         }
 
