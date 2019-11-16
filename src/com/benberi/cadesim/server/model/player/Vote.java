@@ -12,7 +12,7 @@ public class Vote {
 	private int votesFor     = 0;              // count votes for
 	private int votesAgainst = 0;              // count votes against
 	private int majorityThreshold; // vote carried at > n%
-	public static final int VOTE_TIMEOUT_MILLIS = 30000; // timeout after n%
+	public static final int VOTE_TIMEOUT_MILLIS = 60000; // timeout after n%
 	public static final int PRINT_SCORE_MILLIS = 10000; // ms
 	private List<String> eligibleIPs = new ArrayList<String>(); // restrict to players present when vote started
 	private List<String> voterIPs    = new ArrayList<String>(); // prevent multi ip voting
