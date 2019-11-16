@@ -1432,7 +1432,10 @@ public class PlayerManager {
 	    			boolean found = false;
 	    			for (Player registeredPlayer : listRegisteredPlayers())
 	    			{
-	    				if (message.equals("/propose kick " + registeredPlayer.getName()))
+                        // kick player using case insensitive matching
+                        // e.g. Helloworld, helloworld, HelLoWOrLD
+                        // should all kick player HelloWorld
+                        if (message.toLowerCase().equals("/propose kick " + registeredPlayer.getName().toLowerCase()))
 	    				{
 	    					handleStartVote(pl, message, "kick " + registeredPlayer.getName());
 	    					found = true;

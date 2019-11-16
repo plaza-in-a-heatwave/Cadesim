@@ -13,16 +13,14 @@ import static com.benberi.cadesim.server.model.cade.map.BlockadeMap.FLAG_3;
 
 public enum MapType {
 
-    DEFAULT("default.txt");
+    DEFAULT(Constants.DEFAULT_MAPNAME);
 
     MapType(String name) {
     }
 
     public int[][] load(BlockadeMap bmap) {
         int[][] map = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
-
-       // File file = new File(CadeServer.class.getResource("resources/maps/default.txt").getPath());
-        File file = new File(Constants.mapDirectory + "/" + ServerConfiguration.getMapName() + ".txt");
+        File file = new File(Constants.mapDirectory + "/" + ServerConfiguration.getMapName());
 
         int x = 0;
         int y = 0;
@@ -40,6 +38,7 @@ public enum MapType {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
         }
 
         int[][] finalMap = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];

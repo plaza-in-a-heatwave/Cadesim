@@ -20,9 +20,7 @@ public class RandomUtils {
         String result = "<none>";
         try {
             File randomMap = mapList[RandomUtils.randInt(0, mapList.length-1)];
-        	result = randomMap.getName().substring(
-        		0, randomMap.getName().lastIndexOf(".")
-        	);
+        	result = randomMap.getName();
         } catch(NullPointerException e) {
         	throw(e);
         }
