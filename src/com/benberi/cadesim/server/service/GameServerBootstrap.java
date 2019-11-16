@@ -98,7 +98,7 @@ public class GameServerBootstrap {
         options.addOption("f", "enable-breaks", true, "two tuple (duration sec, interval sec) e.g. 60,600 is 1 min break every 10 min. minimum break is 10, minimum interval is 60. (default: not enabled " + ServerConfiguration.getBreak() + ")");
         options.addOption("g", "permit-multiclient", true, "enable players to login with more than 1 client at a time, (on or off) (default: " + ServerConfiguration.getMultiClientMode() + ")");
         options.addOption("h", "help", false, "Show help");
-        options.addOption("i", "enable-power-saving", true, "enable power saving, (on or off) (default: " + ServerConfiguration.getPowerSavingMode() + ")");
+        options.addOption("i", "run-continuous", true, "enable continuous running, (on or off) (default: " + ServerConfiguration.getRunContinuousMode() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("n", "team-names", true, "names for the attacker and defender, comma separated, " + Constants.MAX_TEAMNAME_SIZE + " characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
         options.addOption("o", "map-rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
@@ -259,11 +259,11 @@ public class GameServerBootstrap {
             	String v = cmd.getOptionValue("i").toLowerCase();
             	if (v.equals("on"))
             	{
-            		ServerConfiguration.setPowerSavingMode(true);
+            		ServerConfiguration.setRunContinuousMode(true);
             	}
             	else if (v.equals("off"))
             	{
-            		ServerConfiguration.setPowerSavingMode(false);
+            		ServerConfiguration.setRunContinuousMode(false);
             	}
             	else
             	{

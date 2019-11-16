@@ -97,4 +97,9 @@ public class OutGoingPackets {
      * delivers messages to clients
      */
     public static final int RECEIVE_MESSAGE = 19;
+    
+    /**
+     * ends the game and sends stats across
+     */
+    public static final int END_GAME = 20;
 }

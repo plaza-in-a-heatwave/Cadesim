@@ -288,6 +288,12 @@ public class PlayerPacketManager {
     	this.player.sendPacket(packet);
     }
 
+    public void sendEndGamePacket(byte[] serializedStats) {
+        EndGamePacket packet = new EndGamePacket();
+        packet.setStats(serializedStats);
+        player.sendPacket(packet);
+    }
+
     public void queueOutgoing(OutgoingPacket packet) {
         outgoingPackets.add(packet);
     }

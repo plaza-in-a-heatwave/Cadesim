@@ -413,6 +413,14 @@ public class Player extends Position {
 
             // sunk, 'respawn' on land side with new ship
     		respawnOnLandside(true);
+    		
+    		// increment sunk stats for this player by 1
+    		context.getPlayerManager().getStats().updateData(
+    		    Stats.SUNK_SERIES_PREFIX,
+    		    getName(),
+    		    context.getTimeMachine().getRoundTime(),
+    		    1 // 1 sink
+    		);
     	}
     }
 

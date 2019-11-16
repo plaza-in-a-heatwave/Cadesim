@@ -4,6 +4,7 @@ import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.PlayerManager;
+import com.benberi.cadesim.server.model.player.Stats;
 import com.benberi.cadesim.server.model.player.move.MoveType;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.server.util.Direction;
@@ -533,8 +534,28 @@ public class CollisionCalculator {
      * @param phase     The phase-step it happened at
      */
     private void collide(Player player, Player other, int turn, int phase) {
+        // bugfix - if player was already sunk before the collide,
+        // dont collect sinkstats twice
+        boolean wasAlreadySunk = false;
+        if (player.getVessel().isDamageMaxed())
+        {
+            wasAlreadySunk = true;
+        }
+        
         player.getCollisionStorage().setCollided(turn, phase);
         player.getVessel().appendDamage(other.getVessel().getRamDamage(), other.getTeam());
+        
+        // if sunk, give shooter stat points
+        // marked sunk elsewhere in PlayerManager - but add stats here
+        if (player.getVessel().isDamageMaxed() && !wasAlreadySunk)
+        {
+            context.getPlayerManager().getStats().updateData(
+                Stats.SINK_SERIES_PREFIX,
+                other.getName(),
+                context.getTimeMachine().getRoundTime(),
+                1 // 1 sink
+            );
+        }
     }
 
 

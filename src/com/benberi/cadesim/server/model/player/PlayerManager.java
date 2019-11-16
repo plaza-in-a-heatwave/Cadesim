@@ -18,12 +18,18 @@ import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
 public class PlayerManager {
+
+    /**
+     * Stats to display at end of play
+     */
+    private Stats stats = new Stats();
 
     /**
      * List of players in the game
@@ -95,6 +101,14 @@ public class PlayerManager {
 	private int turnDuration;
 	private int roundDuration;
 	private String disengageBehavior;
+	
+	/**
+	 * getter for the stats member
+	 * @return stats
+	 */
+	public Stats getStats() {
+	    return stats;
+	}
 
 	/**
 	 * helper method to split string into parts
@@ -404,6 +418,22 @@ public class PlayerManager {
                     p.setSunk(turn);
                     p.getAnimationStructure().getTurn(turn).setSunk(true);
                 }
+                
+                // add cannons shot to stats
+                stats.updateData(
+                    Stats.CANNONS_SERIES_PREFIX,
+                    p.getName(),
+                    context.getTimeMachine().getRoundTime(),
+                    leftShoots + rightShoots
+                );
+                
+                // add moves used to stats. if None, just add a 0.
+                stats.updateData(
+                    Stats.MOVES_SERIES_PREFIX,
+                    p.getName(),
+                    context.getTimeMachine().getRoundTime(),
+                    (p.getMoves().getMove(turn) == MoveType.NONE)?0:1
+                );
             }
 
         }
@@ -411,6 +441,22 @@ public class PlayerManager {
         // Process some after-turns stuff like updating damage interfaces, and such
         for (Player p : listRegisteredPlayers()) {
             p.processAfterTurnUpdate();
+            
+            // get damage stats
+            stats.updateData(
+                Stats.DAMAGE_SERIES_PREFIX,
+                p.getName(),
+                context.getTimeMachine().getRoundTime(),
+                (int)p.getVessel().getDamagePercentage()
+            );
+            
+         // get bilge stats
+            stats.updateData(
+                Stats.BILGE_SERIES_PREFIX,
+                p.getName(),
+                context.getTimeMachine().getRoundTime(),
+                (int)p.getVessel().getBilgePercentage()
+            );
         }
 
         context.getTimeMachine().setLock(true);
@@ -455,8 +501,11 @@ public class PlayerManager {
 
         // Set at war flags
         for (Flag flag : context.getMap().getFlags()) {
-            Team addPointsTeam = null;
+            // for stats, track who scored.
+            // not perfect, 1st player always returned even if 2 scored it
+            Player scorer = null;
 
+            Team addPointsTeam = null;
             Team team = null;
             for (Player p : listRegisteredPlayers()) {
                 if (p.isSunk() || p.isNeedsRespawn()) { // bugfix flags are retained on reset
@@ -467,6 +516,7 @@ public class PlayerManager {
                         team = p.getTeam();
                         flag.setControlled(team);
                         addPointsTeam = p.getTeam();
+                        scorer = p;
                     }
                     else if (team == p.getTeam()) {
                         addPointsTeam = p.getTeam();
@@ -474,13 +524,23 @@ public class PlayerManager {
                     else if (team != p.getTeam()) {
                         flag.setAtWar(true);
                         addPointsTeam = null;
+                        scorer = null;
                         break;
                     }
                 }
             }
 
             if (addPointsTeam != null) {
-                addPointsToTeam(addPointsTeam, flag.getSize().getID());
+                int points = flag.getSize().getID();
+                addPointsToTeam(addPointsTeam, points);
+                
+                // also give the scorer stat points
+                stats.updateData(
+                    Stats.POINTS_SERIES_PREFIX,
+                    scorer.getName(),
+                    context.getTimeMachine().getRoundTime(),
+                    points
+                );
             }
         }
 
@@ -518,7 +578,27 @@ public class PlayerManager {
         }
         Player player = collision.getVesselForCannonCollide(source, direction);
         if (player != null && source.isOutOfSafe() && !source.isSunk()) {
+            // bugfix - if player was already sunk before the collide,
+            // dont collect sinkstats twice
+            boolean wasAlreadySunk = false;
+            if (player.getVessel().isDamageMaxed())
+            {
+                wasAlreadySunk = true;
+            }
+
             player.getVessel().appendDamage(((double) shoots * source.getVessel().getCannonType().getDamage()), source.getTeam());
+
+            // if sunk, give shooter stat points
+            // marked sunk elsewhere in PlayerManager - but add stats here
+            if (player.getVessel().isDamageMaxed() && !wasAlreadySunk)
+            {
+                stats.updateData(
+                    Stats.SINK_SERIES_PREFIX,
+                    source.getName(),
+                    context.getTimeMachine().getRoundTime(),
+                    1 // 1 sink
+                );
+            }
         }
     }
 
@@ -563,6 +643,39 @@ public class PlayerManager {
             }
         }
         return  null;
+    }
+
+    /**
+     * sends end game to all connected clients
+     * used when not running continuously
+     * based on https://stackoverflow.com/a/2836659
+     */
+    public void sendEndGamePacket() {
+        // serialize could take some time, do it once only
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutput out = null;
+        try {
+            out = new ObjectOutputStream(b);
+            out.writeObject(stats);
+            out.flush();
+            byte[] serializedStats = b.toByteArray();
+
+            // send the data
+            for (Player p : listRegisteredPlayers()) {
+                p.getPackets().sendEndGamePacket(serializedStats);
+            }
+        }
+        catch (IOException e) {
+            ServerContext.log("WARNING - IOException when trying to serialize and send stats");
+        }
+        finally {
+             // cleanup
+             try {
+                 b.close();
+             } catch (IOException e) {
+                 // ignore
+             }
+        }
     }
 
     /**
@@ -819,6 +932,9 @@ public class PlayerManager {
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
                 printCommandHelp(pl); // private message with commands
+                
+                // start tracking player stats
+                stats.addPlayer(name, Team.teamIDToString(team));
             }
         }
     }
@@ -908,6 +1024,19 @@ public class PlayerManager {
             sendMoveBar(p);
 
         }
+
+        // DEBUG
+        System.out.println("========");
+        for (Stats.Series s : stats.getListOfSeries())
+        {
+            System.out.println("series: " + s.getName());
+            for (int i : s.getDataPoints().keySet())
+            {
+                System.out.println("    key: " + i + ", value: " + s.getDataPoints().get(i));
+            }
+        }
+        System.out.println("========");
+        // END DEBUG
     }
 
     public int getPointsDefender() {
@@ -962,6 +1091,9 @@ public class PlayerManager {
         	p.getMoveTokens().setAutomaticSealGeneration(true); // bugfix disparity between client and server
         	p.getPackets().sendFlags();
         }
+        
+        // make a new stats object
+        stats = new Stats();
         
         // game no longer ended
         setGameEnded(false);

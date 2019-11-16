@@ -45,77 +45,65 @@ public class GameService implements Runnable {
             context.getTimeMachine().tick();
 
             if(playerManager.isGameEnded()) {
-            	// print out the scores for the game
-            	playerManager.serverBroadcastMessage(
-            			"Round ended, final scores were:\n" +
-            			"    Defender:" + playerManager.getPointsDefender() + "\n" + 
-            			"    Attacker:" + playerManager.getPointsAttacker()
-            	);
-
-            	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
-            	gamesCompleted++;
-                
-            	// provide a way to hibernate machines if no players.
-            	// optional as it's quite buggy.
-                if (ServerConfiguration.getPowerSavingMode())
+                if (ServerConfiguration.getRunContinuousMode())
                 {
-                	// if no players... hibernate time machines
-                    if (playerManager.listRegisteredPlayers().size() == 0) {
-                    	context.getTimeMachine().renewTurn(); // bugfix: we're not in the middle of an animation
-                        context.getTimeMachine().setLock(false);
-                        ServerContext.log("No players registered, hibernating to save CPU");
-
-                        while (playerManager.listRegisteredPlayers().size() == 0) {
-                            try {
-                                Thread.sleep(Constants.SERVER_ADMIN_INTERVAL_MILLIS);
-
-                                // every n seconds, do some admin
-                                context.getPackets().queuePackets();
-                                playerManager.tick();
-                                playerManager.queueOutgoing();
-                            } catch(InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                        ServerContext.log("New player joined, waking up...");
+                	// print out the scores for the game
+                	playerManager.serverBroadcastMessage(
+                			"Round ended, final scores were:\n" +
+                			"    Defender:" + playerManager.getPointsDefender() + "\n" + 
+                			"    Attacker:" + playerManager.getPointsAttacker()
+                	);
+    
+                	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
+                	gamesCompleted++;
+                    
+                    // switch map if players have demanded it, or if we're rotating maps
+                    String oldMap = ServerConfiguration.getMapName();
+                    if (playerManager.shouldSwitchMap())
+                    {
+                    	randomRotateMap();
+                    	ServerContext.log(
+                    		"Players voted to switch map; rotated map to: " +
+                    		ServerConfiguration.getMapName()
+                    	);
                     }
+                    else if (
+                    	(ServerConfiguration.getMapRotationPeriod() > 0) &&
+                    	((gamesCompleted % ServerConfiguration.getMapRotationPeriod()) == 0)
+                    ) {
+                    	randomRotateMap();
+                    	ServerContext.log(
+                    		"Rotated map after " +
+                    		Integer.toString(ServerConfiguration.getMapRotationPeriod()) +
+                    		" games, automatically chose random map: " +
+                    		ServerConfiguration.getMapName()
+                    	);
+                    }
+                    
+                    // message if map changed
+                    String newMap = ServerConfiguration.getMapName();
+                    if (!newMap.contentEquals(oldMap))
+                    {
+                    	playerManager.serverBroadcastMessage("Changed map to " + newMap);
+                    }
+                    
+                    // complete the game refresh
+                    playerManager.renewGame();
+                    context.getTimeMachine().renewRound(); // bugfix - order matters
+    
+                    playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
                 }
-                
-                // switch map if players have demanded it, or if we're rotating maps
-                String oldMap = ServerConfiguration.getMapName();
-                if (playerManager.shouldSwitchMap())
+                else // dont run continuous
                 {
-                	randomRotateMap();
-                	ServerContext.log(
-                		"Players voted to switch map; rotated map to: " +
-                		ServerConfiguration.getMapName()
-                	);
-                }
-                else if (
-                	(ServerConfiguration.getMapRotationPeriod() > 0) &&
-                	((gamesCompleted % ServerConfiguration.getMapRotationPeriod()) == 0)
-                ) {
-                	randomRotateMap();
-                	ServerContext.log(
-                		"Rotated map after " +
-                		Integer.toString(ServerConfiguration.getMapRotationPeriod()) +
-                		" games, automatically chose random map: " +
-                		ServerConfiguration.getMapName()
-                	);
-                }
-                
-                // message if map changed
-                String newMap = ServerConfiguration.getMapName();
-                if (!newMap.contentEquals(oldMap))
-                {
-                	playerManager.serverBroadcastMessage("Changed map to " + newMap);
-                }
-                
-                // complete the game refresh
-                playerManager.renewGame();
-                context.getTimeMachine().renewRound(); // bugfix - order matters
+                    // get client to display endgame stats
+                    System.out.println("sending game ended");
+                    playerManager.sendEndGamePacket();
+                    System.out.print("sent game ended");
 
-                playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
+                    // exit cleanly
+                    ServerContext.log("Exited successfully after 1 game played as --run-continuous not enabled");
+                    System.exit(Constants.EXIT_SUCCESS_GAMEOVER);
+                }
             }
 
         } catch (Exception e) {

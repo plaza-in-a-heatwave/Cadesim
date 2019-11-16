@@ -2,7 +2,9 @@ Release changelog for the client & server
     partial release progress also documented here.
     See most recent issues at: github.com/plaza-in-a-heatwave/Obsidio-Server/issues
 
-1.9.91
+2.0.0 (pending)
+    feature (both)  - add stats and an end screen for games that don't renew
+2.0.0 (complete)
     bugfix (server) - when a round is renewed, the time until next break renews too
 1.9.9
     feature (both)  - this and all subsequent releases will feature unique ports to allow simultaneous serving

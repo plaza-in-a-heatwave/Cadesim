@@ -37,12 +37,13 @@ public class Constants {
     /**
      * return types
      */
-    public static final int EXIT_ERROR_UNKNOWN          = 13;
-    public static final int EXIT_ERROR_BAD_CONFIG       =  6;
-    public static final int EXIT_ERROR_CANT_FIND_MAPS   =  3;
-    public static final int EXIT_ERROR_CANT_CREATE_LOGS =  2;
-    public static final int EXIT_ERROR_CANT_BIND_LOCAL  =  1;
-    public static final int EXIT_SUCCESS                =  0;
+    public static final int EXIT_ERROR_UNKNOWN          = 68;
+    public static final int EXIT_ERROR_BAD_CONFIG       = 67;
+    public static final int EXIT_ERROR_CANT_FIND_MAPS   = 66;
+    public static final int EXIT_ERROR_CANT_CREATE_LOGS = 65;
+    public static final int EXIT_ERROR_CANT_BIND_LOCAL  = 64;
+    public static final int EXIT_SUCCESS_GAMEOVER       = 1;  // when not continuous mode, and game ends
+    public static final int EXIT_SUCCESS                = 0;
     
     /**
      * The delay of the main game service loop in milliseconds

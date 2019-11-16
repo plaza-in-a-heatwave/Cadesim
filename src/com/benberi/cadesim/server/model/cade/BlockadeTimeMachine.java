@@ -130,7 +130,7 @@ public class BlockadeTimeMachine {
     }
 
     /**
-     * Gets the blockade time
+     * Gets the blockade time (in seconds)
      * @return {@link #roundTime}
      */
     public int getRoundTime() {
@@ -140,17 +140,25 @@ public class BlockadeTimeMachine {
     private void endRound() { roundTime = 0;}
 
     /**
-     * Gets the current turn time
+     * Gets the current turn time (in seconds)
      * @return {@link #turnTime}
      */
     public int getTurnTime() {
         return turnTime / 10;
     }
 
+    /**
+     * Gets the current time until break (in deciseconds)
+     * @return {@link #timeUntilBreak}
+     */
     public int getTimeUntilBreak() {
         return timeUntilBreak;
     }
 
+    /**
+     * Gets the elapsed break time (in deciseconds)
+     * @return {@link #breakTime}
+     */
     public int getBreakTime() {
         return breakTime;
     }
