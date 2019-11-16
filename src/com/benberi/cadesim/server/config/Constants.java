@@ -33,6 +33,7 @@ public class Constants {
      * map paths to use
      */
     public static final String mapDirectory = "maps";
+    public static final String DEFAULT_MAPNAME = "default.txt";
     
     /**
      * return types
