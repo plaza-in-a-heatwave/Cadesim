@@ -5,7 +5,6 @@ import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
 
-import com.benberi.cadesim.server.util.RandomUtils;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -86,9 +85,15 @@ public class GameServerBootstrap {
      * @throws NumberFormatException 
      */
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
-        Options options = new Options();
-        
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
+
+        // set up maps
+        ServerConfiguration.loadAvailableMaps();
+        ServerContext.log("Loaded " + ServerConfiguration.getAvailableMaps().size() + " maps.");
+        ServerConfiguration.pregenerateNextMapName();
+
+        // set up CLI options
+        Options options = new Options();
 
         options.addOption("a", "max-players", true, "Set max players allowed (default: " + ServerConfiguration.getPlayerLimit() + ")");
         options.addOption("b", "disengage-behavior", true, "disengage button behavior (\"off\", \"simple\", \"realistic\") (default: " + ServerConfiguration.getDisengageBehavior() + ")");
@@ -289,13 +294,11 @@ public class GameServerBootstrap {
             if (!cmd.hasOption("m")) { // Chooses random map if no map chosen
                 try {
                 	ServerConfiguration.setMapName(
-                		RandomUtils.getRandomMapName(
-                			Constants.mapDirectory
-                		)
+                        ServerConfiguration.getRandomMapName()
                 	);
                     ServerContext.log("No map specified, automatically chose random map: " + ServerConfiguration.getMapName());
                 } catch(NullPointerException e) {
-                	ServerContext.log("Failed to find random map folder. create a folder called \"maps\" in the same directory.");
+                    ServerContext.log("Failed to find maps folder. create a folder called \"maps\" in the same directory.");
                     System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
                 }
             }
@@ -309,9 +312,6 @@ public class GameServerBootstrap {
             {
             	help(options);
             }
-
-            // set up the next map too.
-            ServerConfiguration.pregenerateNextMapName();
 
             GameServerBootstrap bootstrap = new GameServerBootstrap();
             bootstrap.startServer();
