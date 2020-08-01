@@ -50,7 +50,7 @@ public class Wargal extends Vessel {
     // forums.puzzlepirates.com/community/mvnforum/viewthread?thread=208282
     @Override
     public double getMaxDamage() {
-        return 10.333;
+        return 17.222;
     }
 
     @Override
