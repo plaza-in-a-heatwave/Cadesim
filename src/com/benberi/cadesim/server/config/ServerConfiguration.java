@@ -1,7 +1,13 @@
 package com.benberi.cadesim.server.config;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+
+import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
-import com.benberi.cadesim.server.util.RandomUtils;
+import com.benberi.cadesim.server.util.Utils;
 
 public class ServerConfiguration {
 	/**
@@ -18,7 +24,6 @@ public class ServerConfiguration {
     private static int respawnDelay  = 2;          // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
-    private static String nextMapName = null;      // the next map in the rotation. cannot be initialized by CLI.
 	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
@@ -30,6 +35,10 @@ public class ServerConfiguration {
 	private static boolean runContinuousMode = true;
     private static boolean multiClientMode = true;
     private static int[] breakInfo = {-1, -1}; // seconds
+
+    // uninitializable defaults
+    private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
+    private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -86,7 +95,7 @@ public class ServerConfiguration {
                 "    Turn duration:" + getTurnDuration() / 10 + "s,\n" +
                 "    Round duration:" + getRoundDuration() / 10 + "s,\n" +
                 "    Sink delay:" + getRespawnDelay() + " turns,\n" +
-                "    Map rotation period:" + getMapRotationPeriod() + " turns,\n" +
+                "    Map rotation period:" + ((getMapRotationPeriod()== -1)?"[rotation off] -1":getMapRotationPeriod() + " turns") + ",\n" +
                 "    Disengage behavior:" + getDisengageBehavior() + ",\n" +
                 "    Vote majority percentage: " +
                 (isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ",\n" +
@@ -107,12 +116,15 @@ public class ServerConfiguration {
         ServerConfiguration.mapName = mapName;
     }
 
-    // setter and generator for the next map in rotation.
+    // setter/getter and generator for the next map in rotation.
     public static String getNextMapName() {
         return ServerConfiguration.nextMapName;
     }
-    public static void pregenerateNextMapName() {
-        ServerConfiguration.nextMapName = RandomUtils.getRandomMapName(Constants.mapDirectory);
+    public static void overrideNextMapName(String mapName) { // specify one
+        ServerConfiguration.nextMapName = mapName;
+    }
+    public static void pregenerateNextMapName() {       // choose one at random
+        ServerConfiguration.nextMapName = ServerConfiguration.getRandomMapName();
     }
 
 	public static int getMapRotationPeriod() {
@@ -122,6 +134,23 @@ public class ServerConfiguration {
 	public static void setMapRotationPeriod(int mapRotationPeriod) {
 		ServerConfiguration.mapRotationPeriod = mapRotationPeriod;
 	}
+
+	// grab available maps and store the list in ServerConfig. restart required to recognize a change.
+	public static void loadAvailableMaps() {
+        Path currentRelativePath = Paths.get("");
+        File[] mapList = currentRelativePath.resolveSibling(Constants.mapDirectory).toFile().listFiles();
+        ArrayList<String> names = new ArrayList<>();
+        for (File f : mapList) {
+            names.add(f.getName());
+        }
+        ServerConfiguration.mapList = names;
+	}
+	public static ArrayList<String> getAvailableMaps() {
+	    return ServerConfiguration.mapList;
+	}
+	public static String getRandomMapName() {
+        return ServerConfiguration.mapList.get(Utils.randInt(0, mapList.size()-1));
+    }
 
 	public static String getDisengageBehavior() {
 		return ServerConfiguration.disengageBehavior ;

@@ -981,9 +981,21 @@ public class PlayerManager {
     public void serverBroadcastMessage(String message)
     {
     	ServerContext.log("[chat] " + Constants.serverBroadcast + ":" + message);
-        for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
-            player.getPackets().sendReceiveMessage(Constants.serverBroadcast, message);
-        }
+    	
+    	if (message.length() >= Constants.SPLIT_CHAT_MESSAGES_THRESHOLD) {
+    	    List<String> messageParts = splitEqually(message, Constants.SPLIT_CHAT_MESSAGES_THRESHOLD);
+    	    for (String s : messageParts) {
+    	        for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
+                    player.getPackets().sendReceiveMessage(Constants.serverBroadcast, s);
+                }
+    	    }
+    	}
+    	else
+    	{
+    	    for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
+                player.getPackets().sendReceiveMessage(Constants.serverBroadcast, message);
+            }
+    	}
     }
     
     /**
@@ -992,7 +1004,16 @@ public class PlayerManager {
     public void serverPrivateMessage(Player pl, String message)
     {
     	ServerContext.log("[chat] " + Constants.serverPrivate + "(to " + pl.getName() + "):" + message);
-        pl.getPackets().sendReceiveMessage(Constants.serverPrivate, message);
+    	
+    	if (message.length() >= Constants.SPLIT_CHAT_MESSAGES_THRESHOLD) {
+    	    List<String> messageParts = splitEqually(message, Constants.SPLIT_CHAT_MESSAGES_THRESHOLD);
+            for (String s : messageParts) {
+                pl.getPackets().sendReceiveMessage(Constants.serverPrivate, s);
+            }
+    	}
+    	else {
+    	    pl.getPackets().sendReceiveMessage(Constants.serverPrivate, message);
+    	}
     }
     
     /**
@@ -1048,6 +1069,32 @@ public class PlayerManager {
 			default:
 				break;
 			}
+		}
+		else if (currentVote.getDescription().startsWith("change map to: "))
+		{
+		    VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+            switch(v)
+            {
+            case TBD:
+                break;
+            case FOR:
+                ServerConfiguration.overrideNextMapName(
+                        currentVote.getDescription().substring(
+                                "change map to: ".length()
+                        )
+                );
+                handleStopVote();
+                setShouldSwitchMap(true);
+                setPersistTemporarySettings(true);
+                context.getTimeMachine().stop();
+                break;
+            case AGAINST:
+            case TIMEDOUT:
+                handleStopVote();
+                break;
+            default:
+                break;
+            }
 		}
 		else if (currentVote.getDescription().startsWith("kick "))
 		{
@@ -1241,14 +1288,14 @@ public class PlayerManager {
 		{
     		serverPrivateMessage(
         			pl,
-        			"The following Cadesim commands are supported: /info"
+        			"The following Cadesim commands are supported: /info, /show"
         	);
 		}
     	else
     	{
     		serverPrivateMessage(
         			pl,
-        			"The following Cadesim commands are supported: /propose, /vote, /info"
+        			"The following Cadesim commands are supported: /propose, /vote, /info, /show"
         	);
     	}
     	
@@ -1303,6 +1350,45 @@ public class PlayerManager {
 	    		else if (message.equals("/propose nextmap"))
 	    		{
 	    			handleStartVote(pl, message, "nextmap");
+	    		}
+	    		else if (message.startsWith("/propose changemap"))
+	    		{
+	    		    // validate by name first
+	    		    String match=null;
+	    		    for (String s : ServerConfiguration.getAvailableMaps()) {
+	    		        if (message.toLowerCase().equals("/propose changemap " + s.toLowerCase())) {
+	    		            match = s;
+	    		            break;
+	    		        }
+	    		    }
+	    		    
+	    		    // validate by number. must have the trailing space too.
+	    		    if (match == null && message.startsWith("/propose changemap ")) {
+	    		        try {
+	    		            int index = Integer.parseInt(message.substring("/propose changemap ".length()));
+	    		            if ((index >= 0) && (index < ServerConfiguration.getAvailableMaps().size())) {
+	    		                match = ServerConfiguration.getAvailableMaps().get(index);
+	    		            }
+	    		            else
+	    		            {
+	    		                serverPrivateMessage(pl, "changemap: [" + index + "] isn't a map we know about");
+	    		            }
+	    		        }
+	    		        catch (NumberFormatException e) {
+	    		            // doesn't exist
+	    		        }
+	    		        catch (Exception e) {
+	    		            // something else...
+	    		        }
+	    		    }
+	    		    
+	    		    if (match != null) {
+	    		        handleStartVote(pl, "/propose changemap " + match, "change map to: " + match);
+	    		    }
+	    		    else
+	    		    {
+	    		        serverPrivateMessage(pl, "usage: /propose changemap <map #/name>\n    find available maps with /show maps");
+	    		    }
 	    		}
 	    		else if (message.startsWith("/propose kick"))
 	    		{
@@ -1409,7 +1495,8 @@ public class PlayerManager {
 	    		{
 	    			serverPrivateMessage(pl, "usage: /propose\n" +
 	    				"    restart (restarts round)\n" +
-	    				"    nextmap (restarts round with new map)\n" +
+	    				"    nextmap (gets a new map)\n" +
+	    				"    changemap <map #/name>, see /show maps\n" +
 	    				"    kick <player>\n" +
 	    				"    set <parameter> <value> (temporarily set value)\n"
 	    			);
@@ -1417,16 +1504,29 @@ public class PlayerManager {
 			}
     		else if (message.equals("/info"))
 			{
-                List<String> messageParts = splitEqually(
-                    ServerConfiguration.getConfig(),
-                    Constants.SPLIT_CHAT_MESSAGES_THRESHOLD
-                );
-
-                for (String s : messageParts)
-                {
-                    serverPrivateMessage(pl, s);
-                }
+                serverPrivateMessage(pl, ServerConfiguration.getConfig());
 			}
+    		else if (message.startsWith("/show"))
+    		{
+    		    // show on its own prints the help.
+    		    if (message.equals("/show nextmap")) {
+    		        serverPrivateMessage(pl, "---nextmap---\n" + ServerConfiguration.getNextMapName());
+    		    }
+    		    else if (message.equals("/show maps")) {
+    		        StringBuilder sb = new StringBuilder("---Available maps---\n");
+    		        for (int i=0; i<ServerConfiguration.getAvailableMaps().size(); i++)
+    		        {
+    		            sb.append("[" + i + "]  " + ServerConfiguration.getAvailableMaps().get(i) + "\n");
+    		        }
+    		        serverPrivateMessage(pl, sb.toString());
+    		    }
+    		    else {
+    		        serverPrivateMessage(pl, "usage: /show\n" +
+                        "    nextmap (show the next map in rotation)\n" +
+                        "    maps (get a list of all available maps)\n"
+                    );
+    		    }
+    		}
 			else
 			{
 				printCommandHelp(pl);
