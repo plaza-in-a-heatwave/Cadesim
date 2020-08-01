@@ -81,9 +81,10 @@ public class PlayerManager {
     private Vote currentVote = null;
     
     /**
-     * should we switch map? (typically requested by player vote)
+     * act on player vote requests
      */
     private boolean shouldSwitchMap = false;
+    private boolean shouldRestartMap = false;
 
 	private boolean gameEnded;
 
@@ -186,14 +187,20 @@ public class PlayerManager {
     }
     
     /**
-     * gets whether the map should be updated
+     * getters/setters for player vote outcomes
      */
     public boolean shouldSwitchMap() {
     	return this.shouldSwitchMap;
     }
-    
     public void setShouldSwitchMap(boolean value) {
     	this.shouldSwitchMap = value;
+    }
+    public boolean shouldRestartMap() {
+        return this.shouldRestartMap;
+    }
+
+    public void setShouldRestartMap(boolean value) {
+        this.shouldRestartMap = value;
     }
 
     /**
@@ -950,8 +957,9 @@ public class PlayerManager {
     		);
     	}
     	setPersistTemporarySettings(false);
-    	
-    	shouldSwitchMap = false;
+
+        setShouldSwitchMap(false);
+        setShouldRestartMap(false);
         pointsAttacker = 0;
         pointsDefender = 0;
 
@@ -1008,8 +1016,9 @@ public class PlayerManager {
 				break;
 			case FOR:
 				handleStopVote();
-				context.getTimeMachine().stop();
+				setShouldRestartMap(true);
 				setPersistTemporarySettings(false); // restart cancels temporary settings
+				context.getTimeMachine().stop();
 				break;
 			case AGAINST:
 			case TIMEDOUT:
