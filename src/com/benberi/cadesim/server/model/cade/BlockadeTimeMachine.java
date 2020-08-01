@@ -53,7 +53,12 @@ public class BlockadeTimeMachine {
             // if breaks enabled, count down towards the break too
             if (timeUntilBreak > 0)
             {
-                timeUntilBreak -= 1;
+                // Bugfix #36 - don't start the break before the turn ends
+                if (turnTime > timeUntilBreak) {
+                    timeUntilBreak = turnTime;
+                } else {
+                    timeUntilBreak -= 1;
+                }
             }
             else if (timeUntilBreak == 0)
             {
@@ -107,6 +112,17 @@ public class BlockadeTimeMachine {
                 inBreak = true;
                 context.getPlayerManager().serverBroadcastMessage("Arr, time to rest a moment. (" + getBreakTime() / 10 + "s)");
             }
+
+            // Bugfix #36; decrement round time, timeuntilbreak, breaktime even when locked
+            if (!inBreak) {
+                roundTime--;
+                timeUntilBreak--;
+            } else {
+                if (breakTime > 0) {
+                    breakTime--;
+                }
+            }
+
         }
 
         if (turnTime <= -Constants.TURN_EXTRA_TIME) {
