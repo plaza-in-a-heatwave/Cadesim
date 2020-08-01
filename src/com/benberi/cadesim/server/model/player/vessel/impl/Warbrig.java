@@ -49,7 +49,7 @@ public class Warbrig extends Vessel {
 
     @Override
     public double getMaxDamage() {
-        return 16.66;
+        return 16.666;
     }
 
     @Override
