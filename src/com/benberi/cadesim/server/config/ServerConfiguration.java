@@ -116,11 +116,14 @@ public class ServerConfiguration {
         ServerConfiguration.mapName = mapName;
     }
 
-    // setter and generator for the next map in rotation.
+    // setter/getter and generator for the next map in rotation.
     public static String getNextMapName() {
         return ServerConfiguration.nextMapName;
     }
-    public static void pregenerateNextMapName() {
+    public static void overrideNextMapName(String mapName) { // specify one
+        ServerConfiguration.nextMapName = mapName;
+    }
+    public static void pregenerateNextMapName() {       // choose one at random
         ServerConfiguration.nextMapName = ServerConfiguration.getRandomMapName();
     }
 
