@@ -529,7 +529,7 @@ public class PlayerManager {
         boolean allFinished = true;
         for (Player p : listRegisteredPlayers()) {
             if (!p.isTurnFinished()) {
-                if (p.getTurnFinishWaitingTicks() > ServerConfiguration.getTurnDuration()) {
+                if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
                     ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
                     serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
                     p.getChannel().disconnect();
