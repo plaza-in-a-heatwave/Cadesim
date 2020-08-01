@@ -250,7 +250,7 @@ public class GameServerBootstrap {
             if (cmd.hasOption("o"))
             {
             	ServerConfiguration.setMapRotationPeriod(Integer.parseInt(cmd.getOptionValue("o")));
-            	if (ServerConfiguration.getMapRotationPeriod() == 0) {
+                if (ServerConfiguration.getMapRotationPeriod() == 0) {
             		help(options);
             	}
             }
@@ -309,6 +309,9 @@ public class GameServerBootstrap {
             {
             	help(options);
             }
+
+            // set up the next map too.
+            ServerConfiguration.pregenerateNextMapName();
 
             GameServerBootstrap bootstrap = new GameServerBootstrap();
             bootstrap.startServer();

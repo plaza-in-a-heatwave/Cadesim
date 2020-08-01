@@ -1,6 +1,7 @@
 package com.benberi.cadesim.server.config;
 
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
+import com.benberi.cadesim.server.util.RandomUtils;
 
 public class ServerConfiguration {
 	/**
@@ -17,6 +18,7 @@ public class ServerConfiguration {
     private static int respawnDelay  = 2;          // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
+    private static String nextMapName = null;      // the next map in the rotation. cannot be initialized by CLI.
 	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
@@ -103,6 +105,14 @@ public class ServerConfiguration {
 
     public static void setMapName(String mapName) {
         ServerConfiguration.mapName = mapName;
+    }
+
+    // setter and generator for the next map in rotation.
+    public static String getNextMapName() {
+        return ServerConfiguration.nextMapName;
+    }
+    public static void pregenerateNextMapName() {
+        ServerConfiguration.nextMapName = RandomUtils.getRandomMapName(Constants.mapDirectory);
     }
 
 	public static int getMapRotationPeriod() {

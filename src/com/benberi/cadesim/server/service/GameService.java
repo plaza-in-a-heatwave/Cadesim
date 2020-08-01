@@ -4,7 +4,6 @@ import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.player.PlayerManager;
-import com.benberi.cadesim.server.util.RandomUtils;
 
 /**
  * This is the "heartbeat" main loop of the game server
@@ -18,8 +17,10 @@ public class GameService implements Runnable {
     
     /**
      * Keep track of how many games we've played
+     * And when we last rotated the map
      */
     private int gamesCompleted = 0;
+    private int lastMapRotation = 0;
 
     public GameService(ServerContext context) {
         this.context = context;
@@ -30,9 +31,16 @@ public class GameService implements Runnable {
      * helper method to randomly rotate the map
      */
     private void randomRotateMap() {
+        // rotate the current one
     	ServerConfiguration.setMapName(
-    		RandomUtils.getRandomMapName(Constants.mapDirectory)
+            ServerConfiguration.getNextMapName()
     	);
+
+        // generate the next one
+        ServerConfiguration.pregenerateNextMapName();
+        ServerContext.log("pre-generated the next map name in rotation: " + ServerConfiguration.getNextMapName());
+
+        // renew it
     	context.renewMap();
     }
 
@@ -55,28 +63,38 @@ public class GameService implements Runnable {
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
             	gamesCompleted++;
                 
-            	// provide a way to hibernate machines if no players.
-            	// optional as it's quite buggy.
-                if (!ServerConfiguration.getRunContinuousMode())
-                {
-                	System.exit(Constants.EXIT_SUCCESS);
-                }
-                
-                // switch map if players have demanded it, or if we're rotating maps
+                // handle switching maps.
                 String oldMap = ServerConfiguration.getMapName();
                 if (playerManager.shouldSwitchMap())
                 {
                 	randomRotateMap();
+                    lastMapRotation = gamesCompleted;
                 	ServerContext.log(
                 		"Players voted to switch map; rotated map to: " +
                 		ServerConfiguration.getMapName()
                 	);
                 }
+                else if (playerManager.shouldRestartMap())
+                {
+                    ServerContext.log(
+                        "Players voted to restart map; keeping map: " +
+                        ServerConfiguration.getMapName()
+                    );
+                }
+                else if (!ServerConfiguration.getRunContinuousMode())
+                {
+                    // it would be cruel to exit early if players voted for a restart/nextmap
+                    ServerContext.log("Not in run-continuous mode, so quitting early.");
+                    System.exit(Constants.EXIT_SUCCESS);
+                }
                 else if (
-                	(ServerConfiguration.getMapRotationPeriod() > 0) &&
-                	((gamesCompleted % ServerConfiguration.getMapRotationPeriod()) == 0)
+                        (ServerConfiguration.getMapRotationPeriod() > 0) && // -1 == don't rotate, 0 invalid
+                        ((gamesCompleted - lastMapRotation) >= ServerConfiguration.getMapRotationPeriod())
                 ) {
-                	randomRotateMap();
+                    lastMapRotation = gamesCompleted;
+
+                    randomRotateMap();
+
                 	ServerContext.log(
                 		"Rotated map after " +
                 		Integer.toString(ServerConfiguration.getMapRotationPeriod()) +
@@ -91,7 +109,7 @@ public class GameService implements Runnable {
                 {
                 	playerManager.serverBroadcastMessage("Changed map to " + newMap);
                 }
-                
+
                 // complete the game refresh
                 playerManager.renewGame();
                 context.getTimeMachine().renewRound(); // bugfix - order matters
