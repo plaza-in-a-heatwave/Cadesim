@@ -28,3 +28,4 @@ jar.deps
 
 # eclipse IDE
 .classpath
+.settings/
