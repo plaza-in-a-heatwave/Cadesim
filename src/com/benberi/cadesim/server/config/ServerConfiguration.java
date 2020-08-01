@@ -25,7 +25,7 @@ public class ServerConfiguration {
 	private static String authCode = ""; // by default no auth code
 	private static String serverName = Constants.name;
 	private static int tokenExpiry = 4;
-	private static boolean powerSavingMode = false;
+	private static boolean runContinuousMode = true;
     private static boolean multiClientMode = true;
     private static int[] breakInfo = {-1, -1}; // seconds
 
@@ -91,7 +91,7 @@ public class ServerConfiguration {
                 "    Jobbers quality: " + getJobbersQualityAsString() + ",\n" +
                 "    Team names: " + getAttackerName() + "," + getDefenderName() + ",\n" +
                 "    Auth code: \"" + getAuthCode() + "\"" + ",\n" +
-                "    Power saving: " + getPowerSavingMode() + ",\n" +
+                "    Run continuous: " + getRunContinuousMode() + ",\n" +
                 "    Multiclient permitted: " + getMultiClientMode() + ",\n" +
                 "    Breaks duration/interval: " + getBreak()[0] + ":" + getBreak()[1] + ",\n" +
                 "]";
@@ -204,12 +204,12 @@ public class ServerConfiguration {
 		ServerConfiguration.tokenExpiry = value;
 	}
 
-	public static boolean getPowerSavingMode() {
-		return ServerConfiguration.powerSavingMode;
+	public static boolean getRunContinuousMode() {
+		return ServerConfiguration.runContinuousMode;
 	}
 
-	public static void setPowerSavingMode(boolean value) {
-		ServerConfiguration.powerSavingMode = value;
+	public static void setRunContinuousMode(boolean value) {
+		ServerConfiguration.runContinuousMode = value;
 	}
 
     public static boolean getMultiClientMode() {

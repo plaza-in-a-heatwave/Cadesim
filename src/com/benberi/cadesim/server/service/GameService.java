@@ -57,28 +57,9 @@ public class GameService implements Runnable {
                 
             	// provide a way to hibernate machines if no players.
             	// optional as it's quite buggy.
-                if (ServerConfiguration.getPowerSavingMode())
+                if (!ServerConfiguration.getRunContinuousMode())
                 {
-                	// if no players... hibernate time machines
-                    if (playerManager.listRegisteredPlayers().size() == 0) {
-                    	context.getTimeMachine().renewTurn(); // bugfix: we're not in the middle of an animation
-                        context.getTimeMachine().setLock(false);
-                        ServerContext.log("No players registered, hibernating to save CPU");
-
-                        while (playerManager.listRegisteredPlayers().size() == 0) {
-                            try {
-                                Thread.sleep(Constants.SERVER_ADMIN_INTERVAL_MILLIS);
-
-                                // every n seconds, do some admin
-                                context.getPackets().queuePackets();
-                                playerManager.tick();
-                                playerManager.queueOutgoing();
-                            } catch(InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                        }
-                        ServerContext.log("New player joined, waking up...");
-                    }
+                	System.exit(Constants.EXIT_SUCCESS);
                 }
                 
                 // switch map if players have demanded it, or if we're rotating maps
