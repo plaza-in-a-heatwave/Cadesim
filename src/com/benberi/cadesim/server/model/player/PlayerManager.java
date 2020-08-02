@@ -453,6 +453,7 @@ public class PlayerManager {
         // Update flags for each player
         for (Player player : listRegisteredPlayers()) {
             if (player.isSunk()) {
+                player.getFlags().clear(); // bugfix #21 flag influence animations not displaying properly
                 continue;
             }
             List<Flag> flags = context.getMap().getInfluencingFlags(player);
@@ -473,9 +474,6 @@ public class PlayerManager {
                     if (team == null) {
                         team = p.getTeam();
                         flag.setControlled(team);
-                        addPointsTeam = p.getTeam();
-                    }
-                    else if (team == p.getTeam()) {
                         addPointsTeam = p.getTeam();
                     }
                     else if (team != p.getTeam()) {

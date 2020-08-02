@@ -442,7 +442,6 @@ public class Player extends Position {
         // send packets
         for (Player p:context.getPlayerManager().listRegisteredPlayers()) {
             p.packets.sendRespawn(this); // bugfix players' moves disappearing when anyone else (re)spawns
-        	p.getContext().getMap().resetFlags(); // bugfix animated flags persisting after reset
         }
     }
 
