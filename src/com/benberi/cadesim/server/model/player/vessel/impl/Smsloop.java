@@ -48,7 +48,7 @@ public class Smsloop extends Vessel {
 
     @Override
     public double getMaxDamage() {
-        return 6.667;
+        return 6.666;
     }
 
     @Override
