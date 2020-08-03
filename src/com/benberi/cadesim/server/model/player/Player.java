@@ -378,11 +378,6 @@ public class Player extends Position {
      * which is triggered by a player clicking Go Oceanside.
      */
     public void respawn() {
-        // refresh tokens, but leave guns as they were. ships just joining will have 0 guns.
-    	tokens.assignDefaultTokens();
-        this.getPackets().sendTokens();
-        getMoveTokens().setTargetTokenGeneration(MoveType.FORWARD, true);
-
     	// where to respawn?
     	if (isFirstEntry()) {
     		setFirstEntry(false);
@@ -411,6 +406,7 @@ public class Player extends Position {
     		}
 
             // sunk, 'respawn' on land side with new ship
+            vessel.resetDamageAndBilge();
     		respawnOnLandside(true);
     	}
     }
@@ -436,7 +432,11 @@ public class Player extends Position {
         outOfSafe = false;
         enteredSafeLandside = false;
         enteredSafeOceanside = false;
-        vessel.resetDamageAndBilge();
+
+         // refresh tokens, but leave guns as they were. ships just joining will have 0 guns.
+        tokens.assignDefaultTokens();
+        this.getPackets().sendTokens();
+        getMoveTokens().setTargetTokenGeneration(MoveType.FORWARD, true);
 
         // send packets
         for (Player p:context.getPlayerManager().listRegisteredPlayers()) {
@@ -455,7 +455,7 @@ public class Player extends Position {
     		// do nothing - can't use the button at all
     		context.getPlayerManager().serverPrivateMessage(
     			this,
-    			"Disengage is not enabled at the moment. Start a vote to enable it."
+                "Disengage is not enabled at the moment. Start a vote to enable it, or restart the server."
     		);
     	}
     	else if (mode.equals("simple"))
