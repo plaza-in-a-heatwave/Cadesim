@@ -243,8 +243,8 @@ public class PlayerManager {
         }
 
         // Update players (for stuff like damage fixing, bilge fixing and move token generation)
-        // but don't do this in breaks, or when locked
-        if ((!tm.isBreak()) && (!tm.isLock()))
+        // don't do this in breaks, but it's fine to do this during the animation.
+        if (!tm.isBreak())
         {
             for (Player p : listRegisteredPlayers()) {
                 if (p.isSunk()) {
