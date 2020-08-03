@@ -40,7 +40,7 @@ public class MoveTokensHandler {
     /**
      * Cannons
      */
-    private int cannons;
+    private int cannons = 0;
 
     /**
      * The target token to generate

@@ -378,9 +378,8 @@ public class Player extends Position {
      * which is triggered by a player clicking Go Oceanside.
      */
     public void respawn() {
-    	// give a fresh complement of tokens and guns
+        // refresh tokens, but leave guns as they were. ships just joining will have 0 guns.
     	tokens.assignDefaultTokens();
-        tokens.assignCannons(vessel.getMaxCannons());
         this.getPackets().sendTokens();
         getMoveTokens().setTargetTokenGeneration(MoveType.FORWARD, true);
 
@@ -743,7 +742,7 @@ public class Player extends Position {
             if (getTurnsUntilControl() == 0) {
             	tokens = new MoveTokensHandler(this);
             	tokens.assignDefaultTokens();
-                tokens.assignCannons(vessel.getMaxCannons());
+                tokens.assignCannons(0); // new ships start with 0 cannons
             }
         }
 
