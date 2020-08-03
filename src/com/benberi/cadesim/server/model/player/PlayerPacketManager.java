@@ -318,6 +318,7 @@ public class PlayerPacketManager {
         while(!incomingPackets.isEmpty()) {
             IncomingPacket packet = incomingPackets.poll();
             player.getContext().getPackets().process(packet.getChannel(), packet.getPacket());
+            packet.getPacket().getBuffer().release(); // bugfix #4 netty memory leak
             if (count > Constants.INCOMING_PACKETS_PLAYER_PER_TICK) {
                 break;
             }
