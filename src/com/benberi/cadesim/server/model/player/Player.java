@@ -746,7 +746,7 @@ public class Player extends Position {
             }
         }
 
-        tokens.clearTemp();
+        tokens.clearPlacedTokens();
         tokens.tickExpiration();
 
         // Send moves

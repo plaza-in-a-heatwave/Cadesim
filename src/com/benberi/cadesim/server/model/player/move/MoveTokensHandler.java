@@ -61,6 +61,9 @@ public class MoveTokensHandler {
     	forwardTokens.clear();
     	rightTokens.clear();
 
+        // remove all placed pieces
+        clearPlacedTokens();
+
     	// assign starter pieces
     	for (int i = 0; i < 4; i++) {
             forwardTokens.add(new MoveToken(MoveType.FORWARD));
@@ -304,7 +307,7 @@ public class MoveTokensHandler {
         }
     }
 
-    public void clearTemp() {
+    public void clearPlacedTokens() {
         tempForwardTokens.clear();
         tempLeftTokens.clear();
         tempRightTokens.clear();
