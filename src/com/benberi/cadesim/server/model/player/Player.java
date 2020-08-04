@@ -755,9 +755,6 @@ public class Player extends Position {
         packets.sendDamage();
         moves.resetTurn();
         packets.sendTokens();
-
-        // reset any glitched moves/guns that remain set by client
-        packets.sendSelectedMoves();
     }
 
     public void setSunk(int sunk) {
