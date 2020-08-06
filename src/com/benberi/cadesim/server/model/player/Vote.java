@@ -101,7 +101,7 @@ public class Vote {
 				break;
 			case FOR:
 				context.serverBroadcastMessage(
-					"Vote " + getDescription() + " passed " + printScore()
+					"Vote " + getDescription() + " passed " + printScore() + ". It will take effect when the current turn/break is over."
 				);
 				break;
 			case AGAINST:

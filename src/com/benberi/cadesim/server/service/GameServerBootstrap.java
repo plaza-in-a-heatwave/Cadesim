@@ -159,7 +159,18 @@ public class GameServerBootstrap {
             }
             if (cmd.hasOption("b"))
             {
-            	ServerConfiguration.setDisengageBehavior(cmd.getOptionValue("b"));
+                String disengageBehavior = cmd.getOptionValue("b");
+                if (
+                        disengageBehavior.equals("off") ||
+                        disengageBehavior.equals(("simple")) ||
+                        disengageBehavior.equals(("realistic"))
+                ) {
+                    ServerConfiguration.setDisengageBehavior(disengageBehavior);
+                }
+                else
+                {
+                    help(options);
+                }
             }
             if (cmd.hasOption("v"))
             {
