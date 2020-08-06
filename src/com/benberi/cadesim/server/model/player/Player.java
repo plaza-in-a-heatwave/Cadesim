@@ -381,6 +381,10 @@ public class Player extends Position {
     	// where to respawn?
     	if (isFirstEntry()) {
     		setFirstEntry(false);
+            // bugfix #48, #49 - zero cannons and damage when just joining or a round restarts
+            tokens.assignCannons(0);
+            vessel.resetDamageAndBilge();
+
     		// start on land side regardless of where
     		// map says we are currently - it's wrong
     		respawnOnLandside(true);
