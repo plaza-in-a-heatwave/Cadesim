@@ -18,9 +18,9 @@ public enum JobbersQuality {
 		0.01000 / (float)(1000 / Constants.SERVICE_LOOP_DELAY)  // full bilge num moves per tick
     ),
 	ELITE(
-		0.13333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " // 4 % per turn ish (full clear in 25 turns)
+		0.17     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " // 5.1 % per turn ish (full clear in 19.61 turns)
 		0.83333 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " // 25% per turn ish (full clear in 4 turns )
-		60,                                                     // " //  actual figure from Napi Peak cade
+		65,                                                     // " //  actual figure from Napi Peak cade was 60. moved to 65 as players preferred.
 		50,                                                     // " //  guessed
 		0.11666 / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  3.5/turn, observed on a cit run
 		3.0     / (float)(1000 / Constants.SERVICE_LOOP_DELAY), // " //  90% per 30s ish (i.e. wb 4 gunners, each fills 3 and a bit guns)

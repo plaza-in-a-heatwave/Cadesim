@@ -60,6 +60,12 @@ public class Constants {
     public static final double MIN_BILGE_INCREASE_PERCENT_PER_SEC = 0.0555;
     public static final double MAX_BILGE_INCREASE_PERCENT_PER_SEC = 1.08;
 
+    /** bilge affect on sailors - multiply normal token generation rate with this coefficient.
+     * Observed move generation rate falls to 0.17578125 of its original value.
+     * (1 - (bilge_fraction * BILGE_SAILOR_PENALTY)) * MOVE_GENERATION_RATE == new move generation rate.
+     */
+    public static final double BILGE_SAILOR_PENALTY = 0.17578125;
+
     /**
      * This is used to timeout players that did not notify the server about their animation finish for the given
      * timeout value
