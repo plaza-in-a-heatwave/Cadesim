@@ -156,8 +156,14 @@ public abstract class Vessel {
         return (damage * 100.0) / getMaxDamage();
     }
 
+    /** returns a percentage 0<=n<=100. **/
     public double getBilgePercentage() {
         return bilge;
+    }
+
+    /** returns a fraction 0<=n<=1. **/
+    public double getBilgeFraction() {
+        return bilge / 100.0;
     }
     
     /**

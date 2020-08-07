@@ -1,4 +1,5 @@
 package com.benberi.cadesim.server.model.player.domain;
+import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.player.Player;
 
 public class MoveGenerator {
@@ -10,7 +11,7 @@ public class MoveGenerator {
 
     private double cannonGenerationPercentage;
 
-    private double moveGenerationPercentage;
+    private double moveGenerationFraction;
 
     public MoveGenerator(Player p) {
         this.player = p;
@@ -24,13 +25,13 @@ public class MoveGenerator {
     }
 
     private void updateMoveGeneration() {
-        double movesPerSec = player.getJobbersQuality().getMovesPerTick();
-        double movesPerSecAffectBilge = movesPerSec - 0.009 * player.getVessel().getBilgePercentage() * movesPerSec;
-        double rate = movesPerSecAffectBilge;
-
-        moveGenerationPercentage += rate;
-        if (moveGenerationPercentage >= 1) {
-            moveGenerationPercentage -= Math.floor(moveGenerationPercentage);
+        // BILGE_SAILOR_PENALTY is applied to all moves generated.
+        // its effect is scaled linearly according to the fraction of bilge present.
+        double movesPerTick = player.getJobbersQuality().getMovesPerTick();
+        double rate = movesPerTick - (1.0 - Constants.BILGE_SAILOR_PENALTY) * player.getVessel().getBilgeFraction() * movesPerTick;
+        moveGenerationFraction += rate;
+        if (moveGenerationFraction >= 1) {
+            moveGenerationFraction -= Math.floor(moveGenerationFraction);
             player.getMoveTokens().moveGenerated();
             player.getPackets().sendTokens();
         }
