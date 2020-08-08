@@ -145,6 +145,10 @@ public enum MoveType {
                        break;
                }
                break;
+           case NONE:
+               // pass
+           default:
+               break;
        }
 
        return position;

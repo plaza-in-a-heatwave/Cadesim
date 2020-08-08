@@ -469,7 +469,7 @@ public class CollisionCalculator {
      * @return The biggest class player
      */
     private Player getLargestSize(List<Player> players) {
-        int max = 0;
+        int max = -1; // bugfix #45 three way collision between sloops.
         Player player = null;
         for (Player p : players) {
             if (p.getVessel().getSize() > max) {

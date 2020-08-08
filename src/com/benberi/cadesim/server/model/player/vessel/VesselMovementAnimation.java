@@ -57,9 +57,9 @@ public enum VesselMovementAnimation {
             case MOVE_LEFT:
             case MOVE_RIGHT:
                 return 500;
+            default:
+                return 0;
         }
-
-        return 0;
     }
 
     public static VesselMovementAnimation getBumpForPhase(int phase) {
@@ -154,8 +154,9 @@ public enum VesselMovementAnimation {
                         return player.copy().addX(-1);
                     case EAST:
                         return player.copy().addX(1);
+                    default:
+                        break;
                 }
-                break;
             case MOVE_BACKWARD:
                 switch (player.getFace()) {
                     case NORTH:
@@ -166,8 +167,9 @@ public enum VesselMovementAnimation {
                         return player.copy().addX(1);
                     case EAST:
                         return player.copy().addX(-1);
+                    default:
+                        break;
                 }
-                break;
             case MOVE_LEFT:
                 switch (player.getFace()) {
                     case NORTH:
@@ -178,8 +180,9 @@ public enum VesselMovementAnimation {
                         return player.copy().addY(-1);
                     case EAST:
                         return player.copy().addY(1);
+                    default:
+                        break;
                 }
-                break;
             case MOVE_RIGHT:
                 switch (player.getFace()) {
                     case NORTH:
@@ -190,7 +193,11 @@ public enum VesselMovementAnimation {
                         return player.copy().addY(1);
                     case EAST:
                         return player.copy().addY(-1);
+                    default:
+                        break;
                 }
+
+            default:
                 break;
         }
 
