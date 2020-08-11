@@ -254,11 +254,13 @@ public class PlayerManager {
             }
         }
 
-        // Handle login/logout requests (only when not animating)
+        // Handle logout requests (only when not animating)
         if (!context.getTimeMachine().isLock()) {
-            handlePlayerLoginRequests();
             handleLogoutRequests();
         }
+
+        // Handle login requests any time
+        handlePlayerLoginRequests();
     }
 
     /**
@@ -533,7 +535,8 @@ public class PlayerManager {
     private void handleTime() {
         boolean allFinished = true;
         for (Player p : listRegisteredPlayers()) {
-            if (!p.isTurnFinished()) {
+            // all players must notify they're finished, unless a player joined during break.
+            if (!p.isTurnFinished() && !p.didJoinInBreak()) {
                 if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
                     ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
                     serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
@@ -547,11 +550,13 @@ public class PlayerManager {
         }
 
         if (allFinished) {
+            for (Player p : listRegisteredPlayers()) {
+                if (p.didJoinInBreak()) {
+                    p.setJoinedInBreak(false);
+                }
+            }
+
             handleTurnEnd();
-        }
-        else
-        {
-        	
         }
     }
 
@@ -824,6 +829,9 @@ public class PlayerManager {
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
                 printCommandHelp(pl); // private message with commands
+
+                // players who join during break don't need to send an animation complete packet.
+                pl.setJoinedInBreak(context.getTimeMachine().isLock());
             }
         }
     }

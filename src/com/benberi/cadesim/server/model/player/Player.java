@@ -144,6 +144,19 @@ public class Player extends Position {
     private boolean turnFinished;
 
     /**
+     * did player join during break
+     */
+    private boolean joinedInBreak;
+
+    public void setJoinedInBreak(boolean value) {
+        joinedInBreak = value;
+    }
+
+    public boolean didJoinInBreak() {
+        return joinedInBreak;
+    }
+
+    /**
      * The waiting time for animation to finish
      */
     private int turnFinishWaitingTicks = 0;
@@ -363,6 +376,7 @@ public class Player extends Position {
         		"[player-joined] Registered player \"" + name + "\", " +
         		Team.teamIDToString(team) + ", " +
         		Vessel.VESSEL_IDS.get(ship) + ", on " +
+                "joined during the " + (joinedInBreak?"break":"round") + ", " +
         		channel.remoteAddress() + ". " +
         		context.getPlayerManager().printPlayers()
         );
