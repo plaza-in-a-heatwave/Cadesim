@@ -828,6 +828,7 @@ public class PlayerManager {
                 pl.getPackets().sendPlayerFlags();
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
+                printTeams(null, true);     // total counts of players in server
                 printCommandHelp(pl); // private message with commands
 
                 // players who join during break don't need to send an animation complete packet.
@@ -852,7 +853,8 @@ public class PlayerManager {
 	                }
 	            }
 	            serverBroadcastMessage("Goodbye " + player.getName() + " (" + player.getTeam() + ")");
-	            
+                printTeams(null, true); // broadcast
+
 	            // log
 	            ServerContext.log(
 	            	"[player left] De-registered and logged out player \"" + player.getName() + "\", on " +
@@ -1307,6 +1309,47 @@ public class PlayerManager {
     	
     }
     
+    private void printTeams(Player pl, boolean verbose) {
+        int numAttackers = 0;
+        int numDefenders = 0;
+        int numPlayers = this.listRegisteredPlayers().size();
+        String attackers = "";
+        String defenders = "";
+
+        // compute values
+        for (Player p : this.listRegisteredPlayers()) {
+            if (p.getTeam().equals(Team.ATTACKER)) {
+                numAttackers++;
+                attackers += "\n    " + p.getName() +
+                        " (" + Vessel.VESSEL_IDS.get(p.getVessel().getID()) + ")";
+            }
+            else if (p.getTeam().equals(Team.DEFENDER))
+            {
+                numDefenders++;
+                defenders += "\n    " + p.getName() +
+                        " (" + Vessel.VESSEL_IDS.get(p.getVessel().getID()) + ")";
+            }
+        }
+
+        // null out if there aren't any attackers or defenders
+        if (numAttackers == 0) { attackers = "\n    -"; }
+        if (numDefenders == 0) { defenders = "\n    -"; }
+        String message = "Players in server: " + numPlayers + " ( Att. " + numAttackers + ", Def. " + numDefenders + ")";
+
+        if (verbose) {
+                message +=  "\nAttackers:" + attackers + "\nDefenders:" + defenders;
+        }
+
+        // do the print
+        if (pl == null) {
+            serverBroadcastMessage(message);
+        }
+        else
+        {
+            serverPrivateMessage(pl, message);
+        }
+    }
+
     private String proposeSetHelp()
     {
     	return "usage: /propose set <parameter> <value> -\n" +
@@ -1315,7 +1358,7 @@ public class PlayerManager {
 		"    sinkpenalty (between 0 and 10000 inclusive)\n" +
 		"    disengage-behavior (off|realistic|simple)\n";
     }
-    
+
     public void handleMessage(Player pl, String message)
     {
     	// log here (always)
@@ -1518,6 +1561,11 @@ public class PlayerManager {
     		    if (message.equals("/show nextmap")) {
     		        serverPrivateMessage(pl, "---nextmap---\n" + ServerConfiguration.getNextMapName());
     		    }
+                else if (message.equals("/show players")) { // alias
+                    printTeams(pl, false);
+                } else if (message.equals("/show teams")) { // verbose alias
+                    printTeams(pl, true);
+                }
     		    else if (message.equals("/show maps")) {
     		        StringBuilder sb = new StringBuilder("---Available maps---\n");
     		        for (int i=0; i<ServerConfiguration.getAvailableMaps().size(); i++)
@@ -1529,7 +1577,8 @@ public class PlayerManager {
     		    else {
     		        serverPrivateMessage(pl, "usage: /show\n" +
                         "    nextmap (show the next map in rotation)\n" +
-                        "    maps (get a list of all available maps)\n"
+                        "    maps (get a list of all available maps)\n" +
+                        "    players, teams"
                     );
     		    }
     		}
