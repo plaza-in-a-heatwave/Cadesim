@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +49,9 @@ public class ServerContext {
 
     static {
     	new File(Constants.logDirectory).mkdirs();
-    	logFile = new File(Constants.logDirectory + "/" + Constants.logName);
+        String datePrefix = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss-SSSSSSX_").withZone(ZoneOffset.UTC)
+                .format(Instant.now());
+        logFile = new File(Constants.logDirectory + "/" + datePrefix + Constants.logName);
         try {
             logFile.createNewFile();
             log("Using logfile: " + logFile.getPath());
