@@ -4,6 +4,7 @@ import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.codec.IncomingPackets;
 import com.benberi.cadesim.server.codec.util.Packet;
 import com.benberi.cadesim.server.model.player.Player;
+import com.benberi.cadesim.server.util.Utils;
 import com.benberi.cadesim.server.codec.packet.in.*;
 import io.netty.channel.Channel;
 
@@ -98,12 +99,9 @@ public class ServerPacketManager {
                     executor.execute(p, packet);
                 }
                 catch (Exception e) {
-                    ServerContext.log(
-                    		"WARNING - malformed high-level packet from " +
-                    		p.getChannel().remoteAddress() +
-                    		" error message: " + e.getMessage() + ", " +
-                    		e.getClass().getName() + " (player was kicked)"
-                    );
+                    ServerContext.log("WARNING - malformed packet with valid opcode from "
+                            + p.getChannel().remoteAddress() + " error message: " + e.getMessage() + ", "
+                            + e.getClass().getName() + " (player was kicked, see trace)\n" + Utils.getStackTrace(e));
                     c.disconnect();
                 }
                 return true;

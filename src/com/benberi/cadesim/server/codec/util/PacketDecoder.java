@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import java.util.List;
 
 import com.benberi.cadesim.server.ServerContext;
+import com.benberi.cadesim.server.util.Utils;
 
 public class PacketDecoder extends StatefulByteDecoder<PacketDecodeState> {
 
@@ -60,11 +61,8 @@ public class PacketDecoder extends StatefulByteDecoder<PacketDecodeState> {
         }
         catch(Exception e)
         {
-        	ServerContext.log(
-            		"WARNING - malformed low-level packet from " +
-            		ctx.channel().remoteAddress() +
-            		", kicked sender"
-            );
+            ServerContext.log("WARNING - malformed packet without valid opcode from " + ctx.channel().remoteAddress()
+                    + " (sender was kicked, see trace)\n" + Utils.getStackTrace(e));
             ctx.channel().disconnect();
 //            ctx.channel().deregister();
         }

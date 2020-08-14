@@ -799,9 +799,17 @@ public class PlayerManager {
             int response = LoginResponsePacket.SUCCESS;
 
             if (version != Constants.PROTOCOL_VERSION) {
+                ServerContext.log(
+                    "Warning: Player protocol version " + version +
+                    " does not match server " + Constants.PROTOCOL_VERSION
+                );
                 response = LoginResponsePacket.BAD_VERSION;
             }
             else if (getPlayerByName(name) != null) {
+                ServerContext.log(
+                        "Warning: Player name " + name+
+                        " is already in use"
+                );
                 response = LoginResponsePacket.NAME_IN_USE;
             }
             else if (
@@ -809,9 +817,15 @@ public class PlayerManager {
             	(name.length() <= 0) ||
             	(name.length() > Constants.MAX_NAME_SIZE))
             {
+                ServerContext.log(
+                        "Warning: Player chose bad name (" + name+ ")"
+                );
             	response = LoginResponsePacket.BAD_NAME;
             }
             else if (!Vessel.VESSEL_IDS.containsKey(ship)) {
+                ServerContext.log(
+                        "Warning: Player chose bad ship (" + ship + ")"
+                );
                 response = LoginResponsePacket.BAD_SHIP;
             }
 
