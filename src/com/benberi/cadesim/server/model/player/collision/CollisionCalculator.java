@@ -48,7 +48,7 @@ public class CollisionCalculator {
         List<Player> collided = new ArrayList<>();
 
         for (Player p : players.listRegisteredPlayers()) {
-            if (p == pl || p.getCollisionStorage().isCollided(turn)) {
+            if (p == pl || p.getCollisionStorage().isCollided(turn)) { // TODO #26 possible bug? isCollided() but don't know if position has changed.
                 continue;
             }
             MoveType move = p.getMoves().getMove(turn);
@@ -325,124 +325,33 @@ public class CollisionCalculator {
      * @return The player instance if it hits any player, null if no hit
      */
     public Player getVesselForCannonCollide(Player source, Direction direction) {
-        switch (direction) {
-            case LEFT:
-                switch (source.getFace().getDirectionId()) {
-                    case 2:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX();
-                            int y = source.getY() + i;
+        // calculate direction multiplier
+        int dM = (direction == Direction.LEFT)?1:-1; // direction (-1 or 1)
 
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                    case 6:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX() + i;
-                            int y = source.getY();
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                    case 10:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX();
-                            int y = source.getY() - i;
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                    case 14:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX() - i;
-                            int y = source.getY();
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                }
-                break;
-            case RIGHT:
-                switch (source.getFace().getDirectionId()) {
-                    case 2:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX();
-                            int y = source.getY() - i;
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                    case 6:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX() - i;
-                            int y = source.getY();
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                    case 10:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX();
-                            int y = source.getY() + i;
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                    case 14:
-                        for (int i = 1; i < 4; i++) {
-                            int x = source.getX() + i;
-                            int y = source.getY();
-                            if (context.getMap().isBigRock(x, y)) {
-                                return null;
-                            }
-                            Player player = players.getPlayerByPosition(x, y);
-                            if (player != null) {
-                                return player;
-                            }
-                        }
-                        break;
-                }
-                break;
-
+        // calculate x,y offsets
+        int xO = 0;
+        int yO = 0;
+        switch (source.getFace()) {
+        case EAST:  yO =  1; break;
+        case SOUTH: xO =  1; break;
+        case WEST:  yO = -1; break;
+        case NORTH: xO = -1; break;
         }
 
+        // return the player
+        for (int i = 1; i < 4; i++) {
+            int x = source.getX() + (xO * dM);
+            int y = source.getY() + (yO * dM);
+
+            if (context.getMap().isBigRock(x, y)) {
+                return null;
+            }
+
+            Player player = players.getPlayerByPosition(x, y);
+            if (player != null) {
+                return player;
+            }
+        }
         return null;
     }
 
@@ -466,7 +375,7 @@ public class CollisionCalculator {
     /**
      * Gets the largest ship class size out of list of players
      * @param players   The players list
-     * @return The biggest class player
+     * @return The biggest class player, or null if no players.
      */
     private Player getLargestSize(List<Player> players) {
         int max = -1; // bugfix #45 three way collision between sloops.
@@ -505,7 +414,7 @@ public class CollisionCalculator {
     private boolean canBumpPlayer(Player bumper, Player bumped, int turn, int phase) {
         VesselMovementAnimation anim = VesselMovementAnimation.getBumpAnimation(bumper, bumped);
         Position bumpPosition = anim.getPositionForAnimation(bumped);
-        return bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk() &&
+        return bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk() && // TODO #26 the !bumped.isSunk() might cause a bug if we sink in one turn and try to move there
                 !isOutOfBounds(bumpPosition) && getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0 &&
                 !context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumped);
     }
@@ -519,7 +428,7 @@ public class CollisionCalculator {
     private boolean outOfBump(Player bumper, Player bumped, int turn, int phase) {
         VesselMovementAnimation anim = VesselMovementAnimation.getBumpAnimation(bumper, bumped);
         Position bumpPosition = anim.getPositionForAnimation(bumped);
-        return (bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk()
+        return (bumper.getVessel().getSize() >= bumped.getVessel().getSize() && !bumped.isSunk() // TODO #26 the !bumped.isSunk() might be source of a bug
                 && getPlayersTryingToClaim(bumped, bumpPosition, turn, phase).size() == 0)
                 && (context.getMap().isRock(bumpPosition.getX(), bumpPosition.getY(), bumped)
                 || isOutOfBounds(bumpPosition));
