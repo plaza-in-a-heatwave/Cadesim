@@ -103,6 +103,13 @@ public class PlayerPacketManager {
 
         player.sendPacket(packet);
     }
+    /**
+     * Sends the team names to the client
+     */
+    public void sendMapList() {
+        SendMapListPacket packet = new SendMapListPacket();
+        player.sendPacket(packet);
+    }
 
     /**
      * @deprecated

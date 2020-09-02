@@ -191,14 +191,16 @@ public abstract class Vessel {
     }
 
     public boolean isDamageMaxed() {
-        return damage >= getMaxDamage();
+    	if(damage >= getMaxDamage()) {
+    		return true;
+    	}
+    	return false;
     }
 
     public void resetDamageAndBilge() {
         damage = 0;
         bilge = 0;
     }
-
     /**
      * @return The maximum amount of filled cannons allowed
      */

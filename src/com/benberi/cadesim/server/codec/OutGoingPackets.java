@@ -97,4 +97,8 @@ public class OutGoingPackets {
      * delivers messages to clients
      */
     public static final int RECEIVE_MESSAGE = 19;
+    /**
+     * delivers map names to client
+     */
+    public static final int SEND_MAPNAMES = 20;
 }

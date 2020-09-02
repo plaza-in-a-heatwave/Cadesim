@@ -19,6 +19,7 @@ import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -273,10 +274,50 @@ public class PlayerManager {
         for (Player player : listRegisteredPlayers()) {
             player.getPackets().sendSelectedMoves();
         }
-
         // Loop through all turns
         for (int turn = 0; turn < 4; turn++) {
+        	//shooting/damage loop
+            for (Player p : listRegisteredPlayers()) {
 
+                if (p.getCollisionStorage().isOnAction()) {
+                    int tile = p.getCollisionStorage().getActionTile();
+                    if (p.getCollisionStorage().isCollided(turn)) {
+                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
+                    } else {
+                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
+                    }
+
+                    if (context.getMap().isWhirlpool(tile))
+                        p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
+                }
+
+                p.getCollisionStorage().setBumped(false);
+                p.getCollisionStorage().clear();
+                p.getCollisionStorage().setOnAction(-1);
+
+                // left shoots
+                int leftShoots = p.getMoves().getLeftCannons(turn);
+                // right shoots
+                int rightShoots = p.getMoves().getRightCannons(turn);
+
+                // Apply cannon damages if they collided with anyone
+                damagePlayersAtDirection(leftShoots, p, Direction.LEFT, turn);
+                damagePlayersAtDirection(rightShoots, p, Direction.RIGHT, turn);
+
+                MoveAnimationTurn t = p.getAnimationStructure().getTurn(turn);
+
+                // Set cannon animations
+                t.setLeftShoots(leftShoots);
+                t.setRightShoots(rightShoots);
+            }
+            //sinking loop
+            for (Player p : listRegisteredPlayers()) {
+                if(p.getVessel().isDamageMaxed() && !p.isSunk()) {
+                	p.setSunk(turn);
+                	p.getAnimationStructure().getTurn(turn).setSunk(true);
+                }
+            }
+            //moving loops
             /*
              * Phase 1 handling
              */
@@ -374,49 +415,8 @@ public class PlayerManager {
                     p.getCollisionStorage().setPositionChanged(false);
                 }
             }
-
-            for (Player p : listRegisteredPlayers()) {
-
-                if (p.getCollisionStorage().isOnAction()) {
-                    int tile = p.getCollisionStorage().getActionTile();
-                    if (p.getCollisionStorage().isCollided(turn)) {
-                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
-                    } else {
-                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
-                    }
-
-                    if (context.getMap().isWhirlpool(tile))
-                        p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
-                }
-
-                p.getCollisionStorage().setBumped(false);
-                p.getCollisionStorage().clear();
-                p.getCollisionStorage().setOnAction(-1);
-
-
-                // left shoots
-                int leftShoots = p.getMoves().getLeftCannons(turn);
-                // right shoots
-                int rightShoots = p.getMoves().getRightCannons(turn);
-
-                // Apply cannon damages if they collided with anyone
-                damagePlayersAtDirection(leftShoots, p, Direction.LEFT, turn);
-                damagePlayersAtDirection(rightShoots, p, Direction.RIGHT, turn);
-
-                MoveAnimationTurn t = p.getAnimationStructure().getTurn(turn);
-
-                // Set cannon animations
-                t.setLeftShoots(leftShoots);
-                t.setRightShoots(rightShoots);
-
-                if (p.getVessel().isDamageMaxed() && !p.isSunk()) {
-                    p.setSunk(turn);
-                    p.getAnimationStructure().getTurn(turn).setSunk(true);
-                }
-            }
-
+            
         }
-
         // Process some after-turns stuff like updating damage interfaces, and such
         for (Player p : listRegisteredPlayers()) {
             p.processAfterTurnUpdate();
@@ -524,7 +524,7 @@ public class PlayerManager {
             return;
         }
         Player player = collision.getVesselForCannonCollide(source, direction);
-        if (player != null && source.isOutOfSafe() && !source.isSunk()) {
+        if (player != null && source.isOutOfSafe()) {
             player.getVessel().appendDamage(((double) shoots * source.getVessel().getCannonType().getDamage()), source.getTeam());
         }
     }
@@ -840,6 +840,7 @@ public class PlayerManager {
                 pl.getPackets().sendTokens();
                 pl.getPackets().sendFlags();
                 pl.getPackets().sendPlayerFlags();
+                pl.getPackets().sendMapList();
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
                 printTeams(null, true);     // total counts of players in server
