@@ -27,7 +27,7 @@ public class SendMapListPacket extends OutgoingPacket{
         {
             String map = ServerConfiguration.getAvailableMaps().get(i).replace(".txt", "");
             writeByteString(map);
-            String mapDir = String.format("maps/%s.png", map);
+            String mapDir = String.format("maps/screenshots/%s.png", map);
             try {
             	File imageFile = new File(mapDir);
             	byte[] fileContent = Files.readAllBytes(imageFile.toPath());
