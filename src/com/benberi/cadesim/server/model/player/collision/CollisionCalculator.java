@@ -158,7 +158,7 @@ public class CollisionCalculator {
 
 
                         if (p.getVessel().getSize() > claimed.getVessel().getSize()) {
-                            p.set(position);
+                        	p.set(position);
                             p.getCollisionStorage().setPositionChanged(true);
                         }
                     }
@@ -327,7 +327,6 @@ public class CollisionCalculator {
     public Player getVesselForCannonCollide(Player source, Direction direction) {
         // calculate direction multiplier
         int dM = (direction == Direction.LEFT)?1:-1; // direction (-1 or 1)
-
         // calculate x,y offsets
         int xO = 0;
         int yO = 0;
@@ -339,9 +338,9 @@ public class CollisionCalculator {
         }
 
         // return the player
-        for (int i = 1; i < 4; i++) {
-            int x = source.getX() + (xO * dM);
-            int y = source.getY() + (yO * dM);
+        for (int i = 1; i < 4; i++) { // i is basically # of spots away
+    		int x = source.getX() + (xO * dM * i);
+        	int y = source.getY() + (yO * dM * i);
 
             if (context.getMap().isBigRock(x, y)) {
                 return null;

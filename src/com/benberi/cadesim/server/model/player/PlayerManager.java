@@ -270,11 +270,10 @@ public class PlayerManager {
     public void handleTurns() {
 
         context.getTimeMachine().renewTurn();
+
+
         // Loop through all turns
         for (int turn = 0; turn < 4; turn++) {
-        	
-
-            //moving loops
             /*
              * Phase 1 handling
              */
@@ -371,11 +370,9 @@ public class PlayerManager {
                 for (Player p : listRegisteredPlayers()) {
                     p.getCollisionStorage().setPositionChanged(false);
                 }
-                
             }
-          //shooting/damage loop
-            for (Player p : listRegisteredPlayers()) {
-
+            
+        	for (Player p : listRegisteredPlayers()) {
                 if (p.getCollisionStorage().isOnAction()) {
                     int tile = p.getCollisionStorage().getActionTile();
                     if (p.getCollisionStorage().isCollided(turn)) {
@@ -392,6 +389,7 @@ public class PlayerManager {
                 p.getCollisionStorage().clear();
                 p.getCollisionStorage().setOnAction(-1);
 
+
                 // left shoots
                 int leftShoots = p.getMoves().getLeftCannons(turn);
                 // right shoots
@@ -406,20 +404,22 @@ public class PlayerManager {
                 // Set cannon animations
                 t.setLeftShoots(leftShoots);
                 t.setRightShoots(rightShoots);
-            }
-            //sinking loop
-            for (Player p : listRegisteredPlayers()) {
-                if(p.getVessel().isDamageMaxed() && !p.isSunk()) {
-                	p.setSunk(turn);
-                	p.getAnimationStructure().getTurn(turn).setSunk(true);
-                }
-            }
-            
-        }
 
+            }
+        	
+        	for (Player p : listRegisteredPlayers()) {
+	            if (p.getVessel().isDamageMaxed() && !p.isSunk()) {
+	                p.setSunk(turn);
+	                p.getAnimationStructure().getTurn(turn).setSunk(true);
+	            }
+        	}
+
+        }
+        
         for (Player player : listRegisteredPlayers()) {
             player.getPackets().sendSelectedMoves();
         }
+
         // Process some after-turns stuff like updating damage interfaces, and such
         for (Player p : listRegisteredPlayers()) {
             p.processAfterTurnUpdate();
@@ -525,10 +525,11 @@ public class PlayerManager {
     private void damagePlayersAtDirection(int shoots, Player source, Direction direction, int turnId) {
         if (shoots <= 0) {
             return;
-        }
-        Player player = collision.getVesselForCannonCollide(source, direction);
-        if (player != null && source.isOutOfSafe()) {
-            player.getVessel().appendDamage(((double) shoots * source.getVessel().getCannonType().getDamage()), source.getTeam());
+        }else {
+	        Player player = collision.getVesselForCannonCollide(source, direction);
+	        if (player != null && source.isOutOfSafe()) {
+	            player.getVessel().appendDamage(((double) shoots * source.getVessel().getCannonType().getDamage()), source.getTeam());
+	        }
         }
     }
 

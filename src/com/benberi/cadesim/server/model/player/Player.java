@@ -234,12 +234,12 @@ public class Player extends Position {
     public Position set(Position pos) {
         if (!needsRespawn) {
             if (!outOfSafe && !context.getMap().isSafe(pos)) {
-                this.outOfSafe = true;
+                setOutOfSafe(true);
             }
 
-            if (outOfSafe && context.getMap().isSafe(pos)) {
+            else if (outOfSafe && context.getMap().isSafe(pos)) {
                 needsRespawn = true;
-                outOfSafe = false;
+                setOutOfSafe(false);
 
                 // mark which safe zone we sailed through
                 if (context.getMap().isSafeLandside(pos))
