@@ -835,6 +835,7 @@ public class PlayerManager {
             pl.getPackets().sendLoginResponse(response);
 
             if (response == LoginResponsePacket.SUCCESS) {
+//            	pl.getPackets().sendMapList();
                 pl.register(name, ship, team);
                 pl.getPackets().sendBoard();
                 pl.getPackets().sendTeams();
