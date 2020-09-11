@@ -1,6 +1,7 @@
 package com.benberi.cadesim.server.config;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class ServerConfiguration {
     private static int respawnDelay  = 2;          // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
+    private static String mapFilter = ".txt";
 	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
@@ -110,6 +112,10 @@ public class ServerConfiguration {
     public static String getMapName() {
         return ServerConfiguration.mapName;
     }
+    
+    public static String getMapFilter() {
+        return ServerConfiguration.mapFilter;
+    }
 
     public static void setMapName(String mapName) {
         ServerConfiguration.mapName = mapName;
@@ -137,7 +143,19 @@ public class ServerConfiguration {
 	// grab available maps and store the list in ServerConfig. restart required to recognize a change.
 	public static void loadAvailableMaps() {
         Path currentRelativePath = Paths.get("");
-        File[] mapList = currentRelativePath.resolveSibling(Constants.mapDirectory).toFile().listFiles();
+        FilenameFilter textFilter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				String lowercaseName = name.toLowerCase();
+				if(lowercaseName.endsWith(getMapFilter())) {
+					return true;
+				}else {
+					return false;
+				}
+			}
+        	
+        };
+        File[] mapList = currentRelativePath.resolveSibling(Constants.mapDirectory).toFile().listFiles(textFilter);
         ArrayList<String> names = new ArrayList<>();
         for (File f : mapList) {
             names.add(f.getName());

@@ -270,7 +270,10 @@ public class PlayerManager {
     public void handleTurns() {
 
         context.getTimeMachine().renewTurn();
-
+        
+        for (Player player : listRegisteredPlayers()) {
+            player.getPackets().sendSelectedMoves();
+        }
 
         // Loop through all turns
         for (int turn = 0; turn < 4; turn++) {
@@ -414,10 +417,6 @@ public class PlayerManager {
 	            }
         	}
 
-        }
-        
-        for (Player player : listRegisteredPlayers()) {
-            player.getPackets().sendSelectedMoves();
         }
 
         // Process some after-turns stuff like updating damage interfaces, and such
@@ -844,7 +843,6 @@ public class PlayerManager {
                 pl.getPackets().sendTokens();
                 pl.getPackets().sendFlags();
                 pl.getPackets().sendPlayerFlags();
-                pl.getPackets().sendMapList();
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
                 printTeams(null, true);     // total counts of players in server
@@ -852,6 +850,7 @@ public class PlayerManager {
 
                 // players who join during break don't need to send an animation complete packet.
                 pl.setJoinedInBreak(context.getTimeMachine().isLock());
+                pl.getPackets().sendMapList();
             }
         }
     }

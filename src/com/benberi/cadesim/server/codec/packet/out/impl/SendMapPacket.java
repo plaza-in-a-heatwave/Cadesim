@@ -2,6 +2,7 @@ package com.benberi.cadesim.server.codec.packet.out.impl;
 
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.util.PacketLength;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 
@@ -22,9 +23,8 @@ public class SendMapPacket extends OutgoingPacket {
 
     public void encode() {
         int[][] map = bmap.getMap();
-
         setPacketLengthType(PacketLength.SHORT);
-
+        writeByteString(ServerConfiguration.getMapName());
         for (int x = 0; x < map.length; x++) {
             for (int y = 0; y < map[x].length; y++) {
                 int tile = map[x][y];
@@ -35,7 +35,6 @@ public class SendMapPacket extends OutgoingPacket {
                 }
             }
         }
-
         setLength(getBuffer().readableBytes());
     }
 }
