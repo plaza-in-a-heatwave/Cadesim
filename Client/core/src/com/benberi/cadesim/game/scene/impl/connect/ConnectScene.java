@@ -67,7 +67,8 @@ public class ConnectScene implements GameScene, InputProcessor {
     private ArrayList<String> room_names = new ArrayList<String>();
     private java.util.Random prng = new java.util.Random(System.currentTimeMillis());
     private String chosenGreeting;
-    private String code_url = "https://github.com/plaza-in-a-heatwave/Obsidio-Server/issues";
+    private final String CODE_URL = "https://github.com/plaza-in-a-heatwave/Cadesim/issues";
+    private final int CODE_URL_WIDTH = 278; // px
 
     private boolean failed;
 
@@ -549,7 +550,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         	notesFont.draw(batch, "Found a bug? Let us know!", 15, 25);
         	
         	if (codeURL) { notesFont.setColor(Color.SKY); }
-        	notesFont.draw(batch, code_url, 138, 25);
+            notesFont.draw(batch, CODE_URL, 138, 25);
             notesFont.setColor(Color.WHITE);
         	
             font.setColor(Color.WHITE);
@@ -747,7 +748,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 		if (isMouseOverCodeUrl(screenX, Gdx.graphics.getHeight() - screenY))
 		{
 	    	try {
-				java.awt.Desktop.getDesktop().browse(java.net.URI.create(code_url));
+				java.awt.Desktop.getDesktop().browse(java.net.URI.create(CODE_URL));
 			} catch (IOException e) {
 				// nvm, couldn't open URL
 			}
@@ -815,7 +816,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     
     public boolean isMouseOverCodeUrl(float x, float y)
     {
-    	return x >= 138 && y >= 10 && x < 447 && y < 31;
+        return x >= 138 && y >= 10 && x <= (138 + CODE_URL_WIDTH) && y < 31;
     }
 
     @Override

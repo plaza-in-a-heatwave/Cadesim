@@ -5,8 +5,5 @@ To run:
 * unzip the cadesim files somewhere sensible and double-click the .jar to launch
 * Contact the server admin for the server code
 
-Release changelog:
-* github.com/plaza-in-a-heatwave/Obsidio-Server/blob/master/CHANGELOG
-
-Bugs, feature requests:
-* github.com/plaza-in-a-heatwave/Obsidio-Server/issues
+Bugs, feature requests, changelog:
+* github.com/plaza-in-a-heatwave/Cadesim/issues

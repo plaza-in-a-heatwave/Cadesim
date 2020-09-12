@@ -13,7 +13,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
- * Obsidio game server for Blockade Simulator
+ * Cadesim game server for Blockade Simulator
  *
  * @author Ben Beri <benberi545@gmail.com> | Jony
  */

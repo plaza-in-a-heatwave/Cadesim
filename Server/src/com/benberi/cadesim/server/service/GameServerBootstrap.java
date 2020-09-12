@@ -17,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Obsidio game server bootstrap
+ * Cadesim game server bootstrap
  *
  * @author Ben Beri <benberi545@gmail.com>
  *                  <https://github.com/benberi>
@@ -74,7 +74,7 @@ public class GameServerBootstrap {
     	// And then exits
         HelpFormatter formatter = new HelpFormatter();
 
-        formatter.printHelp("Obsidio-Server", options);
+        formatter.printHelp("Cadesim", options);
         System.exit(Constants.EXIT_ERROR_BAD_CONFIG);
     }
 
