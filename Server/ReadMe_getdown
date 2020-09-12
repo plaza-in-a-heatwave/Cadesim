@@ -1,0 +1,28 @@
+For our client auto-update feature we need the following;
+ - getdown.txt
+ - getdown.jar
+ - user.config
+ - version.txt
+ - digest.txt files (qty -2)
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+To get the digest files;
+run "java -classpath getdown-digest.jar com.threerings.getdown.tools.Digester ."
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+Note:
+the '.' in the above command is the location of the client jar file, user.config and other files. 
+In my example all files (even getdown-digest.jar) are in the same folder.
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+To update client:
+1. Export client project as cadesim.jar from eclipse
+2. Update any background/UI needed before proceeding
+3. Increase version# in getdown.txt and version.txt and rerun getdown-digest.jar to propagate the new digest files.
+
+4. Upload all .txt files & config file to the hosted server on google drive. 
+
+Hosted server: https://gucadesim.imfast.io/
+(we can always change server later if needed)

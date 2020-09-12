@@ -1,10 +1,7 @@
-# Obsidio Blockade Server
+# Cadesim server
 
-This is a server used to run the Blockade Simulator that recently was named as "Obsidio".  
-The game client repository: https://github.com/BenBeri/Obsidio  
-
-Dependencies:  
-[Netty](https://netty.io/)  
+## Dependencies:  
+[Netty](https://netty.io/)
 [Apache Commons CLI](http://commons.apache.org/proper/commons-cli/)
 
 E.g.:
@@ -16,11 +13,34 @@ E.g.:
 * commons-cli-1.4/commons-cli-1.4-tests.jar
 * commons-cli-1.4/commons-cli-1.4-test-sources.jar
 
-# Notes on Eclipse build
-Change .classpath entries to where you installed Netty/Commons CLI
+## Eclipse config
+* Import from filesystem (not existing project), use folder "Cadesim\Server"
+* Entry point: Cadesim\Server\src\com\benberi\cadesim\server\service\GameServerBootstrap.java
+* Change .classpath entries to where you installed Netty/Commons CLI
+* Set src as source dir and clean,rebuild
 
-Set src as source dir and clean,rebuild
-
-Couldnt get jars exporting from eclipse
-* you can use export-to-jar.sh in terminal
+## Exporting
+Use eclipse export to jar. Alternatively there is a helper script to export jars:
+* export-to-jar.sh in terminal
 * add netty/commons paths to "jar.deps" and run "export-to-jar.sh"
+
+# Cadesim client
+
+## Dependencies
+[Netty](https://netty.io/)
+[Apache Commons IO](http://commons.apache.org/proper/commons-io/)
+[Google GSON](https://github.com/google/gson)
+
+## Eclipse config
+* Use the Gradle import wizard to import the "Client" folder
+* build.gradle -> gradle -> refresh gradle project
+* Set JRE System Libraries to JavaSE-1.8 if not already
+* Entry point: "Cadesim\Client\desktop\src\com\benberi\cadesim\desktop\DesktopLauncher.java"
+* Update the build path dependencies:
+** Core depends on Core/src
+** BlockadeSimulator-Desktop depends on itself (with /src excluded)
+** BlockadeSimulator-Desktop depends on /src
+
+## Exporting
+* Export as jar, make sure there is user.config in the same directory
+* java -jar jarjar.jar

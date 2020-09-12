@@ -1,0 +1,37 @@
+{
+  "name": "cell",
+  "orientations": {
+    "0": {
+      "x": 0,
+      "y": 0,
+      "width": 64,
+      "height": 48,
+      "offsetx": 0,
+      "offsety": 10
+    },
+    "1": {
+      "x": 64,
+      "y": 0,
+      "width": 64,
+      "height": 48,
+      "offsetx": 0,
+      "offsety": 10
+    },
+    "2": {
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 48,
+      "offsetx": 0,
+      "offsety": 10
+    },
+    "3": {
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 48,
+      "offsetx": 0,
+      "offsety": 12
+    }
+  }
+}
