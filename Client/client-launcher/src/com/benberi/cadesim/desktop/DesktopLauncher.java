@@ -51,38 +51,42 @@ public class DesktopLauncher {
 			}
 		
 		});
-		updateThread.start();
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		int[] res = new int[2];
-		BlockadeSimulator cadesim = new BlockadeSimulator();
-		res = loadresolution();
-		config.resizable = false;
-		config.width = res[0];
-		config.height = res[1];
-		//config.backgroundFPS = 20;    // bugfix high CPU
-		config.vSyncEnabled = false; // "
-		config.title = "CadeSim: v" + Constants.VERSION;
-		new LwjglApplication(cadesim, config);
-	}
 
-	private static int[] loadresolution() {
+		// load the properties config
 		Properties prop = new Properties();
 		String fileName = "user.config";
 		InputStream is = null;
 		try {
 		    is = new FileInputStream(fileName);
+		    prop.load(is);
 		} catch (FileNotFoundException e) {
 		    e.printStackTrace();
 		}
-	
-		try {
-		    prop.load(is);
-		} catch (IOException e) {
+		catch (IOException e) {
 		    e.printStackTrace();
 		}
-	    int[] resolution = new int[2];
-		resolution[0] = Integer.parseInt(prop.getProperty("user.width"));
-		resolution[1] = Integer.parseInt(prop.getProperty("user.height"));
-		return resolution;
+
+		// schedule update, unless explicitly disabled
+		String updateType = prop.getProperty("autoupdate");
+		if ((updateType != null) && updateType.equalsIgnoreCase("no"))
+		{
+			System.out.println("Automatic updates are disabled.");
+		}
+		else
+		{
+			System.out.println("Automatic updates are enabled.");
+			updateThread.start();
+		}
+
+		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		BlockadeSimulator cadesim = new BlockadeSimulator();
+
+		config.resizable = false;
+		config.width = Integer.parseInt(prop.getProperty("user.width"));
+		config.height = Integer.parseInt(prop.getProperty("user.height"));
+		//config.backgroundFPS = 20;    // bugfix high CPU
+		config.vSyncEnabled = false; // "
+		config.title = "CadeSim: v" + Constants.VERSION;
+		new LwjglApplication(cadesim, config);
 	}
 }
