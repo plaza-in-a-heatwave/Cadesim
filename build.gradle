@@ -76,6 +76,10 @@ project(":client-launcher") {
     }
 }
 
+project(":server") {
+    apply plugin: "java"
+}
+
 tasks.eclipse.doLast {
     delete ".project"
 }
