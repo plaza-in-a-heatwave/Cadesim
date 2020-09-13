@@ -38,7 +38,6 @@ allprojects {
 project(":client-core") {
     apply plugin: "java"
 
-
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
@@ -53,14 +52,11 @@ project(":client-core") {
 		compile group: 'io.netty', name: 'netty-all', version: '4.1.5.Final'
         compile group: 'commons-io', name: 'commons-io', version: '2.6'
         compile group: 'javax.xml.soap', name: 'javax.xml.soap-api', version: '1.4.0'
-
-
     }
 }
 
 project(":client-launcher") {
     apply plugin: "java"
-
 
     dependencies {
         compile project(":client-core")
@@ -72,7 +68,16 @@ project(":client-launcher") {
         compile "com.badlogicgames.gdx:gdx-controllers-desktop:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-controllers-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-desktop"
-        
+    }
+}
+
+project(":server") {
+    apply plugin: "java"
+
+    dependencies {
+        compile group: 'io.netty', name: 'netty-all', version: '4.1.5.Final'
+        compile group: 'io.netty', name: 'netty-all', version: '4.1.5.Final-sources'
+        compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     }
 }
 

@@ -14,6 +14,9 @@ E.g.:
 * commons-cli-1.4/commons-cli-1.4-test-sources.jar
 
 ## Eclipse config
+* Use the gradle import wizard and folder Cadesim
+
+Otherwise manually:
 * Import from filesystem (not existing project), use folder "Cadesim\Server"
 * Entry point: Cadesim\Server\src\com\benberi\cadesim\server\service\GameServerBootstrap.java
 * Change .classpath entries to where you installed Netty/Commons CLI
@@ -32,6 +35,9 @@ Use eclipse export to jar. Alternatively there is a helper script to export jars
 [Google GSON](https://github.com/google/gson)
 
 ## Eclipse config
+* Use the gradle import wizard and folder Cadesim
+
+Otherwise manually:
 * Use the Gradle import wizard to import the "Client" folder
 * build.gradle -> gradle -> refresh gradle project
 * Set JRE System Libraries to JavaSE-1.8 if not already
