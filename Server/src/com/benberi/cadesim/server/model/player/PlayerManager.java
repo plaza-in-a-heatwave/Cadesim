@@ -18,6 +18,7 @@ import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -82,10 +83,11 @@ public class PlayerManager {
     private Vote currentVote = null;
     
     /**
-     * act on player vote requests
+     * restart conditions
      */
     private boolean shouldSwitchMap = false;
     private boolean shouldRestartMap = false;
+    private boolean updateScheduledAfterGame = false;
 
 	private boolean gameEnded;
 
@@ -188,7 +190,7 @@ public class PlayerManager {
     }
     
     /**
-     * getters/setters for player vote outcomes
+     * getters/setters for restart-related events
      */
     public boolean shouldSwitchMap() {
     	return this.shouldSwitchMap;
@@ -202,6 +204,14 @@ public class PlayerManager {
 
     public void setShouldRestartMap(boolean value) {
         this.shouldRestartMap = value;
+    }
+
+    public void setUpdateScheduledAfterGame(boolean value) {
+        updateScheduledAfterGame = value;
+    }
+
+    public boolean isUpdateScheduledAfterGame() {
+        return updateScheduledAfterGame;
     }
 
     /**
@@ -237,10 +247,23 @@ public class PlayerManager {
             		currentVote = null;
             	}
             }
-            
+
             // also check for players who might have logged in but not
             // registered - then timed out
             timeoutUnregisteredPlayers();
+
+            // also check if we need to update the server
+            // TODO this code is only here because the mechanism is convenient.
+            // it is not related to player management functionality.
+            if (ServerConfiguration.isScheduledAutoUpdate())
+            {
+                if (
+                    ServerConfiguration.getNextUpdateDateTime().toEpochSecond() <=
+                    ZonedDateTime.now().toEpochSecond())
+                {
+                    setUpdateScheduledAfterGame(true);
+                }
+            }
         }
 
         // Update players (for stuff like damage fixing, bilge fixing and move token generation)

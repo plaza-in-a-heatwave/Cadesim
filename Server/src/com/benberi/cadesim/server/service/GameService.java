@@ -26,7 +26,7 @@ public class GameService implements Runnable {
         this.context = context;
         this.playerManager = context.getPlayerManager();
     }
-    
+
     /**
      * helper method to randomly rotate the map
      */
@@ -62,7 +62,7 @@ public class GameService implements Runnable {
 
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
             	gamesCompleted++;
-                
+
                 // handle switching maps.
                 String oldMap = ServerConfiguration.getMapName();
                 if (playerManager.shouldSwitchMap())
@@ -86,6 +86,23 @@ public class GameService implements Runnable {
                     // it would be cruel to exit early if players voted for a restart/nextmap
                     ServerContext.log("Not in run-continuous mode, so quitting early.");
                     System.exit(Constants.EXIT_SUCCESS);
+                }
+                else if (playerManager.isUpdateScheduledAfterGame()) {
+                    // check for updates and restart the server if we need to
+                    java.io.File f = new java.io.File(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
+                    int sleep_ms = 2000;
+                    int sleepTotal = 0;
+                    while (!f.mkdir()) {
+                        ServerContext.log("UPDATER: Waiting to update... (" + sleepTotal + ")");
+                        Thread.sleep(sleep_ms); // TODO need exit condition
+                        sleepTotal += sleep_ms;
+                    }
+
+                    ServerContext.log("UPDATER: Created lock directory (" + f.getName() + ")");
+
+                    // TODO
+
+                    System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
                 }
                 else if (
                         (ServerConfiguration.getMapRotationPeriod() > 0) && // -1 == don't rotate, 0 invalid

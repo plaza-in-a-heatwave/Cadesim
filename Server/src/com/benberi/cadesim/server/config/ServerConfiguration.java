@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.util.Utils;
@@ -36,10 +38,28 @@ public class ServerConfiguration {
 	private static boolean runContinuousMode = true;
     private static boolean multiClientMode = true;
     private static int[] breakInfo = {-1, -1}; // seconds
+    private static boolean scheduledAutoUpdate = false; // default
 
-    // uninitializable defaults
+	// uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
+    private static ZonedDateTime nextUpdateDateTime = null; // updated once on startup
+
+    public static ZonedDateTime getNextUpdateDateTime() {
+		return nextUpdateDateTime;
+	}
+
+	public static void setNextUpdateDateTime(ZonedDateTime nextUpdateDateTime) {
+		ServerConfiguration.nextUpdateDateTime = nextUpdateDateTime;
+	}
+
+	public static boolean isScheduledAutoUpdate() {
+		return scheduledAutoUpdate;
+	}
+
+	public static void setScheduledAutoUpdate(boolean value) {
+		ServerConfiguration.scheduledAutoUpdate = value;
+	}
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -106,6 +126,7 @@ public class ServerConfiguration {
                 "    Run continuous: " + getRunContinuousMode() + ",\n" +
                 "    Multiclient permitted: " + getMultiClientMode() + ",\n" +
                 "    Breaks duration/interval: " + getBreak()[0] + ":" + getBreak()[1] + ",\n" +
+                "    Updates scheduled at: " + (!isScheduledAutoUpdate()?"not set":(getNextUpdateDateTime().getHour() + ":" + getNextUpdateDateTime().getMinute() + ":" + getNextUpdateDateTime().getSecond())) + ",\n" +
                 "]";
     }
 

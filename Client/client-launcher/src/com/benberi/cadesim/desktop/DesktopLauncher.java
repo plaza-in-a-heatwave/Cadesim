@@ -44,6 +44,7 @@ public class DesktopLauncher {
 					}else {
 						Constants.SERVER_VERSION_BOOL = true;
 					}
+					sc.close();
 				}
 				 catch (IOException e) {
 					e.printStackTrace();

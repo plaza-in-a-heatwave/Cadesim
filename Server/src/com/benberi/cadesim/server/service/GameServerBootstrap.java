@@ -12,8 +12,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.time.ZonedDateTime;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -112,7 +115,9 @@ public class GameServerBootstrap {
         options.addOption("r", "round-duration", true, "round duration seconds, minimum " + Constants.MIN_ROUND_DURATION + ", must be >= turn duration, (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
         options.addOption("s", "server-name", true, "provide a name for the server, " + Constants.MAX_SERVER_NAME_SIZE + " characters max (default: " + ServerConfiguration.getServerName() + ")");
         options.addOption("t", "turn-duration", true, "turn duration seconds, minimum " + Constants.MIN_TURN_DURATION + ", (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
+        options.addOption("u", "schedule-auto-updates", true, "schedule auto updates to take place at HH:MM:SS. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTime().toString()) + ")");
         options.addOption("v", "voting-majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
+
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
@@ -172,6 +177,34 @@ public class GameServerBootstrap {
                     help(options);
                 }
             }
+            if (cmd.hasOption("u")) {
+                String updateTime = cmd.getOptionValue("u");
+
+                String[] l = updateTime.split(":");
+                if (l.length != 3) {
+                    help(options);
+                }
+                int hours = Integer.parseInt(l[0]);
+                int minutes = Integer.parseInt(l[1]);
+                int seconds = Integer.parseInt(l[2]);
+                if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) {
+                    help(options);
+                }
+
+                // calculate when the next one would be based on our start time
+                ZonedDateTime now = ZonedDateTime.now();
+                ZonedDateTime next = ZonedDateTime.of(now.getYear(), now.getMonthValue(), now.getDayOfMonth(), hours,
+                        minutes, seconds, 0, ZonedDateTime.now().getZone());
+                if (next.toEpochSecond() <= now.toEpochSecond()) {
+                    next = next.plusDays(1); // next was actually previous
+                }
+                next = next.plusMinutes( // stagger updates if multiple rooms
+                        ThreadLocalRandom.current().nextInt(Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[0],
+                                Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[1] + 1));
+
+                ServerConfiguration.setScheduledAutoUpdate(true);
+                ServerConfiguration.setNextUpdateDateTime(next);
+            }
             if (cmd.hasOption("v"))
             {
             	int votingMajority = Integer.parseInt(cmd.getOptionValue("v"));
@@ -183,10 +216,6 @@ public class GameServerBootstrap {
             	{
             		help(options);
             	}
-            }
-            if (cmd.hasOption("v"))
-            {
-            	ServerConfiguration.setVotingMajority(Integer.parseInt(cmd.getOptionValue("v")));
             }
             if (cmd.hasOption("q"))
             {

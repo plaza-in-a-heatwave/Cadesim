@@ -36,14 +36,15 @@ public class Constants {
     public static final String DEFAULT_MAPNAME = "default.txt";
     
     /**
-     * return types
+     * return types ( < 128 good; >= 128 bad)
      */
-    public static final int EXIT_ERROR_UNKNOWN          = 13;
-    public static final int EXIT_ERROR_BAD_CONFIG       =  6;
-    public static final int EXIT_ERROR_CANT_FIND_MAPS   =  3;
-    public static final int EXIT_ERROR_CANT_CREATE_LOGS =  2;
-    public static final int EXIT_ERROR_CANT_BIND_LOCAL  =  1;
-    public static final int EXIT_SUCCESS                =  0;
+    public static final int EXIT_ERROR_UNKNOWN            = 140;
+    public static final int EXIT_ERROR_BAD_CONFIG         = 133;
+    public static final int EXIT_ERROR_CANT_FIND_MAPS     = 130;
+    public static final int EXIT_ERROR_CANT_CREATE_LOGS   = 129;
+    public static final int EXIT_ERROR_CANT_BIND_LOCAL    = 128;
+    public static final int EXIT_SUCCESS_SCHEDULED_UPDATE = 1;
+    public static final int EXIT_SUCCESS                  = 0;
     
     /**
      * The delay of the main game service loop in milliseconds
@@ -122,4 +123,7 @@ public class Constants {
 	 */
     public static final int MIN_BREAK_DURATION = 10;
     public static final int MIN_BREAK_INTERVAL = 60;
+
+    public static final String AUTO_UPDATING_LOCK_DIRECTORY_NAME = "AUTOUPDATING.LOCK";
+    public static final int[] STAGGER_AUTOUPDATE_RANGE_MINUTES = {-5, 5};
 }
