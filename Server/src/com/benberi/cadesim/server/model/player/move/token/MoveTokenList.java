@@ -6,7 +6,11 @@ import java.util.TreeSet;
 
 public class MoveTokenList extends TreeSet<MoveToken> {
 
-    private MoveType type;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private MoveType type;
 
     public MoveTokenList(MoveType moveType) {
         super(new MoveTokenComparator());

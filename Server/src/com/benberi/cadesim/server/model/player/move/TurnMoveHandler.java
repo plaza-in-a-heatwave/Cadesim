@@ -88,7 +88,8 @@ public class TurnMoveHandler {
      *
      * @param manuaverSlot  The new maneuver slot
      */
-    public void setManuaverSlot(int manuaverSlot) {
+    @SuppressWarnings("deprecation")
+	public void setManuaverSlot(int manuaverSlot) {
         int prevSlot = this.manuaverSlot;
         this.manuaverSlot = manuaverSlot;
         MoveType move = getMove(manuaverSlot);
