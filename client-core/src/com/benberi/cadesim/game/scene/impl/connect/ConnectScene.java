@@ -228,6 +228,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                 		digest2.delete();
                 		version.delete();
 						ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
+						@SuppressWarnings("unused")
 						Process p = pb.start(); //assign to process for something in future
 						System.exit(0);
 					}catch(Exception e){System.out.println(e);}

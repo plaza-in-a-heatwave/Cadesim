@@ -29,7 +29,8 @@ public enum MoveType {
         return this;
     }
 
-    public int getIncrementXForRotation(int rotationIndex) {
+    @SuppressWarnings("incomplete-switch")
+	public int getIncrementXForRotation(int rotationIndex) {
         switch(this) {
             case FORWARD:
                 switch(rotationIndex) {
@@ -64,7 +65,8 @@ public enum MoveType {
         return 0;
     }
 
-    public int getIncrementYForRotation(int rotationIndex) {
+    @SuppressWarnings("incomplete-switch")
+	public int getIncrementYForRotation(int rotationIndex) {
         switch(this) {
             case FORWARD:
                 switch(rotationIndex) {
@@ -99,7 +101,8 @@ public enum MoveType {
         return 0;
     }
 
-    public int getRotationTargetIndex(int rotationIndex) {
+    @SuppressWarnings("incomplete-switch")
+	public int getRotationTargetIndex(int rotationIndex) {
         int rot = 0;
         switch (this) {
             case LEFT:

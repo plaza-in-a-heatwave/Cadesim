@@ -54,7 +54,8 @@ public enum VesselMovementAnimation {
         return this.getId() >= 16;
     }
 
-    public int getIncrementXForRotation(int rotationIndex) {
+    @SuppressWarnings("incomplete-switch")
+	public int getIncrementXForRotation(int rotationIndex) {
         switch (this) {
             case WP_SE:
             case WP_NE:
@@ -138,7 +139,8 @@ public enum VesselMovementAnimation {
         return 0;
     }
 
-    public int getIncrementYForRotation(int rotationIndex) {
+    @SuppressWarnings("incomplete-switch")
+	public int getIncrementYForRotation(int rotationIndex) {
         switch (this) {
             case WP_SW:
             case WP_SE:
@@ -225,7 +227,8 @@ public enum VesselMovementAnimation {
         return this == MOVE_FORWARD || this == MOVE_BACKWARD || this == MOVE_LEFT || this == MOVE_RIGHT || this.getId() >= 8 && this.getId() <= 11;
     }
 
-    public Vector2 getBumpTargetPosition(int rotationIndex) {
+    @SuppressWarnings("incomplete-switch")
+	public Vector2 getBumpTargetPosition(int rotationIndex) {
         switch (this) {
             case BUMP_NORTH:
                 return new Vector2(0, 0.2f);
@@ -256,7 +259,8 @@ public enum VesselMovementAnimation {
         return null;
     }
 
-    public int getRotationTargetIndex(int rotationIndex) {
+    @SuppressWarnings("incomplete-switch")
+	public int getRotationTargetIndex(int rotationIndex) {
         int rot = 0;
         if (this.getId() >= 16) {
             rot = rotationIndex + 4;
@@ -300,7 +304,8 @@ public enum VesselMovementAnimation {
         return animation == BUMP_PHASE_1 || animation == BUMP_PHASE_2 || animation.getId() >= 12 && animation.getId() <= 15;
     }
 
-    public Vector2 getInbetweenWhirlpool(Vector2 start) {
+    @SuppressWarnings("incomplete-switch")
+	public Vector2 getInbetweenWhirlpool(Vector2 start) {
         Vector2 inbetween = start.cpy();
         switch (this) {
             case WP_SW:

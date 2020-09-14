@@ -10,7 +10,8 @@ public enum  MovePhase {
     // The shoots phase
     SHOOT;
 
-    public static MovePhase getNext(MovePhase currentPhase) {
+    @SuppressWarnings("incomplete-switch")
+	public static MovePhase getNext(MovePhase currentPhase) {
         if (currentPhase == null) {
             return MOVE_TOKEN;
         }

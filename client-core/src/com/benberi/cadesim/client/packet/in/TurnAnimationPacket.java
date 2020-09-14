@@ -6,16 +6,12 @@ import com.benberi.cadesim.client.packet.ClientPacketExecutor;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
 import com.benberi.cadesim.game.entity.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.game.entity.vessel.move.MoveAnimationTurn;
-import com.benberi.cadesim.game.entity.vessel.move.MovePhase;
 import com.benberi.cadesim.game.entity.vessel.move.MoveType;
 
 public class TurnAnimationPacket extends ClientPacketExecutor {
 
-	private GameContext context;
-	
-    public TurnAnimationPacket(GameContext ctx) {
+	public TurnAnimationPacket(GameContext ctx) {
         super(ctx);
-        context = ctx;
     }
 
     @Override

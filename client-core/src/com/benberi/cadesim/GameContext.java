@@ -534,8 +534,4 @@ public class GameContext {
 	public void setClientInitiatedDisconnect(boolean clientDisconnected) {
 		this.clientDisconnected = clientDisconnected;
 	}
-
-	public void resetTitle() {
-		Gdx.graphics.setTitle("CadeSim: ");
-	}
 }

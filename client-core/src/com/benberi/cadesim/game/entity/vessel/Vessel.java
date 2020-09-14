@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.reflect.Method;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.Entity;
@@ -224,7 +223,8 @@ public abstract class Vessel extends Entity {
         tickBumpRotation(1);
     }
 
-    public void tickBumpRotation(int amount) {
+    @SuppressWarnings("incomplete-switch")
+	public void tickBumpRotation(int amount) {
         switch (bumpVector.getMove()) {
             case LEFT:
                 if (rotationIndex - amount < 0) {
@@ -662,7 +662,7 @@ public abstract class Vessel extends Entity {
     public static Vessel createVesselByType(GameContext context, String name, int x, int y, int type) {
         try
         {
-        	Class shiptype = (VESSEL_TYPES.get(type));
+        	Class<?> shiptype = (VESSEL_TYPES.get(type));
             Constructor<?> c = shiptype.getConstructor(GameContext.class, String.class, int.class, int.class);
             return (Vessel)c.newInstance(context, name, x, y);
         }
@@ -676,7 +676,12 @@ public abstract class Vessel extends Entity {
     /**
      * map integer IDs to classes
      */
-    public static final HashMap<Integer, Class<? extends Vessel>> VESSEL_TYPES = new HashMap<Integer, Class<? extends Vessel>>() {{
+    public static final HashMap<Integer, Class<? extends Vessel>> VESSEL_TYPES = new HashMap<Integer, Class<? extends Vessel>>() {/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+	{
     	put(0, Smsloop.class);
     	put(1, Lgsloop.class);
     	put(2, Dhow.class);
@@ -703,7 +708,7 @@ public abstract class Vessel extends Entity {
     	{
     		try
     		{
-    			Class shiptype_field = VESSEL_TYPES.get(i);
+    			Class<?> shiptype_field = VESSEL_TYPES.get(i);
     			Field vesselname_field = shiptype_field.getField("VESSELNAME");
     			String value = (String)vesselname_field.get(shiptype_field);
         		if (value.equals(name))
@@ -752,7 +757,7 @@ public abstract class Vessel extends Entity {
     public static String getNameFromId(int id) {
 		try
 		{
-			Class shiptype_field = VESSEL_TYPES.get(id);
+			Class<?> shiptype_field = VESSEL_TYPES.get(id);
 			Field vesselname_field = shiptype_field.getField("VESSELNAME");
 			return (String)vesselname_field.get(shiptype_field);
 		}

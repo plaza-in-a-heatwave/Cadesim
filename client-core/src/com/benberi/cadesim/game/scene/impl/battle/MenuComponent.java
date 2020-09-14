@@ -3,7 +3,6 @@ package com.benberi.cadesim.game.scene.impl.battle;
 import java.awt.Rectangle;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
@@ -19,15 +18,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.scene.SceneComponent;
-import com.benberi.cadesim.game.scene.impl.connect.ResolutionTypeLabel;
-import com.benberi.cadesim.game.scene.impl.control.ControlAreaScene;
 
 public class MenuComponent extends SceneComponent<SeaBattleScene> implements InputProcessor {
     /**
@@ -58,7 +52,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     private int MENU_buttonY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 238);
 
     private int MENU_tableX     = MENU_REF_X + (Gdx.graphics.getWidth() - 80);
-    private int MENU_tableY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 321);
+    @SuppressWarnings("unused")
+	private int MENU_tableY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 321);
     
     private int MENU_lobbyButtonX     = MENU_REF_X + (Gdx.graphics.getWidth() - 76);
     private int MENU_lobbyButtonY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 273);
@@ -83,9 +78,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	public Stage stage;
 	private SelectBox<String> selectBox;
 	private InputProcessor input;
-	private Table table;
 	private Dialog dialog;
-	private OrthographicCamera orthoCamera;
 	public Skin skin;
 	private String[] mapStrings;
 	Texture texture;

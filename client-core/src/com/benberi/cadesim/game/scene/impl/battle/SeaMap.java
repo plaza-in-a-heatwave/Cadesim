@@ -19,16 +19,13 @@ public class SeaMap {
      */
     public static final int MAP_HEIGHT = 36;
 
-    private GameContext context;
-
     /**
      * Map tiles
      */
     private GameTile[][] tiles = new GameTile[MAP_WIDTH][MAP_HEIGHT];
 
     public SeaMap(GameContext context, int[][] map) {
-        this.context = context;
-        SafeZone safe = new SafeZone(context);
+        new SafeZone(context);
     }
 
     public GameTile[][] getTiles() {
