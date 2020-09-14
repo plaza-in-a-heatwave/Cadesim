@@ -614,6 +614,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                     font.draw(batch, "Close", x + 400 - 55, y + (25 + (layout.height / 2)));
                 }
                 batch.end();
+                Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
             }
         }
         else {

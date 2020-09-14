@@ -487,15 +487,14 @@ public class GameContext {
     	if(getServerResponse()) {
     		getServerChannel().disconnect();
     		System.out.println("Login error; handling response.");
-    		Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
     	}else {
 	        setReady(false);
 	        setIsConnected(false);
 	        setIsInLobby(true);
+	        getServerChannel().disconnect();
 			getConnectScene().setState(ConnectionSceneState.DEFAULT);
-			getServerChannel().disconnect();
 			connectScene.setPopup("Server Disconnected; Returning to Lobby...", false);
-			Gdx.graphics.setTitle("CadeSim");
+			System.out.println("Server disconnected.");
     	}
     }
 
@@ -534,5 +533,9 @@ public class GameContext {
 
 	public void setClientInitiatedDisconnect(boolean clientDisconnected) {
 		this.clientDisconnected = clientDisconnected;
+	}
+
+	public void resetTitle() {
+		Gdx.graphics.setTitle("CadeSim: ");
 	}
 }
