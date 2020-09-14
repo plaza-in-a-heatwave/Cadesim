@@ -20,6 +20,9 @@ import com.benberi.cadesim.server.model.player.PlayerManager;
  */
 public class GameService implements Runnable {
 
+    /**
+     * Updater: Thread to check for updates automatically
+     */
     Thread updateThread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -73,6 +76,87 @@ public class GameService implements Runnable {
 
         // updated by thread
         return isUpdateAvailable;
+    }
+
+    /**
+     * Updater: perform automatic update
+     * @throws InterruptedException
+     * @throws IOException
+     */
+    public void doAutomaticUpdateAndExit() throws InterruptedException, IOException {
+        // check for updates and restart the server if we need to
+        java.io.File f = new java.io.File(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
+        int sleep_ms = 2000;
+        int sleepTotal = 0;
+        boolean fileLockSuccess = true;
+        while (!f.mkdir()) {
+            ServerContext.log("UPDATER: Waiting to update... (" + sleepTotal + ")");
+            Thread.sleep(sleep_ms);
+            sleepTotal += sleep_ms;
+
+            // exit condition so we don't endlessly loop
+            if (sleepTotal >= Constants.AUTO_UPDATE_MAX_LOCK_WAIT_MS) {
+                ServerContext.log("UPDATER: Waited too long for file lock, maybe another server crashed. Giving up and restarting instead. (" + sleepTotal + ")");
+                fileLockSuccess = false;
+                break;
+            }
+        }
+
+        if (fileLockSuccess && isUpdateAvailable()) {
+            ServerContext.log("UPDATER: Created lock directory (" + f.getName() + ")");
+
+            // TODO #69 fill in lock directory details
+
+            try {
+                ServerContext.log("Performing update, deleting files...");
+                //delete required files in order to update client
+                File digest1 = new File("digest.txt");
+                File digest2 = new File("digest2.txt");
+                File version = new File("version.txt");
+                digest1.delete();
+                digest2.delete();
+                version.delete();
+                ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
+                Process p = pb.start(); //assign to process for something in future
+                System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
+            }catch(Exception e){System.out.println(e);}
+        }
+        else {
+
+            // get the name of the jar file
+            String jarFileName = "";
+            CodeSource codeSource = GameServerBootstrap.class.getProtectionDomain().getCodeSource();
+            try {
+                File jarFile = new File(codeSource.getLocation().toURI().getPath());
+                jarFileName = jarFile.getCanonicalPath();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // only restart if it's a jar (e.g. prevent IDE)
+            if (jarFileName.endsWith(".jar")) {
+                ArrayList<String> arglist = new ArrayList<String>();
+
+                // start with java -jar jarfile.jar
+                arglist.add("java");
+                arglist.add("-jar");
+                arglist.add(jarFileName);
+
+                // add the cadesim server args
+                String args[] = ServerConfiguration.getArgs();
+                for (int i=0; i<args.length; i++) {
+                    arglist.add(args[i]);
+                }
+
+                // restart the server by creating a new process.
+                ProcessBuilder pb = new ProcessBuilder(arglist);
+                Process p = pb.start();
+            }
+        }
+
+        System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
     }
 
     /**
@@ -154,79 +238,7 @@ public class GameService implements Runnable {
                     System.exit(Constants.EXIT_SUCCESS);
                 }
                 else if (playerManager.isUpdateScheduledAfterGame()) {
-                    // check for updates and restart the server if we need to
-                    java.io.File f = new java.io.File(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
-                    int sleep_ms = 2000;
-                    int sleepTotal = 0;
-                    boolean fileLockSuccess = true;
-                    while (!f.mkdir()) {
-                        ServerContext.log("UPDATER: Waiting to update... (" + sleepTotal + ")");
-                        Thread.sleep(sleep_ms);
-                        sleepTotal += sleep_ms;
-
-                        // exit condition so we don't endlessly loop
-                        if (sleepTotal >= Constants.AUTO_UPDATE_MAX_LOCK_WAIT_MS) {
-                            ServerContext.log("UPDATER: Waited too long for file lock, maybe another server crashed. Giving up and restarting instead. (" + sleepTotal + ")");
-                            fileLockSuccess = false;
-                            break;
-                        }
-                    }
-
-                    if (fileLockSuccess && isUpdateAvailable()) {
-                        ServerContext.log("UPDATER: Created lock directory (" + f.getName() + ")");
-
-                        // TODO #69 fill in lock directory details
-
-                        try {
-                            ServerContext.log("Performing update, deleting files...");
-                            //delete required files in order to update client
-                            File digest1 = new File("digest.txt");
-                            File digest2 = new File("digest2.txt");
-                            File version = new File("version.txt");
-                            digest1.delete();
-                            digest2.delete();
-                            version.delete();
-                            ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
-                            Process p = pb.start(); //assign to process for something in future
-                            System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
-                        }catch(Exception e){System.out.println(e);}
-                    }
-                    else {
-
-                        // get the name of the jar file
-                        String jarFileName = "";
-                        CodeSource codeSource = GameServerBootstrap.class.getProtectionDomain().getCodeSource();
-                        try {
-                            File jarFile = new File(codeSource.getLocation().toURI().getPath());
-                            jarFileName = jarFile.getCanonicalPath();
-                        } catch (URISyntaxException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        // only restart if it's a jar (e.g. prevent IDE)
-                        if (jarFileName.endsWith(".jar")) {
-                            ArrayList<String> arglist = new ArrayList<String>();
-
-                            // start with java -jar jarfile.jar
-                            arglist.add("java");
-                            arglist.add("-jar");
-                            arglist.add(jarFileName);
-
-                            // add the cadesim server args
-                            String args[] = ServerConfiguration.getArgs();
-                            for (int i=0; i<args.length; i++) {
-                                arglist.add(args[i]);
-                            }
-
-                            // restart the server by creating a new process.
-                            ProcessBuilder pb = new ProcessBuilder(arglist);
-                            Process p = pb.start();
-                        }
-                    }
-
-                    System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
+                    doAutomaticUpdateAndExit();
                 }
                 else if (
                         (ServerConfiguration.getMapRotationPeriod() > 0) && // -1 == don't rotate, 0 invalid
