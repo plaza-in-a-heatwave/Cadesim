@@ -13,7 +13,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import java.time.ZonedDateTime;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -90,6 +89,12 @@ public class GameServerBootstrap {
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
+        // add a few sec delay before doing anything to give any
+        // previous instances a chance to exit
+        Thread.sleep(2000);
+
+        // TODO #69 check if the lockfile is ours, and remove it if so
+
         // set up maps
         ServerConfiguration.loadAvailableMaps();
         ServerContext.log("Loaded " + ServerConfiguration.getAvailableMaps().size() + " maps.");
@@ -123,6 +128,9 @@ public class GameServerBootstrap {
         CommandLine cmd = null;
         try {
             cmd = parser.parse(options, args);
+
+            // store args in ServerConfiguration for use by auto updater
+            ServerConfiguration.setArgs(args);
 
             // check independent options
             if (cmd.hasOption("h")) {

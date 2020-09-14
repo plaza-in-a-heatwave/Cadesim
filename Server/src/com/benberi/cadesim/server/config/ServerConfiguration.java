@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.util.Utils;
@@ -44,6 +43,15 @@ public class ServerConfiguration {
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
     private static ZonedDateTime nextUpdateDateTime = null; // updated once on startup
+    private static String[] args; // store the args received on the commandline
+
+    public static String[] getArgs() {
+        return args;
+    }
+
+    public static void setArgs(String[] args) {
+        ServerConfiguration.args = args;
+    }
 
     public static ZonedDateTime getNextUpdateDateTime() {
 		return nextUpdateDateTime;
