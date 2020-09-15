@@ -196,7 +196,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             	dialog.setSize(650, 450);
             	dialog.setPosition(Gdx.graphics.getWidth()/2 - 325, Gdx.graphics.getHeight()/2 - 200);
         	}else {
-        		System.out.println("Not available");
+                System.out.println("Map preview not available");
         		dialog.setSize(400, 250);
         		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
         		Label notAvailable = new Label("Map preview not available.",skin);
@@ -214,7 +214,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		                	dialog.setSize(650, 450);
 		                	dialog.setPosition(Gdx.graphics.getWidth()/2 - 325, Gdx.graphics.getHeight()/2 - 200);
 	                	}else {
-	                		System.out.println("Not available");
+                            System.out.println("Map preview not available");
 	                		dialog.setSize(400, 250);
 	                		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
 	                		Label notAvailable = new Label("Map preview not available.",skin);
