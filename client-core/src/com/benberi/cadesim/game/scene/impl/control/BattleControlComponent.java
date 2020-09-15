@@ -763,7 +763,8 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         	
         // handle chat if it has grown too big?
         if (chatTable.getCells().size > CHAT_MAX_NUMBER_OF_MESSAGES) {
-            Cell<Label> cell = chatTable.getCells().first();
+            @SuppressWarnings("unchecked")
+			Cell<Label> cell = chatTable.getCells().first();
             cell.getActor().remove();                     // rm actor
             chatTable.getCells().removeValue(cell, true); // rm lingering physical presence
             chatTable.invalidate();
@@ -783,6 +784,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
      */
 	public void clearChat() {
 		while (chatTable.getCells().size > 0) {
+			@SuppressWarnings("unchecked")
 			Cell<Label> cell = chatTable.getCells().first();
 			cell.getActor().getStyle().font.dispose();
 			cell.getActor().remove();
@@ -1732,7 +1734,8 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     /**
      * Draws the movement selection section
      */
-    private void drawMovesSelect() {
+    @SuppressWarnings("incomplete-switch")
+	private void drawMovesSelect() {
         // auto, cannons
         batch.draw(autoBackground, MOVES_autoBackgroundX, MOVES_autoBackgroundY);
         font.draw(batch, "Auto", MOVES_autoTextX, MOVES_autoTextY);

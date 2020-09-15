@@ -228,6 +228,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                 		digest2.delete();
                 		version.delete();
 						ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
+						@SuppressWarnings("unused")
 						Process p = pb.start(); //assign to process for something in future
 						System.exit(0);
 					}catch(Exception e){System.out.println(e);}
@@ -614,6 +615,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                     font.draw(batch, "Close", x + 400 - 55, y + (25 + (layout.height / 2)));
                 }
                 batch.end();
+                Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
             }
         }
         else {

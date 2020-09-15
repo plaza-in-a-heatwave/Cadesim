@@ -146,7 +146,7 @@ public class SceneAssetManager {
     private final static String FLAG = "cade/buoy_symbols.png";
     private final static String FLAGTEXTURE = "cade/buoy.png";
     
-    private final static String BACKGROUND = "bg.png";
+    private final static String BACKGROUND = "client_bg.png";
     private final static String TEXTFIELDTEXTURE = "skin/textfield.png";
     private final static String LOGINBUTTON = "skin/login.png";
     private final static String LOGINBUTTONHOVER = "skin/login-hover.png";

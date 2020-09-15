@@ -35,11 +35,6 @@ public class BlockadeMap {
 
 
     /**
-     * The game context
-     */
-    private GameContext context;
-
-    /**
      * The rocks layer
      */
     private BlockadeMapLayer<GameObject> rocks = new BlockadeMapLayer<GameObject>();
@@ -62,8 +57,6 @@ public class BlockadeMap {
     private Cell[][] sea = new Cell[MAP_WIDTH][MAP_HEIGHT];
 
     public BlockadeMap(GameContext context, int[][] tiles) {
-        this.context = context;
-
         // Create the sea tiles
         for (int x = 0; x < MAP_WIDTH; x++) {
             for (int y = 0; y < MAP_HEIGHT; y++) {

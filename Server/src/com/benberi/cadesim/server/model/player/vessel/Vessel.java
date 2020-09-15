@@ -55,7 +55,12 @@ public abstract class Vessel {
 	/**
 	 * map integer ids to human readable ship ids
 	 */
-	public static final HashMap<Integer, String> VESSEL_IDS = new HashMap<Integer, String>() {{
+	public static final HashMap<Integer, String> VESSEL_IDS = new HashMap<Integer, String>() {/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+	{
 		put(0, "smsloop");
 		put(1, "lgsloop");
 		put(2, "dhow");

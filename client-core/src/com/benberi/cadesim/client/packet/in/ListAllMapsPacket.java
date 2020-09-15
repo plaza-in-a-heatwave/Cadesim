@@ -1,6 +1,5 @@
 package com.benberi.cadesim.client.packet.in;
 
-import java.awt.image.BufferedImage;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;

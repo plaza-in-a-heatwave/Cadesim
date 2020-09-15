@@ -11,6 +11,7 @@ import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.scene.GameScene;
 import com.benberi.cadesim.game.scene.SceneComponent;
 
+@SuppressWarnings("rawtypes")
 public class GameInformation extends SceneComponent {
 
     /**
@@ -52,7 +53,8 @@ public class GameInformation extends SceneComponent {
     // are we defender or attacker?
     boolean areDefender;
 
-    GameInformation(GameContext context, GameScene owner) {
+    @SuppressWarnings("unchecked")
+	GameInformation(GameContext context, GameScene owner) {
         super(context, owner);
         this.context = context;
     }

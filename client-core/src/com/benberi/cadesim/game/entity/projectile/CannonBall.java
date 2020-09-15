@@ -33,7 +33,6 @@ public class CannonBall extends Sprite {
 
     private TextureRegion ending;
 
-    private Texture splash;
     private Texture hit;
 
     /**
@@ -45,8 +44,6 @@ public class CannonBall extends Sprite {
     private int splashTicks;
 
     private int regX;
-    private boolean explodeOnReach;
-
     protected CannonBall(Vessel source, Vector2 target, Texture t, Texture splash, Texture hit) {
         super(t);
         this.source = source;
@@ -54,8 +51,6 @@ public class CannonBall extends Sprite {
         setPosition(source.getX(), source.getY());
 
         this.hit = hit;
-        this.splash = splash;
-
         this.ending = new TextureRegion(splash);
         this.ending.setRegionWidth(40);
         this.ending.setRegionHeight(30);
@@ -145,7 +140,6 @@ public class CannonBall extends Sprite {
     }
 
     public void setExplodeOnReach(boolean explodeOnReach) {
-        this.explodeOnReach = explodeOnReach;
         if (explodeOnReach) {
             this.ending = new TextureRegion(hit);
             this.ending.setRegionWidth(40);
