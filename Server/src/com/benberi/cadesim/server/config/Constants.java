@@ -38,6 +38,7 @@ public class Constants {
     /**
      * return types ( < 128 good; >= 128 bad)
      */
+    public static final int EXIT_ERROR_CANT_UPDATE        = 141;
     public static final int EXIT_ERROR_UNKNOWN            = 140;
     public static final int EXIT_ERROR_BAD_CONFIG         = 133;
     public static final int EXIT_ERROR_CANT_FIND_MAPS     = 130;
@@ -124,8 +125,11 @@ public class Constants {
     public static final int MIN_BREAK_DURATION = 10;
     public static final int MIN_BREAK_INTERVAL = 60;
 
+    /**
+     * auto update variables
+     */
     public static final String AUTO_UPDATING_LOCK_DIRECTORY_NAME = "AUTOUPDATING.LOCK";
+    public static final String AUTO_UPDATING_ID_FILE_NAME = "id.tmp";
     public static final int[] STAGGER_AUTOUPDATE_RANGE_MINUTES = {-5, 5};
-
     public static final int AUTO_UPDATE_MAX_LOCK_WAIT_MS = 600 * 1000; // 10 min
 }

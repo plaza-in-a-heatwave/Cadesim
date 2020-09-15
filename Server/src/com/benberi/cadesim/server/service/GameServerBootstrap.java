@@ -12,7 +12,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -93,7 +98,56 @@ public class GameServerBootstrap {
         // previous instances a chance to exit
         Thread.sleep(2000);
 
-        // TODO #69 check if the lockfile is ours, and remove it if so
+        // check if the lockdir is "ours"
+        boolean lastUpdateWasOurs = false;
+        String idfilename =
+                Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME +
+                System.getProperty("file.separator") +
+                Constants.AUTO_UPDATING_ID_FILE_NAME;
+        String idfilecontent;
+        try {
+            idfilecontent = new String(
+                Files.readAllBytes(Paths.get(idfilename))
+             );
+            if (idfilecontent.equals(String.join(" ", ServerConfiguration.getArgs()))) {
+                lastUpdateWasOurs = true;
+            }
+        } catch (IOException e) {
+            // pass, couldn't open idfile so assume wasn't ours
+        }
+
+        // if last update was ours, clean up
+        if (lastUpdateWasOurs) {
+            ArrayList<String> toDelete = new ArrayList<>();
+            toDelete.add("getdown.txt");
+            toDelete.add("version.txt");
+            toDelete.add("digest.txt");
+            toDelete.add("digest2.txt");
+            toDelete.add(
+                Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME +
+                System.getProperty("file.separator") +
+                Constants.AUTO_UPDATING_ID_FILE_NAME
+            );
+            toDelete.add(
+                Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME
+            );
+            boolean deleteSucceeded = true;
+            for (String s : toDelete) {
+                File f = new File(s);
+                if (f.delete()) {
+                    ServerContext.log("deleted " + f.getPath() + " on startup.");
+                }
+                else
+                {
+                    ServerContext.log("couldn't delete " + f.getPath() + " on startup");
+                    deleteSucceeded = false;
+                }
+            }
+
+            if (!deleteSucceeded) {
+                ServerContext.log("Error: delete of at least one update file failed.");
+            }
+        }
 
         // set up maps
         ServerConfiguration.loadAvailableMaps();

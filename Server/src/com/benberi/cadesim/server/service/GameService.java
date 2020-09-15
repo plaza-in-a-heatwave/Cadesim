@@ -3,10 +3,14 @@ package com.benberi.cadesim.server.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.CodeSource;
 import java.util.ArrayList;
 
@@ -105,7 +109,39 @@ public class GameService implements Runnable {
         if (fileLockSuccess && isUpdateAvailable()) {
             ServerContext.log("UPDATER: Created lock directory (" + f.getName() + ")");
 
-            // TODO #69 fill in lock directory details
+            // create id tmp file
+            String idfilename =
+                    Constants.AUTO_UPDATE_MAX_LOCK_WAIT_MS +
+                    System.getProperty("file.separator") +
+                    Constants.AUTO_UPDATING_ID_FILE_NAME;
+            try {
+                FileWriter idfile = new FileWriter(idfilename);
+                idfile.write(String.join(" ",ServerConfiguration.getArgs()));
+                idfile.close();
+                ServerContext.log("Successfully created " + idfilename );
+            } catch (IOException e) {
+                ServerContext.log(
+                    "Couldn't create " +
+                    idfilename +
+                    "(" + e.getMessage() + ")"
+                );
+                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
+            }
+
+            // copy getdown.txt.server -> getdown.txt
+            try {
+                Files.copy(
+                    Paths.get("getdown.txt.server"),
+                    Paths.get("getdown.txt"),
+                    StandardCopyOption.REPLACE_EXISTING
+                );
+            } catch (IOException e) {
+                ServerContext.log(
+                    "Couldn't copy getdown.txt.server to getdown.txt" +
+                    "(" + e.getMessage() + ")"
+                );
+                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
+            }
 
             try {
                 ServerContext.log("Performing update, deleting files...");
@@ -117,7 +153,7 @@ public class GameService implements Runnable {
                 digest2.delete();
                 version.delete();
                 ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
-                Process p = pb.start(); //assign to process for something in future
+                pb.start(); //assign to process for something in future
                 System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
             }catch(Exception e){System.out.println(e);}
         }
@@ -152,10 +188,9 @@ public class GameService implements Runnable {
 
                 // restart the server by creating a new process.
                 ProcessBuilder pb = new ProcessBuilder(arglist);
-                Process p = pb.start();
+                pb.start();
             }
         }
-
         System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
     }
 
