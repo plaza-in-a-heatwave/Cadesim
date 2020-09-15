@@ -391,22 +391,22 @@ public class PlayerManager {
                 p.getCollisionStorage().clear();
                 p.getCollisionStorage().setOnAction(-1);
 
-
-                // left shoots
-                int leftShoots = p.getMoves().getLeftCannons(turn);
-                // right shoots
-                int rightShoots = p.getMoves().getRightCannons(turn);
-
-                // Apply cannon damages if they collided with anyone
-                damagePlayersAtDirection(leftShoots, p, Direction.LEFT, turn);
-                damagePlayersAtDirection(rightShoots, p, Direction.RIGHT, turn);
-
-                MoveAnimationTurn t = p.getAnimationStructure().getTurn(turn);
-
-                // Set cannon animations
-                t.setLeftShoots(leftShoots);
-                t.setRightShoots(rightShoots);
-
+                if(!p.isSunk()) { //bugfix: only shoot if not sunk
+	                // left shoots
+	                int leftShoots = p.getMoves().getLeftCannons(turn);
+	                // right shoots
+	                int rightShoots = p.getMoves().getRightCannons(turn);
+	
+	                // Apply cannon damages if they collided with anyone
+	                damagePlayersAtDirection(leftShoots, p, Direction.LEFT, turn);
+	                damagePlayersAtDirection(rightShoots, p, Direction.RIGHT, turn);
+	
+	                MoveAnimationTurn t = p.getAnimationStructure().getTurn(turn);
+	
+	                // Set cannon animations
+	                t.setLeftShoots(leftShoots);
+	                t.setRightShoots(rightShoots);
+                }
             }
         	
         	for (Player p : listRegisteredPlayers()) {
