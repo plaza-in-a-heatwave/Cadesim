@@ -214,28 +214,36 @@ public class ConnectScene implements GameScene, InputProcessor {
         buttonStyle.imageOver = regularDrawable;
         //login button
         buttonConn = new ImageButton(buttonStyle); //Set the button up
-        buttonConn.addListener(new ClickListener() { 
+        buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
             	//only run if there is an update listed on server
-            	if(!Constants.SERVER_VERSION_BOOL) {
+            	if(!Constants.SERVER_VERSION_IDENTICAL) {
 	                try {
-	                	System.out.println("Performing update, deleting files...");
+	                	System.out.println("Performing update; deleting necessary files...");
 	                	//delete required files in order to update client
 	                	File digest1 = new File("digest.txt");
 	                	File digest2 = new File("digest2.txt");
 	                	File version = new File("version.txt");
                 		digest1.delete();
+                		System.out.println("Deleted file: digest.txt");
                 		digest2.delete();
+                		System.out.println("Deleted file: digest2.txt");
                 		version.delete();
+                		System.out.println("Deleted file: version.txt");
 						ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
 						@SuppressWarnings("unused")
 						Process p = pb.start(); //assign to process for something in future
+						System.out.println("Performing update; closing client and running getdown...");
 						System.exit(0);
-					}catch(Exception e){System.out.println(e);}
+					}catch(Exception e){
+						System.out.println(e);
+						System.out.println("Unable to start getdown.jar; run manually.");
+						System.out.println("Be sure to delete digest files before running.");
+						}
+	                
 	                }
 	            else {
 	                try {
-	                	System.out.println("Performing login");
 	                    performLogin();
 	                    buttonConn.toggle();
 	                } catch (UnknownHostException e) {
@@ -430,7 +438,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         stage.addActor(teamType);
         stage.addActor(roomLabel);
         stage.addActor(buttonConn);
-        
+        //resolution dialog 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 		dialog = new Dialog("Resolution", skin, "dialog") {
 			protected void result(Object object)
@@ -446,7 +454,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 			    }
             }
 		};
-		
+		//show specific text in resolution dialog
 		if(resolution != null) {
 			String text = String.format("Selected screen resolution - %s", 
 					ResolutionTypeLabel.resToString(resolution));
@@ -518,7 +526,7 @@ public class ConnectScene implements GameScene, InputProcessor {
             }
          });
     }
-    
+    //gets server code for the specific selected room
     public void getServerCode() {
         if (roomLabel.getSelectedIndex() < port_numbers.size()) { //sanity check
         	System.out.println("Room " + (roomLabel.getSelectedIndex() + 1) + " Selected.");
@@ -869,6 +877,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     
     public void revertResolution() {
     	resolutionType.setSelectedIndex(indexResolution);
+    	System.out.println("Reverting resolution to previous settings.");
 		Gdx.graphics.setWindowedMode(Integer.parseInt(oldResolution[0]), Integer.parseInt(oldResolution[1]));
 		create();
     }

@@ -20,6 +20,7 @@ public class DesktopLauncher {
 			@Override
 			public void run() {
 				try {
+					@SuppressWarnings("resource")
 					BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
 					sc.readLine();
 					//get server url from getDown.txt
@@ -35,15 +36,20 @@ public class DesktopLauncher {
 							new InputStreamReader(cadesimServer.openStream()));
 					String serverVersion = reader.readLine().replaceAll("\\s+","");
 					boolean updateBool = serverVersion.equals(txtVersion);
-					System.out.println("Finished checking server version.");
 					if(!updateBool) {
-						Constants.SERVER_VERSION_BOOL = false;
+						Constants.SERVER_VERSION_IDENTICAL = false;
+						System.out.println("Your client is out-of-date.");
+						System.out.println("Current version: " + txtVersion + ", Newer version: " + serverVersion);
 					}else {
-						Constants.SERVER_VERSION_BOOL = true;
+						Constants.SERVER_VERSION_IDENTICAL = true;
+						System.out.println("Your client is up-to-date.");
+						System.out.println("Current version: " + txtVersion);
 					}
 				}
 				 catch (IOException e) {
 					e.printStackTrace();
+					System.out.println("Unable to check server version.");
+					Constants.SERVER_VERSION_IDENTICAL = true; // don't update if cannot connect to server
 				}
 			}
 		
@@ -72,6 +78,7 @@ public class DesktopLauncher {
 		else
 		{
 			System.out.println("Automatic updates are enabled.");
+			System.out.println("Checking for updates...");
 			updateThread.start();
 		}
 
