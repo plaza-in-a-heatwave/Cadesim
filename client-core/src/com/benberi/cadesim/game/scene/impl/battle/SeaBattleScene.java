@@ -260,7 +260,6 @@ public class SeaBattleScene implements GameScene {
                             else {
                                 vessel.tickBumpRotation(1);
                             }
-
                         }
                         else if (vessel.getCurrentPerformingMove() == VesselMovementAnimation.BUMP_PHASE_2 && distance >= vector.getDistance() / 2 && !vector.isPlayedMiddleAnimation()) {
                             vessel.tickBumpRotation(1);

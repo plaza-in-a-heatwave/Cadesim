@@ -163,6 +163,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     			    {
     					dialog.setVisible(false);
     					Gdx.input.setInputProcessor(input);
+    		    		menuButtonIsDown = false;
+    		    		menuLobbyIsDown = false;
+    		        	menuMapsIsDown = false;
     			    } else if(object.equals(1L)){
     			    	dialog.setVisible(false);
     			    	Gdx.input.setInputProcessor(input);
@@ -170,6 +173,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     			    	context.getControlScene().getBnavComponent().getChatBar().getTextfield().setText(
     			    			mapCommand);
     		    		context.getControlScene().getBnavComponent().getChatBar().sendChat();
+    		    		menuButtonIsDown = false;
+    		    		menuLobbyIsDown = false;
+    		        	menuMapsIsDown = false;    			    
     			    }
                 }
     		};
