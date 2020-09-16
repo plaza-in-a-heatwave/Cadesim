@@ -64,6 +64,12 @@ public class GameService implements Runnable {
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
             	gamesCompleted++;
 
+                // if there's an update, handle that.
+                // the update may halt execution and/or reboot the server.
+                if (playerManager.isUpdateScheduledAfterGame()) {
+                    context.getUpdater().update();
+                }
+
                 // handle switching maps.
                 String oldMap = ServerConfiguration.getMapName();
                 if (playerManager.shouldSwitchMap())
@@ -87,9 +93,6 @@ public class GameService implements Runnable {
                     // it would be cruel to exit early if players voted for a restart/nextmap
                     ServerContext.log("Not in run-continuous mode, so quitting early.");
                     System.exit(Constants.EXIT_SUCCESS);
-                }
-                else if (playerManager.isUpdateScheduledAfterGame()) {
-                    context.getUpdater().update();
                 }
                 else if (
                         (ServerConfiguration.getMapRotationPeriod() > 0) && // -1 == don't rotate, 0 invalid

@@ -99,6 +99,11 @@ public class Constants {
 	public static final int SPLIT_CHAT_MESSAGES_THRESHOLD = 240;
 
 	/**
+	 * how often to inform players about scheduled updates
+	 */
+	public static final long BROADCAST_SCHEDULED_UPDATE_INTERVAL_MILLIS = 300000;
+
+	/**
 	 * n seconds to register
 	 */
 	public static final long REGISTER_TIME_MILLIS = 2000;

@@ -87,6 +87,8 @@ public class PlayerManager {
     private boolean shouldSwitchMap = false;
     private boolean shouldRestartMap = false;
     private boolean updateScheduledAfterGame = false;
+    private long    lastUpdateNotificationMillis =
+        System.currentTimeMillis() -Constants.BROADCAST_SCHEDULED_UPDATE_INTERVAL_MILLIS;
 
 	private boolean gameEnded;
 
@@ -213,6 +215,17 @@ public class PlayerManager {
         return updateScheduledAfterGame;
     }
 
+    void notifyScheduledUpdate() {
+        lastUpdateNotificationMillis = System.currentTimeMillis();
+        serverBroadcastMessage("[[RESTART NOTICE]] The server will restart after this game (in approximately " + (context.getTimeMachine().getTurnTime() / 60.0)
+                + " minutes) for scheduled maintenance, and should be back online within a few minutes.");
+    }
+
+    boolean shouldNotifyScheduledUpdate() {
+        return ((System.currentTimeMillis()
+                - lastUpdateNotificationMillis) >= Constants.BROADCAST_SCHEDULED_UPDATE_INTERVAL_MILLIS);
+    }
+
     /**
      * Ticks all players
      */
@@ -262,6 +275,17 @@ public class PlayerManager {
                     ZonedDateTime.now().toEpochSecond())
                 {
                     setUpdateScheduledAfterGame(true);
+
+                    // if no players in game, end the game now
+                    if (0 == context.getPlayerManager().listRegisteredPlayers().size()) {
+                        context.getTimeMachine().stop();
+                    }
+                }
+
+                // notify players of a pending restart every few minutes.
+                // the first notification should be sent instantly.
+                if (shouldNotifyScheduledUpdate()) {
+                    notifyScheduledUpdate();
                 }
             }
         }

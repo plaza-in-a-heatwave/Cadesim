@@ -218,7 +218,8 @@ public class Updater {
     }
 
     /**
-     * Updater: perform automatic update
+     * Updater: perform automatic update.
+     * May exit and/or restart the process.
      *
      * @throws InterruptedException
      * @throws IOException
