@@ -324,6 +324,7 @@ public class PlayerManager {
                 t.setMoveToken(move);
                 if (p.getCollisionStorage().isCollided(turn)) {
                     t.setAnimation(VesselMovementAnimation.getBumpForPhase(p.getCollisionStorage().getCollisionRerefence(turn).getPhase()));
+                    
                 }
                 else {
                     if (p.getCollisionStorage().getBumpAnimation() != VesselMovementAnimation.NO_ANIMATION) {
@@ -331,6 +332,7 @@ public class PlayerManager {
                     }
                     else {
                         t.setAnimation(VesselMovementAnimation.getIdForMoveType(move));
+           
                     }
                 }
 
@@ -1066,6 +1068,10 @@ public class PlayerManager {
 				setShouldRestartMap(true);
 				setPersistTemporarySettings(false); // restart cancels temporary settings
 				context.getTimeMachine().stop();
+				for(Player player : players) { // resets all players tokens
+					player.setTurnsUntilControl(0);
+					player.getMoveTokens().assignDefaultTokens();
+				}
 				break;
 			case AGAINST:
 			case TIMEDOUT:
@@ -1087,6 +1093,10 @@ public class PlayerManager {
 				setShouldSwitchMap(true);
 				setPersistTemporarySettings(true);
 				context.getTimeMachine().stop();
+				for(Player player : players) { // resets all players tokens
+					player.setTurnsUntilControl(0);
+					player.getMoveTokens().assignDefaultTokens();
+				}
 				break;
 			case AGAINST:
 			case TIMEDOUT:
@@ -1113,6 +1123,10 @@ public class PlayerManager {
                 setShouldSwitchMap(true);
                 setPersistTemporarySettings(true);
                 context.getTimeMachine().stop();
+				for(Player player : players) { // resets all players tokens
+					player.setTurnsUntilControl(0);
+					player.getMoveTokens().assignDefaultTokens();
+				}
                 break;
             case AGAINST:
             case TIMEDOUT:

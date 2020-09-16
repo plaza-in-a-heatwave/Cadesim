@@ -184,8 +184,9 @@ public class CollisionCalculator {
                     if (!checkCollision(claimed, turn, phase, false)) {
                         if (setPosition) {
                             // Moved successfully, claim position
-                            p.set(position);
-                            p.getCollisionStorage().setPositionChanged(true);
+                        	p.getCollisionStorage().setCollided(turn, phase);
+//                            p.set(position);
+//                            p.getCollisionStorage().setPositionChanged(true);
                         }
                     }
                     else {
@@ -281,8 +282,8 @@ public class CollisionCalculator {
                 }
             }
             if(checkActionCollision(claimed, next, turn, phase, false)) {
-            	player.getCollisionStorage().setCollided(turn, phase);
             	player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
+            	player.getCollisionStorage().setCollided(turn, phase);
             	return true;
             }
         }
