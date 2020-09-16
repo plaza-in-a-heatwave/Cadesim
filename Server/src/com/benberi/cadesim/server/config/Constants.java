@@ -38,14 +38,14 @@ public class Constants {
     /**
      * return types ( < 128 good; >= 128 bad)
      */
-    public static final int EXIT_ERROR_CANT_UPDATE        = 141;
-    public static final int EXIT_ERROR_UNKNOWN            = 140;
-    public static final int EXIT_ERROR_BAD_CONFIG         = 133;
-    public static final int EXIT_ERROR_CANT_FIND_MAPS     = 130;
-    public static final int EXIT_ERROR_CANT_CREATE_LOGS   = 129;
-    public static final int EXIT_ERROR_CANT_BIND_LOCAL    = 128;
-    public static final int EXIT_SUCCESS_SCHEDULED_UPDATE = 1;
-    public static final int EXIT_SUCCESS                  = 0;
+    public static final int EXIT_ERROR_CANT_UPDATE              = 141;
+    public static final int EXIT_ERROR_UNKNOWN                  = 140;
+    public static final int EXIT_ERROR_BAD_CONFIG               = 133;
+    public static final int EXIT_ERROR_CANT_FIND_MAPS           = 130;
+    public static final int EXIT_ERROR_CANT_CREATE_LOGS         = 129;
+    public static final int EXIT_ERROR_CANT_BIND_LOCAL          = 128;
+    public static final int EXIT_SUCCESS_SCHEDULED_UPDATE       = 1;
+    public static final int EXIT_SUCCESS                        = 0;
     
     /**
      * The delay of the main game service loop in milliseconds

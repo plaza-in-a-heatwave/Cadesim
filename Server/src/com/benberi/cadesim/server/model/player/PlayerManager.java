@@ -253,7 +253,8 @@ public class PlayerManager {
 
             // also check if we need to update the server
             // TODO this code is only here because the mechanism is convenient.
-            // it is not related to player management functionality.
+            // it is not related to player management functionality. It should
+            // be moved to a more appropriate admin loop when possible.
             if (ServerConfiguration.isScheduledAutoUpdate())
             {
                 if (

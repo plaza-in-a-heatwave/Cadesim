@@ -1,19 +1,5 @@
 package com.benberi.cadesim.server.service;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.security.CodeSource;
-import java.util.ArrayList;
-
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
@@ -23,176 +9,6 @@ import com.benberi.cadesim.server.model.player.PlayerManager;
  * This is the "heartbeat" main loop of the game server
  */
 public class GameService implements Runnable {
-
-    /**
-     * Updater: Thread to check for updates automatically
-     */
-    Thread updateThread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            try {
-                BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
-                sc.readLine();
-                //get server url from getDown.txt
-                String cadesimUrl = sc.readLine();
-                String[] url = cadesimUrl.split("=");
-                //read version from getDown.txt
-                String cadeSimVersion = sc.readLine();
-                String[] version = cadeSimVersion.split("=");
-                String txtVersion = version[1].replaceAll("\\s+","");
-                URL cadesimServer = new URL(url[1] + "version.txt");
-                //read version from server
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(cadesimServer.openStream()));
-                String serverVersion = reader.readLine().replaceAll("\\s+","");
-                isUpdateAvailable = !serverVersion.equals(txtVersion);
-                System.out.println("Finished checking server version.");
-                sc.close();
-                checkingForUpdate = false;
-            }
-             catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-    });
-
-    /**
-     * Updater: shared variables used by the updater thread
-     */
-    public boolean checkingForUpdate;
-    public boolean isUpdateAvailable = false;
-
-    /**
-     * Updater: runs update thread and blocks until result.
-     */
-    public boolean isUpdateAvailable() {
-        checkingForUpdate = true;
-        updateThread.start();
-        while (checkingForUpdate) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                ServerContext.log("server was checking for update, but the thread was interrupted. (" + e.getMessage() + ")");
-            }
-        }
-
-        // updated by thread
-        return isUpdateAvailable;
-    }
-
-    /**
-     * Updater: perform automatic update
-     * @throws InterruptedException
-     * @throws IOException
-     */
-    public void doAutomaticUpdateAndExit() throws InterruptedException, IOException {
-        // check for updates and restart the server if we need to
-        java.io.File f = new java.io.File(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
-        int sleep_ms = 2000;
-        int sleepTotal = 0;
-        boolean fileLockSuccess = true;
-        while (!f.mkdir()) {
-            ServerContext.log("UPDATER: Waiting to update... (" + sleepTotal + ")");
-            Thread.sleep(sleep_ms);
-            sleepTotal += sleep_ms;
-
-            // exit condition so we don't endlessly loop
-            if (sleepTotal >= Constants.AUTO_UPDATE_MAX_LOCK_WAIT_MS) {
-                ServerContext.log("UPDATER: Waited too long for file lock, maybe another server crashed. Giving up and restarting instead. (" + sleepTotal + ")");
-                fileLockSuccess = false;
-                break;
-            }
-        }
-
-        if (fileLockSuccess && isUpdateAvailable()) {
-            ServerContext.log("UPDATER: Created lock directory (" + f.getName() + ")");
-
-            // create id tmp file
-            String idfilename =
-                    Constants.AUTO_UPDATE_MAX_LOCK_WAIT_MS +
-                    System.getProperty("file.separator") +
-                    Constants.AUTO_UPDATING_ID_FILE_NAME;
-            try {
-                FileWriter idfile = new FileWriter(idfilename);
-                idfile.write(String.join(" ",ServerConfiguration.getArgs()));
-                idfile.close();
-                ServerContext.log("Successfully created " + idfilename );
-            } catch (IOException e) {
-                ServerContext.log(
-                    "Couldn't create " +
-                    idfilename +
-                    "(" + e.getMessage() + ")"
-                );
-                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
-            }
-
-            // copy getdown.txt.server -> getdown.txt
-            try {
-                Files.copy(
-                    Paths.get("getdown.txt.server"),
-                    Paths.get("getdown.txt"),
-                    StandardCopyOption.REPLACE_EXISTING
-                );
-            } catch (IOException e) {
-                ServerContext.log(
-                    "Couldn't copy getdown.txt.server to getdown.txt" +
-                    "(" + e.getMessage() + ")"
-                );
-                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
-            }
-
-            try {
-                ServerContext.log("Performing update, deleting files...");
-                //delete required files in order to update client
-                File digest1 = new File("digest.txt");
-                File digest2 = new File("digest2.txt");
-                File version = new File("version.txt");
-                digest1.delete();
-                digest2.delete();
-                version.delete();
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
-                pb.start(); //assign to process for something in future
-                System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
-            }catch(Exception e){System.out.println(e);}
-        }
-        else {
-
-            // get the name of the jar file
-            String jarFileName = "";
-            CodeSource codeSource = GameServerBootstrap.class.getProtectionDomain().getCodeSource();
-            try {
-                File jarFile = new File(codeSource.getLocation().toURI().getPath());
-                jarFileName = jarFile.getCanonicalPath();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // only restart if it's a jar (e.g. prevent IDE)
-            if (jarFileName.endsWith(".jar")) {
-                ArrayList<String> arglist = new ArrayList<String>();
-
-                // start with java -jar jarfile.jar
-                arglist.add("java");
-                arglist.add("-jar");
-                arglist.add(jarFileName);
-
-                // add the cadesim server args
-                String args[] = ServerConfiguration.getArgs();
-                for (int i=0; i<args.length; i++) {
-                    arglist.add(args[i]);
-                }
-
-                // restart the server by creating a new process.
-                ProcessBuilder pb = new ProcessBuilder(arglist);
-                pb.start();
-            }
-        }
-        System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
-    }
 
     /**
      * The server context
@@ -273,7 +89,7 @@ public class GameService implements Runnable {
                     System.exit(Constants.EXIT_SUCCESS);
                 }
                 else if (playerManager.isUpdateScheduledAfterGame()) {
-                    doAutomaticUpdateAndExit();
+                    context.getUpdater().update();
                 }
                 else if (
                         (ServerConfiguration.getMapRotationPeriod() > 0) && // -1 == don't rotate, 0 invalid
