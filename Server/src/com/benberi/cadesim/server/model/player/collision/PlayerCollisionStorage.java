@@ -45,7 +45,7 @@ public class PlayerCollisionStorage {
         this.collisions[turn] = new PlayerCollisionReference(player, phase);
     }
 
-    public boolean isColided(int turn, int phase) {
+    public boolean isCollided(int turn, int phase) {
         if (this.collisions[turn] != null)
             return this.collisions[turn].getPhase() == phase;
         return false;
