@@ -42,7 +42,8 @@ public class ServerConfiguration {
 	// uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
-    private static ZonedDateTime nextUpdateDateTime = null; // updated once on startup
+    private static ZonedDateTime nextUpdateDateTimeActual = null;          // updated once on startup. what user will get.
+    private static ZonedDateTime nextUpdateDateTimeScheduled = null; // updated once on startup. what user asked for.
     private static String[] args; // store the args received on the commandline
 
     public static String[] getArgs() {
@@ -53,12 +54,20 @@ public class ServerConfiguration {
         ServerConfiguration.args = args;
     }
 
-    public static ZonedDateTime getNextUpdateDateTime() {
-		return nextUpdateDateTime;
+    public static ZonedDateTime getNextUpdateDateTimeScheduled() {
+        return nextUpdateDateTimeScheduled;
+    }
+
+    public static void setNextUpdateDateTimeScheduled(ZonedDateTime nextUpdateDateTimeScheduled) {
+        ServerConfiguration.nextUpdateDateTimeScheduled = nextUpdateDateTimeScheduled;
+    }
+
+    public static ZonedDateTime getNextUpdateDateTimeActual() {
+		return nextUpdateDateTimeActual;
 	}
 
-	public static void setNextUpdateDateTime(ZonedDateTime nextUpdateDateTime) {
-		ServerConfiguration.nextUpdateDateTime = nextUpdateDateTime;
+	public static void setNextUpdateDateTimeActual(ZonedDateTime nextUpdateDateTimeActual) {
+		ServerConfiguration.nextUpdateDateTimeActual = nextUpdateDateTimeActual;
 	}
 
 	public static boolean isScheduledAutoUpdate() {
@@ -134,7 +143,8 @@ public class ServerConfiguration {
                 "    Run continuous: " + getRunContinuousMode() + ",\n" +
                 "    Multiclient permitted: " + getMultiClientMode() + ",\n" +
                 "    Breaks duration/interval: " + getBreak()[0] + ":" + getBreak()[1] + ",\n" +
-                "    Updates scheduled at: " + (!isScheduledAutoUpdate()?"not set":(getNextUpdateDateTime().getHour() + ":" + getNextUpdateDateTime().getMinute() + ":" + getNextUpdateDateTime().getSecond())) + ",\n" +
+                "    Update scheduled for: " + (!isScheduledAutoUpdate()?"not set":(String.format("%02d", getNextUpdateDateTimeScheduled().getHour()) + ":" + String.format("%02d", getNextUpdateDateTimeScheduled().getMinute()))) + ",\n" +
+                "    Update staggered for: " + (!isScheduledAutoUpdate()?"not set":(String.format("%02d", getNextUpdateDateTimeActual().getHour()) + ":" + String.format("%02d", getNextUpdateDateTimeActual().getMinute()))) + ",\n" +
                 "]";
     }
 

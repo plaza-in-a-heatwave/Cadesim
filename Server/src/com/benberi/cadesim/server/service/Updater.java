@@ -68,7 +68,7 @@ public class Updater {
                 lastUpdateWasOurs = true;
             }
         } catch (IOException e) {
-            // pass, couldn't open idfile so assume wasn't ours
+            ServerContext.log("[cleanup] Couldn't open idfile so assume wasn't ours.");
         }
 
         // if last update was ours, clean up
@@ -85,16 +85,20 @@ public class Updater {
             for (String s : toDelete) {
                 File f = new File(s);
                 if (f.delete()) {
-                    ServerContext.log("deleted " + f.getPath() + " on startup.");
+                    ServerContext.log("[cleanup] deleted " + f.getPath() + " on startup.");
                 } else {
-                    ServerContext.log("couldn't delete " + f.getPath() + " on startup");
+                    ServerContext.log("[cleanup] couldn't delete " + f.getPath() + " on startup");
                     deleteSucceeded = false;
                 }
             }
 
             if (!deleteSucceeded) {
-                ServerContext.log("Error: delete of at least one update file failed.");
+                ServerContext.log("[cleanup] Error: delete of at least one update file failed.");
             }
+        }
+        else
+        {
+            ServerContext.log("[cleanup] the lockfile isn't ours, so leaving it be.");
         }
     }
 
@@ -119,7 +123,8 @@ public class Updater {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(cadesimServer.openStream()));
                 String serverVersion = reader.readLine().replaceAll("\\s+", "");
                 isUpdateAvailable = !serverVersion.equals(txtVersion);
-                System.out.println("Finished checking server version.");
+                System.out.println("Finished checking server version. ("
+                        + (isUpdateAvailable ? "update available" : "no new update available") + ")");
                 sc.close();
                 checkingForUpdate = false;
             } catch (IOException e) {
@@ -181,9 +186,13 @@ public class Updater {
         try {
             File jarFile = new File(codeSource.getLocation().toURI().getPath());
             jarFileName = jarFile.getCanonicalPath();
+            ServerContext.log("using jar file name: " + jarFileName);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            ServerContext.log("jar path was null. /hint/ Try exporting as a jar, select \"Extract required libraries into generated JAR\"");
             e.printStackTrace();
         }
 
@@ -204,12 +213,14 @@ public class Updater {
 
             // restart the server by creating a new process & exiting.
             ProcessBuilder pb = new ProcessBuilder(arglist);
+            ServerContext.log("calling new process with:" + String.join(" ", arglist));
             try {
                 pb.start();
             } catch (IOException e) {
                 ServerContext.log("failed to spawn new server process when restarting. (" + e + ")");
                 System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
             }
+            ServerContext.log("Successfully spawned new process. Quitting this one.");
             System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
         } else {
             ServerContext.log("failed to spawn new server process: server not running from jar.");
@@ -245,11 +256,11 @@ public class Updater {
             }
         }
 
-        if (fileLockSuccess && isUpdateAvailable()) {
+        if (fileLockSuccess) {
             ServerContext.log("UPDATER: Created lock directory (" + f.getName() + ")");
 
             // create id tmp file
-            String idfilename = Constants.AUTO_UPDATE_MAX_LOCK_WAIT_MS + System.getProperty("file.separator")
+            String idfilename = Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME + System.getProperty("file.separator")
                     + Constants.AUTO_UPDATING_ID_FILE_NAME;
             try {
                 FileWriter idfile = new FileWriter(idfilename);
@@ -258,8 +269,6 @@ public class Updater {
                 ServerContext.log("Successfully created " + idfilename);
             } catch (IOException e) {
                 ServerContext.log("Couldn't create " + idfilename + "(" + e.getMessage() + ")");
-
-                // failed; cleanup
                 this.cleanupAndRestart();
             }
 
@@ -268,8 +277,7 @@ public class Updater {
                 Files.copy(Paths.get("getdown.txt.server"), Paths.get("getdown.txt"),
                         StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                ServerContext.log("Couldn't copy getdown.txt.server to getdown.txt" + "(" + e.getMessage() + ")");
-
+                ServerContext.log("Couldn't copy getdown.txt.server to getdown.txt" + "(" + e + ")");
                 cleanupAndRestart();
             }
 
@@ -278,14 +286,18 @@ public class Updater {
             String[] args = ServerConfiguration.getArgs();
             sb.append("\n\n"); // pad
             for (int i = 0; i < args.length; i++) {
-                sb.append("apparg = " + i + "\n");
+                sb.append("apparg = " + args[i] + "\n");
             }
             try {
                 Files.write(Paths.get("getdown.txt"), sb.toString().getBytes(), StandardOpenOption.APPEND);
             } catch (IOException e) {
-                ServerContext.log("Couldn't append appargs to getdown.txt" + "(" + e.getMessage() + ")");
-
+                ServerContext.log("Couldn't append appargs to getdown.txt" + "(" + e + ")");
                 cleanupAndRestart();
+            }
+
+            if (!isUpdateAvailable()) {
+                ServerContext.log("no update available, restarting server.");
+                restartServer(); // just restart :)
             }
 
             try {
@@ -304,10 +316,9 @@ public class Updater {
                 System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
             } catch (Exception e) {
                 ServerContext.log("exception when calling getdown: " + e);
-
                 cleanupAndRestart();
             }
-        } else { // didnt lock
+        } else { // didnt lock - no cleanup needed, just restart server :)
             restartServer();
         }
         assert false : "reached invalid logic path";

@@ -90,6 +90,8 @@ public class GameServerBootstrap {
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
         // clean up after previous update session if needed
+        // last session's args required to id this new process
+        ServerConfiguration.setArgs(args);
         Updater.cleanupAfterRestart();
 
         // set up maps
@@ -117,7 +119,7 @@ public class GameServerBootstrap {
         options.addOption("r", "round-duration", true, "round duration seconds, minimum " + Constants.MIN_ROUND_DURATION + ", must be >= turn duration, (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
         options.addOption("s", "server-name", true, "provide a name for the server, " + Constants.MAX_SERVER_NAME_SIZE + " characters max (default: " + ServerConfiguration.getServerName() + ")");
         options.addOption("t", "turn-duration", true, "turn duration seconds, minimum " + Constants.MIN_TURN_DURATION + ", (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
-        options.addOption("u", "schedule-auto-updates", true, "schedule auto updates to take place at HH:MM:SS. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTime().toString()) + ")");
+        options.addOption("u", "schedule-updates", true, "schedule automatic updates to take place at HH:MM. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTimeActual().toString()) + ")");
         options.addOption("v", "voting-majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
 
         CommandLineParser parser = new DefaultParser();
@@ -125,9 +127,6 @@ public class GameServerBootstrap {
         CommandLine cmd = null;
         try {
             cmd = parser.parse(options, args);
-
-            // store args in ServerConfiguration for use by auto updater
-            ServerConfiguration.setArgs(args);
 
             // check independent options
             if (cmd.hasOption("h")) {
@@ -184,15 +183,22 @@ public class GameServerBootstrap {
             }
             if (cmd.hasOption("u")) {
                 String updateTime = cmd.getOptionValue("u");
-
+                int hours = -1, minutes = -1, seconds = 0;
                 String[] l = updateTime.split(":");
-                if (l.length != 3) {
+                if (l.length != 2) {
+                    ServerContext.log("schedule-update not in HH:MM format.");
                     help(options);
                 }
-                int hours = Integer.parseInt(l[0]);
-                int minutes = Integer.parseInt(l[1]);
-                int seconds = Integer.parseInt(l[2]);
-                if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) {
+
+                try {
+                    hours = Integer.parseInt(l[0]);
+                    minutes = Integer.parseInt(l[1]);
+                } catch (NumberFormatException e) {
+                    ServerContext.log("schedule-update HH:MM must be digits.");
+                    help(options);
+                }
+                if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+                    ServerContext.log("incorrect units in HH:MM string.");
                     help(options);
                 }
 
@@ -203,12 +209,16 @@ public class GameServerBootstrap {
                 if (next.toEpochSecond() <= now.toEpochSecond()) {
                     next = next.plusDays(1); // next was actually previous
                 }
-                next = next.plusMinutes( // stagger updates if multiple rooms
-                        ThreadLocalRandom.current().nextInt(Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[0],
-                                Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[1] + 1));
+                ServerConfiguration.setNextUpdateDateTimeScheduled(next); // what user asked for
+
+                // stagger updates if multiple rooms
+                // TODO #69 uncomment this when feature is tested & complete.
+//                next = next.plusMinutes(
+//                        ThreadLocalRandom.current().nextInt(Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[0],
+//                                Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[1] + 1));
 
                 ServerConfiguration.setScheduledAutoUpdate(true);
-                ServerConfiguration.setNextUpdateDateTime(next);
+                ServerConfiguration.setNextUpdateDateTimeActual(next); // what user will get
             }
             if (cmd.hasOption("v"))
             {

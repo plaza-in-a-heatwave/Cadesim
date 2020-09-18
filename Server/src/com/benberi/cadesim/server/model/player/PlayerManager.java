@@ -217,12 +217,12 @@ public class PlayerManager {
 
     void notifyScheduledUpdate() {
         lastUpdateNotificationMillis = System.currentTimeMillis();
-        serverBroadcastMessage("[[RESTART NOTICE]] The server will restart after this game (in approximately " + (context.getTimeMachine().getTurnTime() / 60.0)
+        serverBroadcastMessage("~~RESTART NOTICE~~ The server will restart when this game ends ( " + (String.format("%d", (Math.round(context.getTimeMachine().getRoundTime() / 60.0))))
                 + " minutes) for scheduled maintenance, and should be back online within a few minutes.");
     }
 
     boolean shouldNotifyScheduledUpdate() {
-        return ((System.currentTimeMillis()
+        return isUpdateScheduledAfterGame() && ((System.currentTimeMillis()
                 - lastUpdateNotificationMillis) >= Constants.BROADCAST_SCHEDULED_UPDATE_INTERVAL_MILLIS);
     }
 
@@ -271,13 +271,14 @@ public class PlayerManager {
             if (ServerConfiguration.isScheduledAutoUpdate())
             {
                 if (
-                    ServerConfiguration.getNextUpdateDateTime().toEpochSecond() <=
+                    ServerConfiguration.getNextUpdateDateTimeActual().toEpochSecond() <=
                     ZonedDateTime.now().toEpochSecond())
                 {
                     setUpdateScheduledAfterGame(true);
 
                     // if no players in game, end the game now
                     if (0 == context.getPlayerManager().listRegisteredPlayers().size()) {
+                        ServerContext.log("There were no players in the current game, so ending game early.");
                         context.getTimeMachine().stop();
                     }
                 }
@@ -590,7 +591,7 @@ public class PlayerManager {
                 if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
                     ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
                     serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
-                    p.getChannel().disconnect();
+                    kickPlayer(p, false);
                 }
                 else {
                     p.updateTurnFinishWaitingTicks();
@@ -674,8 +675,7 @@ public class PlayerManager {
     	for (Player p : l)
     	{
     		ServerContext.log("WARNING - " + p.getChannel().remoteAddress() + " timed out while registering, and was kicked.");
-            p.getChannel().disconnect();
-            players.remove(p);
+            kickPlayer(p, false);
             ServerContext.log(printPlayers());
     	}
     }
@@ -696,6 +696,12 @@ public class PlayerManager {
     		Integer.toString(getPlayers().size()) + ".";
     }
 
+    public void kickPlayer(Player p, boolean shouldBan) {
+        if (shouldBan) { temporaryBannedIPs.add(p.getIP()); }
+        p.getChannel().disconnect();
+        players.remove(p);
+    }
+
     /**
      * Registers a new player to the server, puts him in a hold until he sends the protocol handshake packet
      *
@@ -708,7 +714,7 @@ public class PlayerManager {
         {
         	// dont allow banned IPs into the server until the next round begins
         	ServerContext.log("Kicked player " + c.remoteAddress() + " attempted to rejoin, and was kicked again.");
-        	player.getChannel().disconnect();
+            kickPlayer(player, false);
         	return;
         }
         
@@ -724,10 +730,22 @@ public class PlayerManager {
                         ip + " (currently logged in as " + p.getName() + ")" +
                         " attempted login on a second client, but multiclient is not permitted"
                     );
-                    player.getChannel().disconnect();
+                    kickPlayer(player, false);
                     return;
                 }
             }
+        }
+
+        // dont allow players to join if we're updating right now.
+        // bugfix for client that joins while update is applying, then channel
+        // closes minutes later potentially disrupting their next game.
+        if (context.getPlayerManager().isGameEnded() &&
+                context.getPlayerManager().isUpdateScheduledAfterGame()) {
+            ServerContext.log(
+                "[kicked player] New player added to channel " +
+                c.remoteAddress() + ". Kicked because update in progress.");
+            kickPlayer(player, false);
+            return;
         }
      	
         // otherwise ok
@@ -1182,8 +1200,7 @@ public class PlayerManager {
 				if (playerToKick != null)
 				{
 					serverBroadcastMessage("Player " + playerToKick.getName() + " was kicked by vote!");
-					temporaryBannedIPs.add(playerToKick.getIP());
-					playerToKick.getChannel().disconnect();
+                    kickPlayer(playerToKick, true);
 				}
 				handleStopVote();
 				break;
