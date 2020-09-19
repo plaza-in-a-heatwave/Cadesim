@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -204,15 +203,6 @@ public class Updater {
             } catch (IOException e) {
                 ServerContext.log("Couldn't create " + idfilename + "(" + e.getMessage() + ")");
                 this.cleanupAndRestart();
-            }
-
-            // copy getdown.txt.server -> getdown.txt
-            try {
-                Files.copy(Paths.get("getdown.txt.server"), Paths.get("getdown.txt"),
-                        StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                ServerContext.log("Couldn't copy getdown.txt.server to getdown.txt" + "(" + e + ")");
-                cleanupAndRestart();
             }
 
             // delete digests. otherwise getdown will
