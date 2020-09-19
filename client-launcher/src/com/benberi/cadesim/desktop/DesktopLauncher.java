@@ -45,6 +45,7 @@ public class DesktopLauncher {
 						System.out.println("Your client is up-to-date.");
 						System.out.println("Current version: " + txtVersion);
 					}
+					sc.close();
 				}
 				 catch (IOException e) {
 					e.printStackTrace();

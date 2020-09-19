@@ -3,18 +3,20 @@ package com.benberi.cadesim.server.service;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
+import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.PlayerManager;
 
 /**
  * This is the "heartbeat" main loop of the game server
  */
 public class GameService implements Runnable {
+
     /**
      * The server context
      */
     private ServerContext context;
     private PlayerManager playerManager; // this called so often, should cache
-    
+
     /**
      * Keep track of how many games we've played
      * And when we last rotated the map
@@ -26,7 +28,7 @@ public class GameService implements Runnable {
         this.context = context;
         this.playerManager = context.getPlayerManager();
     }
-    
+
     /**
      * helper method to randomly rotate the map
      */
@@ -62,7 +64,19 @@ public class GameService implements Runnable {
 
             	ServerContext.log("Ending game #" + Integer.toString(gamesCompleted) + ".");
             	gamesCompleted++;
-                
+
+                // if there's an update, handle that.
+                // the update may halt execution and/or reboot the server.
+                if (playerManager.isUpdateScheduledAfterGame()) {
+                    for (Player p : context.getPlayerManager().listRegisteredPlayers() ) {
+                        // kick each player before update starts
+                        p.getChannel().disconnect();
+                        context.getPlayerManager().getPlayers().remove(p);
+                    }
+
+                    context.getUpdater().update();
+                }
+
                 // handle switching maps.
                 String oldMap = ServerConfiguration.getMapName();
                 if (playerManager.shouldSwitchMap())

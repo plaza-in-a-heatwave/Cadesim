@@ -12,6 +12,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.time.ZonedDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -112,12 +113,26 @@ public class GameServerBootstrap {
         options.addOption("r", "round-duration", true, "round duration seconds, minimum " + Constants.MIN_ROUND_DURATION + ", must be >= turn duration, (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
         options.addOption("s", "server-name", true, "provide a name for the server, " + Constants.MAX_SERVER_NAME_SIZE + " characters max (default: " + ServerConfiguration.getServerName() + ")");
         options.addOption("t", "turn-duration", true, "turn duration seconds, minimum " + Constants.MIN_TURN_DURATION + ", (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
+        options.addOption("u", "schedule-updates", true, "schedule automatic updates to take place at HH:MM. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTimeScheduled().toString()) + ")");
         options.addOption("v", "voting-majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
+        options.addOption("z", "do-nothing", false, "Start the app and immediately exit.");
+
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
         try {
             cmd = parser.parse(options, args);
+
+            // immediately exit. this option used to provide getdown
+            // with something executable to run during update stages.
+            if (cmd.hasOption("z")) {
+                System.exit(Constants.EXIT_SUCCESS);
+            }
+
+            // clean up after previous update session if needed
+            // last session's args required to id this new process
+            ServerConfiguration.setArgs(args);
+            Updater.cleanupAfterRestart();
 
             // check independent options
             if (cmd.hasOption("h")) {
@@ -172,6 +187,40 @@ public class GameServerBootstrap {
                     help(options);
                 }
             }
+            if (cmd.hasOption("u")) {
+                String updateTime = cmd.getOptionValue("u");
+                int hours = -1, minutes = -1, seconds = 0;
+                String[] l = updateTime.split(":");
+                if (l.length != 2) {
+                    ServerContext.log("schedule-update not in HH:MM format.");
+                    help(options);
+                }
+
+                try {
+                    hours = Integer.parseInt(l[0]);
+                    minutes = Integer.parseInt(l[1]);
+                } catch (NumberFormatException e) {
+                    ServerContext.log("schedule-update HH:MM must be digits.");
+                    help(options);
+                }
+                if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+                    ServerContext.log("incorrect units in HH:MM string.");
+                    help(options);
+                }
+
+                // calculate when the next one would be based on our start time
+                ZonedDateTime now = ZonedDateTime.now();
+                ZonedDateTime next = ZonedDateTime.of(now.getYear(), now.getMonthValue(), now.getDayOfMonth(), hours,
+                        minutes, seconds, 0, ZonedDateTime.now().getZone());
+                if (next.toEpochSecond() <= now.toEpochSecond()) {
+                    next = next.plusDays(1); // next was actually previous
+                }
+                ServerConfiguration.setNextUpdateDateTimeScheduled(next);
+                ServerConfiguration.setScheduledAutoUpdate(true);
+
+                // considered staggering start times. this might make things worse as
+                // a server could stagger into the future and restart multiple times.
+            }
             if (cmd.hasOption("v"))
             {
             	int votingMajority = Integer.parseInt(cmd.getOptionValue("v"));
@@ -183,10 +232,6 @@ public class GameServerBootstrap {
             	{
             		help(options);
             	}
-            }
-            if (cmd.hasOption("v"))
-            {
-            	ServerConfiguration.setVotingMajority(Integer.parseInt(cmd.getOptionValue("v")));
             }
             if (cmd.hasOption("q"))
             {

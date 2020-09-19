@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -36,10 +37,37 @@ public class ServerConfiguration {
 	private static boolean runContinuousMode = true;
     private static boolean multiClientMode = true;
     private static int[] breakInfo = {-1, -1}; // seconds
+    private static boolean scheduledAutoUpdate = false; // default
 
-    // uninitializable defaults
+	// uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
+    private static ZonedDateTime nextUpdateDateTimeScheduled = null; // updated once on startup
+    private static String[] args; // store the args received on the commandline
+
+    public static String[] getArgs() {
+        return args;
+    }
+
+    public static void setArgs(String[] args) {
+        ServerConfiguration.args = args;
+    }
+
+    public static ZonedDateTime getNextUpdateDateTimeScheduled() {
+        return nextUpdateDateTimeScheduled;
+    }
+
+    public static void setNextUpdateDateTimeScheduled(ZonedDateTime nextUpdateDateTimeScheduled) {
+        ServerConfiguration.nextUpdateDateTimeScheduled = nextUpdateDateTimeScheduled;
+    }
+
+	public static boolean isScheduledAutoUpdate() {
+		return scheduledAutoUpdate;
+	}
+
+	public static void setScheduledAutoUpdate(boolean value) {
+		ServerConfiguration.scheduledAutoUpdate = value;
+	}
 
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
@@ -106,6 +134,7 @@ public class ServerConfiguration {
                 "    Run continuous: " + getRunContinuousMode() + ",\n" +
                 "    Multiclient permitted: " + getMultiClientMode() + ",\n" +
                 "    Breaks duration/interval: " + getBreak()[0] + ":" + getBreak()[1] + ",\n" +
+                "    Update scheduled for: " + (!isScheduledAutoUpdate()?"not set":(String.format("%02d", getNextUpdateDateTimeScheduled().getHour()) + ":" + String.format("%02d", getNextUpdateDateTimeScheduled().getMinute()))) + ",\n" +
                 "]";
     }
 

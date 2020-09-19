@@ -1,6 +1,7 @@
 package com.benberi.cadesim.server;
 
 import com.benberi.cadesim.server.model.player.PlayerManager;
+import com.benberi.cadesim.server.service.Updater;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.BlockadeTimeMachine;
 import com.benberi.cadesim.server.codec.packet.ServerPacketManager;
@@ -40,11 +41,14 @@ public class ServerContext {
 
     private ServerPacketManager packets;
 
+    private Updater updater;
+
     public ServerContext() {
         this.players = new PlayerManager(this);
         this.timeMachine = new BlockadeTimeMachine(this);
         this.map = new BlockadeMap(this);
         this.packets = new ServerPacketManager(this);
+        this.updater = new Updater(this);
     }
 
     static {
@@ -113,5 +117,13 @@ public class ServerContext {
      */
     public ServerPacketManager getPackets() {
         return packets;
+    }
+
+    /**
+     * Gets the updater
+     * @return {@link #updater}
+     */
+    public Updater getUpdater() {
+        return updater;
     }
 }
