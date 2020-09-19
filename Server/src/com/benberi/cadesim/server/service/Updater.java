@@ -1,19 +1,15 @@
 package com.benberi.cadesim.server.service;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.security.CodeSource;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
@@ -68,16 +64,12 @@ public class Updater {
                 lastUpdateWasOurs = true;
             }
         } catch (IOException e) {
-            ServerContext.log("[cleanup] Couldn't open idfile so assume wasn't ours.");
+            ServerContext.log("[cleanup] Couldn't open idfile so assume wasn't ours (or isn't there)");
         }
 
         // if last update was ours, clean up
         if (lastUpdateWasOurs) {
             ArrayList<String> toDelete = new ArrayList<>();
-            toDelete.add("getdown.txt");
-            toDelete.add("version.txt");
-            toDelete.add("digest.txt");
-            toDelete.add("digest2.txt");
             toDelete.add(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME + System.getProperty("file.separator")
                     + Constants.AUTO_UPDATING_ID_FILE_NAME);
             toDelete.add(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
@@ -98,66 +90,8 @@ public class Updater {
         }
         else
         {
-            ServerContext.log("[cleanup] the lockfile isn't ours, so leaving it be.");
+            ServerContext.log("[cleanup] the lockfile isn't ours (or there is no lockfile), so doing nothing.");
         }
-    }
-
-    /**
-     * Updater: Thread to check for updates automatically
-     */
-    Thread updateThread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            try {
-                BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
-                sc.readLine();
-                // get server url from getDown.txt
-                String cadesimUrl = sc.readLine();
-                String[] url = cadesimUrl.split("=");
-                // read version from getDown.txt
-                String cadeSimVersion = sc.readLine();
-                String[] version = cadeSimVersion.split("=");
-                String txtVersion = version[1].replaceAll("\\s+", "");
-                URL cadesimServer = new URL(url[1] + "version.txt");
-                // read version from server
-                BufferedReader reader = new BufferedReader(new InputStreamReader(cadesimServer.openStream()));
-                String serverVersion = reader.readLine().replaceAll("\\s+", "");
-                isUpdateAvailable = !serverVersion.equals(txtVersion);
-                System.out.println("Finished checking server version. ("
-                        + (isUpdateAvailable ? "update available" : "no new update available") + ")");
-                sc.close();
-                checkingForUpdate = false;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-    });
-
-    /**
-     * Updater: shared variables used by the updater thread
-     */
-    private boolean checkingForUpdate;
-    private boolean isUpdateAvailable = false;
-
-    /**
-     * Updater: runs update thread and blocks until result.
-     */
-    private boolean isUpdateAvailable() {
-        checkingForUpdate = true;
-        updateThread.start();
-        while (checkingForUpdate) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                ServerContext.log(
-                        "server was checking for update, but the thread was interrupted. (" + e.getMessage() + ")");
-            }
-        }
-
-        // updated by thread
-        return isUpdateAvailable;
     }
 
     /**
@@ -281,39 +215,25 @@ public class Updater {
                 cleanupAndRestart();
             }
 
-            // append apparg lines to getdown.txt
-            StringBuilder sb = new StringBuilder();
-            String[] args = ServerConfiguration.getArgs();
-            sb.append("\n\n"); // pad
-            for (int i = 0; i < args.length; i++) {
-                sb.append("apparg = " + args[i] + "\n");
-            }
-            try {
-                Files.write(Paths.get("getdown.txt"), sb.toString().getBytes(), StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                ServerContext.log("Couldn't append appargs to getdown.txt" + "(" + e + ")");
-                cleanupAndRestart();
-            }
+            // delete digests. otherwise getdown will
+            // run multiple times and get confused
+            f = new File("digest.txt");
+            f.delete();
+            f = new File("digest2.txt");
+            f.delete();
 
-            if (!isUpdateAvailable()) {
-                ServerContext.log("no update available, restarting server.");
-                restartServer(); // just restart :)
-            }
-
+            // run getdown
             try {
-                ServerContext.log("Performing update, deleting files...");
-                // delete required files in order to update client
-                File digest1 = new File("digest.txt");
-                File digest2 = new File("digest2.txt");
-                File version = new File("version.txt");
-                digest1.delete();
-                digest2.delete();
-                version.delete();
                 ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
-                pb.start(); // assign to process for something in future
+                Process p = pb.start(); // assign to process for something in future
 
-                ServerContext.log("quitting Server, to be restarted by getdown...");
-                System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
+                ServerContext.log("waiting for getdown to finish before restarting server...");
+                if (p.waitFor(Constants.AUTO_UPDATE_MAX_WAIT_GETDOWN_MS, TimeUnit.MILLISECONDS)) { // blocks, times out
+                    ServerContext.log("getdown finished successfully. Restarting server...");
+                } else {
+                    ServerContext.log("getdown didn't close in time. Maybe it crashed? Restarting server...");
+                }
+                restartServer();
             } catch (Exception e) {
                 ServerContext.log("exception when calling getdown: " + e);
                 cleanupAndRestart();

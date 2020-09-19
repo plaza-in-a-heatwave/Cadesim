@@ -134,7 +134,7 @@ public class Constants {
      * auto update variables
      */
     public static final String AUTO_UPDATING_LOCK_DIRECTORY_NAME = "AUTOUPDATING.LOCK";
-    public static final String AUTO_UPDATING_ID_FILE_NAME = "id.tmp";
-    public static final int[] STAGGER_AUTOUPDATE_RANGE_MINUTES = {0, 20}; // 20 min window
-    public static final int AUTO_UPDATE_MAX_LOCK_WAIT_MS = 600 * 1000; // 10 min
+    public static final String AUTO_UPDATING_ID_FILE_NAME        = "id.tmp";
+    public static final int AUTO_UPDATE_MAX_LOCK_WAIT_MS         = 600 * 1000; // 10 min
+    public static final int AUTO_UPDATE_MAX_WAIT_GETDOWN_MS      = 300 * 1000; //  5 min
 }

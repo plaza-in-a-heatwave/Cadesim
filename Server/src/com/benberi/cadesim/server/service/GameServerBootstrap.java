@@ -15,7 +15,6 @@ import org.apache.commons.cli.ParseException;
 import java.time.ZonedDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -89,11 +88,6 @@ public class GameServerBootstrap {
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
-        // clean up after previous update session if needed
-        // last session's args required to id this new process
-        ServerConfiguration.setArgs(args);
-        Updater.cleanupAfterRestart();
-
         // set up maps
         ServerConfiguration.loadAvailableMaps();
         ServerContext.log("Loaded " + ServerConfiguration.getAvailableMaps().size() + " maps.");
@@ -119,14 +113,26 @@ public class GameServerBootstrap {
         options.addOption("r", "round-duration", true, "round duration seconds, minimum " + Constants.MIN_ROUND_DURATION + ", must be >= turn duration, (default: " + ServerConfiguration.getRoundDuration() / 10 + ")");
         options.addOption("s", "server-name", true, "provide a name for the server, " + Constants.MAX_SERVER_NAME_SIZE + " characters max (default: " + ServerConfiguration.getServerName() + ")");
         options.addOption("t", "turn-duration", true, "turn duration seconds, minimum " + Constants.MIN_TURN_DURATION + ", (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
-        options.addOption("u", "schedule-updates", true, "schedule automatic updates to take place at HH:MM. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTimeActual().toString()) + ")");
+        options.addOption("u", "schedule-updates", true, "schedule automatic updates to take place at HH:MM. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTimeScheduled().toString()) + ")");
         options.addOption("v", "voting-majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
+        options.addOption("z", "do-nothing", false, "Start the app and immediately exit.");
 
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
         try {
             cmd = parser.parse(options, args);
+
+            // immediately exit. this option used to provide getdown
+            // with something executable to run during update stages.
+            if (cmd.hasOption("z")) {
+                System.exit(Constants.EXIT_SUCCESS);
+            }
+
+            // clean up after previous update session if needed
+            // last session's args required to id this new process
+            ServerConfiguration.setArgs(args);
+            Updater.cleanupAfterRestart();
 
             // check independent options
             if (cmd.hasOption("h")) {
@@ -209,16 +215,11 @@ public class GameServerBootstrap {
                 if (next.toEpochSecond() <= now.toEpochSecond()) {
                     next = next.plusDays(1); // next was actually previous
                 }
-                ServerConfiguration.setNextUpdateDateTimeScheduled(next); // what user asked for
-
-                // stagger updates if multiple rooms
-                // TODO #69 uncomment this when feature is tested & complete.
-//                next = next.plusMinutes(
-//                        ThreadLocalRandom.current().nextInt(Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[0],
-//                                Constants.STAGGER_AUTOUPDATE_RANGE_MINUTES[1] + 1));
-
+                ServerConfiguration.setNextUpdateDateTimeScheduled(next);
                 ServerConfiguration.setScheduledAutoUpdate(true);
-                ServerConfiguration.setNextUpdateDateTimeActual(next); // what user will get
+
+                // considered staggering start times. this might make things worse as
+                // a server could stagger into the future and restart multiple times.
             }
             if (cmd.hasOption("v"))
             {

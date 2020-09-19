@@ -1,6 +1,7 @@
 # custom
 jar.deps
 user.config
+.jarv
 
 # log file
 *.log

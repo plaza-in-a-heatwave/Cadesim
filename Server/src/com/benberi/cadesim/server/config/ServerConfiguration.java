@@ -42,8 +42,7 @@ public class ServerConfiguration {
 	// uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
-    private static ZonedDateTime nextUpdateDateTimeActual = null;          // updated once on startup. what user will get.
-    private static ZonedDateTime nextUpdateDateTimeScheduled = null; // updated once on startup. what user asked for.
+    private static ZonedDateTime nextUpdateDateTimeScheduled = null; // updated once on startup
     private static String[] args; // store the args received on the commandline
 
     public static String[] getArgs() {
@@ -61,14 +60,6 @@ public class ServerConfiguration {
     public static void setNextUpdateDateTimeScheduled(ZonedDateTime nextUpdateDateTimeScheduled) {
         ServerConfiguration.nextUpdateDateTimeScheduled = nextUpdateDateTimeScheduled;
     }
-
-    public static ZonedDateTime getNextUpdateDateTimeActual() {
-		return nextUpdateDateTimeActual;
-	}
-
-	public static void setNextUpdateDateTimeActual(ZonedDateTime nextUpdateDateTimeActual) {
-		ServerConfiguration.nextUpdateDateTimeActual = nextUpdateDateTimeActual;
-	}
 
 	public static boolean isScheduledAutoUpdate() {
 		return scheduledAutoUpdate;
@@ -144,7 +135,6 @@ public class ServerConfiguration {
                 "    Multiclient permitted: " + getMultiClientMode() + ",\n" +
                 "    Breaks duration/interval: " + getBreak()[0] + ":" + getBreak()[1] + ",\n" +
                 "    Update scheduled for: " + (!isScheduledAutoUpdate()?"not set":(String.format("%02d", getNextUpdateDateTimeScheduled().getHour()) + ":" + String.format("%02d", getNextUpdateDateTimeScheduled().getMinute()))) + ",\n" +
-                "    Update staggered for: " + (!isScheduledAutoUpdate()?"not set":(String.format("%02d", getNextUpdateDateTimeActual().getHour()) + ":" + String.format("%02d", getNextUpdateDateTimeActual().getMinute()))) + ",\n" +
                 "]";
     }
 

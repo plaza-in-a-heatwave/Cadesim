@@ -22,7 +22,29 @@ To update client:
 2. Update any background/UI needed before proceeding
 3. Increase version# in getdown.txt and version.txt and rerun getdown-digest.jar to propagate the new digest files.
 
-4. Upload all .txt files & config file to the hosted server on google drive. 
+4. Upload all .txt files & config file to the hosted server. 
 
-Hosted server: https://gucadesim.imfast.io/
-(we can always change server later if needed)
+
+For our server auto-update feature we need the following;
+ - getdown.txt
+ - getdown.jar
+ - digest.txt files (qty -2)
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+To get the digest files;
+run "java -classpath getdown-digest.jar com.threerings.getdown.tools.Digester ."
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+Note:
+the '.' in the above command is the location of the server jar file, user.config and other files. 
+In my example all files (even getdown-digest.jar) are in the same folder.
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+To update server:
+1. Export server project as cadesim.jar from eclipse
+2. Update any background/UI needed before proceeding
+3. rerun getdown-digest.jar to propagate the new digest files.
+
+4. Upload digests, getdown, icon, background, getdown.jar and server jar to the hosted server.

@@ -271,7 +271,7 @@ public class PlayerManager {
             if (ServerConfiguration.isScheduledAutoUpdate())
             {
                 if (
-                    ServerConfiguration.getNextUpdateDateTimeActual().toEpochSecond() <=
+                    ServerConfiguration.getNextUpdateDateTimeScheduled().toEpochSecond() <=
                     ZonedDateTime.now().toEpochSecond())
                 {
                     setUpdateScheduledAfterGame(true);
