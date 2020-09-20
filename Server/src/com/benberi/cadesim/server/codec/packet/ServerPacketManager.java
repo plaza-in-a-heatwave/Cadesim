@@ -3,6 +3,7 @@ package com.benberi.cadesim.server.codec.packet;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.codec.IncomingPackets;
 import com.benberi.cadesim.server.codec.util.Packet;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.util.Utils;
 import com.benberi.cadesim.server.codec.packet.in.*;
@@ -70,6 +71,11 @@ public class ServerPacketManager {
      * @return  status
      */
     public boolean process(Channel c, Packet packet) {
+        // block all packet input in test mode
+        if (ServerConfiguration.isTestMode()) {
+            return false;
+        }
+
         Player p = context.getPlayerManager().getPlayerByChannel(c);
         if (p == null) {
         	SocketAddress sockaddr = c.remoteAddress();

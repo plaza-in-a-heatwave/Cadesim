@@ -103,7 +103,8 @@ public class GameServerBootstrap {
         options.addOption("e", "token-expiry-turns", true, "set token expiry, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getTokenExpiry() + ")");
         options.addOption("f", "enable-breaks", true, "two tuple (duration sec, interval sec) e.g. 60,600 is 1 min break every 10 min. minimum break is 10, minimum interval is 60. (default: not enabled " + ServerConfiguration.getBreak() + ")");
         options.addOption("g", "permit-multiclient", true, "enable players to login with more than 1 client at a time, (on or off) (default: " + ServerConfiguration.getMultiClientMode() + ")");
-        options.addOption("h", "help", false, "Show help");
+        options.addOption("h", "help", false, "Show help and exit");
+        options.addOption("j", "test-mode", false, "Run test suites and exit");
         options.addOption("k", "run-continuous", true, "endlessly cycle maps (on or off) (default: " + ServerConfiguration.getRunContinuousMode() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("n", "team-names", true, "names for the attacker and defender, comma separated, " + Constants.MAX_TEAMNAME_SIZE + " characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
@@ -137,6 +138,9 @@ public class GameServerBootstrap {
             // check independent options
             if (cmd.hasOption("h")) {
                 help(options);
+            }
+            if (cmd.hasOption("j")) {
+                ServerConfiguration.setTestMode(true);
             }
             if (cmd.hasOption("a")) {
             	ServerConfiguration.setPlayerLimit(Integer.parseInt(cmd.getOptionValue("a")));
@@ -361,6 +365,17 @@ public class GameServerBootstrap {
             else {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
                 ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
+            }
+            if (ServerConfiguration.isTestMode()) {
+                // override above maps with dedicated test map
+                try {
+                    ServerConfiguration.setMapName(
+                        Constants.TEST_MAPNAME
+                    );
+                } catch (NullPointerException e) {
+                    ServerContext.log("Failed to find maps folder. create a folder called \"maps\" in the same directory.");
+                    System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
+                }
             }
             
             // check co-dependent arguments e.g. turn/round time

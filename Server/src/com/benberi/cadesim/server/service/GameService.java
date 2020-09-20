@@ -55,6 +55,8 @@ public class GameService implements Runnable {
             context.getTimeMachine().tick();
 
             if(playerManager.isGameEnded()) {
+                // last run for this game
+
             	// print out the scores for the game
             	playerManager.serverBroadcastMessage(
             			"Round ended, final scores were:\n" +

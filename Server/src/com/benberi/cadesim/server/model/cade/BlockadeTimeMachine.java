@@ -25,6 +25,11 @@ public class BlockadeTimeMachine {
     private boolean breakPending = false;
 
     /**
+     * Has time machine ticked yet
+     */
+    private boolean firstRunThisGame = true;
+
+    /**
      * The server context
      */
     private ServerContext context;
@@ -44,10 +49,19 @@ public class BlockadeTimeMachine {
 	    return inBreak;
 	}
 
+	/**
+	 * helper method to get whether the time machine has ticked yet
+	 */
+
+	public boolean firstRunThisGame() {
+	    return firstRunThisGame;
+	}
+
     /**
      * The main tick of blockade time machine
      */
     public void tick() {
+        firstRunThisGame = false;
         if (!isLock())
         {
             // if breaks enabled, count down towards the break too
@@ -204,9 +218,10 @@ public class BlockadeTimeMachine {
         isLastTurn = false;
 
         // reset breaks
-        breakTime      = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
-        timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
-        inBreak = false;
-        breakPending = false;
+        breakTime        = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
+        timeUntilBreak   = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
+        inBreak          = false;
+        breakPending     = false;
+        firstRunThisGame = true;
     }
 }

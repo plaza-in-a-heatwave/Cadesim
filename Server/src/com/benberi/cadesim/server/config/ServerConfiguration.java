@@ -37,13 +37,22 @@ public class ServerConfiguration {
 	private static boolean runContinuousMode = true;
     private static boolean multiClientMode = true;
     private static int[] breakInfo = {-1, -1}; // seconds
-    private static boolean scheduledAutoUpdate = false; // default
+    private static boolean scheduledAutoUpdate = false;
+    private static boolean testMode = false;
 
 	// uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
     private static ZonedDateTime nextUpdateDateTimeScheduled = null; // updated once on startup
     private static String[] args; // store the args received on the commandline
+
+    public static boolean isTestMode() {
+        return testMode;
+    }
+
+    public static void setTestMode(boolean value) {
+        testMode = value;
+    }
 
     public static String[] getArgs() {
         return args;

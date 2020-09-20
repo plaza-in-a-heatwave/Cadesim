@@ -43,12 +43,15 @@ public class ServerContext {
 
     private Updater updater;
 
+    private FunctionalTests functionalTests;
+
     public ServerContext() {
         this.players = new PlayerManager(this);
         this.timeMachine = new BlockadeTimeMachine(this);
         this.map = new BlockadeMap(this);
         this.packets = new ServerPacketManager(this);
         this.updater = new Updater(this);
+        this.functionalTests = new FunctionalTests(this);
     }
 
     static {
@@ -125,5 +128,13 @@ public class ServerContext {
      */
     public Updater getUpdater() {
         return updater;
+    }
+
+    /**
+     * Gets the functional tests
+     * @return {@link #functionalTests}
+     */
+    public FunctionalTests getFunctionalTests() {
+        return functionalTests;
     }
 }

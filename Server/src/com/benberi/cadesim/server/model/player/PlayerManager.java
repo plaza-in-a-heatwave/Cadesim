@@ -316,6 +316,13 @@ public class PlayerManager {
      * Handles and executes all turns
      */
     public void handleTurns() {
+        if (ServerConfiguration.isTestMode()) {
+            if (!context.getFunctionalTests().loadNextScenario()) {
+                // all tests complete
+                ServerContext.log("All tests complete, quitting.");
+                System.exit(Constants.EXIT_SUCCESS);
+            }
+        }
 
         context.getTimeMachine().renewTurn();
         
@@ -472,6 +479,11 @@ public class PlayerManager {
         // Process some after-turns stuff like updating damage interfaces, and such
         for (Player p : listRegisteredPlayers()) {
             p.processAfterTurnUpdate();
+        }
+
+        if (ServerConfiguration.isTestMode()) {
+            context.getFunctionalTests().evaluateScenario();
+            context.getFunctionalTests().unloadScenario();
         }
 
         context.getTimeMachine().setLock(true);

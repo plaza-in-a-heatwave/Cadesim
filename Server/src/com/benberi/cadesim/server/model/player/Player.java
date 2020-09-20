@@ -29,11 +29,13 @@ public class Player extends Position {
 
     /**
      * The channel of the player
+     * Bots have a null channel
      */
     private Channel channel;
 
     /**
      * The packet manager
+     * Bots have a null packet manager
      */
     private PlayerPacketManager packets;
 
@@ -162,15 +164,23 @@ public class Player extends Position {
     private int turnFinishWaitingTicks = 0;
     private List<Flag> flags;
 
+    private boolean isBot;
+
+    /**
+     * @param ctx   the server context
+     * @param c     the channel, or null if isBot
+     * If creating a bot, remember to call register().
+     */
     public Player(ServerContext ctx, Channel c) {
     	this.joinTime = System.currentTimeMillis();
-        this.channel = c;
         this.context = ctx;
-        this.packets = new PlayerPacketManager(this);
         this.moveGenerator = new MoveGenerator(this);
         this.tokens = new MoveTokensHandler(this);
         this.moves = new TurnMoveHandler(this);
         this.collisionStorage = new PlayerCollisionStorage(this);
+        this.packets = new PlayerPacketManager(this);
+        this.channel = c;
+        setBot(c == null);
 
         set(-1, -1);
     }
@@ -233,11 +243,11 @@ public class Player extends Position {
     @Override
     public Position set(Position pos) {
         if (!needsRespawn) {
-            if (!outOfSafe && !context.getMap().isSafe(pos)) {
+            if (!isOutOfSafe() && !context.getMap().isSafe(pos)) {
                 setOutOfSafe(true);
             }
 
-            else if (outOfSafe && context.getMap().isSafe(pos)) {
+            else if (isOutOfSafe() && context.getMap().isSafe(pos)) {
                 needsRespawn = true;
                 setOutOfSafe(false);
 
@@ -261,12 +271,15 @@ public class Player extends Position {
     }
 
     /**
-     * Sends a packet
+     * Sends a packet to a Player
      *
      * @param packet The packet to send
+     * Players who are bots cannot receive packets
      */
     public void sendPacket(OutgoingPacket packet) {
-        packets.queueOutgoing(packet);
+        if (!isBot()) {
+            packets.queueOutgoing(packet);
+        }
     }
 
     /**
@@ -373,11 +386,11 @@ public class Player extends Position {
         this.vessel = Vessel.createVesselByType(this, ship);
         this.isRegistered = true;
         ServerContext.log(
-        		"[player-joined] Registered player \"" + name + "\", " +
+                "[player-joined] Registered player \"" + name + "\"" + ", " +
         		Team.teamIDToString(team) + ", " +
         		Vessel.VESSEL_IDS.get(ship) + ", on " +
                 "joined during the " + (joinedInBreak?"break":"round") + ", " +
-        		channel.remoteAddress() + ". " +
+                getIP() + ". " +
         		context.getPlayerManager().printPlayers()
         );
         respawn();
@@ -447,7 +460,7 @@ public class Player extends Position {
 
         // reset flags
         setNeedsRespawn(false);
-        outOfSafe = false;
+        setOutOfSafe(false);
         enteredSafeLandside = false;
         enteredSafeOceanside = false;
 
@@ -481,7 +494,7 @@ public class Player extends Position {
     		// strictly, in a cade only the attacker would be
         	// able to do this. However in simple mode we provide the ability
     		// for the defender to go Oceanside too to keep things fair.
-        	if (!outOfSafe) {
+            if (!isOutOfSafe()) {
         		if (context.getMap().isSafeLandside(this))
         		{
         			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
@@ -496,7 +509,7 @@ public class Player extends Position {
     	else if (mode.equals("realistic"))
     	{
     		// can only dis/re if in safe
-    		if (!outOfSafe) {
+            if (!isOutOfSafe()) {
         		if (context.getMap().isSafeLandside(this))
         		{
         			if (getTeam() == Team.ATTACKER)
@@ -621,7 +634,11 @@ public class Player extends Position {
 	 */
 	public String getIP()
 	{
-		return getChannel().remoteAddress().toString().replace("/", "").split(":")[0];
+	    if (isBot()) {
+	        return "<bot>";
+	    } else {
+	        return getChannel().remoteAddress().toString().replace("/", "").split(":")[0];
+	    }
 	}
     
     /**
@@ -800,7 +817,7 @@ public class Player extends Position {
             p.packets.sendRespawn(this);
         }
 
-        outOfSafe = false;
+        setOutOfSafe(false);
         packets.sendDamage();
         packets.sendTokens();
     }
@@ -840,4 +857,12 @@ public class Player extends Position {
 	public void setTurnsUntilControl(int turnsUntilControl) {
 		this.turnsUntilControl = turnsUntilControl;
 	}
+
+    public boolean isBot() {
+        return isBot;
+    }
+
+    public void setBot(boolean isBot) {
+        this.isBot = isBot;
+    }
 }
