@@ -131,6 +131,8 @@ public class Vote {
 		
 		for (Player p:pm.listRegisteredPlayers())
 		{
+		    if (p.isBot()) { continue; } // robots can't vote
+
 			String ip = p.getIP();
 			if (!eligibleIPs.contains(ip))
 			{

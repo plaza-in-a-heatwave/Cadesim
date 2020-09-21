@@ -47,6 +47,7 @@ public class Updater {
         // add a few sec delay before doing anything to give any
         // previous instances a chance to exit
         try {
+            ServerContext.log("Sleeping for a few seconds to give previous server processes a chance to exit.");
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             // pass

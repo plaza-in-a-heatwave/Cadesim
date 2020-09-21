@@ -36,9 +36,9 @@ public class GameServerBootstrap {
     private ServerContext context;
 
     /**
-     * The start time of the server
+     * To measure the start time of the server
      */
-    private long start;
+    private static long start;
     public GameServerBootstrap() {
         context = new ServerContext();
     }
@@ -48,8 +48,6 @@ public class GameServerBootstrap {
      * @throws InterruptedException
      */
     private void startServer() throws InterruptedException {
-        start = System.currentTimeMillis();
-
         ServerContext.log("Using config: " + ServerConfiguration.getConfig());
         ServerContext.log("Starting up the host server....");
         CadeServer server = new CadeServer(context, this); // to notify back its done
@@ -86,6 +84,7 @@ public class GameServerBootstrap {
      * @throws NumberFormatException 
      */
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
+        start = System.currentTimeMillis();
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
         // set up maps
@@ -138,9 +137,6 @@ public class GameServerBootstrap {
             // check independent options
             if (cmd.hasOption("h")) {
                 help(options);
-            }
-            if (cmd.hasOption("j")) {
-                ServerConfiguration.setTestMode(true);
             }
             if (cmd.hasOption("a")) {
             	ServerConfiguration.setPlayerLimit(Integer.parseInt(cmd.getOptionValue("a")));
@@ -366,7 +362,10 @@ public class GameServerBootstrap {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
                 ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
             }
-            if (ServerConfiguration.isTestMode()) {
+            
+            // test mode overrides
+            if (cmd.hasOption("j")) {
+                ServerConfiguration.setTestMode(true);
                 // override above maps with dedicated test map
                 try {
                     ServerConfiguration.setMapName(
@@ -376,6 +375,10 @@ public class GameServerBootstrap {
                     ServerContext.log("Failed to find maps folder. create a folder called \"maps\" in the same directory.");
                     System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
                 }
+                
+                // reduce turn duration to 0.1s. (TODO #71 possibly could be 0s with tweaks to time machine)
+                ServerConfiguration.setTurnDuration(1); // 0.1s
+                ServerConfiguration.setRoundDuration(315360000); // 1 year to be safe
             }
             
             // check co-dependent arguments e.g. turn/round time
