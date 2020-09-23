@@ -77,7 +77,7 @@ public class PlayerCollisionStorage {
      * @return <code>true</code> If collision happened, else false
      */
     public boolean isCollided(int turn) {
-        return getCollisionRerefence(turn) != null;
+        return getCollisionReference(turn) != null;
     }
 
     /**
@@ -85,7 +85,7 @@ public class PlayerCollisionStorage {
      * @param turn  The turn
      * @return The collision reference if found, or null if not
      */
-    public PlayerCollisionReference getCollisionRerefence(int turn) {
+    public PlayerCollisionReference getCollisionReference(int turn) {
         return this.collisions[turn];
     }
 

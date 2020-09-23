@@ -355,11 +355,13 @@ public class SeaBattleScene implements GameScene {
             
             // let camera move with vessel if it's supposed to
             if (cameraFollowsVessel) {
-    			Vessel myVessel = context.getEntities().getVesselByName(context.myVessel);
-    			camera.translate(
-    					getIsometricX(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.x,
-    					getIsometricY(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.y
-    			);
+    			if(camera != null && context.myVessel != null) {
+    				Vessel myVessel = context.getEntities().getVesselByName(context.myVessel);
+	    			camera.translate(
+	    					getIsometricX(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.x,
+	    					getIsometricY(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.y
+	    			);
+    			}
         	}
 
             if (vessel.isSmoking()) {
@@ -704,11 +706,15 @@ public class SeaBattleScene implements GameScene {
         		cameraFollowsVessel = false;
         	} else {
         		this.cameraFollowsVessel = true;
-        		Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
-        		camera.translate(
-        				getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
-        				getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
-        		);
+        		try {
+	        		Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
+	        		camera.translate(
+	        				getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
+	        				getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
+	        		);
+        		}catch(NullPointerException e){
+        			//TO-DO -fix issue with null pointer
+        		}
         	}
     		
             return true;

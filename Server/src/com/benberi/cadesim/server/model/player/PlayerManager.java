@@ -372,7 +372,7 @@ public class PlayerManager {
                 p.setFace(move.getNextFace(p.getFace()));
                 t.setMoveToken(move);
                 if (p.getCollisionStorage().isCollided(turn)) {
-                    t.setAnimation(VesselMovementAnimation.getBumpForPhase(p.getCollisionStorage().getCollisionRerefence(turn).getPhase()));
+                    t.setAnimation(VesselMovementAnimation.getBumpForPhase(p.getCollisionStorage().getCollisionReference(turn).getPhase()));
                     
                 }
                 else {
