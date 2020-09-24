@@ -47,30 +47,28 @@ public class CollisionCalculator {
         for (Player p : players.listRegisteredPlayers()) {
         	MoveType move = p.getMoves().getMove(turn);
             Position next = p;
-            Position previous = p;;
-            //removed collision check because we need to check every player thats tried to take position
+            Position finalPosition = p;
             if (p == pl) {
             	continue;
             }
             if (!p.getCollisionStorage().isPositionChanged()) {
         		next = move.getNextPositionWithPhase(p, p.getFace(),phase);
-        		//need to know previous phase because forwards finish on phase 0 and any turn does not know
-        		//about the previous phase
-        		previous = move.getNextPositionWithPhase(p, p.getFace(),0);
+        		finalPosition = move.getFinalPosition(p, p.getFace());
             }
             //perform each phase individually
             if(phase == 0) {
                 if(next.equals(target)) {
                 	collided.add(p);
+                	p.getCollisionStorage().setCollided(turn, phase, target);
                 }
             }
-            if(phase == 1) {
-                if(previous.equals(target)) {
-                	collided.add(p);
-                }
-                if(next.equals(target)) {
-                	collided.add(p);
-                }
+            if(phase == 1){
+            	if(finalPosition.equals(target)) {
+            		collided.add(p);
+            	}
+            	if(next.equals(target)) {
+            		collided.add(p);
+            	}
             }
         }
         return collided;
@@ -79,29 +77,15 @@ public class CollisionCalculator {
     public List<Player> getPlayersTryingToClaimByAction(Player pl, Position target, int turn, int phase) {
         List<Player> collided = new ArrayList<>();
         for (Player p : players.listRegisteredPlayers()) {
-            if (p == pl || p.getCollisionStorage().isCollided(turn)) {
-                continue;
+            if (p == pl) {
+            	continue;
             }
-
             Position next = p;
-            Position previous = p;
             if (!p.getCollisionStorage().isPositionChanged()) {
                 next = context.getMap().getNextActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
-                previous = context.getMap().getNextActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, 0);
             }
-            //perform each phase individually
-            if(phase == 0) {
-                if(next.equals(target)) {
-                	collided.add(p);
-                }
-            }
-            if(phase == 1) {
-                if(previous.equals(target)) {
-                	collided.add(p);
-                }
-                if(next.equals(target)) {
-                	collided.add(p);
-                }
+            if(next.equals(target)) {
+            	collided.add(p);
             }
         }
         return collided;
@@ -149,7 +133,7 @@ public class CollisionCalculator {
             // If the result is not null, the position is claimed
             if (claimed != null) {
                 if (claimed.getCollisionStorage().isCollided(turn)) {
-                    collide(p, claimed, turn, phase);
+                    collide(p, claimed, turn, phase,position);
                     return true;
                 }
 
@@ -161,7 +145,7 @@ public class CollisionCalculator {
                 // Check if the claimed position doesn't move away
                 if (claimed.getMoves().getMove(turn) == MoveType.NONE || claimedNextPos.equals(claimed)) {
                     if (move != MoveType.FORWARD || claimed.getVessel().getSize() >= p.getVessel().getSize()) {
-                        collide(p, claimed, turn, phase);
+                        collide(p, claimed, turn, phase, position);
                     }
 
                     if (move == MoveType.FORWARD && canBumpPlayer(p, claimed, turn, phase)) {
@@ -170,7 +154,7 @@ public class CollisionCalculator {
                             bumpPlayer(claimed, p, turn, phase);
                         }
                         else {
-                            p.getCollisionStorage().setCollided(turn, phase);
+                            p.getCollisionStorage().setCollided(turn, phase, position);
                             return true;
                         }
 
@@ -181,11 +165,11 @@ public class CollisionCalculator {
                         }
                     }
                     else if(claimed.isSunk()) {
-                        collide(p, claimed, turn, phase);
+                        collide(p, claimed, turn, phase, position);
                         return true;
                     }
                     else if(move == MoveType.FORWARD && outOfBump(p, claimed, turn, phase)) {
-                        collide(p, claimed, turn, phase);
+                        collide(p, claimed, turn, phase, position);
                     }
 
                     claimed.getVessel().appendDamage(p.getVessel().getRamDamage(), p.getTeam());
@@ -193,8 +177,8 @@ public class CollisionCalculator {
                     return true;
                 }
                 else if (claimedNextPos.equals(p)) { // If they switched positions (e.g nose to nose, F, F move)
-                	collide(p, claimed, turn, phase);
-                    collide(claimed, p, turn, phase);
+                	collide(p, claimed, turn, phase,position);
+                    collide(claimed, p, turn, phase,position);
                     return true;
                 }
                 else {
@@ -204,8 +188,8 @@ public class CollisionCalculator {
                     }
                     else {
                         // did not move successfully, collide
-                        collide(p, claimed, turn, phase);
-                        collide(claimed, p, turn, phase);
+                        collide(p, claimed, turn, phase,position);
+                        collide(claimed, p, turn, phase,position);
                         return true;
                     }
                 }
@@ -226,32 +210,25 @@ public class CollisionCalculator {
             	//Stop players from movement
                 for (Player pl : collisions) {
                 	MoveType move = pl.getMoves().getMove(turn);
-                	if(phase == 0) {
+                    if(phase == 0) {
                      	if(pl == p) {
-                    		collide(p, pl, turn, 0);	
+                     		collide(pl, p, turn, phase, position);	
                     	}
-                        collide(pl, p, turn, 0);
-                	}else {//phase 1 collisions
-                		if(move == MoveType.FORWARD) {//fixes animation glitches for forwards
-                			if(pl == p) {
-                        		collide(p, pl, turn, 0);	
+                     	collide(pl, p, turn, phase, position);
+                    }
+                    if(phase == 1) {
+                    	if(move == MoveType.FORWARD) {
+                         	if(pl == p) {
+                         		collide(pl, p, turn, 0, position);	
                         	}
-                            collide(pl, p, turn, 0);
-                		}
-                		if(move == MoveType.LEFT || move == MoveType.RIGHT){// fix animation glitches for turns
-	                     	if(pl == p) {
-	                    		collide(p, pl, turn, 1);	
-	                    	}
-	                        collide(pl, p, turn, 1);
-                		}else {
-                			if(move == MoveType.FORWARD) {
-                				pl.getCollisionStorage().setCollided(turn, 0);
-                			}else {
-                				pl.getCollisionStorage().setCollided(turn, 1);
-                			}
-                			p.getCollisionStorage().setCollided(turn, 1);
-                		}
-                	}
+                         	collide(pl, p, turn, 0, position);
+                    	}else {
+                         	if(pl == p) {
+                         		collide(pl, p, turn, phase, position);	
+                        	}
+                         	collide(pl, p, turn, phase, position);
+                    	}
+                    }
                 }
             }
             else {
@@ -262,27 +239,20 @@ public class CollisionCalculator {
                     }
                     if(phase == 0) {
                      	if(pl == p) {
-                     		collide(pl, largest, turn, 0);	
+                     		collide(pl, largest, turn, phase,position);	
                     	}
-                     	collide(pl, largest, turn, 0);	
+                     	collide(pl, largest, turn, phase,position);	
                 	}else {//phase 1 collisions
                 		if(smallestMove == MoveType.FORWARD) {//fixes animation glitches for forwards
                 			if(pl == p) {
-                        		collide(pl, largest, turn, 0);	
+                        		collide(pl, largest, turn, 0,position);	
                         	}
-                            collide(pl, largest, turn, 0);
-                		}
-                		if(smallestMove == MoveType.LEFT || smallestMove == MoveType.RIGHT){// fix animation glitches for turns
-	                     	if(pl == p) {
-	                    		collide(pl, largest, turn, 0);	
-	                    	}
-	                        collide(pl, largest, turn, 0);
+                            collide(pl, largest, turn, 0,position);
                 		}else {
-                			if(smallestMove == MoveType.FORWARD) {
-                				pl.getCollisionStorage().setCollided(turn, 0);
-                			}else {
-                				pl.getCollisionStorage().setCollided(turn, 1);
-                			}
+	                     	if(pl == p) {
+	                    		collide(pl, largest, turn, phase,position);	
+	                    	}
+	                        collide(pl, largest, turn, phase,position);
                 		}
                 	}
                 }
@@ -310,7 +280,7 @@ public class CollisionCalculator {
         }
         if (player.getCollisionStorage().isCollided(turn) || context.getMap().isRock(target.getX(), target.getY(), player) || isOutOfBounds(target)) {
             player.getVessel().appendDamage(player.getVessel().getRockDamage(), Team.NEUTRAL);
-            player.getCollisionStorage().setCollided(turn, phase);
+            player.getCollisionStorage().setCollided(turn, phase, player);
             return true;
         }
         Player claimed = players.getPlayerByPosition(target.getX(), target.getY());
@@ -320,8 +290,8 @@ public class CollisionCalculator {
                 next = context.getMap().getNextActionTilePosition(claimed.getCollisionStorage().isOnAction() ? claimed.getCollisionStorage().getActionTile() : -1, claimed, phase);
             }
             if (next.equals(player)) {
-            	collide(player, claimed, turn, phase);
-            	collide(claimed, player, turn, phase);
+            	collide(player, claimed, turn, phase,next);
+            	collide(claimed, player, turn, phase,next);
                 return true;
             }
             else if (next.equals(claimed)) {
@@ -338,21 +308,21 @@ public class CollisionCalculator {
                 }
 
                 if (player.getVessel().getSize() <= claimed.getVessel().getSize()) {
-                    player.getCollisionStorage().setCollided(turn, phase);
+                    player.getCollisionStorage().setCollided(turn, phase, player);
                     return true;
                 }
             }
             if(checkActionCollision(claimed, next, turn, phase, false)) {
-            	collide(player, claimed, turn, phase);
+            	collide(player, claimed, turn, phase,next);
             	return true;
             }
         }
         else {
             List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
             if (collided.size() > 0) {
-            	collide(player, player, turn, phase);
+            	collide(player, player, turn, phase, player); //might not be correct position for collide
                 for (Player p : collided) {
-                	collide(p, player, turn, phase);
+                	collide(p, player, turn, phase,p); //might not be correct position for collide
                 }
                 return true;
             }
@@ -371,7 +341,7 @@ public class CollisionCalculator {
             pos = move.getNextPositionWithPhase(player, player.getFace(), phase);
         }
         if (context.getMap().isRock(pos.getX(), pos.getY(), player)) {
-            player.getCollisionStorage().setCollided(turn, phase);
+            player.getCollisionStorage().setCollided(turn, phase, pos);
             return true;
         }
         return false;
@@ -497,8 +467,8 @@ public class CollisionCalculator {
      * @param turn      The turn it happened at
      * @param phase     The phase-step it happened at
      */
-    private void collide(Player player, Player other, int turn, int phase) {
-        player.getCollisionStorage().setCollided(turn, phase);
+    private void collide(Player player, Player other, int turn, int phase, Position position) {
+        player.getCollisionStorage().setCollided(turn, phase,position);
         player.getVessel().appendDamage(other.getVessel().getRamDamage(), other.getTeam());
     }
 
@@ -517,7 +487,7 @@ public class CollisionCalculator {
             pos = move.getNextPositionWithPhase(player, player.getFace(), phase);
         }
         if (isOutOfBounds(pos)) {
-            player.getCollisionStorage().setCollided(turn, phase);
+            player.getCollisionStorage().setCollided(turn, phase, player);
             return true;
         }
         return false;

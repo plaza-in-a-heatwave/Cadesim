@@ -127,4 +127,9 @@ public class Position {
 
         return super.equals(o);
     }
+    
+    @Override
+    public String toString() {
+    	return "Position x: " + this.getX() + ", Position y: " + this.getY();
+    }
 }

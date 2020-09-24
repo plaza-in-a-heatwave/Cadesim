@@ -1,6 +1,7 @@
 package com.benberi.cadesim.server.model.player.collision;
 
 import com.benberi.cadesim.server.model.player.Player;
+import com.benberi.cadesim.server.util.Position;
 
 public class PlayerCollisionReference {
 
@@ -13,9 +14,11 @@ public class PlayerCollisionReference {
      * The phase collision happened at
      */
     private int phase;
+    private Position position;
 
-    public PlayerCollisionReference(Player p, int phase) {
+    public PlayerCollisionReference(Player p, int phase, Position position) {
         this.phase = phase;
+        this.position = position;
         this.player = p;
     }
 
@@ -25,5 +28,9 @@ public class PlayerCollisionReference {
 
     public int getPhase() {
         return phase;
+    }
+    
+    public Position getPosition() {
+        return position;
     }
 }
