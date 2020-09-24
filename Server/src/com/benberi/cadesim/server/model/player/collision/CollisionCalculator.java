@@ -256,10 +256,35 @@ public class CollisionCalculator {
             }
             else {
                 for (Player pl : collisions) {
+                	MoveType smallestMove = pl.getMoves().getMove(turn);
                     if (pl == largest) {
                         continue;
                     }
-                    collide(pl, largest, turn, phase);
+                    if(phase == 0) {
+                     	if(pl == p) {
+                     		collide(pl, largest, turn, 0);	
+                    	}
+                     	collide(pl, largest, turn, 0);	
+                	}else {//phase 1 collisions
+                		if(smallestMove == MoveType.FORWARD) {//fixes animation glitches for forwards
+                			if(pl == p) {
+                        		collide(pl, largest, turn, 0);	
+                        	}
+                            collide(pl, largest, turn, 0);
+                		}
+                		if(smallestMove == MoveType.LEFT || smallestMove == MoveType.RIGHT){// fix animation glitches for turns
+	                     	if(pl == p) {
+	                    		collide(pl, largest, turn, 0);	
+	                    	}
+	                        collide(pl, largest, turn, 0);
+                		}else {
+                			if(smallestMove == MoveType.FORWARD) {
+                				pl.getCollisionStorage().setCollided(turn, 0);
+                			}else {
+                				pl.getCollisionStorage().setCollided(turn, 1);
+                			}
+                		}
+                	}
                 }
                 if (!largest.getCollisionStorage().isPositionChanged()) {
                     largest.set(position);
