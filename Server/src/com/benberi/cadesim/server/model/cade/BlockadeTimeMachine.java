@@ -30,6 +30,11 @@ public class BlockadeTimeMachine {
     private boolean firstRunThisGame = true;
 
     /**
+     * Are we in test mode
+     */
+    private boolean testModeActive = ServerConfiguration.isTestMode();
+
+    /**
      * The server context
      */
     private ServerContext context;
@@ -139,7 +144,10 @@ public class BlockadeTimeMachine {
 
         }
 
-        if (turnTime <= -Constants.TURN_EXTRA_TIME) {
+        if (
+                (!testModeActive) && (turnTime <= -Constants.TURN_EXTRA_TIME) ||
+                (testModeActive)  && (turnTime <= 0) // make tests run faster
+        ) {
             if (!isLock()) {
                 try {
                     context.getPlayerManager().handleTurns();
