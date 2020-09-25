@@ -32,8 +32,9 @@ public class Constants {
     /**
      * map paths to use
      */
-    public static final String mapDirectory = "maps";
+    public static final String mapDirectory    = "maps";
     public static final String DEFAULT_MAPNAME = "default.txt";
+    public static final String TEST_MAPNAME    = "test.txt";
     
     /**
      * return types ( < 128 good; >= 128 bad)

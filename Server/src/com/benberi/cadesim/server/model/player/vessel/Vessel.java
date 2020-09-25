@@ -79,6 +79,32 @@ public abstract class Vessel {
 	}};
 	
 	/**
+     * map human readable ship ids to integer ids
+     */
+    public static final HashMap<String, Integer> VESSEL_STRINGS = new HashMap<String, Integer>() {/**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
+
+    {
+        put("smsloop",    0);
+        put("lgsloop",    1);
+        put("dhow",       2);
+        put("fanchuan",   3);
+        put("longship",   4);
+        put("junk",       5);
+        put("baghlah",    6);
+        put("merchbrig",  7);
+        put("warbrig",    8);
+        put("xebec",      9);
+        put("merchgal",  10);
+        put("warfrig",   11);
+        put("wargal",    12);
+        put("grandfrig", 13);
+        put("blackship", 14);
+    }};
+	
+	/**
 	 * @param name the name to search
 	 * @return id, or -1 if not found
 	 */

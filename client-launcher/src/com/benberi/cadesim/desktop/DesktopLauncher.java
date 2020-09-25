@@ -20,7 +20,6 @@ public class DesktopLauncher {
 			@Override
 			public void run() {
 				try {
-					@SuppressWarnings("resource")
 					BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
 					sc.readLine();
 					//get server url from getDown.txt

@@ -43,12 +43,15 @@ public class ServerContext {
 
     private Updater updater;
 
+    private RegressionTests regressionTests;
+
     public ServerContext() {
         this.players = new PlayerManager(this);
         this.timeMachine = new BlockadeTimeMachine(this);
         this.map = new BlockadeMap(this);
         this.packets = new ServerPacketManager(this);
         this.updater = new Updater(this);
+        this.regressionTests = new RegressionTests(this, false); // verbose switch
     }
 
     static {
@@ -125,5 +128,13 @@ public class ServerContext {
      */
     public Updater getUpdater() {
         return updater;
+    }
+
+    /**
+     * Gets the regression tests
+     * @return {@link #regressionTests}
+     */
+    public RegressionTests getRegressionTests() {
+        return regressionTests;
     }
 }

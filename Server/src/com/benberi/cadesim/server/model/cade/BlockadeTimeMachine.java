@@ -25,6 +25,16 @@ public class BlockadeTimeMachine {
     private boolean breakPending = false;
 
     /**
+     * Has time machine ticked yet
+     */
+    private boolean firstRunThisGame = true;
+
+    /**
+     * Are we in test mode
+     */
+    private boolean testModeActive = ServerConfiguration.isTestMode();
+
+    /**
      * The server context
      */
     private ServerContext context;
@@ -44,10 +54,19 @@ public class BlockadeTimeMachine {
 	    return inBreak;
 	}
 
+	/**
+	 * helper method to get whether the time machine has ticked yet
+	 */
+
+	public boolean firstRunThisGame() {
+	    return firstRunThisGame;
+	}
+
     /**
      * The main tick of blockade time machine
      */
     public void tick() {
+        firstRunThisGame = false;
         if (!isLock())
         {
             // if breaks enabled, count down towards the break too
@@ -125,7 +144,10 @@ public class BlockadeTimeMachine {
 
         }
 
-        if (turnTime <= -Constants.TURN_EXTRA_TIME) {
+        if (
+                (!testModeActive) && (turnTime <= -Constants.TURN_EXTRA_TIME) ||
+                (testModeActive)  && (turnTime <= 0) // make tests run faster
+        ) {
             if (!isLock()) {
                 try {
                     context.getPlayerManager().handleTurns();
@@ -204,9 +226,10 @@ public class BlockadeTimeMachine {
         isLastTurn = false;
 
         // reset breaks
-        breakTime      = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
-        timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
-        inBreak = false;
-        breakPending = false;
+        breakTime        = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
+        timeUntilBreak   = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
+        inBreak          = false;
+        breakPending     = false;
+        firstRunThisGame = true;
     }
 }

@@ -13,6 +13,7 @@ import com.benberi.cadesim.server.model.player.domain.PlayerLoginRequest;
 import com.benberi.cadesim.server.model.player.move.MoveAnimationTurn;
 import com.benberi.cadesim.server.model.player.move.MoveType;
 import com.benberi.cadesim.server.model.player.vessel.Vessel;
+import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
@@ -316,6 +317,13 @@ public class PlayerManager {
      * Handles and executes all turns
      */
     public void handleTurns() {
+        if (ServerConfiguration.isTestMode()) {
+            if (!context.getRegressionTests().loadNextScenario()) {
+                context.getRegressionTests().getSummary();
+                ServerContext.log("All tests complete, quitting.");
+                System.exit(Constants.EXIT_SUCCESS);
+            }
+        }
 
         context.getTimeMachine().renewTurn();
         
@@ -474,6 +482,11 @@ public class PlayerManager {
             p.processAfterTurnUpdate();
         }
 
+        if (ServerConfiguration.isTestMode()) {
+            context.getRegressionTests().evaluateScenario();
+            context.getRegressionTests().unloadScenario();
+        }
+
         context.getTimeMachine().setLock(true);
     }
 
@@ -591,7 +604,7 @@ public class PlayerManager {
             // all players must notify they're finished, unless a player joined during break.
             if (!p.isTurnFinished() && !p.didJoinInBreak()) {
                 if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
-                    ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getChannel().remoteAddress() + ")");
+                    ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getIP() + ")");
                     serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
                     kickPlayer(p, false);
                 }
@@ -676,7 +689,7 @@ public class PlayerManager {
     	// kick!
     	for (Player p : l)
     	{
-    		ServerContext.log("WARNING - " + p.getChannel().remoteAddress() + " timed out while registering, and was kicked.");
+    		ServerContext.log("WARNING - " + p.getIP() + " timed out while registering, and was kicked.");
             kickPlayer(p, false);
             ServerContext.log(printPlayers());
     	}
@@ -699,29 +712,74 @@ public class PlayerManager {
     }
 
     public void kickPlayer(Player p, boolean shouldBan) {
-        if (shouldBan) { temporaryBannedIPs.add(p.getIP()); }
-        p.getChannel().disconnect();
-        players.remove(p);
+        if (!p.isBot()) {
+            if (shouldBan) { temporaryBannedIPs.add(p.getIP()); }
+            deRegisterPlayer(p.getChannel());
+        }
+        else {
+            p.setTurnFinished(true);
+            players.remove(p);
+        }
+    }
+    
+    /**
+     * Create new NPC.
+     * @param name its name
+     * @param vesselID its ship type enum
+     * @param team its team (team type enum)
+     * @param startPosition -1,-1 to start not spawned, or >=0,>=0 to start on the map.
+     * @param startFace     which way to face to start with?
+     * @param startDamage   how much damage to spawn in with
+     */
+    public Player createBot(
+            String name,
+            int vesselID,
+            Team team,
+            int[] startPosition,
+            VesselFace startFace,
+            float startDamage
+    ) {
+        Player p = registerPlayer(null);
+        p.register(
+                name,
+                vesselID,
+                team.getID(),
+                startPosition,
+                startFace,
+                startDamage,
+                true
+        );
+        return p;
+    }
+
+    /**
+     * Remove an NPC.
+     * @param player which one to remove
+     */
+    public void removeBot(Player player) {
+        kickPlayer(player, false); // kick but don't ban
     }
 
     /**
      * Registers a new player to the server, puts him in a hold until he sends the protocol handshake packet
+     * bots never send a handshake, so you can immediately register them.
      *
      * @param c The channel to register
+     * @return  the newly created player
      */
-    public void registerPlayer(Channel c) {
+    public Player registerPlayer(Channel c) {
         Player player = new Player(context, c);
         String ip = player.getIP();
-        if (temporaryBannedIPs.contains(ip))
+        if ((!player.isBot()) && (temporaryBannedIPs.contains(ip))) // bots are exempt
         {
         	// dont allow banned IPs into the server until the next round begins
-        	ServerContext.log("Kicked player " + c.remoteAddress() + " attempted to rejoin, and was kicked again.");
+        	ServerContext.log("Kicked player " + player.getIP() + " attempted to rejoin, and was kicked again.");
             kickPlayer(player, false);
-        	return;
+        	return player;
         }
-        
-        // don't allow multiclients if settings forbid it
-        if (!ServerConfiguration.getMultiClientMode())
+
+        // don't allow multiclients if settings forbid it. Bots are exempt.
+        if ((!player.isBot()) && (!ServerConfiguration.getMultiClientMode()))
         {
             for (Player p : players)
             {
@@ -733,7 +791,7 @@ public class PlayerManager {
                         " attempted login on a second client, but multiclient is not permitted"
                     );
                     kickPlayer(player, false);
-                    return;
+                    return player;
                 }
             }
         }
@@ -745,18 +803,20 @@ public class PlayerManager {
                 context.getPlayerManager().isUpdateScheduledAfterGame()) {
             ServerContext.log(
                 "[kicked player] New player added to channel " +
-                c.remoteAddress() + ". Kicked because update in progress.");
+                player.getIP() + ". Kicked because update in progress.");
             kickPlayer(player, false);
-            return;
+            return player;
         }
      	
         // otherwise ok
     	players.add(player);
         ServerContext.log(
         	"[player joined] New player added to channel " +
-        	c.remoteAddress() + ". " +
+        	player.getIP() + ". " +
         	printPlayers()
         );
+        
+        return player;
     }
 
 
@@ -790,10 +850,11 @@ public class PlayerManager {
      * Gets a player instance by its channel
      * @param c The channel
      * @return  The player instance if found, null if not found
+     * bots are exempt.
      */
     public Player getPlayerByChannel(Channel c) {
         for(Player p : players) {
-            if (p.getChannel().equals(c)) {
+            if ((!p.isBot()) && p.getChannel().equals(c)) {
                 return p;
             }
         }
@@ -943,11 +1004,11 @@ public class PlayerManager {
 
 	            // log
 	            ServerContext.log(
-	            	"[player left] De-registered and logged out player \"" + player.getName() + "\", on " +
-	            	player.getChannel().remoteAddress() + ". " +
+	            	"[player left] De-registered and logged out player \"" + player.getName() + "\", " +
+	            	player.getIP() + ". " +
 	            	printPlayers()
 	            );
-	            
+
 	            // end game if applicable
 	            if (listRegisteredPlayers().size() == 0)
 	            {
@@ -959,7 +1020,7 @@ public class PlayerManager {
             	// just log
             	ServerContext.log(
 	            	"[player left] unregistered player disconnected on " +
-	            	player.getChannel().remoteAddress() + ". " +
+	            	player.getIP() + ". " +
 	            	printPlayers()
 	            );
             }
@@ -1080,13 +1141,15 @@ public class PlayerManager {
     	    List<String> messageParts = splitEqually(message, Constants.SPLIT_CHAT_MESSAGES_THRESHOLD);
     	    for (String s : messageParts) {
     	        for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
-                    player.getPackets().sendReceiveMessage(Constants.serverBroadcast, s);
+    	            if (player.isBot()) { continue; }
+    	            player.getPackets().sendReceiveMessage(Constants.serverBroadcast, s);
                 }
     	    }
     	}
     	else
     	{
     	    for(Player player : context.getPlayerManager().listRegisteredPlayers()) {
+    	        if (player.isBot()) { continue; }
                 player.getPackets().sendReceiveMessage(Constants.serverBroadcast, message);
             }
     	}
@@ -1097,6 +1160,10 @@ public class PlayerManager {
      */
     public void serverPrivateMessage(Player pl, String message)
     {
+        if (pl.isBot()) {
+            return;
+        }
+        
     	ServerContext.log("[chat] " + Constants.serverPrivate + "(to " + pl.getName() + "):" + message);
     	
     	if (message.length() >= Constants.SPLIT_CHAT_MESSAGES_THRESHOLD) {
@@ -1655,7 +1722,10 @@ public class PlayerManager {
     		else if (message.startsWith("/show"))
     		{
     		    // show on its own prints the help.
-    		    if (message.equals("/show nextmap")) {
+    		    if (message.equals("/show thismap")) {
+    		        serverPrivateMessage(pl, "---thismap---\n" + ServerConfiguration.getMapName());
+    		    }
+    		    else if (message.equals("/show nextmap")) {
     		        serverPrivateMessage(pl, "---nextmap---\n" + ServerConfiguration.getNextMapName());
     		    }
                 else if (message.equals("/show players")) { // alias
@@ -1673,6 +1743,7 @@ public class PlayerManager {
     		    }
     		    else {
     		        serverPrivateMessage(pl, "usage: /show\n" +
+                        "    thismap (show the current selected map)\n" +
                         "    nextmap (show the next map in rotation)\n" +
                         "    maps (get a list of all available maps)\n" +
                         "    players, teams"

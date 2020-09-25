@@ -36,9 +36,9 @@ public class GameServerBootstrap {
     private ServerContext context;
 
     /**
-     * The start time of the server
+     * To measure the start time of the server
      */
-    private long start;
+    private static long start;
     public GameServerBootstrap() {
         context = new ServerContext();
     }
@@ -48,8 +48,6 @@ public class GameServerBootstrap {
      * @throws InterruptedException
      */
     private void startServer() throws InterruptedException {
-        start = System.currentTimeMillis();
-
         ServerContext.log("Using config: " + ServerConfiguration.getConfig());
         ServerContext.log("Starting up the host server....");
         CadeServer server = new CadeServer(context, this); // to notify back its done
@@ -86,6 +84,7 @@ public class GameServerBootstrap {
      * @throws NumberFormatException 
      */
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
+        start = System.currentTimeMillis();
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
         // set up maps
@@ -103,7 +102,8 @@ public class GameServerBootstrap {
         options.addOption("e", "token-expiry-turns", true, "set token expiry, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getTokenExpiry() + ")");
         options.addOption("f", "enable-breaks", true, "two tuple (duration sec, interval sec) e.g. 60,600 is 1 min break every 10 min. minimum break is 10, minimum interval is 60. (default: not enabled " + ServerConfiguration.getBreak() + ")");
         options.addOption("g", "permit-multiclient", true, "enable players to login with more than 1 client at a time, (on or off) (default: " + ServerConfiguration.getMultiClientMode() + ")");
-        options.addOption("h", "help", false, "Show help");
+        options.addOption("h", "help", false, "Show help and exit");
+        options.addOption("j", "test-mode", false, "Run test suites and exit");
         options.addOption("k", "run-continuous", true, "endlessly cycle maps (on or off) (default: " + ServerConfiguration.getRunContinuousMode() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("n", "team-names", true, "names for the attacker and defender, comma separated, " + Constants.MAX_TEAMNAME_SIZE + " characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
@@ -361,6 +361,24 @@ public class GameServerBootstrap {
             else {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
                 ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
+            }
+            
+            // test mode overrides
+            if (cmd.hasOption("j")) {
+                ServerConfiguration.setTestMode(true);
+                // override above maps with dedicated test map
+                try {
+                    ServerConfiguration.setMapName(
+                        Constants.TEST_MAPNAME
+                    );
+                } catch (NullPointerException e) {
+                    ServerContext.log("Failed to find maps folder. create a folder called \"maps\" in the same directory.");
+                    System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
+                }
+                
+                // reduce turn duration to 0.1s. (TODO #71 possibly could be 0s with tweaks to time machine)
+                ServerConfiguration.setTurnDuration(1); // 0.1s
+                ServerConfiguration.setRoundDuration(315360000); // 1 year to be safe
             }
             
             // check co-dependent arguments e.g. turn/round time

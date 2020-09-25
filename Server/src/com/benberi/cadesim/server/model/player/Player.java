@@ -29,11 +29,13 @@ public class Player extends Position {
 
     /**
      * The channel of the player
+     * Bots have a null channel
      */
     private Channel channel;
 
     /**
      * The packet manager
+     * Bots have a null packet manager
      */
     private PlayerPacketManager packets;
 
@@ -162,17 +164,25 @@ public class Player extends Position {
     private int turnFinishWaitingTicks = 0;
     private List<Flag> flags;
 
+    private boolean isBot;
+
+    /**
+     * @param ctx   the server context
+     * @param c     the channel, or null if isBot
+     * If creating a bot, remember to call register().
+     */
     public Player(ServerContext ctx, Channel c) {
     	this.joinTime = System.currentTimeMillis();
-        this.channel = c;
         this.context = ctx;
-        this.packets = new PlayerPacketManager(this);
         this.moveGenerator = new MoveGenerator(this);
         this.tokens = new MoveTokensHandler(this);
         this.moves = new TurnMoveHandler(this);
         this.collisionStorage = new PlayerCollisionStorage(this);
+        this.packets = new PlayerPacketManager(this);
+        this.channel = c;
+        setBot(c == null);
 
-        set(-1, -1);
+        set(-1, -1); // not spawned
     }
 
     /**
@@ -233,11 +243,11 @@ public class Player extends Position {
     @Override
     public Position set(Position pos) {
         if (!needsRespawn) {
-            if (!outOfSafe && !context.getMap().isSafe(pos)) {
+            if (!isOutOfSafe() && !context.getMap().isSafe(pos)) {
                 setOutOfSafe(true);
             }
 
-            else if (outOfSafe && context.getMap().isSafe(pos)) {
+            else if (isOutOfSafe() && context.getMap().isSafe(pos)) {
                 needsRespawn = true;
                 setOutOfSafe(false);
 
@@ -261,12 +271,15 @@ public class Player extends Position {
     }
 
     /**
-     * Sends a packet
+     * Sends a packet to a Player
      *
      * @param packet The packet to send
+     * Players who are bots cannot receive packets
      */
     public void sendPacket(OutgoingPacket packet) {
-        packets.queueOutgoing(packet);
+        if (!isBot()) {
+            packets.queueOutgoing(packet);
+        }
     }
 
     /**
@@ -275,7 +288,7 @@ public class Player extends Position {
      * @return {@link #channel}
      */
     public Channel getChannel() {
-        return channel;
+        return isBot()? null:channel;
     }
 
     /**
@@ -365,22 +378,35 @@ public class Player extends Position {
     /**
      * Sets the player registered
      *
-     * @param name  The name to register
+     * @param name           The name to register
+     * @param ship           The ship id
+     * @param team           The team id
+     * @param customPosition >=0, >=0 if place, otherwise null for default spawn
+     * @param customFace     enum value,        otherwise null for default face
+     * @param customDamage   float damage to spawn with, or 0 for default damage
+     * @param shouldSpawnFullCannons spawn with full cannons?
      */
-    public void register(String name, int ship, int team) {
+    public void register(String name, int ship, int team, int[] customPosition, VesselFace customFace, float customDamage, boolean shouldSpawnFullCannons) {
         this.name = name;
         this.team = Team.forId(team);
         this.vessel = Vessel.createVesselByType(this, ship);
         this.isRegistered = true;
         ServerContext.log(
-        		"[player-joined] Registered player \"" + name + "\", " +
+                "[player joined] Registered player \"" + name + "\"" + ", " +
         		Team.teamIDToString(team) + ", " +
-        		Vessel.VESSEL_IDS.get(ship) + ", on " +
-                "joined during the " + (joinedInBreak?"break":"round") + ", " +
-        		channel.remoteAddress() + ". " +
+        		Vessel.VESSEL_IDS.get(ship) +
+                " joined during the " + (joinedInBreak?"break":"round") + ", on " +
+                getIP() + ". " +
         		context.getPlayerManager().printPlayers()
         );
-        respawn();
+        respawn(customPosition, customFace, customDamage, shouldSpawnFullCannons);
+    }
+    
+    /**
+     * wrapper for register
+     */
+    public void register(String name, int ship, int team) {
+        register(name, ship, team, null, null, 0, false);
     }
 
     /**
@@ -390,8 +416,13 @@ public class Player extends Position {
      * This is 1 of 2 wrappers around respawnOnLandside().
      * The other wrapper is requestRespawnToOceanside()
      * which is triggered by a player clicking Go Oceanside.
+     * 
+     * @param customPosition which position? or null if default
+     * @param customFace     which facing?   or null if default
+     * @param customDamage   float damage to spawn with, or 0 for default damage
+     * @param shouldSpawnFullCannons spawn with full cannons?
      */
-    public void respawn() {
+    public void respawn(int[] customPosition, VesselFace customFace, float customDamage, boolean shouldSpawnFullCannons) {
     	// where to respawn?
     	if (isFirstEntry()) {
     		setFirstEntry(false);
@@ -401,14 +432,14 @@ public class Player extends Position {
 
     		// start on land side regardless of where
     		// map says we are currently - it's wrong
-    		respawnOnLandside(true);
+    		respawnOnLandside(true, customPosition, customFace, customDamage, shouldSpawnFullCannons);
         } else if (enteredSafeLandside) { // drove into safe
     		// only defenders may use the landside safe zone
     		// so only defenders should be respawned here
-    		respawnOnLandside(true);
+    		respawnOnLandside(true, customPosition, customFace, customDamage, shouldSpawnFullCannons);
         } else if (enteredSafeOceanside) { // drove into safe
     		// both teams may use the oceanside safe zone
-    		respawnOnLandside(false);
+    		respawnOnLandside(false, customPosition, customFace, customDamage, shouldSpawnFullCannons);
     	} else {
     		context.getPlayerManager().serverBroadcastMessage(this.getName() + " was sunk!");
 
@@ -425,41 +456,78 @@ public class Player extends Position {
 
             // sunk, 'respawn' on land side with new ship
             vessel.resetDamageAndBilge();
-    		respawnOnLandside(true);
+    		respawnOnLandside(true, customPosition, customFace, customDamage, shouldSpawnFullCannons);
     	}
+    }
+
+    /**
+     * wrapper for respawn
+     */
+    public void respawn() {
+        respawn(null, null, 0, false);
     }
 
 	/**
      * respawn on one of two sides
      * @param landSide true if want to spawn on landside else false
+     * @param customPosition which position? or null if default
+     * @param customFace     which facing?   or null if default
+     * @param shouldSpawnFullCannons spawn with full cannons?
+     * @param customDamage   float damage to spawn with, or 0 for default damage
      */
-    private void respawnOnLandside(boolean landSide) {
-    	int x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
-    	int y = landSide?(BlockadeMap.MAP_HEIGHT-1):0;
-        setFace(landSide?VesselFace.SOUTH:VesselFace.NORTH);
-
-        while(context.getPlayerManager().getPlayerByPosition(x, y) != null) {
-            x++;
-            x = x % BlockadeMap.MAP_WIDTH;
-            // TODO what if cant enter the map?
-        }
-        set(x, y);
+    private void respawnOnLandside(boolean landSide, int[] customPosition, VesselFace customFace, float customDamage, boolean shouldSpawnFullCannons) {
+        int x = -1;
+        int y = -1;
+    	if (customPosition == null) {
+            x = ThreadLocalRandom.current().nextInt(0,BlockadeMap.MAP_WIDTH);
+        	y = landSide?(BlockadeMap.MAP_HEIGHT-1):0;
+        	while(context.getPlayerManager().getPlayerByPosition(x, y) != null) {
+                x++;
+                x = x % BlockadeMap.MAP_WIDTH;
+                // TODO what if cant enter the map?
+            }
+    	}
+    	else {
+    	    x = customPosition[0];
+    	    y = customPosition[1];
+    	}
+    	set(x, y);
+    	
+    	if (customFace == null) {
+    	    setFace(landSide?VesselFace.SOUTH:VesselFace.NORTH);
+    	}
+    	else {
+    	    setFace(customFace);
+    	}
 
         // reset flags
         setNeedsRespawn(false);
-        outOfSafe = false;
+        setOutOfSafe(false);
         enteredSafeLandside = false;
         enteredSafeOceanside = false;
 
-         // refresh tokens, but leave guns as they were. ships just joining will have 0 guns.
+        // refresh tokens, but leave guns as they were by default unless overriden.
+        // ships just joining get 0 guns.
         tokens.assignDefaultTokens();
         this.getPackets().sendTokens();
         getMoveTokens().setTargetTokenGeneration(MoveType.FORWARD, true);
+        if (shouldSpawnFullCannons) {
+            getMoveTokens().addCannons(this.getVessel().getMaxCannons());
+            getPackets().sendTokens();
+        }
 
         // send packets
         for (Player p:context.getPlayerManager().listRegisteredPlayers()) {
             p.packets.sendRespawn(this); // bugfix players' moves disappearing when anyone else (re)spawns
         }
+    }
+    
+    /**
+     * wrapper for respawnOnLandside
+     * @param landSide true if want to spawn on landside else false
+     */
+    private void respawnOnLandside(boolean landside) {
+        respawnOnLandside(landside, null, null, 0, false);
     }
 
     /**
@@ -481,7 +549,7 @@ public class Player extends Position {
     		// strictly, in a cade only the attacker would be
         	// able to do this. However in simple mode we provide the ability
     		// for the defender to go Oceanside too to keep things fair.
-        	if (!outOfSafe) {
+            if (!isOutOfSafe()) {
         		if (context.getMap().isSafeLandside(this))
         		{
         			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
@@ -496,7 +564,7 @@ public class Player extends Position {
     	else if (mode.equals("realistic"))
     	{
     		// can only dis/re if in safe
-    		if (!outOfSafe) {
+            if (!isOutOfSafe()) {
         		if (context.getMap().isSafeLandside(this))
         		{
         			if (getTeam() == Team.ATTACKER)
@@ -621,7 +689,11 @@ public class Player extends Position {
 	 */
 	public String getIP()
 	{
-		return getChannel().remoteAddress().toString().replace("/", "").split(":")[0];
+	    if (isBot()) {
+	        return "<bot>";
+	    } else {
+	        return getChannel().remoteAddress().toString().replace("/", "").split(":")[0];
+	    }
 	}
     
     /**
@@ -800,7 +872,7 @@ public class Player extends Position {
             p.packets.sendRespawn(this);
         }
 
-        outOfSafe = false;
+        setOutOfSafe(false);
         packets.sendDamage();
         packets.sendTokens();
     }
@@ -840,4 +912,12 @@ public class Player extends Position {
 	public void setTurnsUntilControl(int turnsUntilControl) {
 		this.turnsUntilControl = turnsUntilControl;
 	}
+
+    public boolean isBot() {
+        return isBot;
+    }
+
+    public void setBot(boolean isBot) {
+        this.isBot = isBot;
+    }
 }
