@@ -47,7 +47,7 @@ public class Updater {
         // add a few sec delay before doing anything to give any
         // previous instances a chance to exit
         try {
-            ServerContext.log("Sleeping for a few seconds to give previous server processes a chance to exit.");
+            ServerContext.log("[updater] Sleeping for a few seconds to give previous server processes a chance to exit.");
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             // pass
@@ -64,7 +64,7 @@ public class Updater {
                 lastUpdateWasOurs = true;
             }
         } catch (IOException e) {
-            ServerContext.log("[cleanup] Couldn't open idfile so assume wasn't ours (or isn't there)");
+            ServerContext.log("[updater] Couldn't open idfile so assume wasn't ours (or isn't there)");
         }
 
         // if last update was ours, clean up
@@ -77,20 +77,20 @@ public class Updater {
             for (String s : toDelete) {
                 File f = new File(s);
                 if (f.delete()) {
-                    ServerContext.log("[cleanup] deleted " + f.getPath() + " on startup.");
+                    ServerContext.log("[updater] deleted " + f.getPath() + " on startup.");
                 } else {
-                    ServerContext.log("[cleanup] couldn't delete " + f.getPath() + " on startup");
+                    ServerContext.log("[updater] couldn't delete " + f.getPath() + " on startup");
                     deleteSucceeded = false;
                 }
             }
 
             if (!deleteSucceeded) {
-                ServerContext.log("[cleanup] Error: delete of at least one update file failed.");
+                ServerContext.log("[updater] Error: delete of at least one update file failed.");
             }
         }
         else
         {
-            ServerContext.log("[cleanup] the lockfile isn't ours (or there is no lockfile), so doing nothing.");
+            ServerContext.log("[updater] the lockfile isn't ours (or there is no lockfile), so doing nothing.");
         }
     }
 
@@ -100,9 +100,9 @@ public class Updater {
     void cleanupAndRestart() {
         File f = new File(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
         if (f.delete()) {
-            ServerContext.log("deleted lockfile " + f.getPath());
+            ServerContext.log("[updater] deleted lockfile " + f.getPath());
         } else {
-            ServerContext.log("couldn't delete lockfile " + f.getPath());
+            ServerContext.log("[updater] couldn't delete lockfile " + f.getPath());
         }
         restartServer();
     }
@@ -120,13 +120,13 @@ public class Updater {
         try {
             File jarFile = new File(codeSource.getLocation().toURI().getPath());
             jarFileName = jarFile.getCanonicalPath();
-            ServerContext.log("using jar file name: " + jarFileName);
+            ServerContext.log("[updater] using jar file name: " + jarFileName);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
-            ServerContext.log("jar path was null. /hint/ Try exporting as a jar, select \"Extract required libraries into generated JAR\"");
+            ServerContext.log("[updater] jar path was null. /hint/ Try exporting as a jar, select \"Extract required libraries into generated JAR\"");
             e.printStackTrace();
         }
 
@@ -147,17 +147,17 @@ public class Updater {
 
             // restart the server by creating a new process & exiting.
             ProcessBuilder pb = new ProcessBuilder(arglist);
-            ServerContext.log("calling new process with:" + String.join(" ", arglist));
+            ServerContext.log("[updater] calling new process with:" + String.join(" ", arglist));
             try {
                 pb.start();
             } catch (IOException e) {
-                ServerContext.log("failed to spawn new server process when restarting. (" + e + ")");
+                ServerContext.log("[updater] failed to spawn new server process when restarting. (" + e + ")");
                 System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
             }
-            ServerContext.log("Successfully spawned new process. Quitting this one.");
+            ServerContext.log("[updater] Successfully spawned new process. Quitting this one.");
             System.exit(Constants.EXIT_SUCCESS_SCHEDULED_UPDATE);
         } else {
-            ServerContext.log("failed to spawn new server process: server not running from jar.");
+            ServerContext.log("[updater] failed to spawn new server process: server not running from jar.");
             System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
         }
     }
@@ -176,14 +176,14 @@ public class Updater {
         int sleepTotal = 0;
         boolean fileLockSuccess = true;
         while (!f.mkdir()) {
-            ServerContext.log("UPDATER: Waiting to update... (" + sleepTotal + ")");
+            ServerContext.log("[updater]  Waiting to update... (" + sleepTotal + ")");
             Thread.sleep(sleep_ms);
             sleepTotal += sleep_ms;
 
             // exit condition so we don't endlessly loop
             if (sleepTotal >= Constants.AUTO_UPDATE_MAX_LOCK_WAIT_MS) {
                 ServerContext.log(
-                        "UPDATER: Waited too long for file lock, maybe another server crashed. Giving up and restarting instead. ("
+                        "[updater] Waited too long for file lock, maybe another server crashed. Giving up and restarting instead. ("
                                 + sleepTotal + ")");
                 fileLockSuccess = false;
                 break;
@@ -191,7 +191,7 @@ public class Updater {
         }
 
         if (fileLockSuccess) {
-            ServerContext.log("UPDATER: Created lock directory (" + f.getName() + ")");
+            ServerContext.log("[updater] Created lock directory (" + f.getName() + ")");
 
             // create id tmp file
             String idfilename = Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME + System.getProperty("file.separator")
@@ -200,9 +200,9 @@ public class Updater {
                 FileWriter idfile = new FileWriter(idfilename);
                 idfile.write(String.join(" ", ServerConfiguration.getArgs()));
                 idfile.close();
-                ServerContext.log("Successfully created " + idfilename);
+                ServerContext.log("[updater] Successfully created " + idfilename);
             } catch (IOException e) {
-                ServerContext.log("Couldn't create " + idfilename + "(" + e.getMessage() + ")");
+                ServerContext.log("[updater] Couldn't create " + idfilename + "(" + e.getMessage() + ")");
                 this.cleanupAndRestart();
             }
 
@@ -218,15 +218,15 @@ public class Updater {
                 ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
                 Process p = pb.start(); // assign to process for something in future
 
-                ServerContext.log("waiting for getdown to finish before restarting server...");
+                ServerContext.log("[updater] waiting for getdown to finish before restarting server...");
                 if (p.waitFor(Constants.AUTO_UPDATE_MAX_WAIT_GETDOWN_MS, TimeUnit.MILLISECONDS)) { // blocks, times out
-                    ServerContext.log("getdown finished successfully. Restarting server...");
+                    ServerContext.log("[updater] getdown finished successfully. Restarting server...");
                 } else {
-                    ServerContext.log("getdown didn't close in time. Maybe it crashed? Restarting server...");
+                    ServerContext.log("[updater] getdown didn't close in time. Maybe it crashed? Restarting server...");
                 }
                 restartServer();
             } catch (Exception e) {
-                ServerContext.log("exception when calling getdown: " + e);
+                ServerContext.log("[updater] exception when calling getdown: " + e);
                 cleanupAndRestart();
             }
         } else { // didnt lock - no cleanup needed, just restart server :)

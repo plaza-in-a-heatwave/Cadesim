@@ -392,10 +392,10 @@ public class Player extends Position {
         this.vessel = Vessel.createVesselByType(this, ship);
         this.isRegistered = true;
         ServerContext.log(
-                "[player-joined] Registered player \"" + name + "\"" + ", " +
+                "[player joined] Registered player \"" + name + "\"" + ", " +
         		Team.teamIDToString(team) + ", " +
         		Vessel.VESSEL_IDS.get(ship) +
-                "joined during the " + (joinedInBreak?"break":"round") + ", on " +
+                " joined during the " + (joinedInBreak?"break":"round") + ", on " +
                 getIP() + ". " +
         		context.getPlayerManager().printPlayers()
         );

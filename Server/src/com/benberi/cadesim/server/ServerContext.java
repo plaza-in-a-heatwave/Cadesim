@@ -51,7 +51,7 @@ public class ServerContext {
         this.map = new BlockadeMap(this);
         this.packets = new ServerPacketManager(this);
         this.updater = new Updater(this);
-        this.functionalTests = new FunctionalTests(this);
+        this.functionalTests = new FunctionalTests(this, false); // verbose switch
     }
 
     static {
