@@ -2,6 +2,7 @@ package com.benberi.cadesim.server.model.player.collision;
 
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
+import com.benberi.cadesim.server.util.Position;
 
 public class PlayerCollisionStorage {
 
@@ -40,9 +41,10 @@ public class PlayerCollisionStorage {
      * Stores a collision
      * @param turn  The turn to store at
      * @param phase The phase the collision happened at
+     * @param position The position the collision happened at
      */
-    public void setCollided(int turn, int phase) {
-        this.collisions[turn] = new PlayerCollisionReference(player, phase);
+    public void setCollided(int turn, int phase, Position position) {
+        this.collisions[turn] = new PlayerCollisionReference(player, phase, position);
     }
 
     public boolean isCollided(int turn, int phase) {
@@ -50,7 +52,23 @@ public class PlayerCollisionStorage {
             return this.collisions[turn].getPhase() == phase;
         return false;
     }
-
+    /**
+     * checks if input position is the same as collided position
+     * @param turn  The turn to store at
+     * @param phase The phase the collision happened at
+     * @param position The position the collision happened at
+     */
+    public boolean isCollidedPosition(int turn, int phase, Position position) {
+        if (this.collisions[turn] != null)
+            return this.collisions[turn].getPosition() == position;
+		return false;
+    }
+    public Position getCollidedPosition(int turn) {
+        if (this.collisions[turn] != null) {
+        	return this.collisions[turn].getPosition();
+        }
+		return null;
+    }
     public boolean isOnAction() {
         return actionTile != -1;
     }
@@ -77,7 +95,7 @@ public class PlayerCollisionStorage {
      * @return <code>true</code> If collision happened, else false
      */
     public boolean isCollided(int turn) {
-        return getCollisionRerefence(turn) != null;
+        return getCollisionReference(turn) != null;
     }
 
     /**
@@ -85,7 +103,7 @@ public class PlayerCollisionStorage {
      * @param turn  The turn
      * @return The collision reference if found, or null if not
      */
-    public PlayerCollisionReference getCollisionRerefence(int turn) {
+    public PlayerCollisionReference getCollisionReference(int turn) {
         return this.collisions[turn];
     }
 

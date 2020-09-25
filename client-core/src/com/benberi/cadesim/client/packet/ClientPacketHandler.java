@@ -62,18 +62,21 @@ public class ClientPacketHandler {
      * @param packet    The packet to handle
      */
     public void handle(Packet packet) {
-        for (Map.Entry<Integer, ClientPacketExecutor> entry : packets.entrySet()) {
-            int opcode = entry.getKey();
-            ClientPacketExecutor p = entry.getValue();
-
-            if (packet.getOpcode() == opcode) {
-                p.execute(packet);
-                packet.getBuffer().release();
-                return;
-            }
-        }
-        packet.getBuffer().release();
-        logger.info("Packet with unknown opcode: " + packet.getOpcode() + " got dropped.");
+    	try {
+	        for (Map.Entry<Integer, ClientPacketExecutor> entry : packets.entrySet()) {
+	            int opcode = entry.getKey();
+	            ClientPacketExecutor p = entry.getValue();
+	            if (packet.getOpcode() == opcode) {
+	                p.execute(packet);
+	                packet.getBuffer().release();
+	                return;
+	            }
+	        }
+	        packet.getBuffer().release();
+	        logger.info("Packet with unknown opcode: " + packet.getOpcode() + " got dropped.");
+    	}catch(NullPointerException e) {
+    		//TO-DO
+	    }
     }
 
     private void registerPackets() {

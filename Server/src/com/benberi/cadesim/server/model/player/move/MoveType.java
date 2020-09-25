@@ -1,5 +1,6 @@
 package com.benberi.cadesim.server.model.player.move;
 
+import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.util.Position;
 
@@ -153,4 +154,51 @@ public enum MoveType {
 
        return position;
     }
+
+	public Position getFinalPosition(Position position, VesselFace face) {
+	       switch (this) {
+           case FORWARD:
+               switch (face) {
+                   case NORTH:
+                       return position.copy().addY(1);
+                   case SOUTH:
+                       return position.copy().addY(-1);
+                   case WEST:
+                       return position.copy().addX(-1);
+                   case EAST:
+                       return position.copy().addX(1);
+               }
+               break;
+           case LEFT:
+               switch (face) {
+                   case NORTH:
+                       return position.copy().addY(1).addX(-1);
+                   case SOUTH:
+                       return position.copy().addY(-1).addX(+1);
+                   case WEST:
+                       return position.copy().addX(-1).addY(-1);
+                   case EAST:
+                       return position.copy().addX(1).addY(1);
+               }
+               break;
+           case RIGHT:
+               switch (face) {
+                   case NORTH:
+                       return position.copy().addY(1).addX(1);
+                   case SOUTH:
+                       return position.copy().addY(-1).addX(-1);
+                   case WEST:
+                       return position.copy().addX(-1).addY(1);
+                   case EAST:
+                       return position.copy().addX(1).addY(-1);
+               }
+               break;
+           case NONE:
+               // pass
+           default:
+               break;
+       }
+
+       return position;
+	}
 }
