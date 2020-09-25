@@ -10,7 +10,7 @@ import com.benberi.cadesim.server.model.player.vessel.Vessel;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 
 /**
- * A light framework for functional collision tests.
+ * A light framework for regression testing collisions.
  *
  * Usage: every start of turn call loadNextScenario (~ setUp) <the turn (the
  * sequence of 4 move slots) plays out> after the turn ends, call
@@ -23,7 +23,7 @@ import com.benberi.cadesim.server.model.player.vessel.VesselFace;
  * etc. * expectDamage(...) * expectFace(...) * expectSunk(...) *
  * expectPosition(...)
  *
- * In FunctionalTests(...) you must: 1. Define your TestScenario objects (each
+ * In RegressionTests(...) you must: 1. Define your TestScenario objects (each
  * optionally containing multiple TestShips) 2. populate listOfScenarios
  *
  * testEquals and testAlmostEquals are provided. In future it might help to use
@@ -41,7 +41,7 @@ import com.benberi.cadesim.server.model.player.vessel.VesselFace;
  *        \0,0           \
  *         '''''''''''''''
  */
-public class FunctionalTests {
+public class RegressionTests {
 
     /////////////
     // aliases //
@@ -333,11 +333,11 @@ public class FunctionalTests {
      * Get a summary of total and pass/failed tests.
      */
     public void getSummary() {
-        ServerContext.log("[functionaltests]: SUMMARY: " +
+        ServerContext.log("[regressiontests]: SUMMARY: " +
             "+" + scenarioPasses + ", -" + scenarioFails + " (total: " + scenarioTotal + ")");
 
         if (0 == scenarioTotal) {
-            ServerContext.log("[functionaltests]:     (did you forget to include some scenarios?");
+            ServerContext.log("[regressiontests]:     (did you forget to include some scenarios?");
         }
     }
 
@@ -385,17 +385,17 @@ public class FunctionalTests {
     private void pass(String scenario, String test, Object expected, Object result) {
         testPasses++;
         if (isVerbose()) {
-            ServerContext.log("[functionaltests]: PASS \"" + scenario + "\" - \"" + test + "\" (result: " + result.toString() + ")");
+            ServerContext.log("[regressiontests]: PASS \"" + scenario + "\" - \"" + test + "\" (result: " + result.toString() + ")");
         }
     }
 
     private void fail(String scenario, String test, Object expected, Object result) {
         testFails++;
-        ServerContext.log("[functionaltests]: FAIL \"" + scenario + "\" - \"" + test + "\" (expected: " + expected.toString()
+        ServerContext.log("[regressiontests]: FAIL \"" + scenario + "\" - \"" + test + "\" (expected: " + expected.toString()
                 + ", result: " + result.toString() + ")");
     }
 
-    public FunctionalTests(ServerContext context, boolean verbose) {
+    public RegressionTests(ServerContext context, boolean verbose) {
         this.context = context;
         setVerbose(verbose);
         scenarioIndex = 0;

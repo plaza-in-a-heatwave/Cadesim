@@ -43,7 +43,7 @@ public class ServerContext {
 
     private Updater updater;
 
-    private FunctionalTests functionalTests;
+    private RegressionTests regressionTests;
 
     public ServerContext() {
         this.players = new PlayerManager(this);
@@ -51,7 +51,7 @@ public class ServerContext {
         this.map = new BlockadeMap(this);
         this.packets = new ServerPacketManager(this);
         this.updater = new Updater(this);
-        this.functionalTests = new FunctionalTests(this, false); // verbose switch
+        this.regressionTests = new RegressionTests(this, false); // verbose switch
     }
 
     static {
@@ -131,10 +131,10 @@ public class ServerContext {
     }
 
     /**
-     * Gets the functional tests
-     * @return {@link #functionalTests}
+     * Gets the regression tests
+     * @return {@link #regressionTests}
      */
-    public FunctionalTests getFunctionalTests() {
-        return functionalTests;
+    public RegressionTests getRegressionTests() {
+        return regressionTests;
     }
 }

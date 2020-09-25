@@ -318,8 +318,8 @@ public class PlayerManager {
      */
     public void handleTurns() {
         if (ServerConfiguration.isTestMode()) {
-            if (!context.getFunctionalTests().loadNextScenario()) {
-                context.getFunctionalTests().getSummary();
+            if (!context.getRegressionTests().loadNextScenario()) {
+                context.getRegressionTests().getSummary();
                 ServerContext.log("All tests complete, quitting.");
                 System.exit(Constants.EXIT_SUCCESS);
             }
@@ -483,8 +483,8 @@ public class PlayerManager {
         }
 
         if (ServerConfiguration.isTestMode()) {
-            context.getFunctionalTests().evaluateScenario();
-            context.getFunctionalTests().unloadScenario();
+            context.getRegressionTests().evaluateScenario();
+            context.getRegressionTests().unloadScenario();
         }
 
         context.getTimeMachine().setLock(true);
