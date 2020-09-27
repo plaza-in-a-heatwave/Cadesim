@@ -391,14 +391,17 @@ public class Player extends Position {
         this.team = Team.forId(team);
         this.vessel = Vessel.createVesselByType(this, ship);
         this.isRegistered = true;
-        ServerContext.log(
-                "[player joined] Registered player \"" + name + "\"" + ", " +
-        		Team.teamIDToString(team) + ", " +
-        		Vessel.VESSEL_IDS.get(ship) +
-                " joined during the " + (joinedInBreak?"break":"round") + ", on " +
-                getIP() + ". " +
-        		context.getPlayerManager().printPlayers()
-        );
+
+        if (!ServerConfiguration.isTestMode()) {
+            ServerContext.log(
+                    "[player joined] Registered player \"" + name + "\"" + ", " +
+            		Team.teamIDToString(team) + ", " +
+            		Vessel.VESSEL_IDS.get(ship) +
+                    " joined during the " + (joinedInBreak?"break":"round") + ", on " +
+                    getIP() + ". " +
+            		context.getPlayerManager().printPlayers()
+            );
+        }
         respawn(customPosition, customFace, customDamage, shouldSpawnFullCannons);
     }
     
@@ -514,6 +517,11 @@ public class Player extends Position {
         if (shouldSpawnFullCannons) {
             getMoveTokens().addCannons(this.getVessel().getMaxCannons());
             getPackets().sendTokens();
+        }
+
+        // add any custom damage on spawn in e.g. for testing purposes
+        if (customDamage > 0) {
+            this.getVessel().addCustomDamage(customDamage);
         }
 
         // send packets

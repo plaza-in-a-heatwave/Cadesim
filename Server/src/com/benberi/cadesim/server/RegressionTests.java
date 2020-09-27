@@ -40,6 +40,8 @@ import com.benberi.cadesim.server.model.player.vessel.VesselFace;
  *       \              \
  *        \0,0           \
  *         '''''''''''''''
+ *
+ * All damages are in MEDIUM cb.
  */
 public class RegressionTests {
 
@@ -119,6 +121,9 @@ public class RegressionTests {
             shots[0][0] = L0; shots[0][1] = R0; shots[1][0] = L1; shots[1][1] = R1;
             shots[2][0] = L2; shots[2][1] = R2; shots[3][0] = L3; shots[3][1] = R3;
         }
+        public void setInitialDamage(float initial) {
+            damage[0] = initial;
+        }
 
         // optional further parameters
         public void expectChangeDamage(float initial, float expected) {
@@ -139,6 +144,10 @@ public class RegressionTests {
             face[1] = expected;
         }
 
+        /**
+         * Test that ship sunk during a specific turn.
+         * @param expectedTurn 0 <= t <= 3
+         */
         public void expectSunkInTurn(int expectedTurn) {
             useSunk = true;
             sunk = expectedTurn;
@@ -200,9 +209,9 @@ public class RegressionTests {
         for (int i = 0; i < t.testShips.size(); i++) {
             // spawn
             assert ((t.testShips.get(i).position[0][0] >= 0) && (t.testShips
-                    .get(i).position[0][1] >= 0)) : "[TestShip]: start position (x,y) must be defined >= 0.";
+                    .get(i).position[0][1] >= 0)) : "[TestShip]: bad test (" + t.name + "). Start position (x,y) must be defined >= 0.";
             assert (t.testShips
-                    .get(i).face[0] != null) : "[TestShip]: start face (NORTH etc.) must be defined != null.";
+                    .get(i).face[0] != null) : "[TestShip]: bad test (" + t.name + "). Start face (NORTH etc.) must be defined != null.";
             Player p = context.getPlayerManager().createBot(
                     t.testShips.get(i).name,
                     t.testShips.get(i).vesselID,
@@ -214,18 +223,33 @@ public class RegressionTests {
 
             // place the moves & shots
             boolean usedAllSlots = true; // check number of moves is correct for ship
+            int unusedSlot = -1;         // find an unused slot we can use for the manuaver piece
+
+            // bugfix: move won't place if manuaver slot is there.
+            // we have to find it and move it to a more appropriate place ("unusedSlot")
+            // this requires a loop pass over slots to find it
+            for (int slot = 0; slot < 4; slot++) {
+                if (t.testShips.get(i).moves[slot] == MoveType.NONE) {
+                    usedAllSlots = false;
+                    unusedSlot = slot;
+                }
+            }
+            if (p.getVessel().has3Moves()) {
+                assert (!usedAllSlots) : "[TestShip]: bad test (" + t.name + "). ship can have 3 moves, but you have given it 4 moves.";
+                p.getMoves().setManuaverSlot(unusedSlot);
+            }
+
             for (int slot = 0; slot < 4; slot++) {
                 // moves
-                p.placeMove(slot, t.testShips.get(i).moves[slot].getId());
-                if (t.testShips.get(i).moves[slot] != MoveType.NONE) {
-                    usedAllSlots = false;
+                if ((!p.getVessel().has3Moves()) || (slot != unusedSlot)) {
+                    p.placeMove(slot, t.testShips.get(i).moves[slot].getId());
                 }
 
                 // shots
                 int lefts = t.testShips.get(i).shots[slot][0];
                 int rights = t.testShips.get(i).shots[slot][1];
                 if ((lefts > 1) || (rights > 1)) {
-                    assert p.getVessel().isDualCannon() : "[TestShip]: bad test. ship is not dual cannon, but you have given it dual shots.";
+                    assert p.getVessel().isDualCannon() : "[TestShip]: bad test (" + t.name + "). ship is not dual cannon, but you have given it dual shots.";
                 }
                 for (int shots = 0; shots < lefts; shots++) {
                     p.placeCannon(slot, 0);
@@ -233,9 +257,6 @@ public class RegressionTests {
                 for (int shots = 0; shots < rights; shots++) {
                     p.placeCannon(slot, 1);
                 }
-            }
-            if (p.getVessel().has3Moves()) {
-                assert (!usedAllSlots) : "[TestShip]: bad test. ship cannot have 4 moves, but you have given it 4 moves.";
             }
 
             // add it to our list of current test scenario bots
@@ -653,6 +674,99 @@ public class RegressionTests {
             s.add(t5);
             s.add(t6);
             listOfScenarios.add(new TestScenario("3 ship bump, variations", s));
+        }
+
+        // wind and rock and ship collisions (repeated for big ship, little ship)
+        //
+        //      start  desc start       end
+        //      1      t1 facing   v
+        //      2      t2 facing   v    1       t1 facing v
+        //      w      wind facing v    2       t2 facing v
+        //      r      rock             r       rock
+        {
+            TestShip t1 = new TestShip(WF, Team.DEFENDER);
+            t1.setMoves(N,N,F,F);
+            t1.expectChangePosition(6,31, 6,30);
+            t1.expectChangeFace(SOUTH, SOUTH);
+
+            TestShip t2 = new TestShip(WF, Team.DEFENDER);
+            t2.setMoves(N,F,N,N);
+            t2.expectChangePosition(6,30, 6,29);
+            t2.expectChangeFace(SOUTH, SOUTH);
+
+            TestShip t3 = new TestShip(SLOOP, Team.DEFENDER);
+            t3.setMoves(N,N,F,F);
+            t3.expectChangePosition(7,31, 7,30);
+            t3.expectChangeFace(SOUTH, SOUTH);
+
+            TestShip t4 = new TestShip(SLOOP, Team.DEFENDER);
+            t4.setMoves(N,F,N,N);
+            t4.expectChangePosition(7,30, 7,29);
+            t4.expectChangeFace(SOUTH, SOUTH);
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            s.add(t3);
+            s.add(t4);
+            listOfScenarios.add(new TestScenario("wind and rock and ship collisions", s));
+
+            // TODO test damage
+        }
+
+        // whirlpool glitch #26(bug 3)
+        {
+            TestShip t1 = new TestShip(SLOOP, Team.DEFENDER);
+            t1.setMoves(N,N,N,F);
+            t1.expectChangePosition(18,12, 18,11);
+            t1.expectChangeFace(SOUTH, SOUTH);
+
+            TestShip t2 = new TestShip(SLOOP, Team.DEFENDER);
+            t2.setMoves(N,N,N,F);
+            t2.expectChangePosition(18,8, 18,9);
+            t2.expectChangeFace(NORTH, EAST);
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            listOfScenarios.add(new TestScenario("wind and whirl collision #26 (3)", s));
+
+            // TODO test damage
+        }
+
+        // add whirlpool glitch #26(bug 4)
+        // current sim behaviour is that ships glide over wrecks of other ships as soon as they sink.
+        // this is non sinking cade behaviour:
+        //     sinking blockades: sinking is like a rock
+        //     non sinking:       can move onto it
+        {
+            TestShip t1 = new TestShip(CUTTER, Team.DEFENDER);
+            t1.setMoves(F,N,N,N);
+            t1.expectChangePosition(16,8, 15,6);
+            t1.expectChangeFace(SOUTH, WEST);
+            t1.setInitialDamage(7); // max is 8
+            t1.expectSunkInTurn(0);
+
+            TestShip t2 = new TestShip(WF, Team.ATTACKER);
+            t2.setMoves(N,R,N,N);
+            t2.setShots(
+                    0, 2,
+                    0, 0,
+                    0, 0,
+                    0, 0);
+            t2.expectChangePosition(14,6, 16,6);
+            t2.expectChangeFace(NORTH, NORTH);
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            listOfScenarios.add(new TestScenario("wind and whirl collision & sink #26 (4)", s));
+
+            // #FIXME this test won't pass, the shots from test framework don't do any damage to t1.
+            //        consequently it won't sink during turn 0 (or at all).
+            //        and also won't end at 15,6 as it doesnt get sunk.
+            //        and its face becomes SOUTH as it doesnt get sunk.
+            //        spamming shots in all slots does hit, so perhaps the position is wrong?
         }
     }
 }

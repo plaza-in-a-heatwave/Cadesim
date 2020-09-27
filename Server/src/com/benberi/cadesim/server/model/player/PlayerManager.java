@@ -810,11 +810,13 @@ public class PlayerManager {
      	
         // otherwise ok
     	players.add(player);
-        ServerContext.log(
-        	"[player joined] New player added to channel " +
-        	player.getIP() + ". " +
-        	printPlayers()
-        );
+    	if (!ServerConfiguration.isTestMode()) {
+            ServerContext.log(
+            	"[player joined] New player added to channel " +
+            	player.getIP() + ". " +
+            	printPlayers()
+            );
+    	}
         
         return player;
     }

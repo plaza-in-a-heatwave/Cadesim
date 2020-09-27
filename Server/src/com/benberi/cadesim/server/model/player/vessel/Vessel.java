@@ -2,6 +2,7 @@ package com.benberi.cadesim.server.model.player.vessel;
 
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.impl.*;
+import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.model.cade.Team;
 
 import java.util.HashMap;
@@ -148,6 +149,18 @@ public abstract class Vessel {
         if (player.getTeam() == damagingTeam) {
             damage = 0.5 * damage;
         }
+        this.damage += damage;
+        if (this.damage > getMaxDamage()) {
+            this.damage = getMaxDamage();
+        }
+    }
+
+    /**
+     * add custom damage, e.g. for testing purposes when spawning in.
+     * Equivalent to: appendDamage(damage, <enemy team>)
+     * @param damage The damage amount to append
+     */
+    public void addCustomDamage(double damage) {
         this.damage += damage;
         if (this.damage > getMaxDamage()) {
             this.damage = getMaxDamage();
