@@ -1,6 +1,5 @@
 package com.benberi.cadesim.server.model.player.move;
 
-import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.util.Position;
 

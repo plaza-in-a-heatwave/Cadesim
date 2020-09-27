@@ -69,15 +69,15 @@ public class Constants {
      */
     public static final double BILGE_SAILOR_PENALTY = 0.17578125;
 
+    public static final int TURN_EXTRA_TIME = 13; // deciseconds
+    public static final int OUTGOING_PACKETS_PLAYER_PER_TICK = 100;
+    public static final int INCOMING_PACKETS_PLAYER_PER_TICK = 100;
+    
     /**
      * This is used to timeout players that did not notify the server about their animation finish for the given
      * timeout value
      */
-    public static final int TURN_FINISH_TIMEOUT = 600; // deciseconds - should be > turntime + extratime
-
-    public static final int TURN_EXTRA_TIME = 13; // deciseconds
-    public static final int OUTGOING_PACKETS_PLAYER_PER_TICK = 100;
-    public static final int INCOMING_PACKETS_PLAYER_PER_TICK = 100;
+    public static final int TURN_FINISH_TIMEOUT = 200 + TURN_EXTRA_TIME; // deciseconds - should be > turntime + extratime
 
     /**
      * largest possible player name

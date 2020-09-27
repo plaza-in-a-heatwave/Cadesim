@@ -606,7 +606,7 @@ public class PlayerManager {
                 if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
                     ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getIP() + ")");
                     serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
-                    kickPlayer(p, false);
+                    kickPlayer(p);
                 }
                 else {
                     p.updateTurnFinishWaitingTicks();
@@ -690,7 +690,7 @@ public class PlayerManager {
     	for (Player p : l)
     	{
     		ServerContext.log("WARNING - " + p.getIP() + " timed out while registering, and was kicked.");
-            kickPlayer(p, false);
+            kickPlayer(p);
             ServerContext.log(printPlayers());
     	}
     }
@@ -711,14 +711,21 @@ public class PlayerManager {
     		Integer.toString(getPlayers().size()) + ".";
     }
 
-    public void kickPlayer(Player p, boolean shouldBan) {
-        if (!p.isBot()) {
-            if (shouldBan) { temporaryBannedIPs.add(p.getIP()); }
-            deRegisterPlayer(p.getChannel());
-        }
-        else {
-            p.setTurnFinished(true);
-            players.remove(p);
+    public void kickPlayer(Player p) {
+        p.setTurnFinished(true);
+        players.remove(p);
+
+        if (!p.isBot()) { p.getChannel().disconnect(); }
+    }
+    
+    public void kickAndBanPlayer(Player p) {
+        if (!p.isBot()) { temporaryBannedIPs.add(p.getIP()); }
+        kickPlayer(p);
+    }
+    
+    public void kickAllPlayers() {
+        for (Player p : this.listRegisteredPlayers()) {
+            kickPlayer(p);
         }
     }
     
@@ -757,7 +764,7 @@ public class PlayerManager {
      * @param player which one to remove
      */
     public void removeBot(Player player) {
-        kickPlayer(player, false); // kick but don't ban
+        kickPlayer(player); // kick but don't ban
     }
 
     /**
@@ -774,7 +781,7 @@ public class PlayerManager {
         {
         	// dont allow banned IPs into the server until the next round begins
         	ServerContext.log("Kicked player " + player.getIP() + " attempted to rejoin, and was kicked again.");
-            kickPlayer(player, false);
+            kickPlayer(player);
         	return player;
         }
 
@@ -790,7 +797,7 @@ public class PlayerManager {
                         ip + " (currently logged in as " + p.getName() + ")" +
                         " attempted login on a second client, but multiclient is not permitted"
                     );
-                    kickPlayer(player, false);
+                    kickPlayer(player);
                     return player;
                 }
             }
@@ -804,7 +811,7 @@ public class PlayerManager {
             ServerContext.log(
                 "[kicked player] New player added to channel " +
                 player.getIP() + ". Kicked because update in progress.");
-            kickPlayer(player, false);
+            kickPlayer(player);
             return player;
         }
      	
@@ -1283,7 +1290,7 @@ public class PlayerManager {
 				if (playerToKick != null)
 				{
 					serverBroadcastMessage("Player " + playerToKick.getName() + " was kicked by vote!");
-                    kickPlayer(playerToKick, true);
+                    kickAndBanPlayer(playerToKick);
 				}
 				handleStopVote();
 				break;
