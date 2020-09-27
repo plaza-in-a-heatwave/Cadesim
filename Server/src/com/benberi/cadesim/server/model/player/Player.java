@@ -104,7 +104,7 @@ public class Player extends Position {
      */
     private int sunkTurn = -1;
 
-    private boolean outOfSafe = false;
+    private boolean previouslyOutOfSafe = false;
 
     /**
      * Count delay for ship to be manauverable again
@@ -241,15 +241,21 @@ public class Player extends Position {
     }
 
     @Override
-    public Position set(Position pos) {
-        if (!needsRespawn) {
-            if (!isOutOfSafe() && !context.getMap().isSafe(pos)) {
-                setOutOfSafe(true);
+    public void set(Position pos) {
+        // don't allow the ship to move if it's sunk.
+        if (isSunk()) {
+            return;
+        }
+
+        // handle if ship wanders into safe
+        if (!isNeedsRespawn()) {
+            if (!getPreviouslyOutOfSafe() && !isInSafe()) {
+                setPreviouslyOutOfSafe(true);
             }
 
-            else if (isOutOfSafe() && context.getMap().isSafe(pos)) {
-                needsRespawn = true;
-                setOutOfSafe(false);
+            else if (getPreviouslyOutOfSafe() && isInSafe()) {
+                setNeedsRespawn(true);
+                setPreviouslyOutOfSafe(false);
 
                 // mark which safe zone we sailed through
                 if (context.getMap().isSafeLandside(pos))
@@ -267,7 +273,8 @@ public class Player extends Position {
             }
         }
 
-        return super.set(pos);
+        super.set(pos);
+        return;
     }
 
     /**
@@ -301,19 +308,19 @@ public class Player extends Position {
     }
 
     /**
-     * Checks if hes out of safe
-     * @return  The out of safe state
+     * Checks if last state was out of safe
+     * @return  The previous of safe state
      */
-    public boolean isOutOfSafe() {
-        return outOfSafe;
+    public boolean getPreviouslyOutOfSafe() {
+        return previouslyOutOfSafe;
     }
 
     /**
-     * Sets out of safe zone state
+     * Sets last out of safe zone state
      * @param flag  The state to set
      */
-    public void setOutOfSafe(boolean flag) {
-        this.outOfSafe = flag;
+    public void setPreviouslyOutOfSafe(boolean flag) {
+        this.previouslyOutOfSafe = flag;
     }
 
     /**
@@ -368,7 +375,9 @@ public class Player extends Position {
      * @param face  The new vessel face to set
      */
     public void setFace(VesselFace face) {
-        this.face = face;
+        if (!isSunk()) {
+            this.face = face;
+        }
     }
 
     public Team getTeam() {
@@ -495,6 +504,7 @@ public class Player extends Position {
     	    y = customPosition[1];
     	}
     	set(x, y);
+    	if (!isInSafe()) { setPreviouslyOutOfSafe(true); } // bugfix to allow shoots in first turn, if we spawned out of safe
     	
     	if (customFace == null) {
     	    setFace(landSide?VesselFace.SOUTH:VesselFace.NORTH);
@@ -505,7 +515,7 @@ public class Player extends Position {
 
         // reset flags
         setNeedsRespawn(false);
-        setOutOfSafe(false);
+        setPreviouslyOutOfSafe(false);
         enteredSafeLandside = false;
         enteredSafeOceanside = false;
 
@@ -557,7 +567,7 @@ public class Player extends Position {
     		// strictly, in a cade only the attacker would be
         	// able to do this. However in simple mode we provide the ability
     		// for the defender to go Oceanside too to keep things fair.
-            if (!isOutOfSafe()) {
+            if (!getPreviouslyOutOfSafe()) {
         		if (context.getMap().isSafeLandside(this))
         		{
         			context.getPlayerManager().serverPrivateMessage(this, "Going Oceanside");
@@ -572,7 +582,7 @@ public class Player extends Position {
     	else if (mode.equals("realistic"))
     	{
     		// can only dis/re if in safe
-            if (!isOutOfSafe()) {
+            if (!getPreviouslyOutOfSafe()) {
         		if (context.getMap().isSafeLandside(this))
         		{
         			if (getTeam() == Team.ATTACKER)
@@ -880,7 +890,7 @@ public class Player extends Position {
             p.packets.sendRespawn(this);
         }
 
-        setOutOfSafe(false);
+        setPreviouslyOutOfSafe(false);
         packets.sendDamage();
         packets.sendTokens();
     }

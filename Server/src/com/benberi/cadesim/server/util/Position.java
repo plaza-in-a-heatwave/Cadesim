@@ -74,14 +74,17 @@ public class Position {
         return this;
     }
 
-    public Position set(int x, int y) {
+    public void set(int x, int y) {
         setX(x);
         setY(y);
+    }
+
+    public Position get() {
         return this;
     }
 
-    public Position set(Position other) {
-        return set(other.getX(), other.getY());
+    public void set(Position other) {
+        set(other.getX(), other.getY());
     }
 
 

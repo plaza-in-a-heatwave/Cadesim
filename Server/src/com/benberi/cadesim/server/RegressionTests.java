@@ -85,7 +85,8 @@ public class RegressionTests {
     /**
      * Test one ship. Has two parts: starting scenario and ending scenario
      */
-    private class TestShip {
+    private static class TestShip {
+        private static long uid = 0;
         // scenario
         public String name = null;
         public int vesselID = -1;
@@ -108,9 +109,12 @@ public class RegressionTests {
 
         // constructor - main parameters
         public TestShip(String vessel, Team team) {
-            this.name = this.toString().split("@")[1]; // give it an exciting yet unique name that isn't 100 pages long
+            this.name = "ship" + uid;
             this.vesselID = Vessel.VESSEL_STRINGS.get(vessel);
             this.team = team;
+
+            // increment the static instance counter
+            uid += 1;
         }
 
         // mandatory parameters
