@@ -4,9 +4,7 @@ import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.PlayerManager;
-import com.benberi.cadesim.server.model.player.move.MoveAnimationTurn;
 import com.benberi.cadesim.server.model.player.move.MoveType;
-import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
@@ -89,7 +87,7 @@ public class CollisionCalculator {
     public List<Player> getPlayersTryingToClaimByAction(Player pl, Position target, int turn, int phase) {
         List<Player> collided = new ArrayList<>();
         for (Player p : players.listRegisteredPlayers()) {
-            if (p == pl && p.getCollisionStorage().isCollided(turn)) {
+            if (p == pl) {
             	continue;
             }
             Position next = p;
@@ -367,7 +365,8 @@ public class CollisionCalculator {
         if (player.equals(target)) {
             return false;
         }
-        if (player.getCollisionStorage().isCollided(turn) || context.getMap().isRock(target.getX(), target.getY(), player) || isOutOfBounds(target)) {
+        //checks rocks or out of bounds only
+        if (player.getCollisionStorage().isCollided(turn) && (context.getMap().isRock(target.getX(), target.getY(), player) || isOutOfBounds(target))) {
             player.getVessel().appendDamage(player.getVessel().getRockDamage(), Team.NEUTRAL);
             player.getCollisionStorage().setCollided(turn, phase);
             return true;
@@ -384,8 +383,8 @@ public class CollisionCalculator {
                 return true;
             }
             else if (next.equals(claimed)) {
-                player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
-                claimed.getVessel().appendDamage(player.getVessel().getRamDamage(), player.getTeam()); //needed if claimed is by a rock 
+            	collide(player,claimed,turn,phase);
+            	collide(claimed,player,turn,phase);
                 Position bumpPos = context.getMap().getNextActionTilePositionForTile(claimed, context.getMap().getTile(player.getX(), player.getY()));
                 if (players.getPlayerByPosition(bumpPos.getX(), bumpPos.getY()) == null && !isOutOfBounds(bumpPos)
                         && !context.getMap().isRock(bumpPos.getX(), bumpPos.getY(), player) && player.getVessel().getSize() >= claimed.getVessel().getSize()) {

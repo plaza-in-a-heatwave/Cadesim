@@ -442,7 +442,9 @@ public class PlayerManager {
                     }
 
                     if (context.getMap().isWhirlpool(tile))
-                        p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
+                    	if(!p.getCollisionStorage().isCollided(turn)) {
+                            p.setFace(context.getMap().getNextActionTileFace(p.getFace()));	
+                    	}
                 }
 
                 p.getCollisionStorage().setBumped(false);
