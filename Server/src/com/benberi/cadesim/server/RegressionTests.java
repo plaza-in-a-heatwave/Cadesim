@@ -519,7 +519,7 @@ public class RegressionTests {
 
             TestShip t2 = new TestShip(SLOOP, Team.DEFENDER);
             t2.setMoves(F,N,N,N);
-            t2.expectChangePosition(5,3, 5,3);
+            t2.expectChangePosition(5,3, 6,3);
             t2.expectChangeFace(WEST, WEST);
 
             List<TestShip> s = new ArrayList<>();
