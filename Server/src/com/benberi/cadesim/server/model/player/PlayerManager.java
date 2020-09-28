@@ -381,7 +381,6 @@ public class PlayerManager {
                 t.setMoveToken(move);
                 if (p.getCollisionStorage().isCollided(turn)) {
                     t.setAnimation(VesselMovementAnimation.getBumpForPhase(p.getCollisionStorage().getCollisionReference(turn).getPhase()));
-                    
                 }
                 else {
                     if (p.getCollisionStorage().getBumpAnimation() != VesselMovementAnimation.NO_ANIMATION) {

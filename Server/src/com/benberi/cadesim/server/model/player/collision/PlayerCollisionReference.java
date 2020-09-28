@@ -14,11 +14,9 @@ public class PlayerCollisionReference {
      * The phase collision happened at
      */
     private int phase;
-    private Position position;
 
-    public PlayerCollisionReference(Player p, int phase, Position position) {
+    public PlayerCollisionReference(Player p, int phase) {
         this.phase = phase;
-        this.position = position;
         this.player = p;
     }
 
@@ -28,9 +26,5 @@ public class PlayerCollisionReference {
 
     public int getPhase() {
         return phase;
-    }
-    
-    public Position getPosition() {
-        return position;
     }
 }
