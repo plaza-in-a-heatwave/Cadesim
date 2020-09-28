@@ -450,6 +450,50 @@ public class RegressionTests {
         // basic tests //
         /////////////////
 
+        // two ships equal size, both bump, safe zones, no damage
+        {
+            // north safe
+            TestShip t1 = new TestShip(SLOOP, Team.DEFENDER);
+            t1.setMoves(F,L,N,N);
+            t1.expectChangePosition(4,35, 4,35);
+            t1.expectChangeFace(EAST, NORTH);
+            t1.expectChangeDamage(0, 0);
+            t1.setShots(
+                    0, 1,
+                    0, 1,
+                    0, 1,
+                    0, 1);
+            TestShip t2 = new TestShip(SLOOP, Team.DEFENDER);
+            t2.setMoves(F,N,N,N);
+            t2.expectChangePosition(5,35, 5,35);
+            t2.expectChangeFace(WEST, WEST);
+            t2.expectChangeDamage(0, 0);
+
+            // south safe
+            TestShip t3 = new TestShip(SLOOP, Team.DEFENDER);
+            t3.setMoves(F,N,N,N);
+            t3.expectChangePosition(4,0, 4,0);
+            t3.expectChangeFace(EAST, EAST);
+            t3.expectChangeDamage(0, 0);
+            TestShip t4 = new TestShip(SLOOP, Team.DEFENDER);
+            t4.setMoves(F,R,N,N);
+            t4.expectChangePosition(5,0, 5,0);
+            t4.expectChangeFace(WEST, NORTH);
+            t4.expectChangeDamage(0, 0);
+            t4.setShots(
+                    1, 0,
+                    1, 0,
+                    1, 0,
+                    1, 0);
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            s.add(t3);
+            s.add(t4);
+            listOfScenarios.add(new TestScenario("two sloops, both bump, safe zones, no damage", s));
+        }
+
         // two ships equal size, both bump
         {
             TestShip t1 = new TestShip(SLOOP, Team.DEFENDER);
@@ -680,6 +724,36 @@ public class RegressionTests {
             listOfScenarios.add(new TestScenario("3 ship bump, variations", s));
         }
 
+        // three ships bump, one big ship
+        // x is WF, claims the space
+        {
+            // x -->   <-- z
+            //       ^
+            //       y
+            TestShip t1 = new TestShip(SLOOP, Team.DEFENDER);
+            t1.setMoves(F,N,N,N);
+            t1.expectChangePosition(13,4, 13,4);
+            t1.expectChangeFace(NORTH, NORTH);
+
+            TestShip t2 = new TestShip(WF, Team.DEFENDER);
+            t2.setMoves(F,N,N,N);
+            t2.expectChangePosition(12,5, 13,5);
+            t2.expectChangeFace(EAST, EAST);
+
+            TestShip t3 = new TestShip(SLOOP, Team.DEFENDER);
+            t3.setMoves(F,N,N,N);
+            t3.expectChangePosition(14,5, 14,5);
+            t3.expectChangeFace(WEST, WEST);
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            s.add(t3);
+            listOfScenarios.add(new TestScenario("3 ship bump, variations, one big ship", s));
+
+            // TODO test damage
+        }
+
         // wind and rock and ship collisions (repeated for big ship, little ship)
         //
         //      start  desc start       end
@@ -765,12 +839,31 @@ public class RegressionTests {
             s.add(t1);
             s.add(t2);
             listOfScenarios.add(new TestScenario("wind and whirl collision & sink #26 (4)", s));
+        }
 
-            // #FIXME this test won't pass, the shots from test framework don't do any damage to t1.
-            //        consequently it won't sink during turn 0 (or at all).
-            //        and also won't end at 15,6 as it doesnt get sunk.
-            //        and its face becomes SOUTH as it doesnt get sunk.
-            //        spamming shots in all slots does hit, so perhaps the position is wrong?
+        // two ships enter a whirlpool, one sinks (alternative version)
+        {
+            TestShip t1 = new TestShip(CUTTER, Team.DEFENDER);
+            t1.setMoves(R,N,N,N);
+            t1.expectChangePosition(15,8, 15,6);
+            t1.expectChangeFace(EAST, WEST);
+            t1.setInitialDamage(7); // max is 8
+            t1.expectSunkInTurn(0);
+
+            TestShip t2 = new TestShip(WF, Team.ATTACKER);
+            t2.setMoves(N,L,N,N);
+            t2.setShots(
+                    2, 0,
+                    0, 0,
+                    0, 0,
+                    0, 0);
+            t2.expectChangePosition(15,5, 16,6);
+            t2.expectChangeFace(EAST, WEST);
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            listOfScenarios.add(new TestScenario("wind and whirl collision & sink #26 (4.1)", s));
         }
     }
 }
