@@ -558,12 +558,12 @@ public class RegressionTests {
         {
             TestShip t1 = new TestShip(WF, Team.DEFENDER);
             t1.setMoves(F,N,N,N);
-            t1.expectChangePosition(4,3, 5,3);
+            t1.expectChangePosition(4,3, 4,3);
             t1.expectChangeFace(EAST, EAST);
 
             TestShip t2 = new TestShip(SLOOP, Team.DEFENDER);
             t2.setMoves(F,N,N,N);
-            t2.expectChangePosition(5,3, 6,3);
+            t2.expectChangePosition(5,3, 5,3);
             t2.expectChangeFace(WEST, WEST);
 
             List<TestShip> s = new ArrayList<>();
