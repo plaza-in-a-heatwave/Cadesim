@@ -802,7 +802,7 @@ public class RegressionTests {
             TestShip t2 = new TestShip(SLOOP, Team.DEFENDER);
             t2.setMoves(N,N,N,F);
             t2.expectChangePosition(18,8, 18,9);
-            t2.expectChangeFace(NORTH, NORTH);
+            t2.expectChangeFace(NORTH, EAST);
 
             List<TestShip> s = new ArrayList<>();
             s.add(t1);
@@ -813,8 +813,10 @@ public class RegressionTests {
         }
 
         // add whirlpool glitch #26(bug 4)
-        // current sim behaviour is that ships collide and stop on sunken ships.
-        //     sinking behaviour (non sink just glides right through)
+        // current sim behaviour is that ships glide over wrecks of other ships as soon as they sink.
+        // this is non sinking cade behaviour:
+        //     sinking blockades: sinking is like a rock
+        //     non sinking:       can move onto it
         {
             TestShip t1 = new TestShip(CUTTER, Team.DEFENDER);
             t1.setMoves(F,N,N,N);
@@ -831,7 +833,7 @@ public class RegressionTests {
                     0, 0,
                     0, 0);
             t2.expectChangePosition(14,6, 16,6);
-            t2.expectChangeFace(NORTH, SOUTH); // whirl acts like a turn
+            t2.expectChangeFace(NORTH, NORTH);
 
             List<TestShip> s = new ArrayList<>();
             s.add(t1);
@@ -856,7 +858,7 @@ public class RegressionTests {
                     0, 0,
                     0, 0);
             t2.expectChangePosition(15,5, 16,6);
-            t2.expectChangeFace(EAST, NORTH);
+            t2.expectChangeFace(EAST, WEST);
 
             List<TestShip> s = new ArrayList<>();
             s.add(t1);
