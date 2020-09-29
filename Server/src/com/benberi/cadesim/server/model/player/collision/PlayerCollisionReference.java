@@ -1,7 +1,6 @@
 package com.benberi.cadesim.server.model.player.collision;
 
 import com.benberi.cadesim.server.model.player.Player;
-import com.benberi.cadesim.server.util.Position;
 
 public class PlayerCollisionReference {
 

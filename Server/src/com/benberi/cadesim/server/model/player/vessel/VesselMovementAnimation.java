@@ -205,7 +205,6 @@ public enum VesselMovementAnimation {
     }
 
     public static VesselMovementAnimation getBumpAnimationForAction(int tile) {
-    	//TODO fix correct directions depending on next position and face
         switch (tile) {
             case WIND_NORTH:
                 return BUMP_NORTH;

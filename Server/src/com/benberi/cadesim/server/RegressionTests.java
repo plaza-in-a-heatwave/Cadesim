@@ -185,7 +185,8 @@ public class RegressionTests {
     private ServerContext context;
     private List<TestScenario> listOfScenarios;
     private int scenarioIndex;
-    private int testPasses     = 0, testFails     = 0, testTotal = 0;
+    @SuppressWarnings("unused") //testFails variable
+	private int testPasses     = 0, testFails     = 0, testTotal = 0;
     private int scenarioPasses = 0, scenarioFails = 0, scenarioTotal = 0;
     private List<Player> listOfBotsCreated;
     private boolean verbose = false;

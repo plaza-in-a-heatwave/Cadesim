@@ -2,7 +2,6 @@ package com.benberi.cadesim.server.model.player.collision;
 
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
-import com.benberi.cadesim.server.util.Position;
 
 public class PlayerCollisionStorage {
 
@@ -26,6 +25,7 @@ public class PlayerCollisionStorage {
     private boolean positionChanged;
 
     private int actionTile = -1;
+    private int nextActionTile = -1;
 
     private boolean recursionStarter;
 
@@ -68,11 +68,18 @@ public class PlayerCollisionStorage {
     public void setOnAction(int tile) {
         this.actionTile = tile;
     }
+    
+    public void setNextAction(int tile) {
+        this.nextActionTile = tile;
+    }
 
     public int getActionTile() {
         return  actionTile;
     }
-
+    
+    public int getNextActionTile() {
+        return  nextActionTile;
+    }
     /**
      * Check if the player collided at given turn
      * @param turn  The turn to check

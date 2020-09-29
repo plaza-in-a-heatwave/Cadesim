@@ -16,7 +16,6 @@ import com.benberi.cadesim.server.model.player.vessel.Vessel;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.server.util.Direction;
-import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.time.ZonedDateTime;
@@ -404,26 +403,15 @@ public class PlayerManager {
                     if (player.getCollisionStorage().isBumped()) {
                         continue;
                     }
-
                     int tile = context.getMap().getTile(player.getX(), player.getY());
-
-                    if (player.getCollisionStorage().isOnAction()) {
-                        tile = player.getCollisionStorage().getActionTile();
-                    }
-
+                    
                     if (context.getMap().isActionTile(tile)) {
-
-                        // Save the action tile
-                        if (!player.getCollisionStorage().isOnAction()) {
-                            player.getCollisionStorage().setOnAction(tile);
-                        }
-
                         // Next position for action tile
-                        Position next = context.getMap().getNextActionTilePosition(tile, player, phase);
-
-                        player.getCollisionStorage().setRecursionStarter(true);
-                        collision.checkActionCollision(player, next, turn, phase, true);
-                        player.getCollisionStorage().setRecursionStarter(false);
+                        if(!player.getCollisionStorage().isCollided(turn,phase) && !player.isSunk()) {
+                            player.getCollisionStorage().setRecursionStarter(true);
+                            collision.checkActionCollision(player, turn, phase, true);
+                            player.getCollisionStorage().setRecursionStarter(false);
+                        }
                     }
                 }
 
@@ -444,6 +432,8 @@ public class PlayerManager {
                     if (context.getMap().isWhirlpool(tile))
                     	if(!p.getCollisionStorage().isCollided(turn)) {
                             p.setFace(context.getMap().getNextActionTileFace(p.getFace()));	
+                    	}else {
+                    		p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
                     	}
                 }
 
