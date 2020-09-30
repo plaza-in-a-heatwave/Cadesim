@@ -16,6 +16,7 @@ import com.benberi.cadesim.server.model.player.vessel.Vessel;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.server.util.Direction;
+import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.time.ZonedDateTime;
@@ -123,6 +124,7 @@ public class PlayerManager {
 		setTurnDuration(ServerConfiguration.getTurnDuration());
 		setRoundDuration(ServerConfiguration.getRoundDuration());
 		setDisengageBehavior(ServerConfiguration.getDisengageBehavior());
+		
 	}
 	
     private void setPersistTemporarySettings(boolean value)
@@ -403,14 +405,27 @@ public class PlayerManager {
                     if (player.getCollisionStorage().isBumped()) {
                         continue;
                     }
+
                     int tile = context.getMap().getTile(player.getX(), player.getY());
-                    
+
+                    if (player.getCollisionStorage().isOnAction()) {
+                        tile = player.getCollisionStorage().getActionTile();
+                    }
+
                     if (context.getMap().isActionTile(tile)) {
+
+                        // Save the action tile
+                        if (!player.getCollisionStorage().isOnAction()) {
+                            player.getCollisionStorage().setOnAction(tile);
+                        }
+
                         // Next position for action tile
-                        if(!player.getCollisionStorage().isCollided(turn,phase) && !player.isSunk()) {
-                            player.getCollisionStorage().setRecursionStarter(true);
-                            collision.checkActionCollision(player, turn, phase, true);
-                            player.getCollisionStorage().setRecursionStarter(false);
+                        Position next = context.getMap().getNextActionTilePosition(tile, player, phase);
+                        if(!player.isSunk()) {
+	                        player.getCollisionStorage().setRecursionStarter(true);
+	                        collision.checkActionCollision(player, next, turn, phase, true);
+	                        player.getCollisionStorage().setRecursionStarter(false);
+                    
                         }
                     }
                 }
@@ -956,7 +971,7 @@ public class PlayerManager {
             pl.getPackets().sendLoginResponse(response);
 
             if (response == LoginResponsePacket.SUCCESS) {
-//            	pl.getPackets().sendMapList();
+            	pl.getPackets().sendMapList();
                 pl.register(name, ship, team);
                 pl.getPackets().sendBoard();
                 pl.getPackets().sendTeams();
@@ -972,7 +987,6 @@ public class PlayerManager {
 
                 // players who join during break don't need to send an animation complete packet.
                 pl.setJoinedInBreak(context.getTimeMachine().isLock());
-                pl.getPackets().sendMapList();
             }
         }
     }
@@ -1061,7 +1075,6 @@ public class PlayerManager {
                 p.giveLife();
             }
             sendMoveBar(p);
-
         }
     }
 

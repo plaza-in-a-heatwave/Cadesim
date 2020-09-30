@@ -834,7 +834,7 @@ public class RegressionTests {
                     0, 0,
                     0, 0);
             t2.expectChangePosition(14,6, 16,6);
-            t2.expectChangeFace(NORTH, NORTH);
+            t2.expectChangeFace(NORTH, SOUTH);
 
             List<TestShip> s = new ArrayList<>();
             s.add(t1);
