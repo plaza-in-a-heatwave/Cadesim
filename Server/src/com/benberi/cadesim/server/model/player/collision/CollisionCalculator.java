@@ -312,6 +312,7 @@ public class CollisionCalculator {
     	if (!setPosition && player.getCollisionStorage().isRecursionStarter()) {
             return false;
         }
+    	
         if (player.equals(target)) {
             return false;
         }
@@ -322,7 +323,6 @@ public class CollisionCalculator {
             return true;
         }
         
-
         Player claimed = players.getPlayerByPosition(target.getX(), target.getY());
         if (claimed != null) {
             Position next = claimed;
@@ -331,13 +331,11 @@ public class CollisionCalculator {
             }
             
             if (next.equals(player)) {
-            	System.out.println("here");
             	collide(player, claimed, turn, phase);
             	collide(claimed, player, turn, phase);
                 return true;
             }
             else if (next.equals(claimed)) {
-            	System.out.println("h1");
                 player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
                 claimed.getVessel().appendDamage(player.getVessel().getRamDamage(), player.getTeam()); //needed if claimed is by a rock 
                 Position bumpPos = context.getMap().getNextActionTilePositionForTile(claimed, context.getMap().getTile(player.getX(), player.getY()));
@@ -362,15 +360,15 @@ public class CollisionCalculator {
         }
         List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
         if (collided.size() > 0) {
-        	collide(player, player, turn, phase);
+        	collide(player, collided.get(0), turn, phase); //get correct damage instead itself
             for (Player p : collided) {
             	int tile = context.getMap().getTile(p.getX(), p.getY());
             	if(context.getMap().isWhirlpool(tile)) {
             		if(p.isSunk()) {
             			collide(p, player, turn, phase);
             		}else {
-            			collide(p, player, turn, phase);
             			p.setFace(p.getFace().getNext());
+            			collide(p, player, turn, phase);
             		}
             	}else {
                 	collide(p, player, turn, phase);
