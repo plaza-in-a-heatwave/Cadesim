@@ -859,7 +859,7 @@ public class RegressionTests {
                     0, 0,
                     0, 0);
             t2.expectChangePosition(15,5, 16,6);
-            t2.expectChangeFace(EAST, WEST);
+            t2.expectChangeFace(EAST, NORTH); //if ships are on north/south of whirlpool
 
             List<TestShip> s = new ArrayList<>();
             s.add(t1);

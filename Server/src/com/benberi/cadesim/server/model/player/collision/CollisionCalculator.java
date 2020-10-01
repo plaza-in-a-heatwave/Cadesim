@@ -315,23 +315,29 @@ public class CollisionCalculator {
         if (player.equals(target)) {
             return false;
         }
-        if (player.getCollisionStorage().isCollided(turn) || context.getMap().isRock(target.getX(), target.getY(), player) || isOutOfBounds(target)) {
-            player.getVessel().appendDamage(player.getVessel().getRockDamage(), Team.NEUTRAL);
+        
+        if (context.getMap().isRock(target.getX(), target.getY(), player) || isOutOfBounds(target)) {
+        	player.getVessel().appendDamage(player.getVessel().getRockDamage(), Team.NEUTRAL);
             player.getCollisionStorage().setCollided(turn, phase);
             return true;
         }
+        
+
         Player claimed = players.getPlayerByPosition(target.getX(), target.getY());
         if (claimed != null) {
             Position next = claimed;
             if (!claimed.getCollisionStorage().isPositionChanged()) {
                 next = context.getMap().getNextActionTilePosition(claimed.getCollisionStorage().isOnAction() ? claimed.getCollisionStorage().getActionTile() : -1, claimed, phase);
             }
+            
             if (next.equals(player)) {
+            	System.out.println("here");
             	collide(player, claimed, turn, phase);
             	collide(claimed, player, turn, phase);
                 return true;
             }
             else if (next.equals(claimed)) {
+            	System.out.println("h1");
                 player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
                 claimed.getVessel().appendDamage(player.getVessel().getRamDamage(), player.getTeam()); //needed if claimed is by a rock 
                 Position bumpPos = context.getMap().getNextActionTilePositionForTile(claimed, context.getMap().getTile(player.getX(), player.getY()));
@@ -358,7 +364,17 @@ public class CollisionCalculator {
         if (collided.size() > 0) {
         	collide(player, player, turn, phase);
             for (Player p : collided) {
-            	collide(p, player, turn, phase);
+            	int tile = context.getMap().getTile(p.getX(), p.getY());
+            	if(context.getMap().isWhirlpool(tile)) {
+            		if(p.isSunk()) {
+            			collide(p, player, turn, phase);
+            		}else {
+            			collide(p, player, turn, phase);
+            			p.setFace(p.getFace().getNext());
+            		}
+            	}else {
+                	collide(p, player, turn, phase);
+            	}
             }
             return true;
         }
@@ -506,7 +522,7 @@ public class CollisionCalculator {
      * @param phase     The phase-step it happened at
      */
     private void collide(Player player, Player other, int turn, int phase) {
-        player.getCollisionStorage().setCollided(turn, phase);
+    	player.getCollisionStorage().setCollided(turn, phase);
         player.getVessel().appendDamage(other.getVessel().getRamDamage(), other.getTeam());
     }
 
