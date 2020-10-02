@@ -129,7 +129,12 @@ public class SeaBattleScene implements GameScene {
     }
 
     @Override
-    public void update(){    	
+    public void update(){
+        // update our lag clock every few seconds.
+        // TODO move this to a more suitable place. Only here because it
+        // seemed to be the most appropriate poll loop available in the client.
+        context.handleClientAlive();
+
         // update the camera
         camera.update();
         if (currentSlot > -1) { 

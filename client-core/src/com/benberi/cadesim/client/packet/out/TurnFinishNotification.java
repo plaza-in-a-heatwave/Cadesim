@@ -16,6 +16,6 @@ public class TurnFinishNotification extends OutgoingPacket {
     public void encode() {
         setPacketLengthType(PacketLength.BYTE);
         writeByte(1);
-        setLength(1);
+        setLength(getBuffer().readableBytes());
     }
 }

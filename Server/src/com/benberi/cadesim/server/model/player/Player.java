@@ -157,6 +157,25 @@ public class Player extends Position {
     public boolean didJoinInBreak() {
         return joinedInBreak;
     }
+    
+    /**
+     * when the player was last seen alive
+     */
+    private long lastAliveMilliseconds;
+
+    public boolean hasLaggedOut() {
+        // bots never lag out!
+        if (isBot()) { 
+            return false;
+        }
+        else {
+            return (System.currentTimeMillis() - lastAliveMilliseconds) > Constants.PLAYER_LAG_TIMEOUT_MS;
+        }
+    }
+
+    public void setLastAliveMilliseconds(long lastAlive) {
+        this.lastAliveMilliseconds = lastAlive;
+    }
 
     /**
      * The waiting time for animation to finish
@@ -179,6 +198,7 @@ public class Player extends Position {
         this.collisionStorage = new PlayerCollisionStorage(this);
         this.packets = new PlayerPacketManager(this);
         this.channel = c;
+        this.setLastAliveMilliseconds(System.currentTimeMillis());
         setBot(c == null);
 
         set(-1, -1); // not spawned

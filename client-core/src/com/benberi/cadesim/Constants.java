@@ -31,6 +31,12 @@ public class Constants {
      */
     public static int PROTOCOL_PORT = 0;
     public static String SERVER_CODE = "";
+
+    /**
+     * Announce client lives every few ms
+     */
+    public static int CLIENT_SEND_ALIVE_MS = 2000;
+
     /**
      * whether or not players can choose the black ship. A debugging option.
      */

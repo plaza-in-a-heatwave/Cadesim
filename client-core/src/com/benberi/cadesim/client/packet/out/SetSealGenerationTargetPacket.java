@@ -19,6 +19,6 @@ public class SetSealGenerationTargetPacket extends OutgoingPacket {
     public void encode() {
         setPacketLengthType(PacketLength.BYTE);
         writeByte(targetMove);
-        setLength(1);
+        setLength(getBuffer().readableBytes());
     }
 }

@@ -291,6 +291,13 @@ public class PlayerManager {
                     notifyScheduledUpdate();
                 }
             }
+
+            // check for lagged out players
+            for (Player p : listRegisteredPlayers()) {
+                if (p.hasLaggedOut()) {
+                    this.kickPlayer(p);
+                }
+            }
         }
 
         // Update players (for stuff like damage fixing, bilge fixing and move token generation)

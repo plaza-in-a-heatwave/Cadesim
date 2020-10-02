@@ -4,18 +4,18 @@ import com.benberi.cadesim.client.codec.util.PacketLength;
 import com.benberi.cadesim.client.packet.OutgoingPacket;
 
 /**
- * Send a request to move oceanside
+ * The login packet requests the server to
+ * connect to the game, with the given display name.
  */
-public class OceansideRequestPacket extends OutgoingPacket {
-
-    public OceansideRequestPacket() {
-        super(7);
+public class ClientAlivePacket extends OutgoingPacket {
+    public ClientAlivePacket() {
+        super(10);
     }
 
     @Override
     public void encode() {
         setPacketLengthType(PacketLength.BYTE);
-        writeByte(1);
+        writeByte(0x00); // dummy byte to deliver
         setLength(getBuffer().readableBytes());
     }
 }

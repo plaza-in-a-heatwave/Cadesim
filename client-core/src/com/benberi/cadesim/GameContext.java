@@ -140,6 +140,28 @@ public class GameContext {
 
 	private boolean clientDisconnected;
 
+	private long lastClientAlive;
+
+	/**
+	 * Send a client alive packet every few seconds to declare this client is still alive
+	 */
+	public void handleClientAlive() {
+	    long now = System.currentTimeMillis();
+	    if ((now - lastClientAlive) > Constants.CLIENT_SEND_ALIVE_MS) {
+	        lastClientAlive = now;
+	        ClientAlivePacket packet = new ClientAlivePacket();
+	        sendPacket(packet);
+        }
+	}
+
+    public long getLastClientAlive() {
+        return lastClientAlive;
+    }
+
+    public void setLastClientAlive(long lastClientAlive) {
+        this.lastClientAlive = lastClientAlive;
+    }
+
     public GameContext(BlockadeSimulator main) {
         this.tools = new GameToolsContainer();
 

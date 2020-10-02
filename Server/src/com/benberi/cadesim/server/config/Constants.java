@@ -5,7 +5,7 @@ public class Constants {
 	 * Name of server
 	 */
 	public static final String name = "Cadesim server";
-	
+
 	/**
 	 * server broadcast/private sender ids
 	 * these must match the ones specified in the client for colors to
@@ -15,7 +15,6 @@ public class Constants {
 	public static final String bannedSubstring  = "cadesim"; // players not allowed to use this in their name
 	public static final String serverBroadcast  = "<cadesim_broadcast>";
 	public static final String serverPrivate    = "<cadesim_private>";
-	
 
 	/**
 	 * Version of server
@@ -28,14 +27,14 @@ public class Constants {
      */
     public static final String logDirectory = "logs";
     public static final String logName      = "cadesim.log";
-    
+
     /**
      * map paths to use
      */
     public static final String mapDirectory    = "maps";
     public static final String DEFAULT_MAPNAME = "default.txt";
     public static final String TEST_MAPNAME    = "test.txt";
-    
+
     /**
      * return types ( < 128 good; >= 128 bad)
      */
@@ -47,7 +46,7 @@ public class Constants {
     public static final int EXIT_ERROR_CANT_BIND_LOCAL          = 128;
     public static final int EXIT_SUCCESS_SCHEDULED_UPDATE       = 1;
     public static final int EXIT_SUCCESS                        = 0;
-    
+
     /**
      * The delay of the main game service loop in milliseconds
      */
@@ -72,12 +71,17 @@ public class Constants {
     public static final int TURN_EXTRA_TIME = 13; // deciseconds
     public static final int OUTGOING_PACKETS_PLAYER_PER_TICK = 100;
     public static final int INCOMING_PACKETS_PLAYER_PER_TICK = 100;
-    
+
     /**
      * This is used to timeout players that did not notify the server about their animation finish for the given
      * timeout value
      */
     public static final int TURN_FINISH_TIMEOUT = 200 + TURN_EXTRA_TIME; // deciseconds - should be > turntime + extratime
+
+    /**
+     * How long a player can not respond before they are lagged out.
+     */
+    public static final int PLAYER_LAG_TIMEOUT_MS = 30000; // milliseconds
 
     /**
      * largest possible player name
@@ -118,7 +122,7 @@ public class Constants {
 	 * how big can team names (e.g. attacker, defender) be?
 	 */
 	public static final int MAX_TEAMNAME_SIZE = 12;
-	
+
 	/**
 	 * minimum times
 	 */
