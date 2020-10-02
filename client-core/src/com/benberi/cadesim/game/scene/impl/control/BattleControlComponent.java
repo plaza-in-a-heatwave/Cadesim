@@ -1242,8 +1242,8 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
             }
 
             draggingPosition = null;
-        } else if((!controlsLocked)) { //fix adding moves
-        	isDragging = false; // bugfix locked controls
+        } else if(!controlsLocked) { //fix adding moves
+        	// unlocked, not dragging
             if (disengageButtonIsDown && isClickingDisengage(x, y)) {
                 getContext().sendDisengageRequestPacket();
                 disengageButtonIsDown = false;
@@ -1341,9 +1341,9 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
                      getContext().sendGenerationTarget(targetMove);
                 }
             }
-            else if (controlsLocked) {
-                // pass - cant set moves on break
-            }
+        } else {
+            // locked (dragging or not dragging)
+            isDragging = false; // bugfix #80 locked controls
         }
 
         // undo any scroll drag effect
