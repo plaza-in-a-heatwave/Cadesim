@@ -214,6 +214,14 @@ public enum VesselMovementAnimation {
                 return BUMP_WEST;
             case WIND_EAST:
                 return BUMP_EAST;
+            case BlockadeMap.WP_NE:
+                return BUMP_SOUTH;
+            case BlockadeMap.WP_NW:
+                return BUMP_EAST;
+            case BlockadeMap.WP_SW:
+                return BUMP_NORTH;
+            case BlockadeMap.WP_SE:
+                return BUMP_WEST;
         }
         return BUMP_NORTH;
     }

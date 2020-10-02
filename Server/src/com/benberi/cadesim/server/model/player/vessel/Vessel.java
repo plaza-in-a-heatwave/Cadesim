@@ -2,7 +2,6 @@ package com.benberi.cadesim.server.model.player.vessel;
 
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.impl.*;
-import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.model.cade.Team;
 
 import java.util.HashMap;

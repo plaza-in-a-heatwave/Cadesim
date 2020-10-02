@@ -2,7 +2,6 @@ package com.benberi.cadesim.server.model.player.collision;
 
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
-import com.benberi.cadesim.server.util.Position;
 
 public class PlayerCollisionStorage {
 
@@ -26,6 +25,7 @@ public class PlayerCollisionStorage {
     private boolean positionChanged;
 
     private int actionTile = -1;
+    private int nextActionTile = -1;
 
     private boolean recursionStarter;
 
@@ -43,8 +43,8 @@ public class PlayerCollisionStorage {
      * @param phase The phase the collision happened at
      * @param position The position the collision happened at
      */
-    public void setCollided(int turn, int phase, Position position) {
-        this.collisions[turn] = new PlayerCollisionReference(player, phase, position);
+    public void setCollided(int turn, int phase) {
+        this.collisions[turn] = new PlayerCollisionReference(player, phase);
     }
 
     public boolean isCollided(int turn, int phase) {
@@ -52,23 +52,7 @@ public class PlayerCollisionStorage {
             return this.collisions[turn].getPhase() == phase;
         return false;
     }
-    /**
-     * checks if input position is the same as collided position
-     * @param turn  The turn to store at
-     * @param phase The phase the collision happened at
-     * @param position The position the collision happened at
-     */
-    public boolean isCollidedPosition(int turn, int phase, Position position) {
-        if (this.collisions[turn] != null)
-            return this.collisions[turn].getPosition() == position;
-		return false;
-    }
-    public Position getCollidedPosition(int turn) {
-        if (this.collisions[turn] != null) {
-        	return this.collisions[turn].getPosition();
-        }
-		return null;
-    }
+
     public boolean isOnAction() {
         return actionTile != -1;
     }
@@ -84,11 +68,18 @@ public class PlayerCollisionStorage {
     public void setOnAction(int tile) {
         this.actionTile = tile;
     }
+    
+    public void setNextAction(int tile) {
+        this.nextActionTile = tile;
+    }
 
     public int getActionTile() {
         return  actionTile;
     }
-
+    
+    public int getNextActionTile() {
+        return  nextActionTile;
+    }
     /**
      * Check if the player collided at given turn
      * @param turn  The turn to check

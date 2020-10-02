@@ -124,6 +124,7 @@ public class PlayerManager {
 		setTurnDuration(ServerConfiguration.getTurnDuration());
 		setRoundDuration(ServerConfiguration.getRoundDuration());
 		setDisengageBehavior(ServerConfiguration.getDisengageBehavior());
+		
 	}
 	
     private void setPersistTemporarySettings(boolean value)
@@ -381,7 +382,6 @@ public class PlayerManager {
                 t.setMoveToken(move);
                 if (p.getCollisionStorage().isCollided(turn)) {
                     t.setAnimation(VesselMovementAnimation.getBumpForPhase(p.getCollisionStorage().getCollisionReference(turn).getPhase()));
-                    
                 }
                 else {
                     if (p.getCollisionStorage().getBumpAnimation() != VesselMovementAnimation.NO_ANIMATION) {
@@ -421,10 +421,12 @@ public class PlayerManager {
 
                         // Next position for action tile
                         Position next = context.getMap().getNextActionTilePosition(tile, player, phase);
-
-                        player.getCollisionStorage().setRecursionStarter(true);
-                        collision.checkActionCollision(player, next, turn, phase, true);
-                        player.getCollisionStorage().setRecursionStarter(false);
+                        if(!player.isSunk()) {
+	                        player.getCollisionStorage().setRecursionStarter(true);
+	                        collision.checkActionCollision(player, next, turn, phase, true);
+	                        player.getCollisionStorage().setRecursionStarter(false);
+                    
+                        }
                     }
                 }
 
@@ -436,14 +438,20 @@ public class PlayerManager {
         	for (Player p : listRegisteredPlayers()) {
                 if (p.getCollisionStorage().isOnAction()) {
                     int tile = p.getCollisionStorage().getActionTile();
-                    if (p.getCollisionStorage().isCollided(turn)) {
-                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
-                    } else {
-                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
+                    if (!context.getMap().isWhirlpool(tile)) {//winds
+	                    if (p.getCollisionStorage().isCollided(turn)) {
+	                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
+	                    } else {
+	                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
+	                    }
                     }
-
-                    if (context.getMap().isWhirlpool(tile))
-                        p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
+                    else if (context.getMap().isWhirlpool(tile))//whirls
+                    	if(!p.getCollisionStorage().isCollided(turn)) {
+                            p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
+                            p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
+                    	}else {
+                    		p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
+                    	}
                 }
 
                 p.getCollisionStorage().setBumped(false);
@@ -972,7 +980,7 @@ public class PlayerManager {
             pl.getPackets().sendLoginResponse(response);
 
             if (response == LoginResponsePacket.SUCCESS) {
-//            	pl.getPackets().sendMapList();
+            	pl.getPackets().sendMapList();
                 pl.register(name, ship, team);
                 pl.getPackets().sendBoard();
                 pl.getPackets().sendTeams();
@@ -988,7 +996,6 @@ public class PlayerManager {
 
                 // players who join during break don't need to send an animation complete packet.
                 pl.setJoinedInBreak(context.getTimeMachine().isLock());
-                pl.getPackets().sendMapList();
             }
         }
     }
@@ -1077,7 +1084,6 @@ public class PlayerManager {
                 p.giveLife();
             }
             sendMoveBar(p);
-
         }
     }
 

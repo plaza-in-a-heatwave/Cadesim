@@ -163,7 +163,6 @@ public class Player extends Position {
      */
     private int turnFinishWaitingTicks = 0;
     private List<Flag> flags;
-
     private boolean isBot;
 
     /**
@@ -246,14 +245,13 @@ public class Player extends Position {
         if (isSunk()) {
             return;
         }
-
         // handle if ship wanders into safe
         if (!isNeedsRespawn()) {
-            if (!getPreviouslyOutOfSafe() && !isInSafe()) {
+            if (!getPreviouslyOutOfSafe() && !isInSafe(pos)) {
                 setPreviouslyOutOfSafe(true);
             }
 
-            else if (getPreviouslyOutOfSafe() && isInSafe()) {
+            else if (getPreviouslyOutOfSafe() && isInSafe(pos)) {
                 setNeedsRespawn(true);
                 setPreviouslyOutOfSafe(false);
 
@@ -827,9 +825,14 @@ public class Player extends Position {
         packets.sendTokens();
         context.getPlayerManager().sendMoveBar(this);
     }
-
+    
+    //need to check current position rather than the player instance
+    public boolean isInSafe(Position pos) {
+    	return context.getMap().isSafe(pos);
+    }
+    
     public boolean isInSafe() {
-        return context.getMap().isSafe(this);
+    	return context.getMap().isSafe(this);
     }
 
     /**
