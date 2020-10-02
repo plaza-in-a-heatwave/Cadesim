@@ -198,6 +198,10 @@ public class BlockadeMap {
     public boolean isWhirlpool(int tile) {
         return tile >= 7 && tile <= 10;
     }
+    
+    public boolean isWind(int tile) {
+        return tile >= 3 && tile <= 6;
+    }
 
     public Flag getFlag(int x, int y) {
         for (Flag f : flags) {

@@ -389,7 +389,6 @@ public class PlayerManager {
                     }
                     else {
                         t.setAnimation(VesselMovementAnimation.getIdForMoveType(move));
-           
                     }
                 }
 
