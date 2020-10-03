@@ -32,7 +32,7 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
 
             // The structure
             MoveAnimationStructure structure = p.getAnimationStructure();
-
+            
             // Write the name of the player as a key
             writeByteString(p.getName());
 
@@ -40,7 +40,14 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
 
                 // The turn
                 MoveAnimationTurn turn = structure.getTurn(slot);
-
+                System.out.println("DEBUG: vals for slot " + slot + " are: " +
+                turn.getMoveToken() + ", " +
+                turn.getAnimation() + ", " +
+                turn.getSubAnimation() + ", " +
+                turn.getLeftShoots() + ", " + 
+                turn.getRightShoots() + ", " + 
+                turn.isSunk()
+                        );
                 // Write the data
                 writeByte(turn.getMoveToken().getId());
                 writeByte(turn.getAnimation().getId());
@@ -49,6 +56,13 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
                 writeByte(turn.getRightShoots());
                 writeByte(turn.isSunk() ? 1 : 0);
             }
+
+            // TODO FIXME there is a shared memory bug here somewhere.
+            // The first ship is the only one to successfully receive an animation.
+            // the MoveAnimationTurn.java declaration of moveToken in class caused a null error.
+
+            // only reset after it's been read.
+            structure.reset();
         }
 
         setLength(getBuffer().readableBytes());

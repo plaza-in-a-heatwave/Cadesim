@@ -67,7 +67,7 @@ public class Player extends Position {
     /**
      * The animation structure
      */
-    private MoveAnimationStructure animation = new MoveAnimationStructure();
+    private MoveAnimationStructure animation;
 
     private JobbersQuality jobbersQuality = ServerConfiguration.getJobbersQuality();
 
@@ -141,11 +141,6 @@ public class Player extends Position {
     private boolean enteredSafeOceanside = false; // "
 
     /**
-     * Mark turn animation finished client-sided notification
-     */
-    private boolean turnFinished;
-
-    /**
      * did player join during break
      */
     private boolean joinedInBreak;
@@ -177,10 +172,6 @@ public class Player extends Position {
         this.lastAliveMilliseconds = lastAlive;
     }
 
-    /**
-     * The waiting time for animation to finish
-     */
-    private int turnFinishWaitingTicks = 0;
     private List<Flag> flags;
     private boolean isBot;
 
@@ -190,6 +181,7 @@ public class Player extends Position {
      * If creating a bot, remember to call register().
      */
     public Player(ServerContext ctx, Channel c) {
+        this.animation = new MoveAnimationStructure();
     	this.joinTime = System.currentTimeMillis();
         this.context = ctx;
         this.moveGenerator = new MoveGenerator(this);
@@ -916,26 +908,6 @@ public class Player extends Position {
         setPreviouslyOutOfSafe(false);
         packets.sendDamage();
         packets.sendTokens();
-    }
-
-    public int getTurnFinishWaitingTicks() {
-        return turnFinishWaitingTicks;
-    }
-
-    public void updateTurnFinishWaitingTicks() {
-        this.turnFinishWaitingTicks++;
-    }
-
-    public boolean isTurnFinished() {
-        return turnFinished;
-    }
-
-    public void setTurnFinished(boolean turnFinished) {
-        this.turnFinished = turnFinished;
-    }
-
-    public void resetWaitingTicks() {
-        this.turnFinishWaitingTicks = 0;
     }
 
     public List<Flag> getFlags() {

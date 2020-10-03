@@ -468,11 +468,6 @@ public class GameContext {
         packet.setTargetMove(targetMove.getId());
         sendPacket(packet);
     }
-
-    public void notifyFinishTurn() {
-        TurnFinishNotification packet = new TurnFinishNotification();
-        sendPacket(packet);
-    }
     
     public void sendDisengageRequestPacket() {
     	OceansideRequestPacket packet = new OceansideRequestPacket();

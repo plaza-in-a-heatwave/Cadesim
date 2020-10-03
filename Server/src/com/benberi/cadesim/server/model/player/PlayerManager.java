@@ -243,7 +243,7 @@ public class PlayerManager {
 
         // turn finished
         if (context.getTimeMachine().isLock()) {
-        	handleTime();
+            handleTurnEnd();
         }
         
         // do admin - every n seconds
@@ -611,37 +611,6 @@ public class PlayerManager {
     }
 
     /**
-     * Handles the time
-     */
-    private void handleTime() {
-        boolean allFinished = true;
-        for (Player p : listRegisteredPlayers()) {
-            // all players must notify they're finished, unless a player joined during break.
-            if (!p.isTurnFinished() && !p.didJoinInBreak()) {
-                if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
-                    ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getIP() + ")");
-                    serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
-                    kickPlayer(p);
-                }
-                else {
-                    p.updateTurnFinishWaitingTicks();
-                    allFinished = false;
-                }
-            }
-        }
-
-        if (allFinished) {
-            for (Player p : listRegisteredPlayers()) {
-                if (p.didJoinInBreak()) {
-                    p.setJoinedInBreak(false);
-                }
-            }
-
-            handleTurnEnd();
-        }
-    }
-
-    /**
      * Gets a player for given position
      * @param x The X-axis position
      * @param y The Y-xis position
@@ -727,7 +696,6 @@ public class PlayerManager {
     }
 
     public void kickPlayer(Player p) {
-        p.setTurnFinished(true);
         players.remove(p);
 
         if (!p.isBot()) { p.getChannel().disconnect(); }
@@ -843,7 +811,6 @@ public class PlayerManager {
         return player;
     }
 
-
     /**
      * De-registers a player from the server
      *
@@ -852,7 +819,6 @@ public class PlayerManager {
     public void deRegisterPlayer(Channel channel) {
         Player player = getPlayerByChannel(channel);
         if (player != null) {
-            player.setTurnFinished(true);
             queuedLogoutRequests.add(player);
         }
         else {
@@ -866,7 +832,6 @@ public class PlayerManager {
     public void resetMoveBars() {
         for (Player p : listRegisteredPlayers()) {
             sendMoveBar(p);
-            p.getAnimationStructure().reset();
         }
     }
 
@@ -1067,7 +1032,6 @@ public class PlayerManager {
             }
 
             sendMoveBar(p);
-            p.getAnimationStructure().reset();
         }
     }
 
@@ -1077,10 +1041,6 @@ public class PlayerManager {
             if (p.isNeedsRespawn()) {
                 p.respawn();
             }
-
-            p.getAnimationStructure().reset();
-            p.setTurnFinished(false);
-            p.resetWaitingTicks();
         }
 
         for (Player p : listRegisteredPlayers()) {

@@ -96,8 +96,28 @@ public class SeaBattleScene implements GameScene {
 
     private int vesselsCountWithCurrentPhase = 0;
     private int vesselsCountNonSinking = 0;
+
+
+    private boolean isAnimationOngoing = false;
+    public boolean isAnimationOngoing() {
+        return isAnimationOngoing;
+    }
+
+    public void setAnimationOngoing(boolean isAnimationOngoing) {
+        this.isAnimationOngoing = isAnimationOngoing;
+    }
+
+    /**
+     * Is the turn finished? (internal flag)
+     */
     private boolean turnFinished;
-	
+    private boolean isTurnFinished() {
+        return turnFinished;
+    }
+    private void setTurnFinished(boolean turnFinished) {
+        this.turnFinished = turnFinished;
+    }
+
     public SeaBattleScene(GameContext context) {
         this.context = context;
         information = new GameInformation(context, this);
@@ -165,7 +185,7 @@ public class SeaBattleScene implements GameScene {
 
                      if (currentSlot > 3) {
                          currentSlot = -1;
-                         turnFinished = true;
+                         this.setTurnFinished(true);
                      }
 
                      recountVessels();
@@ -394,25 +414,13 @@ public class SeaBattleScene implements GameScene {
                 }
             }
         }
-        if (turnFinished) {
-            boolean waitForSink = false;
-            for (Vessel v : context.getEntities().listVesselEntities()) {
-                if (!v.isSinkingAnimationFinished()) {
-                    waitForSink = true;
-                    break;
-                }
-            }
-
-            if (!waitForSink) {
-                context.notifyFinishTurn();
-                turnFinished = false;
-                
-                BattleControlComponent b = context.getControlScene().getBnavComponent();
-                b.updateMoveHistoryAfterTurn();  // post-process tooltips
-                b.resetPlacedMovesAfterTurn();   // reset moves post-turn
-                b.setLockedDuringAnimate(false); // unlock control
-                
-            }
+        if (isTurnFinished()) {
+            setTurnFinished(false); // for next time
+            BattleControlComponent b = context.getControlScene().getBnavComponent();
+            b.updateMoveHistoryAfterTurn();  // post-process tooltips
+            b.resetPlacedMovesAfterTurn();   // reset moves post-turn
+            b.setLockedDuringAnimate(false); // unlock control
+            setAnimationOngoing(false);      // mark animation done
         }
         information.update();
     }
@@ -773,15 +781,16 @@ public class SeaBattleScene implements GameScene {
             vessel.setMovePhase(null);
         }
         recountVessels();
-        
+
         //lock controls
         context.getControlScene().getBnavComponent().setLockedDuringAnimate(true);
+        setAnimationOngoing(true);
     }
 
     public BlockadeMap getMap() {
         return blockadeMap;
     }
-    
+
     public void initializePlayerCamera(Vessel vessel) {
         cameraFollowsVessel = true; // force reset
         camera.translate(

@@ -14,8 +14,8 @@ public class Vote {
 	private int majorityThreshold; // vote carried at > n%
 	public static final int VOTE_TIMEOUT_MILLIS = 60000; // timeout after n%
 	public static final int PRINT_SCORE_MILLIS = 10000; // ms
-	private List<String> eligibleIPs = new ArrayList<String>(); // restrict to players present when vote started
-	private List<String> voterIPs    = new ArrayList<String>(); // prevent multi ip voting
+	private List<String> eligibleIPs; // restrict to players present when vote started
+	private List<String> voterIPs;    // prevent multi ip voting
 	private long voteStartTime; // system time in millis() since vote started
 	private boolean voteInProgress = true; // is vote in progress? true initially
 	private String description;            // describe what the vote relates to
@@ -127,6 +127,8 @@ public class Vote {
 	public Vote(PlayerManager pm, String description, int majorityThreshold)
 	{
 		this.context = pm;
+		this.eligibleIPs = new ArrayList<String>();
+		this.voterIPs    = new ArrayList<String>();
 		voteStartTime = System.currentTimeMillis();
 		
 		for (Player p:pm.listRegisteredPlayers())

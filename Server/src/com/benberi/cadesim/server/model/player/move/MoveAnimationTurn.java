@@ -9,7 +9,7 @@ public class MoveAnimationTurn {
     private int leftShoots;
     private int rightShoots;
     private boolean sunk;
-    private MoveType moveToken;
+    private MoveType moveToken = MoveType.NONE; // TODO FIXME setMoveToken is with NONE, but getMoveToken returns null
 
     public VesselMovementAnimation getAnimation() {
         return animation;

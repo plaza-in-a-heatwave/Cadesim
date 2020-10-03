@@ -62,11 +62,24 @@ public class ClientPacketHandler {
      * @param packet    The packet to handle
      */
     public void handle(Packet packet) {
+        // #81 only handle certain packets during animation
+        if (context.isConnected() && context.getBattleScene().isAnimationOngoing()) {
+            switch (packet.getOpcode()) {
+            case IncomingPackets.SET_TIME:
+                // only handle these packets
+                break;
+            default:
+                // put these packets back in the queue for now
+                packetQueue.add(packet);
+                return;
+            }
+        }
+        
     	try {
 	        for (Map.Entry<Integer, ClientPacketExecutor> entry : packets.entrySet()) {
 	            int opcode = entry.getKey();
 	            ClientPacketExecutor p = entry.getValue();
-	            if (packet.getOpcode() == opcode) {
+	            if (packet.getOpcode() == opcode) {	                
 	                p.execute(packet);
 	                packet.getBuffer().release();
 	                return;
@@ -80,27 +93,27 @@ public class ClientPacketHandler {
     }
 
     private void registerPackets() {
-        packets.put(0, new LoginResponsePacket(context));
-        packets.put(1, new SendMapPacket(context));
-        packets.put(2, new AddPlayerShip(context));
-        packets.put(3, new SetTimePacket(context));
-        packets.put(4, new SendDamagePacket(context));
-        packets.put(5, new SendMoveTokensPacket(context));
-        packets.put(6, new MoveSlotPlacedPacket(context));
-        packets.put(7, new TurnAnimationPacket(context));
-        packets.put(8, new SetPlayersPacket(context));
-        packets.put(9, new MovesBarUpdate(context));
-        packets.put(10, new CannonSlotPlacedPacket(context));
-        packets.put(11, new TargetSealPacket(context));
-        packets.put(12, new PlayerRespawnPacket(context));
-        packets.put(13, new SendPositionsPacket(context));
-        packets.put(14, new RemovePlayerShip(context));
-        packets.put(15, new SendMovesPacket(context));
-        packets.put(16, new SetFlagsPacket(context));
-        packets.put(17, new SetPlayerFlagsPacket(context));
-        packets.put(18, new SetTeamNamesPacket(context));
-        packets.put(19, new ReceiveMessagePacket(context));
-        packets.put(20, new ListAllMapsPacket(context));
+        packets.put(IncomingPackets.LOGIN_RESPONSE,      new LoginResponsePacket(context));
+        packets.put(IncomingPackets.SEND_MAP,            new SendMapPacket(context));
+        packets.put(IncomingPackets.ADD_PLAYER_SHIP,     new AddPlayerShip(context));
+        packets.put(IncomingPackets.SET_TIME,            new SetTimePacket(context));
+        packets.put(IncomingPackets.SEND_DAMAGE,         new SendDamagePacket(context));
+        packets.put(IncomingPackets.SEND_MOVE_TOKENS,    new SendMoveTokensPacket(context));
+        packets.put(IncomingPackets.MOVE_SLOT_PLACED,    new MoveSlotPlacedPacket(context));
+        packets.put(IncomingPackets.TURN_ANIMATION,      new TurnAnimationPacket(context));
+        packets.put(IncomingPackets.SET_PLAYERS,         new SetPlayersPacket(context));
+        packets.put(IncomingPackets.MOVES_BAR_UPDATE,    new MovesBarUpdate(context));
+        packets.put(IncomingPackets.CANNONS_SLOT_PLACED, new CannonSlotPlacedPacket(context));
+        packets.put(IncomingPackets.TARGET_SEAL,         new TargetSealPacket(context));
+        packets.put(IncomingPackets.PLAYER_RESPAWN,      new PlayerRespawnPacket(context));
+        packets.put(IncomingPackets.SEND_POSITIONS,      new SendPositionsPacket(context));
+        packets.put(IncomingPackets.REMOVE_PLAYER_SHIP,  new RemovePlayerShip(context));
+        packets.put(IncomingPackets.SEND_MOVES,          new SendMovesPacket(context));
+        packets.put(IncomingPackets.SET_FLAGS,           new SetFlagsPacket(context));
+        packets.put(IncomingPackets.SET_PLAYER_FLAGS,    new SetPlayerFlagsPacket(context));
+        packets.put(IncomingPackets.SET_TEAM_NAMES,      new SetTeamNamesPacket(context));
+        packets.put(IncomingPackets.RECEIVE_MESSAGE,     new ReceiveMessagePacket(context));
+        packets.put(IncomingPackets.LIST_ALL_MAPS,       new ListAllMapsPacket(context));
     }
     
     public void clearPackets() {
