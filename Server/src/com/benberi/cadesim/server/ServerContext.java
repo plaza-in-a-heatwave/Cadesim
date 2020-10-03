@@ -46,6 +46,17 @@ public class ServerContext {
 
     private RegressionTests regressionTests;
 
+    private byte pingCounter = 0;
+
+    public byte incrementPingCounter() {
+        return ++pingCounter;
+
+    }
+
+    public byte getPingCounter() {
+        return pingCounter;
+    }
+
     public ServerContext() {
         this.players = new PlayerManager(this);
         this.timeMachine = new BlockadeTimeMachine(this);

@@ -22,7 +22,7 @@ public class SendMapPacket extends ClientPacketExecutor {
         }
         
         getContext().getBattleScene().createMap(map);
-        getContext().setReady(true);
+        getContext().setConnected(true);
     }
 
     @Override

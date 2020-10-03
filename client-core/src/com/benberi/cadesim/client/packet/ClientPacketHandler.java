@@ -62,15 +62,25 @@ public class ClientPacketHandler {
      * @param packet    The packet to handle
      */
     public void handle(Packet packet) {
-        // #81 only handle certain packets during animation
+        // #83 if lag test mode, simulate unresponsiveness
+        if (context.isLagTestMode()) {
+            packet.getBuffer().release(); // release to avoid netty memory leak
+            return;
+        }
+
+        // #83 only handle certain packets during animation
         if (context.isConnected() && context.getBattleScene().isAnimationOngoing()) {
             switch (packet.getOpcode()) {
             case IncomingPackets.SET_TIME:
+            case IncomingPackets.RECEIVE_MESSAGE:
+            case IncomingPackets.SEND_DAMAGE:
+            case IncomingPackets.SEND_MOVE_TOKENS:
+            case IncomingPackets.TARGET_SEAL:
                 // only handle these packets
                 break;
             default:
                 // put these packets back in the queue for now
-                packetQueue.add(packet);
+                queuePacket(packet);
                 return;
             }
         }

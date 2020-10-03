@@ -9,7 +9,7 @@ public class MoveAnimationTurn {
     private int leftShoots;
     private int rightShoots;
     private boolean sunk;
-    private MoveType moveToken = MoveType.NONE; // TODO FIXME setMoveToken is with NONE, but getMoveToken returns null
+    private MoveType moveToken = MoveType.NONE; // #83 bugfix some animations failing when move wasn't set
 
     public VesselMovementAnimation getAnimation() {
         return animation;

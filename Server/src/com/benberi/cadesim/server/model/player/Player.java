@@ -158,18 +158,17 @@ public class Player extends Position {
      */
     private long lastAliveMilliseconds;
 
-    public boolean hasLaggedOut() {
-        // bots never lag out!
-        if (isBot()) { 
-            return false;
+    public long getLastResponseTime() {
+        if (isBot()) { // bots are super responsive
+            return System.currentTimeMillis();
         }
         else {
-            return (System.currentTimeMillis() - lastAliveMilliseconds) > Constants.PLAYER_LAG_TIMEOUT_MS;
+            return lastAliveMilliseconds;
         }
     }
 
-    public void setLastAliveMilliseconds(long lastAlive) {
-        this.lastAliveMilliseconds = lastAlive;
+    public void updateResponseTime(long value) {
+        lastAliveMilliseconds = value;
     }
 
     private List<Flag> flags;
@@ -190,7 +189,7 @@ public class Player extends Position {
         this.collisionStorage = new PlayerCollisionStorage(this);
         this.packets = new PlayerPacketManager(this);
         this.channel = c;
-        this.setLastAliveMilliseconds(System.currentTimeMillis());
+        this.lastAliveMilliseconds = System.currentTimeMillis();
         setBot(c == null);
 
         set(-1, -1); // not spawned
@@ -656,6 +655,13 @@ public class Player extends Position {
      */
     public MoveAnimationStructure getAnimationStructure() {
         return animation;
+    }
+
+    /**
+     * Reset an animation structure
+     */
+    public void resetAnimationStructure() {
+        this.animation = new MoveAnimationStructure();
     }
 
     /**

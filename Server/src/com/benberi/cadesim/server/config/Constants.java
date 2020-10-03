@@ -19,8 +19,8 @@ public class Constants {
 	/**
 	 * Version of server
 	 */
-	public static final String VERSION = "1.9.92";
-    public static final int PROTOCOL_VERSION = 12; // MUST match client
+	public static final String VERSION = "1.9.93";
+    public static final int PROTOCOL_VERSION = 1993; // MUST match client
 
     /**
      * Log paths to use
@@ -73,6 +73,11 @@ public class Constants {
     public static final int INCOMING_PACKETS_PLAYER_PER_TICK = 100;
 
     /**
+     * server does misc tasks every n seconds
+     */
+    public static final int SERVER_ADMIN_INTERVAL_MILLIS = 2000;
+
+    /**
      * This is used to timeout players that did not notify the server about their animation finish for the given
      * timeout value
      */
@@ -82,6 +87,8 @@ public class Constants {
      * How long a player can not respond before they are lagged out.
      */
     public static final int PLAYER_LAG_TIMEOUT_MS = 30000; // milliseconds
+
+    public static final int PLAYER_LAG_TOLERABLE_MISSED_PACKETS = 2;
 
     /**
      * largest possible player name
@@ -112,11 +119,6 @@ public class Constants {
 	 * n seconds to register
 	 */
 	public static final long REGISTER_TIME_MILLIS = 2000;
-
-	/**
-	 * server does misc tasks every n seconds
-	 */
-	public static final int SERVER_ADMIN_INTERVAL_MILLIS = 2000;
 
 	/**
 	 * how big can team names (e.g. attacker, defender) be?

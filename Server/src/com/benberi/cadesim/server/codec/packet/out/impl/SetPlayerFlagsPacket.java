@@ -31,10 +31,15 @@ public class SetPlayerFlagsPacket extends OutgoingPacket {
         for (Player p : players) {
             writeByteString(p.getName());
             List<Flag> flags = p.getFlags();
-            writeByte(flags.size());
-            for(Flag f : flags) {
-                writeByte(f.getX());
-                writeByte(f.getY());
+            if (flags != null) {
+                writeByte(flags.size());
+                for (Flag f : flags) {
+                    writeByte(f.getX());
+                    writeByte(f.getY());
+                }
+            }
+            else {
+                writeByte(0x00); // no flags
             }
         }
         setLength(getBuffer().readableBytes());

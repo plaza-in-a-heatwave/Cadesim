@@ -188,7 +188,7 @@ public class ChatBar {
      * send a message via the textfield.
      */
     public void sendChat() {
-        String message = getTextfield().getText();
+        String message = getTextfield().getText();        
         if (message.length() > 0 && message.length() <= maxMessageLength) {
             context.sendPostMessagePacket(message);
         }

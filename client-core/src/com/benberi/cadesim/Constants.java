@@ -17,9 +17,9 @@ public class Constants {
     /**
      * Version of client
      */
-    public static  String VERSION = "1.9.92";
+    public static  String VERSION = "1.9.93";
     public static volatile boolean SERVER_VERSION_IDENTICAL = true;
-    public static final int PROTOCOL_VERSION = 12; // MUST match server
+    public static final int PROTOCOL_VERSION = 1993; // MUST match server
 
 	public static final int MAX_NAME_SIZE = 19;   // name of player
 
@@ -38,7 +38,11 @@ public class Constants {
     public static int CLIENT_SEND_ALIVE_MS = 2000;
 
     /**
-     * whether or not players can choose the black ship. A debugging option.
+     * Enable some developer features, for instance the black ship, and a client lag test mode.
+     *
+     * Individual options can also be enabled/disabled as required.
      */
-    public static final boolean ENABLE_CHOOSE_BLACKSHIP = false;
+    public static final boolean ENABLE_DEVELOPER_FEATURES = true;
+    public static final boolean ENABLE_CHOOSE_BLACKSHIP = ENABLE_DEVELOPER_FEATURES; // see dropdown in lobby
+    public static final boolean ENABLE_LAG_TEST_MODE  = ENABLE_DEVELOPER_FEATURES;   // toggle with /lagtestmode. disabled when in lobby.
 }

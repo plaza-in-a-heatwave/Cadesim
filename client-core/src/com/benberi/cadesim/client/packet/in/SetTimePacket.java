@@ -3,6 +3,7 @@ package com.benberi.cadesim.client.packet.in;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
+import com.benberi.cadesim.client.packet.out.ClientAlivePacket;
 
 public class SetTimePacket extends ClientPacketExecutor {
 
@@ -18,6 +19,7 @@ public class SetTimePacket extends ClientPacketExecutor {
         int breakTime      = p.readInt();
         int turnDuration   = p.readInt();
         int roundDuration  = p.readInt();
+        byte counter       = p.readByte();
 
         // current positions within timeframes
         getContext().getControlScene().getBnavComponent().setTime(turnTime);
@@ -30,6 +32,12 @@ public class SetTimePacket extends ClientPacketExecutor {
         // durations
         getContext().setTurnDuration(turnDuration);
         getContext().setRoundDuration(roundDuration);
+
+        // send a response packet to show client is still alive
+        ClientAlivePacket packet = new ClientAlivePacket();
+        packet.setCounter(getContext().getNextLagCounter()); // server can calculate whether we are lagging or not.
+        getContext().sendPacket(packet);
+        getContext().setLagCounter(counter); // re-sync with the server
     }
 
     @Override

@@ -169,6 +169,7 @@ public class PlayerPacketManager {
         packet.setBreakTime(tm.getBreakTime() / 10);
         packet.setTurnDuration(pm.getTurnDuration() / 10);
         packet.setRoundDuration(pm.getRoundDuration() / 10);
+        packet.setCounter(player.getContext().getPingCounter());
 
         player.sendPacket(packet);
     }
