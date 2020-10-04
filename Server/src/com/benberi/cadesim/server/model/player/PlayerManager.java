@@ -240,11 +240,6 @@ public class PlayerManager {
             lastTimeSend = now;
             sendTime();
         }
-
-        // turn finished
-        if (context.getTimeMachine().isLock()) {
-            handleTurnEnd();
-        }
         
         // do admin - every n seconds
         if (now - lastAdminCheck >= Constants.SERVER_ADMIN_INTERVAL_MILLIS)
@@ -316,12 +311,8 @@ public class PlayerManager {
             }
         }
 
-        // Handle logout requests (only when not animating)
-        if (!context.getTimeMachine().isLock()) {
-            handleLogoutRequests();
-        }
-
-        // Handle login requests any time
+        // Handle logout/login requests any time
+        handleLogoutRequests();
         handlePlayerLoginRequests();
     }
 
@@ -336,8 +327,6 @@ public class PlayerManager {
                 System.exit(Constants.EXIT_SUCCESS);
             }
         }
-
-        context.getTimeMachine().renewTurn();
 
         for (Player player : listRegisteredPlayers()) {
             player.getPackets().sendSelectedMoves(); // unglitch players' moves
@@ -499,31 +488,21 @@ public class PlayerManager {
             p.processAfterTurnUpdate();
         }
 
+        calculateInfluenceFlags();
+
         if (ServerConfiguration.isTestMode()) {
             context.getRegressionTests().evaluateScenario();
             context.getRegressionTests().unloadScenario();
         }
-
-        context.getTimeMachine().setLock(true);
-    }
-
-    /**
-     * Handles a turn end
-     */
-    private void handleTurnEnd() {
-        calculateInfluenceFlags();
         
-	    // end game only after flags calculated, animations done etc
+        // end game only after flags calculated, animations done etc
         if (context.getTimeMachine().getRoundTime() < 0)
         {
-        	setGameEnded(true);
+            setGameEnded(true);
         }
         else
         {
-            // purge all unregistered ships
-            players.removeIf(p -> (!p.isRegistered()));
-
-            context.getTimeMachine().setLock(false);
+            players.removeIf(p -> (!p.isRegistered())); // purge any unregistered ships
             sendAfterTurn();
 
         }
@@ -975,9 +954,6 @@ public class PlayerManager {
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
                 printTeams(null, true);     // total counts of players in server
                 printCommandHelp(pl); // private message with commands
-
-                // players who join during break don't need to send an animation complete packet.
-                pl.setJoinedInBreak(context.getTimeMachine().isLock());
             }
         }
     }
@@ -1116,6 +1092,7 @@ public class PlayerManager {
         	p.getPackets().sendBoard();
         	p.getMoveTokens().setAutomaticSealGeneration(true); // bugfix disparity between client and server
         	p.getPackets().sendFlags();
+        	sendAfterTurn();
         }
         
         // game no longer ended

@@ -22,6 +22,10 @@ public class BlockadeTimeMachine {
      * Are we currently breaking
      */
     private boolean inBreak = false;
+
+    /**
+     * For the time machine to signal to itself it's a good time to start a break
+     */
     private boolean breakPending = false;
 
     /**
@@ -42,8 +46,6 @@ public class BlockadeTimeMachine {
     public BlockadeTimeMachine(ServerContext context) {
         this.context = context;
     }
-
-    private boolean lock;
 
 	private boolean isLastTurn = false;
 
@@ -67,11 +69,22 @@ public class BlockadeTimeMachine {
      */
     public void tick() {
         firstRunThisGame = false;
-        if (!isLock())
+
+        if (!inBreak)
         {
-            // if breaks enabled, count down towards the break too
-            if (timeUntilBreak > 0)
+            roundTime--; // Tick blockade time
+            turnTime--;  // Tick turn time
+
+            // bugfix for final turn: use turnTime instead of roundTime so players can
+            // end on a full turn.
+            if ((!isLastTurn) && (roundTime < turnTime) && (turnTime > 0))
             {
+                isLastTurn  = true;
+                roundTime = turnTime;
+            }
+
+            // handle break countdown/activation
+            if (timeUntilBreak > 0) {
                 // Bugfix #36 - don't start the break before the turn ends
                 if (turnTime > timeUntilBreak) {
                     timeUntilBreak = turnTime;
@@ -79,94 +92,51 @@ public class BlockadeTimeMachine {
                     timeUntilBreak -= 1;
                 }
             }
-            else if (timeUntilBreak == 0)
-            {
-                if (breakTime > 0)
-                {
-                    // at the start of the break period:
-                    //     schedule it
-                    //     notify people
-                    if (breakTime == (ServerConfiguration.getBreak()[0] * 10))
-                    {
-                        if (!inBreak)
-                        {
-                            breakPending = true;
-                        }
-                    }
-
-                    if (inBreak)
-                    {
-                        breakTime -= 1;
-                    }
+            else if (timeUntilBreak == 0) {
+                // start break only if the end-of-turn has also happened
+                if (breakPending) {
+                    // start break
+                    inBreak = true;
+                    breakPending = false;
+                    context.getPlayerManager().serverBroadcastMessage("Arr, time to rest a moment. (" + getBreakTime() / 10 + "s)");
                 }
-                else if (breakTime == 0)
-                {
-                    // break's over!
-                    breakTime    = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
-                    timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
-                    inBreak = false;
-                    context.getPlayerManager().serverBroadcastMessage("Break's over!");
-                }
-            }
-
-            if (!inBreak)
-            {
-                roundTime--; // Tick blockade time
-
-                // if in final turn, use turnTime instead of roundTime
-                // gives players a last whole turn
-                if ((!isLastTurn) && (roundTime < turnTime) && (turnTime > 0))
-                {
-                    isLastTurn  = true;
-                    roundTime = turnTime;
-                }
-            }
-        }
-        else // if isLock()
-        {
-            // if locked, we can schedule a break.
-            if (breakPending)
-            {
-                breakPending = false;
-                inBreak = true;
-                context.getPlayerManager().serverBroadcastMessage("Arr, time to rest a moment. (" + getBreakTime() / 10 + "s)");
-            }
-
-            // Bugfix #36; decrement round time, timeuntilbreak, breaktime even when locked
-            if (!inBreak) {
-                roundTime--;
-                timeUntilBreak--;
             } else {
-                if (breakTime > 0) {
-                    breakTime--;
-                }
+                // not enabled
             }
 
-        }
-
-        if (
-                (!testModeActive) && (turnTime <= -Constants.TURN_EXTRA_TIME) ||
-                (testModeActive)  && (turnTime <= 0) // make tests run faster
-        ) {
-            if (!isLock()) {
+            // if turn ended
+            if (
+                    (!testModeActive) && (turnTime <= -Constants.TURN_EXTRA_TIME) ||
+                    (testModeActive)  && (turnTime <= 0) // make tests run faster
+            ) {
+                renewTurn();
                 try {
                     context.getPlayerManager().handleTurns();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                // no breaks are allowed until the turn has ended. now we allow it.
+                // this guarantees turns will always run first.
+                if ((!inBreak) && (timeUntilBreak == 0)) {
+                    breakPending = true;
+                }
             }
-            return;
         }
-
-        if (!inBreak)
+        else // if in break
         {
-            turnTime--; // Tick turn time
+            if (breakTime > 0) {
+                breakTime--;
+            }
+            else {
+                // get out of break
+                breakTime    = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
+                timeUntilBreak = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
+                inBreak = false;
+                context.getPlayerManager().serverBroadcastMessage("Break's over!");
+            }
         }
-    }
-
-    public void setLock(boolean lock) {
-        this.lock = lock;
     }
 
     /**
@@ -207,14 +177,6 @@ public class BlockadeTimeMachine {
     }
 
     /**
-     * Checks if the time is locked
-     * @return {@link #lock}
-     */
-    public boolean isLock() {
-        return lock;
-    }
-
-    /**
      * Renews the turn time
      */
     public void renewTurn() {
@@ -229,7 +191,6 @@ public class BlockadeTimeMachine {
         breakTime        = ServerConfiguration.getBreak()[0] * 10; // to deciseconds
         timeUntilBreak   = ServerConfiguration.getBreak()[1] * 10; // to deciseconds
         inBreak          = false;
-        breakPending     = false;
         firstRunThisGame = true;
     }
 }

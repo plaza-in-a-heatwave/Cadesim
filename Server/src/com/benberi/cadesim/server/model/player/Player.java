@@ -140,19 +140,6 @@ public class Player extends Position {
     private boolean needsRespawn;                 // we need a respawn
     private boolean enteredSafeLandside = false;  // reason why
     private boolean enteredSafeOceanside = false; // "
-
-    /**
-     * did player join during break
-     */
-    private boolean joinedInBreak;
-
-    public void setJoinedInBreak(boolean value) {
-        joinedInBreak = value;
-    }
-
-    public boolean didJoinInBreak() {
-        return joinedInBreak;
-    }
     
     /**
      * when the player was last seen alive
@@ -417,7 +404,7 @@ public class Player extends Position {
                     "[player joined] Registered player \"" + name + "\"" + ", " +
             		Team.teamIDToString(team) + ", " +
             		Vessel.VESSEL_IDS.get(ship) +
-                    " joined during the " + (joinedInBreak?"break":"round") + ", on " +
+                    " joined on " +
                     getIP() + ". " +
             		context.getPlayerManager().printPlayers()
             );
