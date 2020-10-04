@@ -1344,6 +1344,22 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         } else {
             // locked (dragging or not dragging)
             isDragging = false; // bugfix #80 locked controls
+
+            // allow user to complete clicks on non-bnav buttons
+            if (disengageButtonIsDown && isClickingDisengage(x, y)) {
+                getContext().sendDisengageRequestPacket();
+                disengageButtonIsDown = false;
+            }
+            else if (sendChatButtonIsDown && isClickingSend(x, y)) {
+                getChatBar().sendChat();
+                sendChatButtonIsDown = false;
+            }
+            else if (scrollUpButtonIsDown && isClickingScrollUp(x,y)) {
+                scrollUpButtonIsDown = false;
+            }
+            else if (scrollDownButtonIsDown && isClickingScrollDown(x,y)) {
+                scrollDownButtonIsDown = false;
+            }
         }
 
         // undo any scroll drag effect
