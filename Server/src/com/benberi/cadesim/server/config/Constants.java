@@ -5,7 +5,7 @@ public class Constants {
 	 * Name of server
 	 */
 	public static final String name = "Cadesim server";
-	
+
 	/**
 	 * server broadcast/private sender ids
 	 * these must match the ones specified in the client for colors to
@@ -15,27 +15,26 @@ public class Constants {
 	public static final String bannedSubstring  = "cadesim"; // players not allowed to use this in their name
 	public static final String serverBroadcast  = "<cadesim_broadcast>";
 	public static final String serverPrivate    = "<cadesim_private>";
-	
 
 	/**
 	 * Version of server
 	 */
-	public static final String VERSION = "1.9.92";
-    public static final int PROTOCOL_VERSION = 12; // MUST match client
+	public static final String VERSION = "1.9.93";
+    public static final int PROTOCOL_VERSION = 1993; // MUST match client
 
     /**
      * Log paths to use
      */
     public static final String logDirectory = "logs";
     public static final String logName      = "cadesim.log";
-    
+
     /**
      * map paths to use
      */
     public static final String mapDirectory    = "maps";
     public static final String DEFAULT_MAPNAME = "default.txt";
     public static final String TEST_MAPNAME    = "test.txt";
-    
+
     /**
      * return types ( < 128 good; >= 128 bad)
      */
@@ -47,7 +46,7 @@ public class Constants {
     public static final int EXIT_ERROR_CANT_BIND_LOCAL          = 128;
     public static final int EXIT_SUCCESS_SCHEDULED_UPDATE       = 1;
     public static final int EXIT_SUCCESS                        = 0;
-    
+
     /**
      * The delay of the main game service loop in milliseconds
      */
@@ -69,15 +68,21 @@ public class Constants {
      */
     public static final double BILGE_SAILOR_PENALTY = 0.17578125;
 
-    /**
-     * This is used to timeout players that did not notify the server about their animation finish for the given
-     * timeout value
-     */
-    public static final int TURN_FINISH_TIMEOUT = 600; // deciseconds - should be > turntime + extratime
-
     public static final int TURN_EXTRA_TIME = 13; // deciseconds
     public static final int OUTGOING_PACKETS_PLAYER_PER_TICK = 100;
     public static final int INCOMING_PACKETS_PLAYER_PER_TICK = 100;
+
+    /**
+     * server does misc tasks every n seconds
+     */
+    public static final int SERVER_ADMIN_INTERVAL_MILLIS = 2000;
+
+    /**
+     * How long a player can not respond before they are lagged out.
+     */
+    public static final int PLAYER_LAG_TIMEOUT_MS = 30000; // milliseconds
+
+    public static final int PLAYER_LAG_TOLERABLE_MISSED_PACKETS = 2;
 
     /**
      * largest possible player name
@@ -110,15 +115,10 @@ public class Constants {
 	public static final long REGISTER_TIME_MILLIS = 2000;
 
 	/**
-	 * server does misc tasks every n seconds
-	 */
-	public static final int SERVER_ADMIN_INTERVAL_MILLIS = 2000;
-
-	/**
 	 * how big can team names (e.g. attacker, defender) be?
 	 */
 	public static final int MAX_TEAMNAME_SIZE = 12;
-	
+
 	/**
 	 * minimum times
 	 */

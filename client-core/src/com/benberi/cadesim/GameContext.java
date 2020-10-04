@@ -40,7 +40,6 @@ public class GameContext {
     private Channel serverChannel;
 
     public boolean clear;
-    public boolean isConnected = false;
     public boolean isInLobby = true;
 
     private int shipId = 0;
@@ -118,11 +117,6 @@ public class GameContext {
     private boolean connected = false;
 
     /**
-     * If the game is ready to display
-     */
-    private boolean isReady = false;
-
-    /**
      * Executors service
      */
     private ExecutorService service = Executors.newSingleThreadExecutor();
@@ -139,6 +133,42 @@ public class GameContext {
     public ChannelPipeline pipeline;
 
 	private boolean clientDisconnected;
+
+	/**
+	 * Keep track of how lagged the client is respective to the server.
+	 */
+	private byte lagCounter = 0;
+	
+	/**
+	 * Set lag counter to arbitrary value.
+	 */
+	public void setLagCounter(byte value) {
+	    lagCounter = value;
+	}
+
+	/**
+	 * return the lag counter, incremented.
+	 */
+	public byte getNextLagCounter() {
+	    return ++lagCounter;
+	}
+
+	/**
+	 * A test mode for the client. Simulate a crash scenario where packets are not dispatched.
+	 * Use to test resilience to lag/crashes & ensure players are kicked where appropriate.
+	 * 
+	 * Mode is hard-baked into client, but must be activated with
+	 *     setLagTestMode() and the ALLOW_LAG_TEST_MODE constant.
+	 */
+	private boolean lagTestMode = false;
+	@SuppressWarnings("unused")
+    public boolean isLagTestMode() {
+        return (Constants.ENABLE_LAG_TEST_MODE && lagTestMode);
+    }
+    @SuppressWarnings("unused")
+    public void setLagTestMode(boolean lagTestMode) {
+        this.lagTestMode = (Constants.ENABLE_LAG_TEST_MODE && lagTestMode);
+    }
 
     public GameContext(BlockadeSimulator main) {
         this.tools = new GameToolsContainer();
@@ -178,10 +208,6 @@ public class GameContext {
     
     public EntityManager getEntities() {
         return this.entities;
-    }
-
-    public boolean isConnected() {
-        return this.connected;
     }
 
     /**
@@ -241,16 +267,8 @@ public class GameContext {
         return (ControlAreaScene) scenes.get(0);
     }
 
-    public boolean isReady() {
-        return isReady;
-    }
-
-    public boolean getIsConnected() {
-        return this.connected;
-    }
-    
-    public void setIsConnected(boolean flag) {
-        this.connected = flag;
+    public boolean isConnected() {
+        return connected;
     }
 
     public void setServerChannel(Channel serverChannel) {
@@ -266,6 +284,11 @@ public class GameContext {
      * @param p The packet to send
      */
     public void sendPacket(OutgoingPacket p) {
+        // #83 if lag test mode, simulate unresponsiveness
+        if (isLagTestMode()) {
+            return;
+        }
+        
         p.encode();
         serverChannel.write(p);
         serverChannel.flush();
@@ -395,8 +418,8 @@ public class GameContext {
 
     }
 
-    public void setReady(boolean ready) {
-        this.isReady = ready;
+    public void setConnected(boolean connected) {
+        this.connected = connected;
         Gdx.input.setInputProcessor(input);
         clear = true;
     }
@@ -411,10 +434,15 @@ public class GameContext {
 				entities.dispose();
 			}
 			connectScene.setup();
-			if ((!getIsConnected()) && getIsInLobby()) {
+			if (getIsInLobby()) {
 				System.out.println("Returned to lobby");
 			}else {
 				connectScene.setPopup("You have disconnected from the server.", true);
+			}
+			
+			// #83 reset any lag test mode if we disconnect.
+			if (Constants.ENABLE_LAG_TEST_MODE) {
+			    setLagTestMode(false);
 			}
 		}
 		catch(Exception e) {
@@ -446,11 +474,6 @@ public class GameContext {
         packet.setTargetMove(targetMove.getId());
         sendPacket(packet);
     }
-
-    public void notifyFinishTurn() {
-        TurnFinishNotification packet = new TurnFinishNotification();
-        sendPacket(packet);
-    }
     
     public void sendDisengageRequestPacket() {
     	OceansideRequestPacket packet = new OceansideRequestPacket();
@@ -458,6 +481,19 @@ public class GameContext {
     }
     
     public void sendPostMessagePacket(String message) {
+        // #83 enable and disable lag test mode.
+        if (Constants.ENABLE_LAG_TEST_MODE) {
+            if (message.equals("/lagtestmode")) {
+                setLagTestMode(!isLagTestMode());
+
+                getControlScene().getBnavComponent().addNewMessage(
+                        "lag test mode", (isLagTestMode()?"ENABLED":"DISABLED") +
+                        ". type /lagtestmode to " + (isLagTestMode()?"disable":"enable") + "."
+                );
+                return;
+            }
+        }
+        
     	PostMessagePacket packet = new PostMessagePacket();
     	packet.setMessage(message);
     	sendPacket(packet);
@@ -468,8 +504,7 @@ public class GameContext {
      */
     public void disconnect() {
     	setClientInitiatedDisconnect(true); // wedunnit!
-        setReady(false);
-        setIsConnected(false);
+        setConnected(false);
         setIsInLobby(true);
         getServerChannel().disconnect();
 		getConnectScene().setState(ConnectionSceneState.DEFAULT);
@@ -488,8 +523,7 @@ public class GameContext {
     		getServerChannel().disconnect();
     		System.out.println("Login error; handling response.");
     	}else {
-	        setReady(false);
-	        setIsConnected(false);
+	        setConnected(false);
 	        setIsInLobby(true);
 	        getServerChannel().disconnect();
 			getConnectScene().setState(ConnectionSceneState.DEFAULT);

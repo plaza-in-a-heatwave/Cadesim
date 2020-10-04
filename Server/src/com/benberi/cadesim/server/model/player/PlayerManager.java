@@ -243,7 +243,7 @@ public class PlayerManager {
 
         // turn finished
         if (context.getTimeMachine().isLock()) {
-        	handleTime();
+            handleTurnEnd();
         }
         
         // do admin - every n seconds
@@ -291,6 +291,17 @@ public class PlayerManager {
                     notifyScheduledUpdate();
                 }
             }
+
+            // #83 check for lagged out players
+            for (Player p : listRegisteredPlayers()) {
+                long response = p.getLastResponseTime();
+
+                // did they time out?
+                if ((now - response) > Constants.PLAYER_LAG_TIMEOUT_MS) {
+                    serverBroadcastMessage(p.getName() + " timed out!");
+                    this.kickPlayer(p);
+                }
+            }
         }
 
         // Update players (for stuff like damage fixing, bilge fixing and move token generation)
@@ -329,7 +340,8 @@ public class PlayerManager {
         context.getTimeMachine().renewTurn();
 
         for (Player player : listRegisteredPlayers()) {
-            player.getPackets().sendSelectedMoves();
+            player.getPackets().sendSelectedMoves(); // unglitch players' moves
+            player.resetAnimationStructure();  // reset all of their animation structures before the animation builds up again
         }
 
         // Loop through all turns
@@ -424,7 +436,6 @@ public class PlayerManager {
 	                        player.getCollisionStorage().setRecursionStarter(true);
 	                        collision.checkActionCollision(player, next, turn, phase, true);
 	                        player.getCollisionStorage().setRecursionStarter(false);
-                    
                         }
                     }
                 }
@@ -462,19 +473,18 @@ public class PlayerManager {
 	                int leftShoots = p.getMoves().getLeftCannons(turn);
 	                // right shoots
 	                int rightShoots = p.getMoves().getRightCannons(turn);
-	
+
 	                // Apply cannon damages if they collided with anyone
 	                damagePlayersAtDirection(leftShoots, p, Direction.LEFT, turn);
 	                damagePlayersAtDirection(rightShoots, p, Direction.RIGHT, turn);
-	
-	                MoveAnimationTurn t = p.getAnimationStructure().getTurn(turn);
-	
+
 	                // Set cannon animations
+	                MoveAnimationTurn t = p.getAnimationStructure().getTurn(turn);
 	                t.setLeftShoots(leftShoots);
 	                t.setRightShoots(rightShoots);
                 }
             }
-        	
+
         	for (Player p : listRegisteredPlayers()) {
 	            if (p.getVessel().isDamageMaxed() && !p.isSunk()) {
 	                p.setSunk(turn);
@@ -603,37 +613,6 @@ public class PlayerManager {
     }
 
     /**
-     * Handles the time
-     */
-    private void handleTime() {
-        boolean allFinished = true;
-        for (Player p : listRegisteredPlayers()) {
-            // all players must notify they're finished, unless a player joined during break.
-            if (!p.isTurnFinished() && !p.didJoinInBreak()) {
-                if (p.getTurnFinishWaitingTicks() > Constants.TURN_FINISH_TIMEOUT) {
-                    ServerContext.log(p.getName() +  " was kicked for timing out while animating! (" + p.getIP() + ")");
-                    serverBroadcastMessage(p.getName() + " from team " + p.getTeam() + " was kicked for timing out.");
-                    kickPlayer(p, false);
-                }
-                else {
-                    p.updateTurnFinishWaitingTicks();
-                    allFinished = false;
-                }
-            }
-        }
-
-        if (allFinished) {
-            for (Player p : listRegisteredPlayers()) {
-                if (p.didJoinInBreak()) {
-                    p.setJoinedInBreak(false);
-                }
-            }
-
-            handleTurnEnd();
-        }
-    }
-
-    /**
      * Gets a player for given position
      * @param x The X-axis position
      * @param y The Y-xis position
@@ -697,7 +676,7 @@ public class PlayerManager {
     	for (Player p : l)
     	{
     		ServerContext.log("WARNING - " + p.getIP() + " timed out while registering, and was kicked.");
-            kickPlayer(p, false);
+            kickPlayer(p);
             ServerContext.log(printPlayers());
     	}
     }
@@ -709,7 +688,7 @@ public class PlayerManager {
     public List<Player> getPlayers() {
         return this.players;
     }
-    
+
     /**
      * prints registered/players
      */
@@ -718,14 +697,28 @@ public class PlayerManager {
     		Integer.toString(getPlayers().size()) + ".";
     }
 
-    public void kickPlayer(Player p, boolean shouldBan) {
-        if (!p.isBot()) {
-            if (shouldBan) { temporaryBannedIPs.add(p.getIP()); }
-            deRegisterPlayer(p.getChannel());
+    /**
+     * Kick a player or bot actively
+     * @param p the player to kick.
+     */
+    public void kickPlayer(Player p) {
+        if (p.isBot()) {
+            players.remove(p);
         }
         else {
-            p.setTurnFinished(true);
-            players.remove(p);
+            this.deRegisterPlayer(p.getChannel());
+        }
+    }
+
+    public void kickAndBanPlayer(Player p) {
+        if (!p.isBot()) { temporaryBannedIPs.add(p.getIP()); }
+        kickPlayer(p);
+        serverBroadcastMessage(p.getName() + " was kicked and banned for the rest of this round.");
+    }
+
+    public void kickAllPlayers() {
+        for (Player p : this.listRegisteredPlayers()) {
+            kickPlayer(p);
         }
     }
     
@@ -764,7 +757,7 @@ public class PlayerManager {
      * @param player which one to remove
      */
     public void removeBot(Player player) {
-        kickPlayer(player, false); // kick but don't ban
+        kickPlayer(player); // kick but don't ban
     }
 
     /**
@@ -781,7 +774,7 @@ public class PlayerManager {
         {
         	// dont allow banned IPs into the server until the next round begins
         	ServerContext.log("Kicked player " + player.getIP() + " attempted to rejoin, and was kicked again.");
-            kickPlayer(player, false);
+            kickPlayer(player);
         	return player;
         }
 
@@ -797,7 +790,7 @@ public class PlayerManager {
                         ip + " (currently logged in as " + p.getName() + ")" +
                         " attempted login on a second client, but multiclient is not permitted"
                     );
-                    kickPlayer(player, false);
+                    kickPlayer(player);
                     return player;
                 }
             }
@@ -811,7 +804,7 @@ public class PlayerManager {
             ServerContext.log(
                 "[kicked player] New player added to channel " +
                 player.getIP() + ". Kicked because update in progress.");
-            kickPlayer(player, false);
+            kickPlayer(player);
             return player;
         }
      	
@@ -828,16 +821,14 @@ public class PlayerManager {
         return player;
     }
 
-
     /**
-     * De-registers a player from the server
+     * De-registers a player from the server (reactionary)
      *
      * @param channel   The channel that got de-registered
      */
     public void deRegisterPlayer(Channel channel) {
         Player player = getPlayerByChannel(channel);
         if (player != null) {
-            player.setTurnFinished(true);
             queuedLogoutRequests.add(player);
         }
         else {
@@ -851,7 +842,6 @@ public class PlayerManager {
     public void resetMoveBars() {
         for (Player p : listRegisteredPlayers()) {
             sendMoveBar(p);
-            p.getAnimationStructure().reset();
         }
     }
 
@@ -1032,6 +1022,13 @@ public class PlayerManager {
 	            	printPlayers()
 	            );
             }
+
+            // finally, force-disconnect the channel.
+            try {
+                player.getChannel().disconnect();
+            } catch (Exception e) {
+                ServerContext.log("while disconnecting player " + player.getName() + ", caught exception " + e);
+            }
         }
     }
 
@@ -1040,42 +1037,30 @@ public class PlayerManager {
      */
     private void sendTime() {
 
+        context.incrementPingCounter();
         for (Player player : listRegisteredPlayers()) {
             player.getPackets().sendTime();
         }
     }
 
-    public void resetSunkShips() {
-        for (Player p : listRegisteredPlayers()) {
-            if (p.isSunk()) {
-                p.giveLife();
-            }
-
-            sendMoveBar(p);
-            p.getAnimationStructure().reset();
-        }
-    }
-
     public void sendAfterTurn() {
-
+        // deal with sunk/unspawned ships first
         for (Player p : listRegisteredPlayers()) {
             if (p.isNeedsRespawn()) {
                 p.respawn();
             }
 
-            p.getAnimationStructure().reset();
-            p.setTurnFinished(false);
-            p.resetWaitingTicks();
-        }
-
-        for (Player p : listRegisteredPlayers()) {
-            p.getPackets().sendPositions();
-            p.getPackets().sendFlags();
-            p.getPackets().sendPlayerFlags();
             if (p.isSunk()) {
                 p.giveLife();
             }
+        }
+
+        // then deal with individual players
+        for (Player p : listRegisteredPlayers()) {
+            p.getPackets().sendPositions();
             sendMoveBar(p);
+            p.getPackets().sendFlags();
+            p.getPackets().sendPlayerFlags();
         }
     }
 
@@ -1288,7 +1273,7 @@ public class PlayerManager {
 				if (playerToKick != null)
 				{
 					serverBroadcastMessage("Player " + playerToKick.getName() + " was kicked by vote!");
-                    kickPlayer(playerToKick, true);
+                    kickAndBanPlayer(playerToKick);
 				}
 				handleStopVote();
 				break;

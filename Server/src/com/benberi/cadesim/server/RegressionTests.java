@@ -190,6 +190,7 @@ public class RegressionTests {
     private int scenarioPasses = 0, scenarioFails = 0, scenarioTotal = 0;
     private List<Player> listOfBotsCreated;
     private boolean verbose = false;
+    private long startTime;
 
     public boolean isVerbose() {
         return verbose;
@@ -207,6 +208,11 @@ public class RegressionTests {
     public boolean loadNextScenario() {
         if (scenarioIndex >= this.listOfScenarios.size()) {
             return false;
+        }
+
+        // start overall test timer if first run
+        if (scenarioIndex == 0) {
+            startTime = System.currentTimeMillis();
         }
 
         // spawn each ship, set the start conditions
@@ -360,7 +366,7 @@ public class RegressionTests {
      */
     public void getSummary() {
         ServerContext.log("[regressiontests]: SUMMARY: " +
-            "+" + scenarioPasses + ", -" + scenarioFails + " (total: " + scenarioTotal + ")");
+            "+" + scenarioPasses + ", -" + scenarioFails + " (total: " + scenarioTotal + "), time taken: " + (String.format("%.2f", (float)(System.currentTimeMillis() - startTime) / 1000.0)) + " sec");
 
         if (0 == scenarioTotal) {
             ServerContext.log("[regressiontests]:     (did you forget to include some scenarios?");

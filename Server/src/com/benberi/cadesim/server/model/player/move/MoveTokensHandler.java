@@ -29,13 +29,13 @@ public class MoveTokensHandler {
     /**
      * List of moves
      */
-    private MoveTokenList leftTokens = new MoveTokenList(MoveType.LEFT);
-    private MoveTokenList rightTokens = new MoveTokenList(MoveType.RIGHT);
-    private MoveTokenList forwardTokens = new MoveTokenList(MoveType.FORWARD);
+    private MoveTokenList leftTokens;
+    private MoveTokenList rightTokens;
+    private MoveTokenList forwardTokens;
 
-    private MoveTokenList tempLeftTokens = new MoveTokenList(MoveType.LEFT);
-    private MoveTokenList tempRightTokens = new MoveTokenList(MoveType.RIGHT);
-    private MoveTokenList tempForwardTokens = new MoveTokenList(MoveType.FORWARD);
+    private MoveTokenList tempLeftTokens;
+    private MoveTokenList tempRightTokens;
+    private MoveTokenList tempForwardTokens;
 
     /**
      * Cannons
@@ -89,6 +89,13 @@ public class MoveTokensHandler {
 
     public MoveTokensHandler(Player player) {
         this.player = player;
+
+        this.leftTokens        = new MoveTokenList(MoveType.LEFT);
+        this.rightTokens       = new MoveTokenList(MoveType.RIGHT);
+        this.forwardTokens     = new MoveTokenList(MoveType.FORWARD);
+        this.tempLeftTokens    = new MoveTokenList(MoveType.LEFT);
+        this.tempRightTokens   = new MoveTokenList(MoveType.RIGHT);
+        this.tempForwardTokens = new MoveTokenList(MoveType.FORWARD);
     }
 
     public int countLeftMoves() {

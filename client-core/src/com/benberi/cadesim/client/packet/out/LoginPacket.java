@@ -30,7 +30,7 @@ public class LoginPacket extends OutgoingPacket {
     @Override
     public void encode() {
         setPacketLengthType(PacketLength.BYTE);
-        writeByte(version);
+        writeInt(version);
         writeByte(ship);
         writeByte(team);
         writeByteString(name);

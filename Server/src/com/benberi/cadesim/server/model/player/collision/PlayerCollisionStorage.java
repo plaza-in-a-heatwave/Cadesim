@@ -10,12 +10,13 @@ public class PlayerCollisionStorage {
      */
     private Player player;
 
-    private PlayerCollisionReference[] collisions = new PlayerCollisionReference[4];
+    private PlayerCollisionReference[] collisions;
 
     private boolean actionMoveCollided;
 
     public PlayerCollisionStorage(Player player) {
         this.player = player;
+        this.collisions = new PlayerCollisionReference[4];
     }
 
     private VesselMovementAnimation bumpAnimation = VesselMovementAnimation.NO_ANIMATION;

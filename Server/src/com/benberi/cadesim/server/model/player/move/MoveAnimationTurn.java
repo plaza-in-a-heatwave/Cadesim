@@ -9,7 +9,7 @@ public class MoveAnimationTurn {
     private int leftShoots;
     private int rightShoots;
     private boolean sunk;
-    private MoveType moveToken;
+    private MoveType moveToken = MoveType.NONE; // #83 bugfix some animations failing when move wasn't set
 
     public VesselMovementAnimation getAnimation() {
         return animation;

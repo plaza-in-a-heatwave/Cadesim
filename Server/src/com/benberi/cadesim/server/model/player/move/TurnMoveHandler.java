@@ -12,17 +12,17 @@ public class TurnMoveHandler {
     /**
      * The moves
      */
-    private MoveType[] moves = new MoveType[4];
+    private MoveType[] moves;
 
     /**
      * Left cannons
      */
-    private int[] leftCannons = new int[4];
+    private int[] leftCannons;
 
     /**
      * Right cannons
      */
-    private int[] rightCannons = new int[4];
+    private int[] rightCannons;
 
     /**
      * The manuaver slot for 3-moves ships
@@ -32,6 +32,11 @@ public class TurnMoveHandler {
     public TurnMoveHandler(Player p)
     {
         this.player = p;
+
+        this.moves = new MoveType[4];
+        this.leftCannons  = new int[4];
+        this.rightCannons = new int[4];
+
         resetTurn();
     }
 

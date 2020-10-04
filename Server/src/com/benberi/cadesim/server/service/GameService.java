@@ -3,7 +3,6 @@ package com.benberi.cadesim.server.service;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
-import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.PlayerManager;
 
 /**
@@ -70,11 +69,7 @@ public class GameService implements Runnable {
                 // if there's an update, handle that.
                 // the update may halt execution and/or reboot the server.
                 if (playerManager.isUpdateScheduledAfterGame()) {
-                    for (Player p : context.getPlayerManager().listRegisteredPlayers() ) {
-                        // kick each player before update starts
-                        p.getChannel().disconnect();
-                        context.getPlayerManager().getPlayers().remove(p);
-                    }
+                    context.getPlayerManager().kickAllPlayers();
 
                     context.getUpdater().update();
                 }

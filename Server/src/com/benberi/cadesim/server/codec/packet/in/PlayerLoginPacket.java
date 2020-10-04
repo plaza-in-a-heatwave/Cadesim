@@ -16,12 +16,12 @@ public class PlayerLoginPacket extends ServerPacketExecutor {
 
     @Override
     public void execute(Player pl, Packet p) {
-        int version = p.readByte();
+        int version = p.readInt();
         int ship = p.readByte();
         int team = p.readByte();
         String name = p.readByteString();
         String code = p.readByteString();
-        
+
         // auth check - otherwise login packet never gets processed
         if ((code.length() <= Constants.MAX_CODE_SIZE) && code.equals(ServerConfiguration.getAuthCode()))
         {

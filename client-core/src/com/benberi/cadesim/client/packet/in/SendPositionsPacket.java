@@ -22,9 +22,8 @@ public class SendPositionsPacket extends ClientPacketExecutor {
 
             Vessel vessel = getContext().getEntities().getVesselByName(name);
             if (vessel != null) {
-                vessel.setPosition(x, y);
-                vessel.setRotationIndex(face);
-                vessel.setSinking(false);
+                vessel.setPosition(x, y, true);      // queue if sinking
+                vessel.setRotationIndex(face, true); // queue if sinking
             }
         }
     }

@@ -3,7 +3,6 @@ package com.benberi.cadesim.server.codec.packet.out.impl;
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.util.PacketLength;
 import com.benberi.cadesim.server.model.player.Player;
-import com.benberi.cadesim.server.model.player.move.MoveAnimationStructure;
 import com.benberi.cadesim.server.model.player.move.MoveAnimationTurn;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 
@@ -29,17 +28,13 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
         writeByte(players.size());
 
         for (Player p : players) {
-
-            // The structure
-            MoveAnimationStructure structure = p.getAnimationStructure();
-
             // Write the name of the player as a key
             writeByteString(p.getName());
 
             for (int slot = 0; slot < 4; slot++) {
 
                 // The turn
-                MoveAnimationTurn turn = structure.getTurn(slot);
+                MoveAnimationTurn turn = p.getAnimationStructure().getTurn(slot);
 
                 // Write the data
                 writeByte(turn.getMoveToken().getId());

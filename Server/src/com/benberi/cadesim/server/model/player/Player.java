@@ -19,6 +19,7 @@ import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -67,7 +68,7 @@ public class Player extends Position {
     /**
      * The animation structure
      */
-    private MoveAnimationStructure animation = new MoveAnimationStructure();
+    private MoveAnimationStructure animation;
 
     private JobbersQuality jobbersQuality = ServerConfiguration.getJobbersQuality();
 
@@ -141,11 +142,6 @@ public class Player extends Position {
     private boolean enteredSafeOceanside = false; // "
 
     /**
-     * Mark turn animation finished client-sided notification
-     */
-    private boolean turnFinished;
-
-    /**
      * did player join during break
      */
     private boolean joinedInBreak;
@@ -157,11 +153,25 @@ public class Player extends Position {
     public boolean didJoinInBreak() {
         return joinedInBreak;
     }
-
+    
     /**
-     * The waiting time for animation to finish
+     * when the player was last seen alive
      */
-    private int turnFinishWaitingTicks = 0;
+    private long lastAliveMilliseconds;
+
+    public long getLastResponseTime() {
+        if (isBot()) { // bots are super responsive
+            return System.currentTimeMillis();
+        }
+        else {
+            return lastAliveMilliseconds;
+        }
+    }
+
+    public void updateResponseTime(long value) {
+        lastAliveMilliseconds = value;
+    }
+
     private List<Flag> flags;
     private boolean isBot;
 
@@ -171,6 +181,7 @@ public class Player extends Position {
      * If creating a bot, remember to call register().
      */
     public Player(ServerContext ctx, Channel c) {
+        this.animation = new MoveAnimationStructure();
     	this.joinTime = System.currentTimeMillis();
         this.context = ctx;
         this.moveGenerator = new MoveGenerator(this);
@@ -179,6 +190,8 @@ public class Player extends Position {
         this.collisionStorage = new PlayerCollisionStorage(this);
         this.packets = new PlayerPacketManager(this);
         this.channel = c;
+        this.lastAliveMilliseconds = System.currentTimeMillis();
+        this.flags = new ArrayList<Flag>();
         setBot(c == null);
 
         set(-1, -1); // not spawned
@@ -647,6 +660,13 @@ public class Player extends Position {
     }
 
     /**
+     * Reset an animation structure
+     */
+    public void resetAnimationStructure() {
+        this.animation = new MoveAnimationStructure();
+    }
+
+    /**
      * Gets the player's selected turn moves
      *
      * @return {@link TurnMoveHandler}
@@ -885,7 +905,6 @@ public class Player extends Position {
         vessel.resetDamageAndBilge();
         tokens = new MoveTokensHandler(this);
         moves = new TurnMoveHandler(this);
-        animation = new MoveAnimationStructure();
 
         respawn();
 
@@ -896,26 +915,6 @@ public class Player extends Position {
         setPreviouslyOutOfSafe(false);
         packets.sendDamage();
         packets.sendTokens();
-    }
-
-    public int getTurnFinishWaitingTicks() {
-        return turnFinishWaitingTicks;
-    }
-
-    public void updateTurnFinishWaitingTicks() {
-        this.turnFinishWaitingTicks++;
-    }
-
-    public boolean isTurnFinished() {
-        return turnFinished;
-    }
-
-    public void setTurnFinished(boolean turnFinished) {
-        this.turnFinished = turnFinished;
-    }
-
-    public void resetWaitingTicks() {
-        this.turnFinishWaitingTicks = 0;
     }
 
     public List<Flag> getFlags() {

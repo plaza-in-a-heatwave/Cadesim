@@ -18,6 +18,8 @@ public class SendTimePacket extends OutgoingPacket {
 	private int turnDuration; // how long a turn lasts
 	private int roundDuration;// how long a round lasts
 
+	private int counter;      // a rolling byte counter to keep track of how lagged the player is
+
 
     public SendTimePacket() {
         super(OutGoingPackets.TIME_PACKET);
@@ -32,6 +34,10 @@ public class SendTimePacket extends OutgoingPacket {
         if (turnTime < 0) {
             this.turnTime = 0;
         }
+    }
+
+    public void setCounter(byte value) {
+        this.counter = value;
     }
 
     /**
@@ -65,6 +71,7 @@ public class SendTimePacket extends OutgoingPacket {
         writeInt(breakTime);
         writeInt(turnDuration);
         writeInt(roundDuration);
+        writeByte(counter);
         setLength(getBuffer().readableBytes());
     }
 }

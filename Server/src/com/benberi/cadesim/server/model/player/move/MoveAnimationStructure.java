@@ -4,13 +4,13 @@ import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 
 public class MoveAnimationStructure {
 
-    /**
-     * The turns
-     */
-    private MoveAnimationTurn[] turns = new MoveAnimationTurn[4];
+    private MoveAnimationTurn[] turns;
 
     public MoveAnimationStructure() {
-        reset();
+        this.turns = new MoveAnimationTurn[4];
+        for (int i = 0; i < turns.length; i++) {
+            turns[i] = new MoveAnimationTurn();
+        }
     }
 
     /**
@@ -44,11 +44,5 @@ public class MoveAnimationStructure {
         }
 
         return count;
-    }
-
-    public void reset() {
-        for (int i = 0; i < turns.length; i++) {
-            turns[i] = new MoveAnimationTurn();
-        }
     }
 }
