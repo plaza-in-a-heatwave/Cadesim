@@ -58,9 +58,16 @@ public abstract class Vessel extends Entity {
     private boolean isMoving;
 
     /**
-     * The rotation index of the vessel
+     * The queued x,y position. use if sinking
+     */
+    private float nextX;
+    private float nextY;
+
+    /**
+     * The rotation index of the vessel. if sinking, queue this in nextRotationIndex.
      */
     private int rotationIndex;
+    private int nextRotationIndex;
 
     /**
      * The target index for the rotation in animation
@@ -102,7 +109,7 @@ public abstract class Vessel extends Entity {
 
     private int smokeTicks;
 
-    private boolean isSinking;
+    private boolean isSinking = false;
 
     private boolean isSinkingTexture;
 
@@ -119,7 +126,6 @@ public abstract class Vessel extends Entity {
     private List<CannonBall> cannonballs = new ArrayList<CannonBall>();
     private int moveDelay;
     private boolean bumpReached;
-    public boolean sinkingAnimationFinished = true;
 
     public Vessel(GameContext context, String name, int x, int y) {
         super(context);
@@ -170,10 +176,6 @@ public abstract class Vessel extends Entity {
 
     public boolean isSinkingTexture() {
         return isSinkingTexture;
-    }
-
-    public boolean isSinkingAnimationFinished() {
-        return sinkingAnimationFinished;
     }
 
     public VesselBumpVector getBumpVector() {
@@ -384,10 +386,53 @@ public abstract class Vessel extends Entity {
         this.updateRotation();
     }
 
+    /**
+     * Wrapper around setRotationIndex with option to queue the rotation.
+     * @param index the new index
+     * @param queue whether to queue or not.
+     */
+    public void setRotationIndex(int index, boolean queue) {
+        if (!queue) {
+            setRotationIndex(index);
+        }
+        else {
+            // wait for the vessel to sink before changing position
+            if (this.isSinking()) {
+                this.nextRotationIndex = index;
+            }
+            else {
+                this.rotationIndex = index;
+                this.updateRotation();
+            }
+        }
+    }
+
 
     @Override
     public void setPosition(float x, float y) {
         super.setPosition(x, y);
+    }
+
+    /**
+     * Wrapper around setPosition with option to queue the position.
+     * @param x the new x
+     * @param y the new y
+     * @param queue whether to queue or not.
+     */
+    public void setPosition(float x, float y, boolean queue) {
+        if (!queue) {
+            setPosition(x, y);
+        }
+        else {
+            // wait for the vessel to sink before changing position
+            if (this.isSinking()) {
+                this.nextX = x;
+                this.nextY = y;
+            }
+            else {
+                super.setPosition(x, y);
+            }
+        }
     }
 
     /**
@@ -578,14 +623,10 @@ public abstract class Vessel extends Entity {
     }
 
     public void setSinking(boolean sinking) {
-        this.isSinking = sinking;
+        isSinking = sinking;
         if (!isSinking) {
             setDefaultTexture();
             isSinkingTexture = false;
-            sinkingAnimationFinished = true;
-        }
-        else {
-            sinkingAnimationFinished = false;
         }
     }
 
@@ -616,11 +657,16 @@ public abstract class Vessel extends Entity {
     public void tickSinkingTexture() {
         if (sinkingTicks == 5) {
             if (rotationIndex + 1 >= this.getOrientationPack().getAllOrientations().size()) {
-                sinkingAnimationFinished = true;
-                return;
+                setSinking(false);
+
+                // apply post-sinking positions/rotations that were queued
+                setPosition(nextX, nextY);
+                setRotationIndex(nextRotationIndex);
             }
-            setRotationIndex(rotationIndex + 1);
-            sinkingTicks = 0;
+            else {
+                setRotationIndex(rotationIndex + 1);
+                sinkingTicks = 0;
+            }
         }
         else {
             sinkingTicks++;

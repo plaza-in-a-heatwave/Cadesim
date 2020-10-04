@@ -20,10 +20,8 @@ public class PlayerRespawnPacket extends ClientPacketExecutor {
 
         Vessel v = getContext().getEntities().getVesselByName(name);
         if (v != null) {
-            v.setSinking(false);
-            v.setPosition(x, y);
-            v.setRotationIndex(face);
-            v.getStructure().reset();
+            v.setPosition(x, y, true);      // queue if sinking
+            v.setRotationIndex(face, true); // queue if sinking
             if (v.getName().equals(getContext().myVessel)) {
                 getContext().getControlScene().dispose();
                 getContext().getControlScene().reset();

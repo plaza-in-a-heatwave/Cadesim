@@ -1043,16 +1043,6 @@ public class PlayerManager {
         }
     }
 
-    public void resetSunkShips() {
-        for (Player p : listRegisteredPlayers()) {
-            if (p.isSunk()) {
-                p.giveLife();
-            }
-
-            sendMoveBar(p);
-        }
-    }
-
     public void sendAfterTurn() {
         // deal with sunk/unspawned ships first
         for (Player p : listRegisteredPlayers()) {

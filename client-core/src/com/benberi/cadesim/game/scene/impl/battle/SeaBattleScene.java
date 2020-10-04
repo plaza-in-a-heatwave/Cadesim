@@ -178,6 +178,7 @@ public class SeaBattleScene implements GameScene {
                          v.setMovePhase(null);
                      }
 
+                     // end turn, but need to wait for things to sink...
                      if (currentSlot > 3) {
                          currentSlot = -1;
                          this.setTurnFinished(true);
@@ -192,6 +193,7 @@ public class SeaBattleScene implements GameScene {
              }
          }
 
+        boolean waitingForSink = false; // in case a ship needs to finish sinking before the turn can end
         for (Vessel vessel : context.getEntities().listVesselEntities()) {
         	MovePhase phase = MovePhase.getNext(vessel.getMovePhase());
             if (vessel.isSinking()) {
@@ -408,8 +410,11 @@ public class SeaBattleScene implements GameScene {
                     }
                 }
             }
+            if (vessel.isSinking()) {
+                waitingForSink = true;
+            }
         }
-        if (isTurnFinished()) {
+        if (isTurnFinished() && (!waitingForSink)) {
             setTurnFinished(false); // for next time
             BattleControlComponent b = context.getControlScene().getBnavComponent();
             b.updateMoveHistoryAfterTurn();  // post-process tooltips

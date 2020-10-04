@@ -78,12 +78,6 @@ public class Constants {
     public static final int SERVER_ADMIN_INTERVAL_MILLIS = 2000;
 
     /**
-     * This is used to timeout players that did not notify the server about their animation finish for the given
-     * timeout value
-     */
-    public static final int TURN_FINISH_TIMEOUT = 200 + TURN_EXTRA_TIME; // deciseconds - should be > turntime + extratime
-
-    /**
      * How long a player can not respond before they are lagged out.
      */
     public static final int PLAYER_LAG_TIMEOUT_MS = 30000; // milliseconds

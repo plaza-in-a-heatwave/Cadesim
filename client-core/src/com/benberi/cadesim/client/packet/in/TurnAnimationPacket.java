@@ -30,11 +30,7 @@ public class TurnAnimationPacket extends ClientPacketExecutor {
                     turn.setSubAnimation(VesselMovementAnimation.forId(p.readByte()));
                     turn.setLeftShoots(p.readByte());
                     turn.setRightShoots(p.readByte());
-
-                    byte sunk = p.readByte();
-                    if (sunk == 1) {
-                        turn.setSunk(true);
-                    }
+                    turn.setSunk(p.readByte() == 1);
                 }
             }
             else {

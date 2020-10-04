@@ -19,6 +19,7 @@ import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -190,6 +191,7 @@ public class Player extends Position {
         this.packets = new PlayerPacketManager(this);
         this.channel = c;
         this.lastAliveMilliseconds = System.currentTimeMillis();
+        this.flags = new ArrayList<Flag>();
         setBot(c == null);
 
         set(-1, -1); // not spawned
@@ -903,7 +905,6 @@ public class Player extends Position {
         vessel.resetDamageAndBilge();
         tokens = new MoveTokensHandler(this);
         moves = new TurnMoveHandler(this);
-        animation = new MoveAnimationStructure();
 
         respawn();
 
