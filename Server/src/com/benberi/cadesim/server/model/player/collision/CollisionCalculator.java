@@ -361,13 +361,15 @@ public class CollisionCalculator {
         List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
         if (collided.size() > 0) {
         	collide(player, collided.get(0), turn, phase); //get correct damage instead itself
+        	int playerTile = context.getMap().getTile(player.getX(), player.getY());
             for (Player p : collided) {
             	int tile = context.getMap().getTile(p.getX(), p.getY());
+            	//bug: face isn't set each turn; p may not always change face?
             	if(context.getMap().isWhirlpool(tile)) {
-            		if(p.isSunk()) {
+            		if(context.getMap().isWind(playerTile)) {
+            			p.setFace(p.getFace().getNext());
             			collide(p, player, turn, phase);
             		}else {
-            			p.setFace(p.getFace().getNext());
             			collide(p, player, turn, phase);
             		}
             	}else {
