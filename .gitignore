@@ -2,6 +2,9 @@
 jar.deps
 user.config
 .jarv
+proxy.txt
+.pngv
+gettingdown.lock
 
 # log file
 *.log

@@ -1,17 +1,8 @@
 # Cadesim server
 
 ## Dependencies:  
-[Netty](https://netty.io/)
-[Apache Commons CLI](http://commons.apache.org/proper/commons-cli/)
-
-E.g.:
-* netty-4.0.56.Final/jar/all-in-one/netty-all-4.0.56.Final-sources.jar
-* netty-4.0.56.Final/jar/all-in-one/netty-all-4.0.56.Final.jar
-* commons-cli-1.4/commons-cli-1.4.jar
-* commons-cli-1.4/commons-cli-1.4-javadoc.jar
-* commons-cli-1.4/commons-cli-1.4-sources.jar
-* commons-cli-1.4/commons-cli-1.4-tests.jar
-* commons-cli-1.4/commons-cli-1.4-test-sources.jar
+* [Netty](https://netty.io/)
+* [Apache Commons CLI](http://commons.apache.org/proper/commons-cli/)
 
 ## Eclipse config
 * Use the gradle import wizard and folder Cadesim
@@ -23,16 +14,37 @@ Otherwise manually:
 * Set src as source dir and clean,rebuild
 
 ## Exporting
-Use eclipse export to jar. Alternatively there is a helper script to export jars:
-* export-to-jar.sh in terminal
-* add netty/commons paths to "jar.deps" and run "export-to-jar.sh"
+* Export as jar, extract dependencies.
+
+## Running
+start with commandline: ```java -jar cadesim-server.jar <args>```
+
+E.g.: to start several servers with different ports via commandline, and schedule automatic in-place updates:
+```
+java -jar cadesim-server.jar --schedule-updates 04:00 -p 2345
+java -jar cadesim-server.jar --schedule-updates 04:00 -p 2346
+java -jar cadesim-server.jar --schedule-updates 04:00 -p 2347
+```
+
+Specify round and turn times too:
+```
+# 30s turn, 10m round
+java -jar cadesim-server.jar --schedule-updates 04:00 -p 2345 -t 30 -r 900
+```
+
+For full usage call with ```--help```.
+
+Additional developer options can be added at compile-time.
+
+## Releasing
+See RELEASE.md
 
 # Cadesim client
 
 ## Dependencies
-[Netty](https://netty.io/)
-[Apache Commons IO](http://commons.apache.org/proper/commons-io/)
-[Google GSON](https://github.com/google/gson)
+* [Netty](https://netty.io/)
+* [Apache Commons IO](http://commons.apache.org/proper/commons-io/)
+* [Google GSON](https://github.com/google/gson)
 
 ## Eclipse config
 * Use the gradle import wizard and folder Cadesim
@@ -48,5 +60,16 @@ Otherwise manually:
 ** BlockadeSimulator-Desktop depends on /src
 
 ## Exporting
-* Export as jar, make sure there is user.config in the same directory
-* java -jar jarjar.jar
+* Export as jar, extract dependencies.
+
+## Running
+double-click on the .jar file.
+
+If there are errors, check that ```user.config``` exists.
+
+Additional developer options can be added at compile-time.
+
+To disable automatic updates: add ```autoupdate=no``` to user.config
+
+## Releasing
+See RELEASE.md
