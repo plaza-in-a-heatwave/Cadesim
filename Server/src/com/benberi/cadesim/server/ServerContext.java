@@ -22,6 +22,16 @@ import java.time.format.DateTimeFormatter;
  * server model, domain and configuration
  */
 public class ServerContext {
+    /**
+     *  monitor uptime (after has started up). In ms.
+     */
+    private long time1 = 0;
+    public long getUpTimeMillis() {
+        return System.currentTimeMillis() - time1;
+    }
+    public void initialiseUpTimeMillis(long time1) {
+        this.time1 = System.currentTimeMillis() + time1;
+    }
 
     /**
      * The player manager

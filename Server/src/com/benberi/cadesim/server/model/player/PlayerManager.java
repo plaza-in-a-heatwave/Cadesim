@@ -262,14 +262,17 @@ public class PlayerManager {
             timeoutUnregisteredPlayers();
 
             // also check if we need to update the server
+            // (either by regular update time or continuous reboot dev feature)
             // TODO this code is only here because the mechanism is convenient.
             // it is not related to player management functionality. It should
             // be moved to a more appropriate admin loop when possible.
             if (ServerConfiguration.isScheduledAutoUpdate())
             {
                 if (
-                    ServerConfiguration.getNextUpdateDateTimeScheduled().toEpochSecond() <=
-                    ZonedDateTime.now().toEpochSecond())
+                    ((ServerConfiguration.getNextUpdateDateTimeScheduled().toEpochSecond() <=
+                    ZonedDateTime.now().toEpochSecond()) && (!Constants.ENABLE_CONTINUOUS_REBOOT)) ||
+                    ((context.getUpTimeMillis() > Constants.CONTINOUS_REBOOT_INTERVAL) && Constants.ENABLE_CONTINUOUS_REBOOT)
+                )
                 {
                     setUpdateScheduledAfterGame(true);
 
@@ -879,6 +882,7 @@ public class PlayerManager {
     /**
      * Handles all player login requests
      */
+    @SuppressWarnings("unused")
     public void handlePlayerLoginRequests() {
         while(!queuedLoginRequests.isEmpty()) {
             PlayerLoginRequest request = queuedLoginRequests.poll();
@@ -934,6 +938,12 @@ public class PlayerManager {
             else if (!Vessel.VESSEL_IDS.containsKey(ship)) {
                 ServerContext.log(
                         "Warning: Player chose bad ship (" + ship + ")"
+                );
+                response = LoginResponsePacket.BAD_SHIP;
+            }
+            else if ((!Constants.ENABLE_CHOOSE_BLACKSHIP) && (Vessel.VESSEL_IDS.get(ship).equals("blackship"))) {
+                ServerContext.log(
+                        "Warning: Player chose black ship, but it is not allowed."
                 );
                 response = LoginResponsePacket.BAD_SHIP;
             }

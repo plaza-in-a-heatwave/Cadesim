@@ -138,4 +138,16 @@ public class Constants {
     public static final String AUTO_UPDATING_ID_FILE_NAME        = "id.tmp";
     public static final int AUTO_UPDATE_MAX_LOCK_WAIT_MS         = 600 * 1000; // 10 min
     public static final int AUTO_UPDATE_MAX_WAIT_GETDOWN_MS      = 300 * 1000; //  5 min
+
+    /**
+     * Enable some developer features, for instance a continuous reboot mode.
+     *
+     * Individual options can also be enabled/disabled as required.
+     */
+    public static final boolean ENABLE_DEVELOPER_FEATURES = false;
+
+    public static final boolean ENABLE_CONTINUOUS_REBOOT  = ENABLE_DEVELOPER_FEATURES;
+    public static final int     CONTINOUS_REBOOT_INTERVAL = 60000;  // 60,000 ms, 60 sec
+
+    public static final boolean ENABLE_CHOOSE_BLACKSHIP = ENABLE_DEVELOPER_FEATURES; // allow blackship
 }

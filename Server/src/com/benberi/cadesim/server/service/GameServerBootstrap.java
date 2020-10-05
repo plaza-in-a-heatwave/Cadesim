@@ -64,10 +64,10 @@ public class GameServerBootstrap {
         executorService.scheduleAtFixedRate(service, 0, Constants.SERVICE_LOOP_DELAY, TimeUnit.MILLISECONDS);
 
         long time = System.currentTimeMillis() - start;
-
+        context.initialiseUpTimeMillis(time);
         ServerContext.log("Game Server loaded successfully in " + (int)time + " ms.");
     }
-    
+
     private static void help(Options options) {
         // This prints out some help for the cli
     	// And then exits
