@@ -119,11 +119,13 @@ public class MapEditorMapScene implements GameScene {
         whirlNW = new Whirlpool(context,WP_NW);
         whirlNE = new Whirlpool(context,WP_NE);
         topLayer = new BlockadeMapLayer<GameObject>();
+        smallRock = new SmallRock(context);
+        bigRock = new BigRock(context);
         flag1 = new Flag(context,1);
         flag2 = new Flag(context,2);
         flag3 = new Flag(context,3);
         //initialize currentTile
-        setCurrentTile(windNorth);
+        setCurrentTile(cell);
         
     }
     /**
@@ -196,27 +198,54 @@ public class MapEditorMapScene implements GameScene {
     }
     
     @Override
-    public boolean handleClick(float x, float y, int button) {	
+    public boolean handleClick(float x, float y, int button) {
     	if(button != 2) {
-        	int xz = (int)((x - camera.position.x / GameTile.TILE_WIDTH) + (y- camera.position.y / GameTile.TILE_HEIGHT));
-            int yz = (int)((y - camera.position.y / GameTile.TILE_HEIGHT) - (x- camera.position.x / GameTile.TILE_WIDTH));
-            
-//        	System.out.println(xz  +","+ yz);
+    		if(x < camera.viewportWidth) {
+	        	int xTile = (int)((x - camera.position.x / GameTile.TILE_WIDTH) + (y- camera.position.y / GameTile.TILE_HEIGHT));
+	            int yTile = (int)((y - camera.position.y / GameTile.TILE_HEIGHT) - (x- camera.position.x / GameTile.TILE_WIDTH));
+	            
+	          xTile = 5;
+	          yTile = 4; //test values
+	        	if(button == 0) {
+	        		if(yTile >= 3 && yTile <= 32) { //leave safezone alone
+	        			if(getCurrentTile() instanceof Flag) {
+	        				tiles[xTile][yTile] = cell;
+	        				Flag flag = (Flag) getCurrentTile();
+	        				flag.set(xTile, yTile);
+	        				topLayer.add(flag);
+	        			}
+	        			else if(getCurrentTile() instanceof BigRock) {
+	        				tiles[xTile][yTile] = cell;
+		                    if(topLayer.get(xTile, yTile) != null) {
+		                    	topLayer.remove(xTile, yTile);
+		                    }
+	        				BigRock bigRock = (BigRock) getCurrentTile();
+	        				bigRock.set(xTile, yTile);
+	        				topLayer.add(bigRock);
+	        			}
+	        			else if(getCurrentTile() instanceof SmallRock) {
+	        				tiles[xTile][yTile] = cell;
+	        				SmallRock smallRock = (SmallRock) getCurrentTile();
+		                    if(topLayer.get(xTile, yTile) != null) {
+		                    	topLayer.remove(xTile, yTile);
+		                    }
+	        				smallRock.set(xTile, yTile);
+	        				topLayer.add(smallRock);
+	        			}else {
+	        				tiles[xTile][yTile] = getCurrentTile();
+	        			}
+	        		}
+	        	}else if(button == 1) {
+	        		if (yTile >= 3 && yTile <= 32) {//leave safezone alone
+	                    tiles[xTile][yTile] = cell;
+	                    if(topLayer.get(xTile, yTile) != null) {
+	                    	topLayer.remove(xTile, yTile);
+	                    }
+	        		}
+	        	}
+    		}
     	}
         
-//    	if(button == 0) {
-//    		if(yTile > 3 && yTile < 32) { //leave safezone alone
-//                flag1 = new Flag(context,xTile,yTile,3);
-//                topLayer.add(flag1);
-//    		}
-//    	}else if(button == 1) {
-//    		if (yTile > 3 && yTile < 32) {//leave safezone alone
-//                tiles[xTile][yTile] = cell;
-//                if(topLayer.get(xTile, yTile) != null) {
-//                	topLayer.remove(xTile, yTile);
-//                }
-//    		}
-//    	}
 
         if (x < camera.viewportWidth) {
             this.canDragMap = true;

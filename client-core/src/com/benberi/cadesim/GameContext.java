@@ -258,10 +258,10 @@ public class GameContext {
     	this.input = new GameInputProcessor(this);
         this.mapEditor = new MapEditorMapScene(this);
         this.mapEditorMenu = new MapEditorMenuScene(this);
-        mapEditor.createMap();
         mapEditor.create();
-        mapEditorMenu.create();
+        mapEditor.createMap();
         scenes.add(mapEditor);
+        mapEditorMenu.create();
         scenes.add(mapEditorMenu);
     }
     public void createFurtherScenes(int shipId) {

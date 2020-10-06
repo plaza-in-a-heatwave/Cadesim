@@ -53,6 +53,10 @@ public class Flag extends GameObject {
         updateTextureRegion();
     }
     
+    public void setLocation(int x, int y) {
+    	set(x, y);
+    }
+    
     public boolean isAtWar() {
         return this.atWar;
     }

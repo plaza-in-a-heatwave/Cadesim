@@ -272,11 +272,10 @@ public class SceneAssetManager {
 	public AssetDescriptor<Texture> safe = new AssetDescriptor<Texture>(SAFE, Texture.class);
 	public AssetDescriptor<Texture> sea = new AssetDescriptor<Texture>(SEA, Texture.class);
 	
-	public AssetDescriptor<Texture> bigrock = new AssetDescriptor<Texture>(BIGROCK, Texture.class);
-	public AssetDescriptor<Texture> smallrock = new AssetDescriptor<Texture>(SMALLROCK, Texture.class);
 	public AssetDescriptor<Texture> whirlpool = new AssetDescriptor<Texture>(WHIRLPOOL, Texture.class);
 	public AssetDescriptor<Texture> wind = new AssetDescriptor<Texture>(WIND, Texture.class);
-
+	public AssetDescriptor<Texture> bigrock = new AssetDescriptor<Texture>(BIGROCK, Texture.class);
+	public AssetDescriptor<Texture> smallrock = new AssetDescriptor<Texture>(SMALLROCK, Texture.class);
 	public AssetDescriptor<Texture> cannonball_large = new AssetDescriptor<Texture>(CANNONBALL_LARGE, Texture.class);
     public AssetDescriptor<Texture> cannonball_medium = new AssetDescriptor<Texture>(CANNONBALL_MEDIUM, Texture.class);
     public AssetDescriptor<Texture> cannonball_small = new AssetDescriptor<Texture>(CANNONBALL_SMALL, Texture.class);
