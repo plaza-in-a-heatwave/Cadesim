@@ -3,6 +3,7 @@ package com.benberi.cadesim.game.scene.impl.battle.map.layer;
 import com.benberi.cadesim.game.scene.impl.battle.map.GameObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class BlockadeMapLayer<T extends GameObject> {
@@ -27,6 +28,16 @@ public class BlockadeMapLayer<T extends GameObject> {
             }
         }
         return null;
+    }
+    
+    public void remove(int x, int y) {
+    	
+    	for (Iterator<T> iterator = objects.iterator(); iterator.hasNext();) {
+    	    T object = iterator.next();
+            if (object.getX() == x && object.getY() == y && object != null) {
+            	iterator.remove();
+            }
+    	}
     }
 
     public void clear() {

@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.scene.GameScene;
+import com.benberi.cadesim.game.scene.impl.control.ControlAreaScene;
+import com.benberi.cadesim.game.scene.impl.mapeditor.MapEditorMapScene;
 
 public class GameInputProcessor implements InputProcessor {
 
@@ -19,7 +21,9 @@ public class GameInputProcessor implements InputProcessor {
     	// TODO this is garbage - but I can't pass the key any other way.
     	
     	// for LEFT/RIGHT
-        context.getControlScene().getBnavComponent().keyDown(keycode);
+    	if(context.getScenes().get(0) instanceof ControlAreaScene){
+            context.getControlScene().getBnavComponent().keyDown(keycode);
+    	}
         return false;
     }
 
@@ -28,20 +32,24 @@ public class GameInputProcessor implements InputProcessor {
     	// TODO this is garbage - but I can't pass the key any other way.
     	
     	// for LEFT/RIGHT
-        context.getControlScene().getBnavComponent().keyUp(keycode);
+    	if(context.getScenes().get(0) instanceof ControlAreaScene){
+            context.getControlScene().getBnavComponent().keyUp(keycode);
+    	}
         return false;
     }
 
     @Override
     public boolean keyTyped(char character) {
     	// TODO this is garbage - but I can't pass the key any other way.
-        context.getControlScene().getBnavComponent().keyTyped(character);
+    	if(context.getScenes().get(0) instanceof ControlAreaScene){
+            context.getControlScene().getBnavComponent().keyTyped(character);
+    	}
         return false;
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        for (GameScene scene : context.getScenes()) {
+    	for (GameScene scene : context.getScenes()) {
             if (scene.handleClick(screenX, screenY, button)) {
                 break;
             }
@@ -86,7 +94,13 @@ public class GameInputProcessor implements InputProcessor {
     @Override
     public boolean scrolled(int amount) {
     	// TODO this is garbage - but I can't pass the scroll any other way.
-        context.getControlScene().getBnavComponent().scrolled(amount);
+    	if(context.getScenes().get(0) instanceof ControlAreaScene){
+            context.getControlScene().getBnavComponent().scrolled(amount);
+    	}
+    	
+    	if(context.getScenes().get(0) instanceof MapEditorMapScene) {
+    		context.getMapEditor().scrolled(amount);
+    	}
         return false;
     }
 }

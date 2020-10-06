@@ -123,6 +123,8 @@ public class ConnectScene implements GameScene, InputProcessor {
     private Drawable regularDrawable;
     private Drawable hoverDrawable;
     private ImageButton buttonConn;
+    private TextButton buttonMapEditor;
+    private Skin skin;
     private ImageButtonStyle buttonStyle;
     
     private String[] resolution;
@@ -252,6 +254,16 @@ public class ConnectScene implements GameScene, InputProcessor {
 	            }
             }});
         buttonConn.setPosition(165, 290);
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+      //login button
+        buttonMapEditor = new TextButton("Map Editor",skin); //Set the button up
+        buttonMapEditor.addListener(new ClickListener() {//runs update if there is one before logging in 
+            public void clicked(InputEvent event, float x, float y){
+            	context.createMapEditorScene();
+            	context.setStartedMapEditor(true);
+            }
+        });
+        buttonMapEditor.setPosition(Gdx.graphics.getWidth() - 100, Gdx.graphics.getHeight() - 50);
         renderer = new ShapeRenderer();
 
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -438,6 +450,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         stage.addActor(teamType);
         stage.addActor(roomLabel);
         stage.addActor(buttonConn);
+        stage.addActor(buttonMapEditor); // comment to toggle
         //resolution dialog 
         Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 		dialog = new Dialog("Resolution", skin, "dialog") {
