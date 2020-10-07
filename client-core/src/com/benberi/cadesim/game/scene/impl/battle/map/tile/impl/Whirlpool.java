@@ -17,10 +17,15 @@ public class Whirlpool extends GameTile {
     /**
      * Initializes the tile
      */
-    public Whirlpool(GameContext context, int direction) {
+    public Whirlpool(GameContext context, int direction, boolean disabled) {
         super(context);
-        setTexture(
-        		context.getManager().get(context.getAssetObject().whirlpool));
+        if(!disabled) {
+	        setTexture(
+	        		context.getManager().get(context.getAssetObject().whirlpool));
+        }else {
+        	setTexture(
+	        		context.getManager().get(context.getAssetObject().whirlpool_disabled));
+        }
         setPackedObjectOrientation("whirl");
 
         switch (direction) {

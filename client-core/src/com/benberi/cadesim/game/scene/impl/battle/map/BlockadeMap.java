@@ -82,13 +82,13 @@ public class BlockadeMap {
                     case WIND_WEST:
                     case WIND_NORTH:
                     case WIND_SOUTH:
-                        winds[x][y] = new Wind(context, tile);
+                        winds[x][y] = new Wind(context, tile,false);
                         break;
                     case WP_NE:
                     case WP_NW:
                     case WP_SE:
                     case WP_SW:
-                        whirls[x][y] = new Whirlpool(context, tile);
+                        whirls[x][y] = new Whirlpool(context, tile,false);
                 }
             }
         }

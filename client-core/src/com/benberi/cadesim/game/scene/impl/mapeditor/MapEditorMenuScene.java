@@ -1,16 +1,19 @@
 package com.benberi.cadesim.game.scene.impl.mapeditor;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -42,7 +45,6 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     
     private Stage stage;
     private Skin skin;
-    private BitmapFont font;
     private TextButton loadButton;
     private TextButton saveButton;
     private TextButton newButton;
@@ -116,7 +118,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     private TextureRegionDrawable flag3regularDrawable;
     private TextureRegionDrawable flag3hoverDrawable;  
     
- 
+    private ArrayList<Button> buttonList = new ArrayList<Button>();
     /**
      * The sea texture
      */
@@ -136,17 +138,24 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         batch = new SpriteBatch();
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         setup();
+        
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         initButtons();
         addWhirlButton = new TextButton("Add WhirlPool", skin);
         removeWhirlButton = new TextButton("Remove WhirlPool", skin);
+        Button[] buttonArray = {windNButton,windSButton,windWButton,windEButton,
+        		whirlNWButton,whirlNEButton,whirlSWButton,whirlSEButton,
+        		smallRockButton,bigRockButton,
+        		flag1Button,flag2Button,flag3Button,
+        		addWhirlButton,removeWhirlButton};
+        Collections.addAll(buttonList, buttonArray);
         saveButton = new TextButton("Save Map", skin);
         newButton = new TextButton("New Map", skin);
         loadButton = new TextButton("Load Map", skin);
         lobbyButton = new TextButton("Exit Editor", skin);
 
-        font = context.getManager().get(context.getAssetObject().regularFont);
+        context.getManager().get(context.getAssetObject().regularFont);
 
         Table windTable = new Table();
         windTable.add(windNButton).pad(3.0f);
@@ -191,29 +200,37 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         loadButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-        		System.out.println(context.getMapEditor().getCurrentTile());
+        		context.getMapEditor().loadMap();
         	}
         });
         
         addWhirlButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setAddWhirlPool(true);
         		context.getMapEditor().setCurrentTile(context.getMapEditor().whirlNW);
+        		addWhirlButton.setDisabled(true);
         	}
         });
         
         removeWhirlButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setRemoveWhirlPool(true);
+        		removeWhirlButton.setDisabled(true);
         	}
         });
         
         saveButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-        		System.out.println("save");
+        		context.getMapEditor().saveMap();
         	}
         });
         
@@ -221,7 +238,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         newButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-        		context.getMapEditor().createMap();
+        		context.getMapEditor().createEmptyMap();
         	}
         });
         lobbyButton.addListener(new ClickListener() {
@@ -233,220 +250,269 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     }
     
     public void initButtons() {
-    	windNregularDrawable = new TextureRegionDrawable(context.getMapEditor().windNorth.getRegion());
+    	windNregularDrawable = new TextureRegionDrawable(context.getMapEditor().windNorthDisabled.getRegion());
         windNhoverDrawable = new TextureRegionDrawable(context.getMapEditor().windNorth.getRegion());
         
         windNStyle = new ImageButtonStyle();
         windNStyle.imageUp = windNhoverDrawable;
         windNStyle.imageDown = windNregularDrawable;
+        windNStyle.imageDisabled = windNregularDrawable;
         
         windNButton = new ImageButton(windNStyle);
         windNButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().windNorth);
+        		windNButton.setDisabled(true);
         	}
         });
         
-    	windSregularDrawable = new TextureRegionDrawable(context.getMapEditor().windSouth.getRegion());
+    	windSregularDrawable = new TextureRegionDrawable(context.getMapEditor().windSouthDisabled.getRegion());
         windShoverDrawable = new TextureRegionDrawable(context.getMapEditor().windSouth.getRegion());
         
         windSStyle = new ImageButtonStyle();
         windSStyle.imageUp = windShoverDrawable;
         windSStyle.imageDown = windSregularDrawable;
+        windSStyle.imageDisabled = windSregularDrawable;
         
         windSButton = new ImageButton(windSStyle);
         windSButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().windSouth);
-        	}
-        });
-        
-        //
-    	windSregularDrawable = new TextureRegionDrawable(context.getMapEditor().windSouth.getRegion());
-        windShoverDrawable = new TextureRegionDrawable(context.getMapEditor().windSouth.getRegion());
-        
-        windSStyle = new ImageButtonStyle();
-        windSStyle.imageUp = windShoverDrawable;
-        windSStyle.imageDown = windSregularDrawable;
-        
-        windSButton = new ImageButton(windSStyle);
-        windSButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		context.getMapEditor().setCurrentTile(context.getMapEditor().windSouth);
+        		windSButton.setDisabled(true);
         	}
         });
         //
-    	windWregularDrawable = new TextureRegionDrawable(context.getMapEditor().windWest.getRegion());
+    	windWregularDrawable = new TextureRegionDrawable(context.getMapEditor().windWestDisabled.getRegion());
         windWhoverDrawable = new TextureRegionDrawable(context.getMapEditor().windWest.getRegion());
         
         windWStyle = new ImageButtonStyle();
         windWStyle.imageUp = windWhoverDrawable;
         windWStyle.imageDown = windWregularDrawable;
+        windWStyle.imageDisabled = windWregularDrawable;
         
         windWButton = new ImageButton(windWStyle);
         windWButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().windWest);
+        		windWButton.setDisabled(true);
         	}
         });
         
         //
         //
-    	windEregularDrawable = new TextureRegionDrawable(context.getMapEditor().windEast.getRegion());
+    	windEregularDrawable = new TextureRegionDrawable(context.getMapEditor().windEastDisabled.getRegion());
         windEhoverDrawable = new TextureRegionDrawable(context.getMapEditor().windEast.getRegion());
         
         windEStyle = new ImageButtonStyle();
         windEStyle.imageUp = windEhoverDrawable;
         windEStyle.imageDown = windEregularDrawable;
+        windEStyle.imageDisabled = windEregularDrawable;
         
         windEButton = new ImageButton(windEStyle);
         windEButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().windEast);
+        		windEButton.setDisabled(true);
         	}
         });
         
         
         //WhirlPool
-    	whirlNWregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlNW.getRegion());
+    	whirlNWregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlNWDisabled.getRegion());
     	whirlNWhoverDrawable = new TextureRegionDrawable(context.getMapEditor().whirlNW.getRegion());
         
     	whirlNWStyle = new ImageButtonStyle();
     	whirlNWStyle.imageUp = whirlNWhoverDrawable;
     	whirlNWStyle.imageDown = whirlNWregularDrawable;
+    	whirlNWStyle.imageDisabled = whirlNWregularDrawable;
         
     	whirlNWButton = new ImageButton(whirlNWStyle);
         whirlNWButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().whirlNW);
+        		whirlNWButton.setDisabled(true);
         	}
         });
         
-    	whirlNEregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlNE.getRegion());
+    	whirlNEregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlNEDisabled.getRegion());
     	whirlNEhoverDrawable = new TextureRegionDrawable(context.getMapEditor().whirlNE.getRegion());
         
     	whirlNEStyle = new ImageButtonStyle();
     	whirlNEStyle.imageUp = whirlNEhoverDrawable;
     	whirlNEStyle.imageDown = whirlNEregularDrawable;
+    	whirlNEStyle.imageDisabled = whirlNEregularDrawable;
         
     	whirlNEButton = new ImageButton(whirlNEStyle);
         whirlNEButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().whirlNE);
+        		whirlNEButton.setDisabled(true);
         	}
         });
         
-    	whirlSWregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlSW.getRegion());
+    	whirlSWregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlSWDisabled.getRegion());
     	whirlSWhoverDrawable = new TextureRegionDrawable(context.getMapEditor().whirlSW.getRegion());
         
     	whirlSWStyle = new ImageButtonStyle();
     	whirlSWStyle.imageUp = whirlSWhoverDrawable;
     	whirlSWStyle.imageDown = whirlSWregularDrawable;
+    	whirlSWStyle.imageDisabled = whirlSWregularDrawable;
         
     	whirlSWButton = new ImageButton(whirlSWStyle);
         whirlSWButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().whirlSW);
+        		whirlSWButton.setDisabled(true);
         	}
         });
         
-    	whirlSEregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlSE.getRegion());
+    	whirlSEregularDrawable = new TextureRegionDrawable(context.getMapEditor().whirlSEDisabled.getRegion());
     	whirlSEhoverDrawable = new TextureRegionDrawable(context.getMapEditor().whirlSE.getRegion());
         
     	whirlSEStyle = new ImageButtonStyle();
     	whirlSEStyle.imageUp = whirlSEhoverDrawable;
     	whirlSEStyle.imageDown = whirlSEregularDrawable;
+    	whirlSEStyle.imageDisabled = whirlSEregularDrawable;
         
     	whirlSEButton = new ImageButton(whirlSEStyle);
         whirlSEButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().whirlSE);
+        		whirlSEButton.setDisabled(true);
         	}
         });
         
         //rocks
-    	smallRockregularDrawable = new TextureRegionDrawable(context.getMapEditor().smallRock.getRegion());
+    	smallRockregularDrawable = new TextureRegionDrawable(context.getMapEditor().smallRockDisabled.getRegion());
     	smallRockhoverDrawable = new TextureRegionDrawable(context.getMapEditor().smallRock.getRegion());
         
     	smallRockStyle = new ImageButtonStyle();
     	smallRockStyle.imageUp = smallRockhoverDrawable;
     	smallRockStyle.imageDown = smallRockregularDrawable;
+    	smallRockStyle.imageDisabled = smallRockregularDrawable;
         
     	smallRockButton = new ImageButton(smallRockStyle);
     	smallRockButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().smallRock);
+        		smallRockButton.setDisabled(true);
         	}
         });
     	
-    	bigRockregularDrawable = new TextureRegionDrawable(context.getMapEditor().bigRock.getRegion());
+    	bigRockregularDrawable = new TextureRegionDrawable(context.getMapEditor().bigRockDisabled.getRegion());
     	bigRockhoverDrawable = new TextureRegionDrawable(context.getMapEditor().bigRock.getRegion());
         
     	bigRockStyle = new ImageButtonStyle();
     	bigRockStyle.imageUp = bigRockhoverDrawable;
     	bigRockStyle.imageDown = bigRockregularDrawable;
+    	bigRockStyle.imageDisabled = bigRockregularDrawable;
         
     	bigRockButton = new ImageButton(bigRockStyle);
     	bigRockButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().bigRock);
+        		bigRockButton.setDisabled(true);
         	}
         });
     	
-    	flag1regularDrawable = new TextureRegionDrawable(context.getMapEditor().flag1.getRegion());
+    	flag1regularDrawable = new TextureRegionDrawable(context.getMapEditor().flag1Disabled.getRegion());
     	flag1hoverDrawable = new TextureRegionDrawable(context.getMapEditor().flag1.getRegion());
         
     	flag1Style = new ImageButtonStyle();
     	flag1Style.imageUp = flag1hoverDrawable;
     	flag1Style.imageDown = flag1regularDrawable;
+    	flag1Style.imageDisabled = flag1regularDrawable;
         
     	flag1Button = new ImageButton(flag1Style);
     	flag1Button.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().flag1);
+        		flag1Button.setDisabled(true);
         	}
         });
     	
-    	flag2regularDrawable = new TextureRegionDrawable(context.getMapEditor().flag2.getRegion());
+    	flag2regularDrawable = new TextureRegionDrawable(context.getMapEditor().flag2Disabled.getRegion());
     	flag2hoverDrawable = new TextureRegionDrawable(context.getMapEditor().flag2.getRegion());
         
     	flag2Style = new ImageButtonStyle();
     	flag2Style.imageUp = flag2hoverDrawable;
     	flag2Style.imageDown = flag2regularDrawable;
+    	flag2Style.imageDisabled = flag2regularDrawable;
         
     	flag2Button = new ImageButton(flag2Style);
     	flag2Button.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().flag2);
+        		flag2Button.setDisabled(true);
         	}
         });
     	
     	
-    	flag3regularDrawable = new TextureRegionDrawable(context.getMapEditor().flag3.getRegion());
+    	flag3regularDrawable = new TextureRegionDrawable(context.getMapEditor().flag3Disabled.getRegion());
     	flag3hoverDrawable = new TextureRegionDrawable(context.getMapEditor().flag3.getRegion());
         
     	flag3Style = new ImageButtonStyle();
     	flag3Style.imageUp = flag3hoverDrawable;
     	flag3Style.imageDown = flag3regularDrawable;
+    	flag3Style.imageDisabled = flag3regularDrawable;
         
     	flag3Button = new ImageButton(flag3Style);
     	flag3Button.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().setCurrentTile(context.getMapEditor().flag3);
+        		flag3Button.setDisabled(true);
         	}
         });
         
@@ -457,6 +523,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         inputMultiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
+    
     @Override
     public void update(){
     }

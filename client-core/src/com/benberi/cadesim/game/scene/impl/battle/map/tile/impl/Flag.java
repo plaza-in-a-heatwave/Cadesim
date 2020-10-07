@@ -43,10 +43,15 @@ public class Flag extends GameObject {
         updateTextureRegion();
     }
     
-    public Flag(GameContext context, int flagSize) {
+    public Flag(GameContext context, int flagSize, boolean disabled) {
         super(context);
-        setTexture(
-        		context.getManager().get(context.getAssetObject().flagTexture));
+        if(!disabled) {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().flagTexture));	
+        }else {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().flagTexture_disabled));
+        }
         setCustomOffsetX(2);
         setCustomOffsetY(22);
         setSize(flagSize);

@@ -259,7 +259,7 @@ public class GameContext {
         this.mapEditor = new MapEditorMapScene(this);
         this.mapEditorMenu = new MapEditorMenuScene(this);
         mapEditor.create();
-        mapEditor.createMap();
+        mapEditor.createEmptyMap();
         scenes.add(mapEditor);
         mapEditorMenu.create();
         scenes.add(mapEditorMenu);

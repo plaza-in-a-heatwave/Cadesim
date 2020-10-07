@@ -25,12 +25,17 @@ public class SmallRock extends GameObject {
     /**
      * Initializes the tile
      */
-    public SmallRock(GameContext context) {
+    public SmallRock(GameContext context, boolean disabled) {
         super(context);
-        setTexture(
-        		context.getManager().get(context.getAssetObject().smallrock));
+        if(!disabled) {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().smallrock));
+        }else {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().smallrock_disabled));
+        }
         setPackedObjectOrientation("small_rock");
-        setOrientation(RandomUtils.randInt(0, 3));
+        setOrientation(1);
     }
 
 }

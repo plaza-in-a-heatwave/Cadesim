@@ -24,12 +24,17 @@ public class BigRock extends GameObject {
     /**
      * Initializes the tile
      */
-    public BigRock(GameContext context) {
+    public BigRock(GameContext context, boolean disabled) {
         super(context);
-        setTexture(
-        		context.getManager().get(context.getAssetObject().bigrock));
+        if(!disabled) {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().bigrock));
+        }else {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().bigrock_disabled));
+        }
         setPackedObjectOrientation("big_rock");
-        setOrientation(RandomUtils.randInt(0, 3));
+        setOrientation(1);
     }
 
 }
