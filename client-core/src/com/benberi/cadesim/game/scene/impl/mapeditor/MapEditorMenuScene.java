@@ -48,6 +48,9 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     private TextButton newButton;
     private TextButton lobbyButton;
     
+    private TextButton addWhirlButton;
+    private TextButton removeWhirlButton;
+    
     private ImageButton windNButton;
     private ImageButtonStyle windNStyle;
     private TextureRegionDrawable windNregularDrawable;
@@ -136,7 +139,8 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         initButtons();
-        
+        addWhirlButton = new TextButton("Add WhirlPool", skin);
+        removeWhirlButton = new TextButton("Remove WhirlPool", skin);
         saveButton = new TextButton("Save Map", skin);
         newButton = new TextButton("New Map", skin);
         loadButton = new TextButton("Load Map", skin);
@@ -155,19 +159,21 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         whirlTable.add(whirlNWButton).pad(1.0f);
         whirlTable.add(whirlNEButton).pad(1.0f).row();
         whirlTable.add(whirlSWButton).pad(1.0f);
-        whirlTable.add(whirlSEButton).pad(1.0f);
-        whirlTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-170);
+        whirlTable.add(whirlSEButton).pad(1.0f).row();
+        whirlTable.add(addWhirlButton).colspan(2).row();
+        whirlTable.add(removeWhirlButton).colspan(2);
+        whirlTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-190);
         
         Table rockTable = new Table();
         rockTable.add(smallRockButton).pad(3.0f);
         rockTable.add(bigRockButton).pad(3.0f);
-        rockTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-270);
+        rockTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-310);
         
         Table flagTable = new Table();
         flagTable.add(flag1Button).pad(3.0f);
         flagTable.add(flag2Button).pad(3.0f);
         flagTable.add(flag3Button).pad(3.0f);
-        flagTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-355);
+        flagTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-370);
         
         //menu button options
         Table table = new Table();
@@ -186,6 +192,21 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
         		System.out.println(context.getMapEditor().getCurrentTile());
+        	}
+        });
+        
+        addWhirlButton.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(true);
+        		context.getMapEditor().setCurrentTile(context.getMapEditor().whirlNW);
+        	}
+        });
+        
+        removeWhirlButton.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setRemoveWhirlPool(true);
         	}
         });
         

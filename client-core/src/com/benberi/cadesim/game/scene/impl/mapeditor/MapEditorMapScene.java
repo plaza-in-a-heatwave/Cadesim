@@ -90,6 +90,8 @@ public class MapEditorMapScene implements GameScene {
     public static final int FLAG_3 = 13;
     public Flag flag3;
 
+    public boolean addWhirlPool = false;
+    public boolean removeWhirlPool = false;
     
     /**
      * top layer
@@ -119,6 +121,7 @@ public class MapEditorMapScene implements GameScene {
         whirlNW = new Whirlpool(context,WP_NW);
         whirlNE = new Whirlpool(context,WP_NE);
         topLayer = new BlockadeMapLayer<GameObject>();
+        //need to initialize with no location to avoid nullpointer
         smallRock = new SmallRock(context);
         bigRock = new BigRock(context);
         flag1 = new Flag(context,1);
@@ -204,12 +207,47 @@ public class MapEditorMapScene implements GameScene {
 	        	int xTile = (int)((x - camera.position.x / GameTile.TILE_WIDTH) + (y- camera.position.y / GameTile.TILE_HEIGHT));
 	            int yTile = (int)((y - camera.position.y / GameTile.TILE_HEIGHT) - (x- camera.position.x / GameTile.TILE_WIDTH));
 	            
-	          xTile = 5;
-	          yTile = 4; //test values
+	          xTile = 6;
+	          yTile = 6; //test values
 	        	if(button == 0) {
 	        		if(yTile >= 3 && yTile <= 32) { //leave safezone alone
+	        			if(isAddWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 30) {
+	        				int xTileNW = xTile;
+	        				int yTileNW = yTile;
+	        				int xTileNE = xTile+1;
+	        				int yTileNE = yTile;
+	        				int xTileSW = xTile;
+	        				int yTileSW = yTile-1;
+	        				int xTileSE = xTile+1;
+	        				int yTileSE = yTile-1;
+	        				
+	        				tiles[xTileNW][yTileNW] = cell;
+		                    if(topLayer.get(xTileNW, yTileNW) != null) {
+		                    	topLayer.remove(xTileNW, yTileNW);
+		                    }
+	        				tiles[xTileNE][yTileNE] = cell;
+		                    if(topLayer.get(xTileNE, yTileNE) != null) {
+		                    	topLayer.remove(xTileNE, yTileNE);
+		                    }
+	        				tiles[xTileSW][yTileSW] = cell;
+		                    if(topLayer.get(xTileSW, yTileSW) != null) {
+		                    	topLayer.remove(xTileSW, yTileSW);
+		                    }
+	        				tiles[xTileSE][yTileSE] = cell;
+		                    if(topLayer.get(xTileSE, yTileSE) != null) {
+		                    	topLayer.remove(xTileSE, yTileSE);
+		                    }
+	        				tiles[xTile][yTile] = whirlNW;
+	        				tiles[xTileNE][yTileNE] = whirlNE;
+	        				tiles[xTileSW][yTileSW] = whirlSW;
+	        				tiles[xTileSE][yTileSE] = whirlSE;
+	        				setAddWhirlPool(false);
+	        			}
 	        			if(getCurrentTile() instanceof Flag) {
 	        				tiles[xTile][yTile] = cell;
+		                    if(topLayer.get(xTile, yTile) != null) {
+		                    	topLayer.remove(xTile, yTile);
+		                    }
 	        				Flag flag = (Flag) getCurrentTile();
 	        				flag.set(xTile, yTile);
 	        				topLayer.add(flag);
@@ -232,11 +270,44 @@ public class MapEditorMapScene implements GameScene {
 	        				smallRock.set(xTile, yTile);
 	        				topLayer.add(smallRock);
 	        			}else {
-	        				tiles[xTile][yTile] = getCurrentTile();
+		                    if(topLayer.get(xTile, yTile) != null) {
+		                    	topLayer.remove(xTile, yTile);
+		                    }
+		                    tiles[xTile][yTile] = getCurrentTile();
 	        			}
 	        		}
 	        	}else if(button == 1) {
 	        		if (yTile >= 3 && yTile <= 32) {//leave safezone alone
+	        			if(isRemoveWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 30) {
+	        				int xTileNW = xTile;
+	        				int yTileNW = yTile;
+	        				int xTileNE = xTile+1;
+	        				int yTileNE = yTile;
+	        				int xTileSW = xTile;
+	        				int yTileSW = yTile-1;
+	        				int xTileSE = xTile+1;
+	        				int yTileSE = yTile-1;
+	        				if(tiles[xTileNW][yTileNW] instanceof Whirlpool && tiles[xTileNE][yTileNE] instanceof Whirlpool
+	        						&& tiles[xTileSW][yTileSW] instanceof Whirlpool && tiles[xTileSE][yTileSE] instanceof Whirlpool) {
+		        				tiles[xTileNW][yTileNW] = cell;
+			                    if(topLayer.get(xTileNW, yTileNW) != null) {
+			                    	topLayer.remove(xTileNW, yTileNW);
+			                    }
+		        				tiles[xTileNE][yTileNE] = cell;
+			                    if(topLayer.get(xTileNE, yTileNE) != null) {
+			                    	topLayer.remove(xTileNE, yTileNE);
+			                    }
+		        				tiles[xTileSW][yTileSW] = cell;
+			                    if(topLayer.get(xTileSW, yTileSW) != null) {
+			                    	topLayer.remove(xTileSW, yTileSW);
+			                    }
+		        				tiles[xTileSE][yTileSE] = cell;
+			                    if(topLayer.get(xTileSE, yTileSE) != null) {
+			                    	topLayer.remove(xTileSE, yTileSE);
+			                    }
+			                    setRemoveWhirlPool(false);	
+	        				}
+	        			}
 	                    tiles[xTile][yTile] = cell;
 	                    if(topLayer.get(xTile, yTile) != null) {
 	                    	topLayer.remove(xTile, yTile);
@@ -445,7 +516,19 @@ public class MapEditorMapScene implements GameScene {
 		return currentTile;
 	}
 	
-    public void dispose() {
+    public boolean isAddWhirlPool() {
+		return addWhirlPool;
+	}
+	public void setAddWhirlPool(boolean addWhirlPool) {
+		this.addWhirlPool = addWhirlPool;
+	}
+	public boolean isRemoveWhirlPool() {
+		return removeWhirlPool;
+	}
+	public void setRemoveWhirlPool(boolean removeWhirlPool) {
+		this.removeWhirlPool = removeWhirlPool;
+	}
+	public void dispose() {
 		camera = null;
 		topLayer.clear();
 	}
