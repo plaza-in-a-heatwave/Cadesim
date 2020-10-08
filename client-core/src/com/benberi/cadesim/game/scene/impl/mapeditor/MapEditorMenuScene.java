@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -46,12 +47,12 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     private Stage stage;
     private Skin skin;
     private TextButton loadButton;
+    private TextButton helpButton;
     private TextButton saveButton;
     private TextButton newButton;
     private TextButton lobbyButton;
     
     private TextButton addWhirlButton;
-    private TextButton removeWhirlButton;
     
     private ImageButton windNButton;
     private ImageButtonStyle windNStyle;
@@ -143,16 +144,16 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
 
         initButtons();
         addWhirlButton = new TextButton("Add WhirlPool", skin);
-        removeWhirlButton = new TextButton("Remove WhirlPool", skin);
         Button[] buttonArray = {windNButton,windSButton,windWButton,windEButton,
         		whirlNWButton,whirlNEButton,whirlSWButton,whirlSEButton,
         		smallRockButton,bigRockButton,
         		flag1Button,flag2Button,flag3Button,
-        		addWhirlButton,removeWhirlButton};
+        		addWhirlButton};
         Collections.addAll(buttonList, buttonArray);
         saveButton = new TextButton("Save Map", skin);
         newButton = new TextButton("New Map", skin);
         loadButton = new TextButton("Load Map", skin);
+        helpButton = new TextButton("Help", skin);
         lobbyButton = new TextButton("Exit Editor", skin);
 
         context.getManager().get(context.getAssetObject().regularFont);
@@ -170,7 +171,6 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         whirlTable.add(whirlSWButton).pad(1.0f);
         whirlTable.add(whirlSEButton).pad(1.0f).row();
         whirlTable.add(addWhirlButton).colspan(2).row();
-        whirlTable.add(removeWhirlButton).colspan(2);
         whirlTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-190);
         
         Table rockTable = new Table();
@@ -188,7 +188,8 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         Table table = new Table();
         table.add(newButton).pad(3.0f).row();
         table.add(loadButton).pad(3.0f).row();
-        table.add(saveButton).padTop(3.0f).padBottom(40.0f).row();
+        table.add(saveButton).pad(3.0f).row();
+        table.add(helpButton).padTop(3.0f).padBottom(20.0f).row();
         table.add(lobbyButton).pad(3.0f).row();
         stage.addActor(windTable);
         stage.addActor(whirlTable);
@@ -215,18 +216,6 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         		addWhirlButton.setDisabled(true);
         	}
         });
-        
-        removeWhirlButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		context.getMapEditor().setRemoveWhirlPool(true);
-        		removeWhirlButton.setDisabled(true);
-        	}
-        });
-        
         saveButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -234,6 +223,12 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         	}
         });
         
+        helpButton.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		showHelp();
+        	}
+        });
         
         newButton.addListener(new ClickListener() {
         	@Override
@@ -262,6 +257,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         windNButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -282,6 +278,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         windSButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -302,6 +299,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         windWButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -324,6 +322,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         windEButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -346,6 +345,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         whirlNWButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -366,6 +366,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         whirlNEButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -386,6 +387,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         whirlSWButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -517,6 +519,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         });
         
     }
+   
     public void setup() {
         inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(context.getInputProcessor());
@@ -558,6 +561,26 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
+
+    public void showHelp() {
+    	Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+    	Dialog dialog = new Dialog("Help", skin, "dialog");
+		dialog.text("Basic Instructions:"
+				+ "\n ------------------------------------"
+				+ "\nLeft mouse button: adds items to selected tile."
+				+ "\n\nRight mouse button: sets selected tile to blank tile."
+				+ "\n\nMiddle mouse button: allows zoom/panning around map."
+				+ "\n ------------------------------------"
+				+ "\nAdditional info:"
+				+ "\n-To add an entire whirlpool, click 'Add Whirlpool' and select"
+				+ "\n tile where you want NW corner of whirlpool to be at."
+				+ "\n\n-You can also click and drag to add multiple items, instead of clicking individual tiles.");
+		dialog.button("Ok");
+    	dialog.setMovable(true);
+		stage.addActor(dialog);
+		dialog.show(stage);
+		dialog.setResizable(true);
+    }
     @Override
     public boolean handleDrag(float sx, float sy, float x, float y) {
         return true;

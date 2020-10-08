@@ -6,9 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -18,6 +15,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.scene.GameScene;
 import com.benberi.cadesim.game.scene.impl.battle.map.GameObject;
@@ -120,8 +120,7 @@ public class MapEditorMapScene implements GameScene {
     /**
      * booleans to tell whether add or remove whirlpool button is selected
      */
-    public boolean addWhirlPool = false;
-    public boolean removeWhirlPool = false;
+    public static volatile boolean addWhirlPool = false;
     
     /**
      * top layer
@@ -185,6 +184,7 @@ public class MapEditorMapScene implements GameScene {
      * Creates an empty map with SafeZone tiles
      */
     public void createEmptyMap() {
+    	Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
     	//clear the tiles
     	topLayer.clear();
     	// Create the sea tiles
@@ -247,6 +247,7 @@ public class MapEditorMapScene implements GameScene {
     	int result = fileChooser.showSaveDialog(null);
     	if(result == JFileChooser.APPROVE_OPTION) {
     		File selectedFile = fileChooser.getSelectedFile();
+    		Gdx.graphics.setTitle("MapEditor - current map: " + selectedFile.getName());
     		if(!selectedFile.getAbsolutePath().endsWith(".txt") ) {
     			String fname = selectedFile.getAbsolutePath().toString() + ".txt";
     			selectedFile = new File(fname);
@@ -331,7 +332,8 @@ public class MapEditorMapScene implements GameScene {
     	if(result == JFileChooser.APPROVE_OPTION) {
     		int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
     		File selectedFile = fileChooser.getSelectedFile();
-    		
+    		System.out.println(selectedFile.getName());
+    	
     		int x = 0;
 	        int y = 0;
 	        clearTiles();
@@ -371,10 +373,10 @@ public class MapEditorMapScene implements GameScene {
         			}else if(tempTiles[i][j] == WP_SE) {
         				tiles[x1][y1] = whirlSE;
         			}else if(tempTiles[i][j] == SMALL_ROCK) {
-        				SmallRock small = new SmallRock(context,x1,y1);
+        				SmallRock small = new SmallRock(context,x1,y1,false);
         				topLayer.add(small);
         			}else if(tempTiles[i][j] == BIG_ROCK) {
-        				BigRock big = new BigRock(context,x1,y1);
+        				BigRock big = new BigRock(context,x1,y1,false);
         				topLayer.add(big);
         			}else if(tempTiles[i][j] == FLAG_1) {
 	        			Flag flag_1 = new Flag(context,x1,y1,1);	
@@ -399,7 +401,9 @@ public class MapEditorMapScene implements GameScene {
 	            y1 = 0;
 	            x1++;
 	        }
+	        Gdx.graphics.setTitle("MapEditor - loaded map: "+selectedFile.getName());
     	}
+    	
     }
 
     @Override
@@ -407,6 +411,8 @@ public class MapEditorMapScene implements GameScene {
         renderer = new ShapeRenderer();
         this.batch = new SpriteBatch();
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.position.x = 0;
+        camera.position.y = 200;
     }
 
     @Override
@@ -636,61 +642,30 @@ public class MapEditorMapScene implements GameScene {
 				int yTileSW = yTile-1;
 				int xTileSE = xTile+1;
 				int yTileSE = yTile-1;
-				
+
 				tiles[xTileNW][yTileNW] = cell;
+				tiles[xTileNE][yTileNE] = cell;
+				tiles[xTileSW][yTileSW] = cell;
+				tiles[xTileSE][yTileSE] = cell;
                 if(topLayer.get(xTileNW, yTileNW) != null) {
                 	topLayer.remove(xTileNW, yTileNW);
                 }
-				tiles[xTileNE][yTileNE] = cell;
                 if(topLayer.get(xTileNE, yTileNE) != null) {
                 	topLayer.remove(xTileNE, yTileNE);
                 }
-				tiles[xTileSW][yTileSW] = cell;
                 if(topLayer.get(xTileSW, yTileSW) != null) {
                 	topLayer.remove(xTileSW, yTileSW);
                 }
-				tiles[xTileSE][yTileSE] = cell;
                 if(topLayer.get(xTileSE, yTileSE) != null) {
                 	topLayer.remove(xTileSE, yTileSE);
                 }
-				tiles[xTile][yTile] = whirlNW;
+				tiles[xTileNW][yTileNW] = whirlNW;
 				tiles[xTileNE][yTileNE] = whirlNE;
 				tiles[xTileSW][yTileSW] = whirlSW;
 				tiles[xTileSE][yTileSE] = whirlSE;
+			}
+			else if(getCurrentTile() instanceof Flag) {
 				setAddWhirlPool(false);
-			}
-			if(isRemoveWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 30) {
-				int xTileNW = xTile;
-				int yTileNW = yTile;
-				int xTileNE = xTile+1;
-				int yTileNE = yTile;
-				int xTileSW = xTile;
-				int yTileSW = yTile-1;
-				int xTileSE = xTile+1;
-				int yTileSE = yTile-1;
-				if(tiles[xTileNW][yTileNW] instanceof Whirlpool && tiles[xTileNE][yTileNE] instanceof Whirlpool
-						&& tiles[xTileSW][yTileSW] instanceof Whirlpool && tiles[xTileSE][yTileSE] instanceof Whirlpool) {
-    				tiles[xTileNW][yTileNW] = cell;
-    				setCurrentTile(cell);
-                    if(topLayer.get(xTileNW, yTileNW) != null) {
-                    	topLayer.remove(xTileNW, yTileNW);
-                    }
-    				tiles[xTileNE][yTileNE] = cell;
-                    if(topLayer.get(xTileNE, yTileNE) != null) {
-                    	topLayer.remove(xTileNE, yTileNE);
-                    }
-    				tiles[xTileSW][yTileSW] = cell;
-                    if(topLayer.get(xTileSW, yTileSW) != null) {
-                    	topLayer.remove(xTileSW, yTileSW);
-                    }
-    				tiles[xTileSE][yTileSE] = cell;
-                    if(topLayer.get(xTileSE, yTileSE) != null) {
-                    	topLayer.remove(xTileSE, yTileSE);
-                    }
-                    setRemoveWhirlPool(false);	
-				}
-			}
-			if(getCurrentTile() instanceof Flag) {
 				tiles[xTile][yTile] = cell;
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
@@ -699,21 +674,24 @@ public class MapEditorMapScene implements GameScene {
 				topLayer.add(flag);
 			}
 			else if(getCurrentTile() instanceof BigRock) {
+				setAddWhirlPool(false);
 				tiles[xTile][yTile] = cell;
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
                 }
-				BigRock bigRock = new BigRock(context,xTile, yTile);
+				BigRock bigRock = new BigRock(context,xTile, yTile,true);
 				topLayer.add(bigRock);
 			}
 			else if(getCurrentTile() instanceof SmallRock) {
+				setAddWhirlPool(false);
 				tiles[xTile][yTile] = cell;
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
                 }
-				SmallRock smallRock = new SmallRock(context,xTile, yTile);
+				SmallRock smallRock = new SmallRock(context,xTile, yTile,true);
 				topLayer.add(smallRock);
-			}else { 
+			}else if(getCurrentTile() instanceof Wind || getCurrentTile() instanceof Whirlpool){ 
+				setAddWhirlPool(false);
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
                 }
@@ -752,17 +730,7 @@ public class MapEditorMapScene implements GameScene {
 	}
 	
     public void setAddWhirlPool(boolean addWhirlPool) {
-		this.addWhirlPool = addWhirlPool;
-	}
-    /**
-     * To check if remove whirlpool button is clicked
-     */
-    public boolean isRemoveWhirlPool() {
-		return removeWhirlPool;
-	}
-	
-    public void setRemoveWhirlPool(boolean removeWhirlPool) {
-		this.removeWhirlPool = removeWhirlPool;
+		MapEditorMapScene.addWhirlPool = addWhirlPool;
 	}
 	
     public void dispose() {

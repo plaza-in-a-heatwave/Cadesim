@@ -98,10 +98,10 @@ public class BlockadeMap {
                 int tile = tiles[x][y];
                 switch (tile) {
                     case SMALL_ROCK:
-                        rocks.add(new SmallRock(context, x, y));
+                        rocks.add(new SmallRock(context, x, y,false));
                         break;
                     case BIG_ROCK:
-                        rocks.add( new BigRock(context, x, y));
+                        rocks.add( new BigRock(context, x, y,false));
                         break;
                 }
             }
