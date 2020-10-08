@@ -85,8 +85,10 @@ public class ConnectScene implements GameScene, InputProcessor {
 
     private Texture background;
     private Texture textfieldTexture;
-    private Texture loginButton;
-    private Texture loginButtonHover;
+    private Texture loginButtonUp;
+    private Texture loginButtonDown;
+    private Texture mapEditorButtonUp;
+    private Texture mapEditorButtonDown;
 
     private Texture baghlah;
     private Texture blackship;
@@ -120,12 +122,15 @@ public class ConnectScene implements GameScene, InputProcessor {
     
     private final int MAIN_GROUP_OFFSET_Y = 20;
     
-    private Drawable regularDrawable;
-    private Drawable hoverDrawable;
+    private Drawable loginDrawable;
+    private Drawable loginDisabledDrawable;
+    private Drawable mapEditorDrawable;
+    private Drawable mapEditorDisabledDrawable;
     private ImageButton buttonConn;
-    private TextButton buttonMapEditor;
+    private ImageButton buttonMapEditor;
+    private ImageButtonStyle mapEditorButtonStyle;
     private Skin skin;
-    private ImageButtonStyle buttonStyle;
+    private ImageButtonStyle loginButtonStyle;
     
     private String[] resolution;
     private String[] oldResolution;
@@ -203,19 +208,19 @@ public class ConnectScene implements GameScene, InputProcessor {
         background = context.getManager().get(context.getAssetObject().background);
         textfieldTexture = context.getManager().get(context.getAssetObject().textfieldTexture);
 
-        buttonStyle = new ImageButtonStyle();
-        loginButton = context.getManager().get(context.getAssetObject().loginButton);
-        regularDrawable = new TextureRegionDrawable(new TextureRegion(loginButton));
-        loginButtonHover = context.getManager().get(context.getAssetObject().loginButtonHover);
-        hoverDrawable = new TextureRegionDrawable(new TextureRegion(loginButtonHover));
+        loginButtonStyle = new ImageButtonStyle();
+        loginButtonUp = context.getManager().get(context.getAssetObject().loginButton);
+        loginDrawable = new TextureRegionDrawable(new TextureRegion(loginButtonUp));
+        loginButtonDown = context.getManager().get(context.getAssetObject().loginButtonDown);
+        loginDisabledDrawable = new TextureRegionDrawable(new TextureRegion(loginButtonDown));
         
-        buttonStyle = new ImageButtonStyle();
-        buttonStyle.imageUp = hoverDrawable;
-        buttonStyle.imageDown = regularDrawable;
-        buttonStyle.imageChecked = hoverDrawable;
-        buttonStyle.imageOver = regularDrawable;
+        loginButtonStyle = new ImageButtonStyle();
+        loginButtonStyle.imageUp = loginDrawable;
+        loginButtonStyle.imageDown = loginDisabledDrawable;
+        loginButtonStyle.imageChecked = loginDrawable;
+        loginButtonStyle.imageOver = loginDisabledDrawable;
         //login button
-        buttonConn = new ImageButton(buttonStyle); //Set the button up
+        buttonConn = new ImageButton(loginButtonStyle); //Set the button up
         buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
             	//only run if there is an update listed on server
@@ -256,14 +261,23 @@ public class ConnectScene implements GameScene, InputProcessor {
         buttonConn.setPosition(165, 290);
         skin = new Skin(Gdx.files.internal("uiskin.json"));
       //login button
-        buttonMapEditor = new TextButton("Map Editor",skin); //Set the button up
+        
+        mapEditorButtonStyle = new ImageButtonStyle();
+        mapEditorButtonUp = context.getManager().get(context.getAssetObject().mapEditorButtonUp);
+        mapEditorButtonDown = context.getManager().get(context.getAssetObject().mapEditorButtonDown);
+        mapEditorDrawable = new TextureRegionDrawable(new TextureRegion(mapEditorButtonUp));
+        mapEditorDisabledDrawable = new TextureRegionDrawable(new TextureRegion(mapEditorButtonDown));
+        mapEditorButtonStyle.imageUp = mapEditorDrawable;
+        mapEditorButtonStyle.imageDown = mapEditorDisabledDrawable;
+        mapEditorButtonStyle.imageOver = mapEditorDisabledDrawable;
+        buttonMapEditor = new ImageButton(mapEditorButtonStyle); //Set the button up
         buttonMapEditor.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
             	context.createMapEditorScene();
             	context.setStartedMapEditor(true);
             }
         });
-        buttonMapEditor.setPosition(Gdx.graphics.getWidth() - 100, Gdx.graphics.getHeight() - 50);
+        buttonMapEditor.setPosition(Gdx.graphics.getWidth() - 70, Gdx.graphics.getHeight() - 50);
         renderer = new ShapeRenderer();
 
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));

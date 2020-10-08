@@ -68,6 +68,8 @@ public class MapEditorMapScene implements GameScene {
      */
     public static final int MAP_HEIGHT = 36;
 
+    private static final int TILE_WIDTH_HALF = GameTile.TILE_WIDTH / 2;
+    private static final int TILE_HEIGHT_HALF = GameTile.TILE_HEIGHT / 2;
     /**
      * Tiles for map - 
      * Had to create separate objects for the disabled buttons
@@ -176,6 +178,8 @@ public class MapEditorMapScene implements GameScene {
         flag3Disabled = new Flag(context,3,true);
         //initialize currentTile
         setCurrentTile(cell);
+        
+        
     }
     /**
      * Creates an empty map with SafeZone tiles
@@ -192,10 +196,8 @@ public class MapEditorMapScene implements GameScene {
                 else {
                 	tiles[x][y] = cell;
                 }
-
             }
         }
-
     }
     /**
      * Helper method, flip array horizontally
@@ -404,11 +406,7 @@ public class MapEditorMapScene implements GameScene {
     public void create() {
         renderer = new ShapeRenderer();
         this.batch = new SpriteBatch();
-        camera = new OrthographicCamera(Gdx.graphics.getWidth()-175, Gdx.graphics.getHeight());
-        //initial camera settings;
-        camera.position.x = 0;
-        camera.position.y = 200;
-        camera.zoom = 1.5f;
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override
@@ -421,7 +419,7 @@ public class MapEditorMapScene implements GameScene {
 
     @Override
     public void render() {
-    	Gdx.gl.glViewport(0,0, Gdx.graphics.getWidth()-175, Gdx.graphics.getHeight());
+    	Gdx.gl.glViewport(0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		batch.setProjectionMatrix(camera.combined);
         batch.begin();
         drawSea();
@@ -437,7 +435,31 @@ public class MapEditorMapScene implements GameScene {
     	if (sy > camera.viewportHeight) {
             return false;
         }
-
+    	//allow user to drag and add
+    	if(Gdx.input.isButtonPressed(0)) {
+    		int xTile = getTileX(sx,sy);
+			int yTile = getTileY(sx,sy);
+			try {
+	        	if(sx < Gdx.graphics.getWidth() - 175) {
+	        		addTileItem(xTile,yTile);
+	        	}
+			}catch(Exception e) {
+				
+			}
+    	}
+    	//allow user to drag and remove
+    	if(Gdx.input.isButtonPressed(1)) {
+    		int xTile = getTileX(sx,sy);
+			int yTile = getTileY(sx,sy);
+			try {
+	        	if(sx < Gdx.graphics.getWidth() - 175) {
+	        		removeTileItem(xTile,yTile);
+	        	}
+			}catch(Exception e) {
+				
+			}
+    	}
+    	//allow user to drag camera
     	if(Gdx.input.isButtonPressed(2)) {
             if (this.canDragMap) {
                 camera.translate(-x, y);
@@ -446,131 +468,50 @@ public class MapEditorMapScene implements GameScene {
 
         return true;
     }
+    /**
+     * Get tile at coordinate X
+     */
+    public int getTileX(float x, float y) {
+    	/*
+    	 * getRegionWidth() = TILE_WIDTH_HALF 
+    	 * getRegionHeight() = TILE_HEIGHT_HALF
+    	 * these are the ones being added to worldCoords.x/y
+        */
+    	Vector3 worldCoords = camera.unproject(new Vector3(x, y, 0));
+    	
+    	
+    	return (int)((TILE_WIDTH_HALF * ((-TILE_HEIGHT_HALF + (worldCoords.y + TILE_HEIGHT_HALF)) / 
+				TILE_HEIGHT_HALF) + (worldCoords.x + TILE_WIDTH_HALF)) / TILE_WIDTH_HALF) / 2;
+    }
+    /**
+     * Get tile at coordinate Y
+     */
+    public int getTileY(float x, float y) {
+    	/*
+    	 * getRegionWidth() = TILE_WIDTH_HALF 
+    	 * getRegionHeight() = TILE_HEIGHT_HALF
+    	 * these are the ones being added to worldCoords.x/y
+        */
+    	Vector3 worldCoords = camera.unproject(new Vector3(x, y, 0));
+        return (int)Math.ceil((((-TILE_HEIGHT_HALF * (TILE_WIDTH_HALF + (worldCoords.x + GameTile.TILE_WIDTH)) / 
+				TILE_WIDTH_HALF) + (worldCoords.y + GameTile.TILE_HEIGHT)) / TILE_HEIGHT_HALF) / 2);
+    }
     
     @Override
     public boolean handleClick(float x, float y, int button) {
     	if(button != 2) {
     		if(x < camera.viewportWidth) {
-    			TextureRegion region = tiles[0][0].getRegion();
-    			Vector3 point = camera.unproject(new Vector3(x,y,0));
-	        	int xTile = (int) ((int)(x-point.x / GameTile.TILE_WIDTH) +
-	                    (y-point.y / GameTile.TILE_HEIGHT) +
-	                    (region.getRegionHeight() / (2 * GameTile.TILE_HEIGHT)) +
-	                    (region.getRegionWidth() / (2 * GameTile.TILE_WIDTH)));
-	            int yTile = (int) ((y-point.y / GameTile.TILE_HEIGHT) -
-	                    (x -point.x/ GameTile.TILE_WIDTH) -
-	                    (region.getRegionWidth() / (2 * GameTile.TILE_WIDTH)) +
-	                    (region.getRegionHeight() / (2 * GameTile.TILE_HEIGHT)));
-	            
-//	            System.out.println(xTile%GameTile.TILE_WIDTH);
-//	            System.out.println(yTile%GameTile.TILE_HEIGHT);
-//	          xTile = 6;
-//	          yTile = 6; //test values
-//	        	if(button == 0) {
-//	        		if(yTile >= 3 && yTile <= 32) { //leave safezone alone
-//	        			if(isAddWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 30) {
-//	        				int xTileNW = xTile;
-//	        				int yTileNW = yTile;
-//	        				int xTileNE = xTile+1;
-//	        				int yTileNE = yTile;
-//	        				int xTileSW = xTile;
-//	        				int yTileSW = yTile-1;
-//	        				int xTileSE = xTile+1;
-//	        				int yTileSE = yTile-1;
-//	        				
-//	        				tiles[xTileNW][yTileNW] = cell;
-//		                    if(topLayer.get(xTileNW, yTileNW) != null) {
-//		                    	topLayer.remove(xTileNW, yTileNW);
-//		                    }
-//	        				tiles[xTileNE][yTileNE] = cell;
-//		                    if(topLayer.get(xTileNE, yTileNE) != null) {
-//		                    	topLayer.remove(xTileNE, yTileNE);
-//		                    }
-//	        				tiles[xTileSW][yTileSW] = cell;
-//		                    if(topLayer.get(xTileSW, yTileSW) != null) {
-//		                    	topLayer.remove(xTileSW, yTileSW);
-//		                    }
-//	        				tiles[xTileSE][yTileSE] = cell;
-//		                    if(topLayer.get(xTileSE, yTileSE) != null) {
-//		                    	topLayer.remove(xTileSE, yTileSE);
-//		                    }
-//	        				tiles[xTile][yTile] = whirlNW;
-//	        				tiles[xTileNE][yTileNE] = whirlNE;
-//	        				tiles[xTileSW][yTileSW] = whirlSW;
-//	        				tiles[xTileSE][yTileSE] = whirlSE;
-//	        				setAddWhirlPool(false);
-//	        			}
-//	        			if(getCurrentTile() instanceof Flag) {
-//	        				tiles[xTile][yTile] = cell;
-//		                    if(topLayer.get(xTile, yTile) != null) {
-//		                    	topLayer.remove(xTile, yTile);
-//		                    }
-//	        				Flag flag = (Flag) getCurrentTile();
-//	        				flag.set(xTile, yTile);
-//	        				topLayer.add(flag);
-//	        			}
-//	        			else if(getCurrentTile() instanceof BigRock) {
-//	        				tiles[xTile][yTile] = cell;
-//		                    if(topLayer.get(xTile, yTile) != null) {
-//		                    	topLayer.remove(xTile, yTile);
-//		                    }
-//	        				BigRock bigRock = (BigRock) getCurrentTile();
-//	        				bigRock.set(xTile, yTile);
-//	        				topLayer.add(bigRock);
-//	        			}
-//	        			else if(getCurrentTile() instanceof SmallRock) {
-//	        				tiles[xTile][yTile] = cell;
-//	        				SmallRock smallRock = (SmallRock) getCurrentTile();
-//		                    if(topLayer.get(xTile, yTile) != null) {
-//		                    	topLayer.remove(xTile, yTile);
-//		                    }
-//	        				smallRock.set(xTile, yTile);
-//	        				topLayer.add(smallRock);
-//	        			}else {
-//		                    if(topLayer.get(xTile, yTile) != null) {
-//		                    	topLayer.remove(xTile, yTile);
-//		                    }
-//		                    tiles[xTile][yTile] = getCurrentTile();
-//	        			}
-//	        		}
-//	        	}else if(button == 1) {
-//	        		if (yTile >= 3 && yTile <= 32) {//leave safezone alone
-//	        			if(isRemoveWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 30) {
-//	        				int xTileNW = xTile;
-//	        				int yTileNW = yTile;
-//	        				int xTileNE = xTile+1;
-//	        				int yTileNE = yTile;
-//	        				int xTileSW = xTile;
-//	        				int yTileSW = yTile-1;
-//	        				int xTileSE = xTile+1;
-//	        				int yTileSE = yTile-1;
-//	        				if(tiles[xTileNW][yTileNW] instanceof Whirlpool && tiles[xTileNE][yTileNE] instanceof Whirlpool
-//	        						&& tiles[xTileSW][yTileSW] instanceof Whirlpool && tiles[xTileSE][yTileSE] instanceof Whirlpool) {
-//		        				tiles[xTileNW][yTileNW] = cell;
-//			                    if(topLayer.get(xTileNW, yTileNW) != null) {
-//			                    	topLayer.remove(xTileNW, yTileNW);
-//			                    }
-//		        				tiles[xTileNE][yTileNE] = cell;
-//			                    if(topLayer.get(xTileNE, yTileNE) != null) {
-//			                    	topLayer.remove(xTileNE, yTileNE);
-//			                    }
-//		        				tiles[xTileSW][yTileSW] = cell;
-//			                    if(topLayer.get(xTileSW, yTileSW) != null) {
-//			                    	topLayer.remove(xTileSW, yTileSW);
-//			                    }
-//		        				tiles[xTileSE][yTileSE] = cell;
-//			                    if(topLayer.get(xTileSE, yTileSE) != null) {
-//			                    	topLayer.remove(xTileSE, yTileSE);
-//			                    }
-//			                    setRemoveWhirlPool(false);	
-//	        				}
-//	        			}
-//	                    tiles[xTile][yTile] = cell;
-//	                    if(topLayer.get(xTile, yTile) != null) {
-//	                    	topLayer.remove(xTile, yTile);
-//	                    }
-//	        		}
-//	        	}
+    			int xTile = getTileX(x,y);
+    			int yTile = getTileY(x,y);
+    			try {
+    	        	if(button == 0 && x < Gdx.graphics.getWidth() - 175) {
+    	        		addTileItem(xTile,yTile);
+    	        	}else if(button == 1 && x < Gdx.graphics.getWidth() - 175) {
+    	        		removeTileItem(xTile,yTile);
+    	        	}
+    			}catch(Exception e) {
+    				
+    			}
     		}
     	}
         
@@ -623,15 +564,14 @@ public class MapEditorMapScene implements GameScene {
      * Draws the entire map
      */
     private void renderMap() {
-        for (int i = 0; i < tiles.length; i++) {
-            for(int j = 0; j < tiles[i].length; j++) {
-            	if(tiles[i][j] != null) {
-                    TextureRegion region = tiles[i][j].getRegion();
-                    int x = (i * GameTile.TILE_WIDTH / 2) - (j * GameTile.TILE_WIDTH / 2) - region.getRegionWidth() / 2;
-                    int y = (i * GameTile.TILE_HEIGHT / 2) + (j * GameTile.TILE_HEIGHT / 2) - region.getRegionHeight() / 2;
-                    batch.draw(region, x, y);
+        for (int tileX = 0; tileX < tiles.length; tileX++) {
+            for(int tileY = 0; tileY < tiles[tileX].length; tileY++) {
+            	if(tiles[tileX][tileY] != null) {
+                    TextureRegion region = tiles[tileX][tileY].getRegion();
+                    int worldX = (tileX - tileY)*TILE_WIDTH_HALF - region.getRegionWidth()/2;
+                    int worldY = (tileX + tileY)*TILE_HEIGHT_HALF - region.getRegionHeight()/2;
+                    batch.draw(region, worldX, worldY);
             	}
-            	
             }
         }
     }
@@ -646,9 +586,8 @@ public class MapEditorMapScene implements GameScene {
                 GameObject object = getObject(x, y);
                 if (object != null) {
                     TextureRegion region = object.getRegion();
-
-                    int xx = (object.getX() * GameTile.TILE_WIDTH / 2) - (object.getY() * GameTile.TILE_WIDTH / 2) - region.getRegionWidth() / 2;
-                    int yy = (object.getX() * GameTile.TILE_HEIGHT / 2) + (object.getY() * GameTile.TILE_HEIGHT / 2) - region.getRegionHeight() / 2;
+                    int xx = ((object.getX() - object.getY()) * TILE_WIDTH_HALF) - region.getRegionWidth() / 2;
+                    int yy = ((object.getX() + object.getY()) * TILE_HEIGHT_HALF) - region.getRegionHeight() / 2;
                     int offsetX = 0;
                     int offsetY = 0;
                     if (object.isOriented()) {
@@ -672,7 +611,9 @@ public class MapEditorMapScene implements GameScene {
         return x + width >= camera.position.x - camera.viewportWidth / 2 && x <= camera.position.x + camera.viewportWidth / 2 &&
                 y + height >= camera.position.y - camera.viewportHeight / 2 && y <= camera.position.y + camera.viewportHeight / 2;
     }
-
+    /**
+     * Get object on topLayer (flags/rocks)
+     */
     public GameObject getObject(float x, float y) {
         for (GameObject object : topLayer.getObjects()) {
             if (object.getX() == x && object.getY() == y) {
@@ -681,99 +622,131 @@ public class MapEditorMapScene implements GameScene {
         }
         return null;
     }
-
-	public GameTile getNextTile(GameTile tile) {
-		if(tile instanceof Wind) {
-			if(tile == windEast) {
-				return windNorth;
-			}else if(tile == windNorth) {//wind
-				return windSouth;
-			}else if(tile == windSouth) {
-				return windWest;
-			}else if(tile == windWest) {
-				return windEast;
+    /**
+     * Add an item to a specific tile
+     */
+    public void addTileItem(int xTile, int yTile) {
+		if(yTile >= 3 && yTile <= 32) { //leave safezone alone
+			if(isAddWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 33) {
+				int xTileNW = xTile;
+				int yTileNW = yTile;
+				int xTileNE = xTile+1;
+				int yTileNE = yTile;
+				int xTileSW = xTile;
+				int yTileSW = yTile-1;
+				int xTileSE = xTile+1;
+				int yTileSE = yTile-1;
+				
+				tiles[xTileNW][yTileNW] = cell;
+                if(topLayer.get(xTileNW, yTileNW) != null) {
+                	topLayer.remove(xTileNW, yTileNW);
+                }
+				tiles[xTileNE][yTileNE] = cell;
+                if(topLayer.get(xTileNE, yTileNE) != null) {
+                	topLayer.remove(xTileNE, yTileNE);
+                }
+				tiles[xTileSW][yTileSW] = cell;
+                if(topLayer.get(xTileSW, yTileSW) != null) {
+                	topLayer.remove(xTileSW, yTileSW);
+                }
+				tiles[xTileSE][yTileSE] = cell;
+                if(topLayer.get(xTileSE, yTileSE) != null) {
+                	topLayer.remove(xTileSE, yTileSE);
+                }
+				tiles[xTile][yTile] = whirlNW;
+				tiles[xTileNE][yTileNE] = whirlNE;
+				tiles[xTileSW][yTileSW] = whirlSW;
+				tiles[xTileSE][yTileSE] = whirlSE;
+				setAddWhirlPool(false);
+			}
+			if(isRemoveWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 30) {
+				int xTileNW = xTile;
+				int yTileNW = yTile;
+				int xTileNE = xTile+1;
+				int yTileNE = yTile;
+				int xTileSW = xTile;
+				int yTileSW = yTile-1;
+				int xTileSE = xTile+1;
+				int yTileSE = yTile-1;
+				if(tiles[xTileNW][yTileNW] instanceof Whirlpool && tiles[xTileNE][yTileNE] instanceof Whirlpool
+						&& tiles[xTileSW][yTileSW] instanceof Whirlpool && tiles[xTileSE][yTileSE] instanceof Whirlpool) {
+    				tiles[xTileNW][yTileNW] = cell;
+    				setCurrentTile(cell);
+                    if(topLayer.get(xTileNW, yTileNW) != null) {
+                    	topLayer.remove(xTileNW, yTileNW);
+                    }
+    				tiles[xTileNE][yTileNE] = cell;
+                    if(topLayer.get(xTileNE, yTileNE) != null) {
+                    	topLayer.remove(xTileNE, yTileNE);
+                    }
+    				tiles[xTileSW][yTileSW] = cell;
+                    if(topLayer.get(xTileSW, yTileSW) != null) {
+                    	topLayer.remove(xTileSW, yTileSW);
+                    }
+    				tiles[xTileSE][yTileSE] = cell;
+                    if(topLayer.get(xTileSE, yTileSE) != null) {
+                    	topLayer.remove(xTileSE, yTileSE);
+                    }
+                    setRemoveWhirlPool(false);	
+				}
+			}
+			if(getCurrentTile() instanceof Flag) {
+				tiles[xTile][yTile] = cell;
+                if(topLayer.get(xTile, yTile) != null) {
+                	topLayer.remove(xTile, yTile);
+                }
+                Flag flag = new Flag(context,xTile, yTile,((Flag) getCurrentTile()).getSize());
+				topLayer.add(flag);
+			}
+			else if(getCurrentTile() instanceof BigRock) {
+				tiles[xTile][yTile] = cell;
+                if(topLayer.get(xTile, yTile) != null) {
+                	topLayer.remove(xTile, yTile);
+                }
+				BigRock bigRock = new BigRock(context,xTile, yTile);
+				topLayer.add(bigRock);
+			}
+			else if(getCurrentTile() instanceof SmallRock) {
+				tiles[xTile][yTile] = cell;
+                if(topLayer.get(xTile, yTile) != null) {
+                	topLayer.remove(xTile, yTile);
+                }
+				SmallRock smallRock = new SmallRock(context,xTile, yTile);
+				topLayer.add(smallRock);
+			}else { 
+                if(topLayer.get(xTile, yTile) != null) {
+                	topLayer.remove(xTile, yTile);
+                }
+                tiles[xTile][yTile] = getCurrentTile();
 			}
 		}
-		if(tile instanceof Whirlpool) {
-			if(tile == whirlSE) {//whirl
-				return whirlSW;
-			}else if(tile == whirlSW) {
-				return whirlNW;
-			}else if(tile == whirlNW) {
-				return whirlNE;
-			}else if(tile == whirlNE) {
-				return whirlSE;
-			}
+    }
+    /**
+     * Remove an item to a specific tile
+     */
+    public void removeTileItem(int xTile, int yTile) {
+		if (yTile >= 3 && yTile <= 32) {//leave safezone alone
+            tiles[xTile][yTile] = cell;
+            if(topLayer.get(xTile, yTile) != null) {
+            	topLayer.remove(xTile, yTile);
+            }
 		}
-		if(tile instanceof BigRock) {
-			return smallRock;
-		}
-		if(tile instanceof SmallRock) {
-			return bigRock;
-		}
-		if(tile instanceof Flag){
-			if(tile == flag1) {//whirl
-				return flag2;
-			}else if(tile == flag2) {
-				return flag3;
-			}else if(tile == flag3) {
-				return flag1;
-			}
-		}
-		
-		return cell;
-	}
-	
-	public GameTile getPreviousTile(GameTile tile) {
-		if(tile instanceof Wind) {
-			if(tile == windEast) {
-				return windWest;
-			}else if(tile == windWest) {//wind
-				return windSouth;
-			}else if(tile == windSouth) {
-				return windNorth;
-			}else if(tile == windNorth) {
-				return windEast;
-			}
-		}
-		if(tile instanceof Whirlpool) {
-			if(tile == whirlSE) {//whirl
-				return whirlNE;
-			}else if(tile == whirlNE) {
-				return whirlNW;
-			}else if(tile == whirlNW) {
-				return whirlSW;
-			}else if(tile == whirlSW) {
-				return whirlSE;
-			}
-		}
-		if(tile instanceof BigRock) {
-			return smallRock;
-		}
-		if(tile instanceof SmallRock) {
-			return bigRock;
-		}
-		if(tile instanceof Flag){
-			if(tile == flag1) {//whirl
-				return flag3;
-			}else if(tile == flag3) {
-				return flag2;
-			}else if(tile == flag2) {
-				return flag1;
-			}
-		}
-		
-		return cell;
-	}
-	
+    }
+    /**
+     * Sets current tile for next item
+     */
 	public void setCurrentTile(GameTile tile) {
 		currentTile = tile;
 	}
-	
+    /**
+     * Gets current tile
+     */
 	public GameTile getCurrentTile() {
 		return currentTile;
 	}
-	
+    /**
+     * To check if add whirlpool button is clicked
+     */
     public boolean isAddWhirlPool() {
 		return addWhirlPool;
 	}
@@ -781,7 +754,9 @@ public class MapEditorMapScene implements GameScene {
     public void setAddWhirlPool(boolean addWhirlPool) {
 		this.addWhirlPool = addWhirlPool;
 	}
-	
+    /**
+     * To check if remove whirlpool button is clicked
+     */
     public boolean isRemoveWhirlPool() {
 		return removeWhirlPool;
 	}

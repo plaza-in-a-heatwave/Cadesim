@@ -222,6 +222,8 @@ public class SceneAssetManager {
     private final static String CHATMESSAGESERVERBROADCAST = "ui/chat_message_server_broadcast.png";
     private final static String CHATMESSAGESERVERPRIVATE = "ui/chat_message_server_private.png";
 
+    private final static String MAPEDITOR = "skin/mapEditor.png";
+    private final static String MAPEDITOR_DISABLED ="skin/mapEditor_disabled.png";
     
     /*
      * asset descriptors for textures
@@ -306,7 +308,7 @@ public class SceneAssetManager {
     public AssetDescriptor<Texture> background = new AssetDescriptor<Texture>(BACKGROUND, Texture.class);
     public AssetDescriptor<Texture> textfieldTexture = new AssetDescriptor<Texture>(TEXTFIELDTEXTURE, Texture.class);
     public AssetDescriptor<Texture> loginButton = new AssetDescriptor<Texture>(LOGINBUTTON, Texture.class);
-    public AssetDescriptor<Texture> loginButtonHover = new AssetDescriptor<Texture>(LOGINBUTTONHOVER, Texture.class);
+    public AssetDescriptor<Texture> loginButtonDown = new AssetDescriptor<Texture>(LOGINBUTTONHOVER, Texture.class);
     
     public AssetDescriptor<Texture> cursor = new AssetDescriptor<Texture>(CURSOR, Texture.class);
     public AssetDescriptor<Texture> selection = new AssetDescriptor<Texture>(SELECTION, Texture.class);
@@ -371,6 +373,8 @@ public class SceneAssetManager {
     public AssetDescriptor<Texture> chatMessageServerBroadcast= new AssetDescriptor<Texture>(CHATMESSAGESERVERBROADCAST, Texture.class);
     public AssetDescriptor<Texture> chatMessageServerPrivate= new AssetDescriptor<Texture>(CHATMESSAGESERVERPRIVATE, Texture.class);
 
+    public AssetDescriptor<Texture> mapEditorButtonUp = new AssetDescriptor<Texture>(MAPEDITOR, Texture.class);
+    public AssetDescriptor<Texture> mapEditorButtonDown = new AssetDescriptor<Texture>(MAPEDITOR_DISABLED, Texture.class);
 	/*
 	 * Font asset descriptors
 	 */
@@ -483,9 +487,11 @@ public class SceneAssetManager {
     
 	public void loadConnectSceneTextures() {
 		manager.load(background);
+		manager.load(mapEditorButtonUp);
+		manager.load(mapEditorButtonDown);
 		manager.load(textfieldTexture);
 		manager.load(loginButton);
-		manager.load(loginButtonHover);
+		manager.load(loginButtonDown);
 		manager.load(cursor);
 		manager.load(selection);
 		manager.load(selectBoxBackground);
