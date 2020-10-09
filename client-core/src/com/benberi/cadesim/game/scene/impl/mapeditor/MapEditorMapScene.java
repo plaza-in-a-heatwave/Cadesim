@@ -689,7 +689,7 @@ public class MapEditorMapScene implements GameScene {
                 	topLayer.remove(xTile, yTile);
                 }
                 tiles[xTile][yTile] = getCurrentTile();
-			}else {
+			}else if(getCurrentTile() != null){
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
                 }
