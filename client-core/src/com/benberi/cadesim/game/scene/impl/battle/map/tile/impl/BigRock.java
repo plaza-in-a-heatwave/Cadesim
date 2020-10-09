@@ -20,7 +20,7 @@ public class BigRock extends GameObject {
         		context.getManager().get(context.getAssetObject().bigrock));
         setPackedObjectOrientation("big_rock");
         if(rotationDisabled) {
-        	setOrientation(1);
+        	setOrientation(3);
         }else {
             setOrientation(RandomUtils.randInt(0, 3));
         }

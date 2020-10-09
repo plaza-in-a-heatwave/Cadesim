@@ -144,6 +144,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
 
         initButtons();
         addWhirlButton = new TextButton("Add WhirlPool", skin);
+        addWhirlButton.getStyle().disabled = addWhirlButton.getStyle().down;
         Button[] buttonArray = {windNButton,windSButton,windWButton,windEButton,
         		whirlNWButton,whirlNEButton,whirlSWButton,whirlSEButton,
         		smallRockButton,bigRockButton,
@@ -201,6 +202,11 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         loadButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
+        		context.getMapEditor().setCurrentTile(null);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().loadMap();
         	}
         });
@@ -212,13 +218,17 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         			button.setDisabled(false);
         		}
         		context.getMapEditor().setAddWhirlPool(true);
-        		context.getMapEditor().setCurrentTile(context.getMapEditor().whirlNW);
         		addWhirlButton.setDisabled(true);
         	}
         });
         saveButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
+        		context.getMapEditor().setCurrentTile(null);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().saveMap();
         	}
         });
@@ -226,6 +236,11 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         helpButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
+        		context.getMapEditor().setCurrentTile(null);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		showHelp();
         	}
         });
@@ -233,6 +248,11 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
         newButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
+        		context.getMapEditor().setCurrentTile(null);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
         		context.getMapEditor().createEmptyMap();
         	}
         });
@@ -429,6 +449,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     	smallRockButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -449,6 +470,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     	bigRockButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -469,6 +491,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     	flag1Button.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -489,6 +512,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     	flag2Button.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -510,6 +534,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     	flag3Button.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		context.getMapEditor().setAddWhirlPool(false);
         		for(Button button : buttonList) {
         			button.setDisabled(false);
         		}
@@ -566,15 +591,15 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
     	Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
     	Dialog dialog = new Dialog("Help", skin, "dialog");
 		dialog.text("Basic Instructions:"
-				+ "\n ------------------------------------"
-				+ "\nLeft mouse button: adds items to selected tile."
-				+ "\n\nRight mouse button: sets selected tile to blank tile."
+				+ "\n -------------------------------------------------------------------------------------------------------------------------"
+				+ "\nLeft mouse button: adds selected game tile to selected position."
+				+ "\n\nRight mouse button: sets selected to blank tile."
 				+ "\n\nMiddle mouse button: allows zoom/panning around map."
-				+ "\n ------------------------------------"
+				+ "\n -------------------------------------------------------------------------------------------------------------------------"
 				+ "\nAdditional info:"
-				+ "\n-To add an entire whirlpool, click 'Add Whirlpool' and select"
-				+ "\n tile where you want NW corner of whirlpool to be at."
-				+ "\n\n-You can also click and drag to add multiple items, instead of clicking individual tiles.");
+				+ "\n-To add an entire whirlpool, click 'Add Whirlpool' and select  tile where you want NW corner of whirlpool."
+				+ "\n    (You will be unable to place a whirlpool at tile after oceanside safezone or rightmost tile of map)"
+				+ "\n\n-You can also click and drag to add multiple game tiles, instead of clicking individually.");
 		dialog.button("Ok");
     	dialog.setMovable(true);
 		stage.addActor(dialog);

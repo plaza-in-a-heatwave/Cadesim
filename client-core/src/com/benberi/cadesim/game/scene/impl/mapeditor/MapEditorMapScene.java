@@ -140,6 +140,7 @@ public class MapEditorMapScene implements GameScene {
     private JFileChooser fileChooser;
     
     public MapEditorMapScene(GameContext context) {
+    	Gdx.graphics.setTitle("MapEditor - Blank");
         this.context = context;
         fileChooser = new JFileChooser();
         tiles = new GameTile[MAP_WIDTH][MAP_HEIGHT];
@@ -184,7 +185,7 @@ public class MapEditorMapScene implements GameScene {
      * Creates an empty map with SafeZone tiles
      */
     public void createEmptyMap() {
-    	Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
+    	Gdx.graphics.setTitle("MapEditor - Blank");
     	//clear the tiles
     	topLayer.clear();
     	// Create the sea tiles
@@ -332,8 +333,6 @@ public class MapEditorMapScene implements GameScene {
     	if(result == JFileChooser.APPROVE_OPTION) {
     		int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
     		File selectedFile = fileChooser.getSelectedFile();
-    		System.out.println(selectedFile.getName());
-    	
     		int x = 0;
 	        int y = 0;
 	        clearTiles();
@@ -484,10 +483,8 @@ public class MapEditorMapScene implements GameScene {
     	 * these are the ones being added to worldCoords.x/y
         */
     	Vector3 worldCoords = camera.unproject(new Vector3(x, y, 0));
-    	
-    	
-    	return (int)((TILE_WIDTH_HALF * ((-TILE_HEIGHT_HALF + (worldCoords.y + TILE_HEIGHT_HALF)) / 
-				TILE_HEIGHT_HALF) + (worldCoords.x + TILE_WIDTH_HALF)) / TILE_WIDTH_HALF) / 2;
+    	return (int)Math.floor((TILE_WIDTH_HALF * ((-TILE_HEIGHT_HALF + (worldCoords.y + TILE_HEIGHT_HALF)) / 
+				TILE_HEIGHT_HALF) + (worldCoords.x + TILE_WIDTH_HALF)) / TILE_WIDTH_HALF / 2);
     }
     /**
      * Get tile at coordinate Y
@@ -634,6 +631,7 @@ public class MapEditorMapScene implements GameScene {
     public void addTileItem(int xTile, int yTile) {
 		if(yTile >= 3 && yTile <= 32) { //leave safezone alone
 			if(isAddWhirlPool() && xTile >=0 && xTile <=19 && yTile >=4 && yTile <= 33) {
+				setCurrentTile(whirlNW);
 				int xTileNW = xTile;
 				int yTileNW = yTile;
 				int xTileNE = xTile+1;
@@ -663,9 +661,10 @@ public class MapEditorMapScene implements GameScene {
 				tiles[xTileNE][yTileNE] = whirlNE;
 				tiles[xTileSW][yTileSW] = whirlSW;
 				tiles[xTileSE][yTileSE] = whirlSE;
+			}else if(isAddWhirlPool() && xTile >=0 && xTile <=19 && yTile ==3 && yTile <= 33) {
+				setCurrentTile(null);
 			}
 			else if(getCurrentTile() instanceof Flag) {
-				setAddWhirlPool(false);
 				tiles[xTile][yTile] = cell;
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
@@ -674,7 +673,6 @@ public class MapEditorMapScene implements GameScene {
 				topLayer.add(flag);
 			}
 			else if(getCurrentTile() instanceof BigRock) {
-				setAddWhirlPool(false);
 				tiles[xTile][yTile] = cell;
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
@@ -683,7 +681,6 @@ public class MapEditorMapScene implements GameScene {
 				topLayer.add(bigRock);
 			}
 			else if(getCurrentTile() instanceof SmallRock) {
-				setAddWhirlPool(false);
 				tiles[xTile][yTile] = cell;
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
@@ -691,11 +688,15 @@ public class MapEditorMapScene implements GameScene {
 				SmallRock smallRock = new SmallRock(context,xTile, yTile,true);
 				topLayer.add(smallRock);
 			}else if(getCurrentTile() instanceof Wind || getCurrentTile() instanceof Whirlpool){ 
-				setAddWhirlPool(false);
                 if(topLayer.get(xTile, yTile) != null) {
                 	topLayer.remove(xTile, yTile);
                 }
                 tiles[xTile][yTile] = getCurrentTile();
+			}else {
+                if(topLayer.get(xTile, yTile) != null) {
+                	topLayer.remove(xTile, yTile);
+                }
+                tiles[xTile][yTile] = cell;
 			}
 		}
     }
