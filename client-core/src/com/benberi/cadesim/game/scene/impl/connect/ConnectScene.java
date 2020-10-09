@@ -129,7 +129,6 @@ public class ConnectScene implements GameScene, InputProcessor {
     private ImageButton buttonConn;
     private ImageButton buttonMapEditor;
     private ImageButtonStyle mapEditorButtonStyle;
-    private Skin skin;
     private ImageButtonStyle loginButtonStyle;
     
     private String[] resolution;
@@ -259,7 +258,6 @@ public class ConnectScene implements GameScene, InputProcessor {
 	            }
             }});
         buttonConn.setPosition(165, 290);
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
       //login button
         
         mapEditorButtonStyle = new ImageButtonStyle();

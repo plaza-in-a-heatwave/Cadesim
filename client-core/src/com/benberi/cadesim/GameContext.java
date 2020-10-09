@@ -561,6 +561,7 @@ public class GameContext {
 		getScenes().clear();
 		getConnectScene().setup();
 		setStartedMapEditor(false);
+		Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
     }
     /*
      * When the server decides to disconnect
