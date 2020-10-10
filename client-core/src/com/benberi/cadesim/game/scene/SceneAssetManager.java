@@ -125,6 +125,11 @@ public class SceneAssetManager {
 	private final static String SMALLROCK = "sea/rocks_small.png";
 	private final static String WHIRLPOOL = "sea/whirl.png";
 	private final static String WIND = "sea/wind.png";
+	
+	private final static String BIGROCK_DISABLED ="sea/rocks_big_disable.png";
+	private final static String SMALLROCK_DISABLED = "sea/rocks_small_disable.png";
+	private final static String WHIRLPOOL_DISABLED = "sea/whirl_disable.png";
+	private final static String WIND_DISABLED = "sea/wind_disable.png";
 	/*
 	 * Cannon texture location
 	 */
@@ -145,6 +150,7 @@ public class SceneAssetManager {
     private final static String CONTENDERS = "cade/contender_icons.png";
     private final static String FLAG = "cade/buoy_symbols.png";
     private final static String FLAGTEXTURE = "cade/buoy.png";
+    private final static String FLAGTEXTURE_DISABLED = "cade/buoy_disable.png";
     
     private final static String BACKGROUND = "client_bg.png";
     private final static String TEXTFIELDTEXTURE = "skin/textfield.png";
@@ -216,6 +222,8 @@ public class SceneAssetManager {
     private final static String CHATMESSAGESERVERBROADCAST = "ui/chat_message_server_broadcast.png";
     private final static String CHATMESSAGESERVERPRIVATE = "ui/chat_message_server_private.png";
 
+    private final static String MAPEDITOR = "skin/mapEditor.png";
+    private final static String MAPEDITOR_DISABLED ="skin/mapEditor_disabled.png";
     
     /*
      * asset descriptors for textures
@@ -272,11 +280,15 @@ public class SceneAssetManager {
 	public AssetDescriptor<Texture> safe = new AssetDescriptor<Texture>(SAFE, Texture.class);
 	public AssetDescriptor<Texture> sea = new AssetDescriptor<Texture>(SEA, Texture.class);
 	
-	public AssetDescriptor<Texture> bigrock = new AssetDescriptor<Texture>(BIGROCK, Texture.class);
-	public AssetDescriptor<Texture> smallrock = new AssetDescriptor<Texture>(SMALLROCK, Texture.class);
 	public AssetDescriptor<Texture> whirlpool = new AssetDescriptor<Texture>(WHIRLPOOL, Texture.class);
 	public AssetDescriptor<Texture> wind = new AssetDescriptor<Texture>(WIND, Texture.class);
-
+	public AssetDescriptor<Texture> bigrock = new AssetDescriptor<Texture>(BIGROCK, Texture.class);
+	public AssetDescriptor<Texture> smallrock = new AssetDescriptor<Texture>(SMALLROCK, Texture.class);
+	public AssetDescriptor<Texture> whirlpool_disabled = new AssetDescriptor<Texture>(WHIRLPOOL_DISABLED, Texture.class);
+	public AssetDescriptor<Texture> wind_disabled = new AssetDescriptor<Texture>(WIND_DISABLED, Texture.class);
+	public AssetDescriptor<Texture> bigrock_disabled = new AssetDescriptor<Texture>(BIGROCK_DISABLED, Texture.class);
+	public AssetDescriptor<Texture> smallrock_disabled = new AssetDescriptor<Texture>(SMALLROCK_DISABLED, Texture.class);
+	
 	public AssetDescriptor<Texture> cannonball_large = new AssetDescriptor<Texture>(CANNONBALL_LARGE, Texture.class);
     public AssetDescriptor<Texture> cannonball_medium = new AssetDescriptor<Texture>(CANNONBALL_MEDIUM, Texture.class);
     public AssetDescriptor<Texture> cannonball_small = new AssetDescriptor<Texture>(CANNONBALL_SMALL, Texture.class);
@@ -291,11 +303,12 @@ public class SceneAssetManager {
     public AssetDescriptor<Texture> contenders = new AssetDescriptor<Texture>(CONTENDERS, Texture.class);
     public AssetDescriptor<Texture> flag = new AssetDescriptor<Texture>(FLAG, Texture.class);
     public AssetDescriptor<Texture> flagTexture = new AssetDescriptor<Texture>(FLAGTEXTURE, Texture.class);
+    public AssetDescriptor<Texture> flagTexture_disabled = new AssetDescriptor<Texture>(FLAGTEXTURE_DISABLED, Texture.class);
     
     public AssetDescriptor<Texture> background = new AssetDescriptor<Texture>(BACKGROUND, Texture.class);
     public AssetDescriptor<Texture> textfieldTexture = new AssetDescriptor<Texture>(TEXTFIELDTEXTURE, Texture.class);
     public AssetDescriptor<Texture> loginButton = new AssetDescriptor<Texture>(LOGINBUTTON, Texture.class);
-    public AssetDescriptor<Texture> loginButtonHover = new AssetDescriptor<Texture>(LOGINBUTTONHOVER, Texture.class);
+    public AssetDescriptor<Texture> loginButtonDown = new AssetDescriptor<Texture>(LOGINBUTTONHOVER, Texture.class);
     
     public AssetDescriptor<Texture> cursor = new AssetDescriptor<Texture>(CURSOR, Texture.class);
     public AssetDescriptor<Texture> selection = new AssetDescriptor<Texture>(SELECTION, Texture.class);
@@ -360,6 +373,8 @@ public class SceneAssetManager {
     public AssetDescriptor<Texture> chatMessageServerBroadcast= new AssetDescriptor<Texture>(CHATMESSAGESERVERBROADCAST, Texture.class);
     public AssetDescriptor<Texture> chatMessageServerPrivate= new AssetDescriptor<Texture>(CHATMESSAGESERVERPRIVATE, Texture.class);
 
+    public AssetDescriptor<Texture> mapEditorButtonUp = new AssetDescriptor<Texture>(MAPEDITOR, Texture.class);
+    public AssetDescriptor<Texture> mapEditorButtonDown = new AssetDescriptor<Texture>(MAPEDITOR_DISABLED, Texture.class);
 	/*
 	 * Font asset descriptors
 	 */
@@ -388,10 +403,15 @@ public class SceneAssetManager {
     	manager.load(smallrock);
     	manager.load(whirlpool);
     	manager.load(wind);
+    	manager.load(bigrock_disabled);
+    	manager.load(smallrock_disabled);
+    	manager.load(whirlpool_disabled);
+    	manager.load(wind_disabled);
     	manager.load(infoPanel);
     	manager.load(contenders);
     	manager.load(flag);
     	manager.load(flagTexture);
+    	manager.load(flagTexture_disabled);
     	manager.load(menuUp);
     	manager.load(menuDown);
     	manager.load(lobbyUp);
@@ -467,9 +487,11 @@ public class SceneAssetManager {
     
 	public void loadConnectSceneTextures() {
 		manager.load(background);
+		manager.load(mapEditorButtonUp);
+		manager.load(mapEditorButtonDown);
 		manager.load(textfieldTexture);
 		manager.load(loginButton);
-		manager.load(loginButtonHover);
+		manager.load(loginButtonDown);
 		manager.load(cursor);
 		manager.load(selection);
 		manager.load(selectBoxBackground);

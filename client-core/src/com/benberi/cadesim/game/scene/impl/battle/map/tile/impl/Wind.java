@@ -12,10 +12,15 @@ public class Wind extends GameTile {
     /**
      * Initializes the tile
      */
-    public Wind(GameContext context, int direction) {
+    public Wind(GameContext context, int direction, boolean disabled) {
         super(context);
-        setTexture(
-        		context.getManager().get(context.getAssetObject().wind));
+        if(!disabled) {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().wind));
+        }else {
+        	setTexture(
+            		context.getManager().get(context.getAssetObject().wind_disabled));
+        }
         setPackedObjectOrientation("cell");
 
         switch (direction) {

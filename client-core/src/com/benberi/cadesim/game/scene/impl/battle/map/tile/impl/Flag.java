@@ -31,7 +31,37 @@ public class Flag extends GameObject {
 
         size = RandomUtils.randInt(1, 3);
     }
-
+    
+    public Flag(GameContext context, int x, int y, int flagSize) {
+        super(context);
+        set(x, y);
+        setTexture(
+        		context.getManager().get(context.getAssetObject().flagTexture));
+        setCustomOffsetX(2);
+        setCustomOffsetY(22);
+        setSize(flagSize);
+        updateTextureRegion();
+    }
+    
+    public Flag(GameContext context, int flagSize, boolean disabled) {
+        super(context);
+        if(!disabled) {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().flagTexture));	
+        }else {
+            setTexture(
+            		context.getManager().get(context.getAssetObject().flagTexture_disabled));
+        }
+        setCustomOffsetX(2);
+        setCustomOffsetY(22);
+        setSize(flagSize);
+        updateTextureRegion();
+    }
+    
+    public void setLocation(int x, int y) {
+    	set(x, y);
+    }
+    
     public boolean isAtWar() {
         return this.atWar;
     }

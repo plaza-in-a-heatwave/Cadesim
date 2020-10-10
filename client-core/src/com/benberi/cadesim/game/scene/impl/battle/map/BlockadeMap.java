@@ -82,13 +82,13 @@ public class BlockadeMap {
                     case WIND_WEST:
                     case WIND_NORTH:
                     case WIND_SOUTH:
-                        winds[x][y] = new Wind(context, tile);
+                        winds[x][y] = new Wind(context, tile,false);
                         break;
                     case WP_NE:
                     case WP_NW:
                     case WP_SE:
                     case WP_SW:
-                        whirls[x][y] = new Whirlpool(context, tile);
+                        whirls[x][y] = new Whirlpool(context, tile,false);
                 }
             }
         }
@@ -98,10 +98,10 @@ public class BlockadeMap {
                 int tile = tiles[x][y];
                 switch (tile) {
                     case SMALL_ROCK:
-                        rocks.add(new SmallRock(context, x, y));
+                        rocks.add(new SmallRock(context, x, y,false));
                         break;
                     case BIG_ROCK:
-                        rocks.add( new BigRock(context, x, y));
+                        rocks.add( new BigRock(context, x, y,false));
                         break;
                 }
             }

@@ -21,6 +21,8 @@ import com.benberi.cadesim.game.scene.SceneAssetManager;
 import com.benberi.cadesim.game.scene.TextureCollection;
 import com.benberi.cadesim.game.scene.impl.battle.SeaBattleScene;
 import com.benberi.cadesim.game.scene.impl.control.ControlAreaScene;
+import com.benberi.cadesim.game.scene.impl.mapeditor.MapEditorMapScene;
+import com.benberi.cadesim.game.scene.impl.mapeditor.MapEditorMenuScene;
 import com.benberi.cadesim.input.GameInputProcessor;
 import com.benberi.cadesim.util.GameToolsContainer;
 import com.benberi.cadesim.util.RandomUtils;
@@ -85,6 +87,12 @@ public class GameContext {
      * The control area scene
      */
     private ControlAreaScene controlArea;
+    
+    /**
+     * The map editor scene
+     */
+    private MapEditorMapScene mapEditor;
+    private MapEditorMenuScene mapEditorMenu;
 
     /**
      * The texture collection
@@ -115,6 +123,11 @@ public class GameContext {
      * If connected to server
      */
     private boolean connected = false;
+    
+    /**
+     * If started map editor
+     */
+    private boolean isInMapEditor = false;
 
     /**
      * Executors service
@@ -241,6 +254,16 @@ public class GameContext {
         return packets;
     }
     
+    public void createMapEditorScene() {
+    	this.input = new GameInputProcessor(this);
+        this.mapEditor = new MapEditorMapScene(this);
+        this.mapEditorMenu = new MapEditorMenuScene(this);
+        mapEditor.create();
+        mapEditor.createEmptyMap();
+        scenes.add(mapEditor);
+        mapEditorMenu.create();
+        scenes.add(mapEditorMenu);
+    }
     public void createFurtherScenes(int shipId) {
     	ControlAreaScene.shipId = shipId;
     	this.input = new GameInputProcessor(this);
@@ -259,16 +282,23 @@ public class GameContext {
 		Gdx.graphics.setTitle("CadeSim: " + myVessel + " (" + myTeam + ")");
     }
 
+    public MapEditorMapScene getMapEditor() {
+        return (MapEditorMapScene) scenes.get(0);
+    }
+
     public SeaBattleScene getBattleScene() {
         return (SeaBattleScene) scenes.get(1);
     }
-
     public ControlAreaScene getControlScene() {
         return (ControlAreaScene) scenes.get(0);
     }
 
     public boolean isConnected() {
         return connected;
+    }
+    
+    public boolean isInMapEditor() {
+        return isInMapEditor;
     }
 
     public void setServerChannel(Channel serverChannel) {
@@ -423,6 +453,12 @@ public class GameContext {
         Gdx.input.setInputProcessor(input);
         clear = true;
     }
+    
+    public void setStartedMapEditor(boolean started) {
+        this.isInMapEditor = started;
+//        Gdx.input.setInputProcessor(input);
+        clear = true;
+    }
 
 	public GameInputProcessor getInputProcessor() {
     	return input;
@@ -514,7 +550,19 @@ public class GameContext {
 	    maps.clear();
 	    pixmapArray = null;
     }
-
+    /*
+     * When the client (or user) decides to disconnect
+     */
+    public void exitMapEditor() {
+    	setClientInitiatedDisconnect(true); // wedunnit!
+        setConnected(false);
+        setIsInLobby(true);
+		getConnectScene().setState(ConnectionSceneState.DEFAULT);
+		getScenes().clear();
+		getConnectScene().setup();
+		setStartedMapEditor(false);
+		Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
+    }
     /*
      * When the server decides to disconnect
      */

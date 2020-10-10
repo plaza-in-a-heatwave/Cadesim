@@ -30,7 +30,7 @@ public class Fanchuan extends Vessel {
 
     @Override
     public float getInfluenceRadius() {
-        return 2f;
+        return 1f;
     }
 
     @Override

@@ -40,6 +40,15 @@ public class BlockadeSimulator extends ApplicationAdapter {
 	            scene.render();
 	        }
 		}
+		// render only for map editor
+		if(context.isInMapEditor()) {
+//			Gdx.gl.glClearColor(0, 0, 0, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+	        for (GameScene scene : context.getScenes()) {
+	            scene.update();
+	            scene.render();
+	        }
+		}
 
 	}
 	
