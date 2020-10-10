@@ -179,26 +179,34 @@ public class ServerConfiguration {
 	}
 
 	// grab available maps and store the list in ServerConfig. restart required to recognize a change.
-	public static void loadAvailableMaps() {
-        Path currentRelativePath = Paths.get("");
-        FilenameFilter textFilter = new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				String lowercaseName = name.toLowerCase();
-				if(lowercaseName.endsWith(getMapFilter())) {
-					return true;
-				}else {
-					return false;
-				}
-			}
-        	
-        };
-        File[] mapList = currentRelativePath.resolveSibling(Constants.mapDirectory).toFile().listFiles(textFilter);
-        ArrayList<String> names = new ArrayList<>();
-        for (File f : mapList) {
-            names.add(f.getName());
+	// returns false if failed.
+	public static boolean loadAvailableMaps() {
+        try {
+    	    Path currentRelativePath = Paths.get("");
+            FilenameFilter textFilter = new FilenameFilter() {
+    			@Override
+    			public boolean accept(File dir, String name) {
+    				String lowercaseName = name.toLowerCase();
+    				if(lowercaseName.endsWith(getMapFilter())) {
+    					return true;
+    				}else {
+    					return false;
+    				}
+    			}
+            	
+            };
+            File[] mapList = currentRelativePath.resolveSibling(Constants.mapDirectory).toFile().listFiles(textFilter);
+            ArrayList<String> names = new ArrayList<>();
+            for (File f : mapList) {
+                names.add(f.getName());
+            }
+            ServerConfiguration.mapList = names;
         }
-        ServerConfiguration.mapList = names;
+        catch (NullPointerException e) {
+            return false;
+        }
+        
+        return true;
 	}
 	public static ArrayList<String> getAvailableMaps() {
 	    return ServerConfiguration.mapList;

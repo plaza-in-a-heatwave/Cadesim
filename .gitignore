@@ -5,6 +5,7 @@ user.config
 proxy.txt
 .pngv
 gettingdown.lock
+build/
 
 # log file
 *.log

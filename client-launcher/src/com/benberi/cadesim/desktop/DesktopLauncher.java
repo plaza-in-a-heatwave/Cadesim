@@ -69,9 +69,12 @@ public class DesktopLauncher {
 		    e.printStackTrace();
 		}
 
-		// schedule update, unless explicitly disabled
+		// schedule update.
+		//     enabled  if not defined.
+        //     enabled  if defined and == "yes".
+		//     disabled if defined and != "yes".
 		String updateType = prop.getProperty("autoupdate");
-		if ((updateType != null) && updateType.equalsIgnoreCase("no"))
+		if ((updateType != null) && (!updateType.equalsIgnoreCase("yes")))
 		{
 			System.out.println("Automatic updates are disabled.");
 		}

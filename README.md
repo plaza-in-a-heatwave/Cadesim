@@ -14,7 +14,8 @@ Otherwise manually:
 * Set src as source dir and clean,rebuild
 
 ## Exporting
-* Export as jar, extract dependencies.
+- Export as jar, extract dependencies.
+- or use gradle to export as jar: ```gradle :server:dist```
 
 ## Running
 start with commandline: ```java -jar cadesim-server.jar <args>```
@@ -37,7 +38,10 @@ For full usage call with ```--help```.
 Additional developer options can be added at compile-time.
 
 ## Releasing
-See RELEASE.md
+- modify any desired files before release
+- use gradle to release: ```gradle release``` (also builds client).
+    - this requires you to have bash in %PATH% if building on windows.
+- For more details on the process see RELEASE.md and build.gradle.
 
 # Cadesim client
 
@@ -60,7 +64,8 @@ Otherwise manually:
 ** BlockadeSimulator-Desktop depends on /src
 
 ## Exporting
-* Export as jar, extract dependencies.
+- Export as jar, extract dependencies.
+- or use gradle to export as jar: ```gradle :server:dist```
 
 ## Running
 double-click on the .jar file.
@@ -72,4 +77,8 @@ Additional developer options can be added at compile-time.
 To disable automatic updates: add ```autoupdate=no``` to user.config
 
 ## Releasing
-See RELEASE.md
+- modify any desired files before release, including:
+    - user.config file (client only)
+- use gradle to create the release: ```gradle release``` (also builds server)
+    - this requires you to have bash in %PATH% if building on windows.
+- For more details on the process see RELEASE.md and build.gradle.
