@@ -1,11 +1,10 @@
 # custom
-jar.deps
-user.config
 .jarv
 proxy.txt
 .pngv
 gettingdown.lock
 build/
+release/
 
 # log file
 *.log

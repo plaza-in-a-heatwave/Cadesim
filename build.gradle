@@ -82,6 +82,10 @@ tasks.eclipse.doLast {
     delete ".project"
 }
 
+task clean(type:Delete) {
+   delete "release"
+}
+
 task release(type: Exec) {
     dependsOn ":client-launcher:dist"    // client jar
     dependsOn ":server:dist"             // server jar

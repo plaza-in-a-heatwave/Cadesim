@@ -5,7 +5,7 @@ sourceSets.main.java.srcDirs = [ "src/" ]
 
 project.ext.mainClassName = "com.benberi.cadesim.server.service.GameServerBootstrap"
 
-task dist(type: Jar) {
+task dist(dependsOn: classes, type: Jar) {
     from files(sourceSets.main.output.classesDirs)
     from files(sourceSets.main.output.resourcesDir)
     from {configurations.compile.collect {zipTree(it)}}
@@ -14,3 +14,6 @@ task dist(type: Jar) {
         attributes 'Main-Class': project.mainClassName
     }
 }
+// TODO. it still generates a small jar with "build", and the full jar with "release".
+// it should generate no jar unless called directly with release.
+dist.enabled = false

@@ -14,7 +14,7 @@ ui.status = 30, 136, 364, 80
 ui.status_text = FFEC48
 
 # Application jar files
-code = cadesim.jar
+code = cadesim-client.jar
 
 # The main entry point for the application
 class = com.benberi.cadesim.desktop.DesktopLauncher
