@@ -48,12 +48,13 @@ fi
 # | make client |
 # +-------------+
 
+echo ""
+echo ""
 echo "***********************"
 echo "* making client...    *"
 echo "***********************"
 declare -a clientfiles=(
     "bg.png"
-    "cadesim-client.jar"
     "getdown.jar"
     "getdown.txt"
     "getdown-bg.png"
@@ -66,6 +67,8 @@ pushd "$CLIENT">/dev/null
 for file in "${clientfiles[@]}"; do
     cp -r "$file" "$CLIENTBUILDDIR"
 done
+# move this separately, it's huge. from build task.
+mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/cadesim-client.jar
 popd>/dev/null
 
 # process getdown
@@ -76,7 +79,7 @@ mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$CLIENTZIPNAME" . -9 -x "$(basename "$CLIENTUSERDIR")" -x "$(basename "$CLIENTHTTPDIR")"
+zip -r "$CLIENTZIPNAME" . -9 -x "$(basename "$CLIENTUSERDIR")" -x "$(basename "$CLIENTHTTPDIR")">/dev/null
 
 # generate files for http
 for f in *; do
@@ -85,25 +88,25 @@ for f in *; do
             mv "$f" "$(basename "$CLIENTHTTPDIR")"
         else
             # guard against glob not matching
-            echo "    WARNING: directory was unexpectedly empty."
+            echo "    ERROR: directory was unexpectedly empty."
+            exit 2
         fi
     fi
 done
 popd>/dev/null
-echo "***********************"
-echo "* done making client. *"
-echo "***********************"
+echo "done making client."
 
 # +-------------+
 # | make server |
 # +-------------+
+echo ""
+echo ""
 echo "***********************"
 echo "* making server...    *"
 echo "***********************"
 declare -a serverfiles=(
     "maps"
     "bg.png"
-    "cadesim-server.jar"
     "getdown.jar"
     "getdown.txt"
     "getdown-bg.png"
@@ -111,7 +114,11 @@ declare -a serverfiles=(
     "growup.png"
 )
 pushd "$SERVER">/dev/null
-for file in "${serverfiles[@]}"; do cp -r "$file" "$SERVERBUILDDIR"; done
+for file in "${serverfiles[@]}"; do
+    cp -r "$file" "$SERVERBUILDDIR";
+done
+# move this separately, it's huge. from build task.
+mv build/libs/server*.jar "$SERVERBUILDDIR"/cadesim-server.jar
 popd>/dev/null
 
 # process getdown
@@ -122,7 +129,7 @@ mkdir "$(basename "$SERVERUSERDIR")" "$(basename "$SERVERHTTPDIR")"
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$SERVERZIPNAME" . -9 -x "$(basename "$SERVERUSERDIR")" -x "$(basename "$SERVERHTTPDIR")"
+zip -r "$SERVERZIPNAME" . -9 -x "$(basename "$SERVERUSERDIR")" -x "$(basename "$SERVERHTTPDIR")">/dev/null
 
 # generate files for http
 for f in *; do
@@ -131,14 +138,13 @@ for f in *; do
             mv "$f" "$(basename "$SERVERHTTPDIR")"
         else
             # guard against glob not matching
-            echo "    WARNING: directory was unexpectedly empty."
+            echo "    ERROR: directory was unexpectedly empty."
+            exit 2
         fi
     fi
 done
 popd>/dev/null
-echo "***********************"
-echo "* done making server. *"
-echo "***********************"
+echo "done making server."
 
 # restore working directory
 echo ""

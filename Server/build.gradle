@@ -14,6 +14,5 @@ task dist(dependsOn: classes, type: Jar) {
         attributes 'Main-Class': project.mainClassName
     }
 }
-// TODO. it still generates a small jar with "build", and the full jar with "release".
+// TODO. dist still generates a small jar with "build", and the full jar with "release".
 // it should generate no jar unless called directly with release.
-dist.enabled = false
