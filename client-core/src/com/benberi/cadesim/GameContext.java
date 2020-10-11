@@ -469,6 +469,7 @@ public class GameContext {
 			if (entities != null) {
 				entities.dispose();
 			}
+			getScenes().clear(); // clear other scenes
 			connectScene.setup();
 			if (getIsInLobby()) {
 				System.out.println("Returned to lobby");
