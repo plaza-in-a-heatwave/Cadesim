@@ -1,4 +1,4 @@
-# The URL from which the client is downloaded
+# The URL from which the client is downloaded (must start with http:// and end with trailing /)
 appbase = https://gucadesim.imfast.io/
 version = 0109925
 

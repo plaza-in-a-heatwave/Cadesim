@@ -1,4 +1,5 @@
-# The URL from which the client is downloaded #TODO #69 add subdirectory
+# The URL from which the client is downloaded (must start with http:// and end with trailing /)
+# TODO #69 add subdirectory
 appbase = https://gucadesim.imfast.io/cadesim-server/
 
 # UI Configuration
