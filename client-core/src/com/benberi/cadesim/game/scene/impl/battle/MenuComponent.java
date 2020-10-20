@@ -2,22 +2,27 @@ package com.benberi.cadesim.game.scene.impl.battle;
 
 import java.awt.Rectangle;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
@@ -63,10 +68,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     
 	
     // DISENGAGE shapes
-    Rectangle menuButton_Shape   = new Rectangle(MENU_buttonX, 13, 25, 25);
-    Rectangle menuTable_Shape   = new Rectangle(MENU_tableX, 30, 80, 80);
-    Rectangle menuLobby_Shape   = new Rectangle(MENU_lobbyButtonX, 50, 70, 22);
-    Rectangle menuMap_Shape   = new Rectangle(MENU_mapsButtonX, 80, 70, 22);
+    Rectangle menuButton_Shape;
+    Rectangle menuTable_Shape;
+    Rectangle menuLobby_Shape;
+    Rectangle menuMap_Shape;
 
     /**
      * state of buttons. true if pushed, false if not.
@@ -83,15 +88,113 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private String[] mapStrings;
 	Texture texture;
 	
+	//Settings buttons (sliders)
+	Slider turnDuration_slider;
+	Slider roundDuration_slider;
+	Slider sinkPenalty_slider;
+	TextField turnText;
+	TextField roundText;
+	TextField sinkPenaltyText;
+	//buttons to select disengage behavior
+	TextButton disengageOff;
+	TextButton disengageRealistic;
+	TextButton disengageSimple;
+	//buttons to select job quality
+	TextButton basicQuality;
+	TextButton eliteQuality;
+	//option buttons
+	TextButton proposeButton ;
+	TextButton exitButton;
+	
+	Table table;
+	Table sliderTable;
+	Table disengageTable;
+	Table qualityTable;
+	Table mapTable;
+	Table selectionTable;
+	Container<Table> tableContainer;
+	Cell<?> cell;
+	Label disengageLabel;
+	Label turnLabel;
+	Label roundLabel;
+	Label sinkLabel;
+	Label jobberLabel;
+	Label previewLabel;
+	
+	ButtonGroup<TextButton> disengageBehaviorGroup;
+	ButtonGroup<TextButton> jobberQualityGroup;
+	
     protected MenuComponent(GameContext context, SeaBattleScene owner) {
         super(context, owner);
         this.context = context;
+    	stage = new Stage();
+        batch = new SpriteBatch();
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        dialog = new Dialog("Game Settings", skin, "dialog");
+        menuButton_Shape = new Rectangle(MENU_buttonX, 13, 25, 25);
+        menuTable_Shape = new Rectangle(MENU_tableX, 30, 80, 80);
+        menuLobby_Shape = new Rectangle(MENU_lobbyButtonX, 50, 70, 22);
+        menuMap_Shape = new Rectangle(MENU_mapsButtonX, 80, 70, 22);
+        
+		disengageLabel = new Label("Disengage Behavior:",skin);
+		turnLabel = new Label("Turn Duration (seconds):",skin);
+		roundLabel = new Label("Round Duration (seconds):",skin);
+		sinkLabel = new Label("Sink Penalty (turns):",skin);
+		jobberLabel = new Label("Jobber Quality:", skin);
+		previewLabel = new Label("Map preview not available.",skin);
+		
+		selectBox=new SelectBox<String>(skin);
+		
+    	turnDuration_slider = new Slider(1.0f, 10000f, 1.0f, false, skin);
+    	roundDuration_slider = new Slider(1.0f, 10000f, 1.0f, false, skin);
+    	sinkPenalty_slider = new Slider(0.0f, 10000f, 1.0f, false, skin);
+    	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
+    	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
+    	sinkPenalty_slider.setValue((float)context.getProposedSinkPenalty());
+    	turnText = new TextField("",skin);
+    	roundText = new TextField("",skin);
+    	sinkPenaltyText = new TextField("",skin);
+    	
+    	turnText.setText(String.valueOf(context.getProposedTurnDuration()));
+    	roundText.setText(String.valueOf(context.getProposedRoundDuration()));
+    	sinkPenaltyText.setText(String.valueOf(context.getProposedSinkPenalty()));
+    	
+    	disengageBehaviorGroup = new ButtonGroup<TextButton>();
+    	jobberQualityGroup = new ButtonGroup<TextButton>();
+    	
+    	disengageOff = new TextButton("Off",skin);
+    	disengageOff.getStyle().disabled = disengageOff.getStyle().down;
+    	disengageRealistic = new TextButton("Realistic",skin);
+    	disengageRealistic.getStyle().disabled = disengageRealistic.getStyle().down;
+    	disengageSimple = new TextButton("Simple",skin);
+    	disengageSimple.getStyle().disabled = disengageSimple.getStyle().down;
+    	basicQuality = new TextButton("Basic",skin);
+    	basicQuality.getStyle().disabled = basicQuality.getStyle().down;
+    	eliteQuality = new TextButton("Elite",skin);
+    	eliteQuality.getStyle().disabled = eliteQuality.getStyle().down;
+    	
+    	disengageBehaviorGroup.add(disengageOff,disengageRealistic,disengageSimple);
+    	jobberQualityGroup.add(basicQuality,eliteQuality);
+    	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+    		if(button.getText().toString().toLowerCase().equals(context.getProposedDisengageBehavior())) {
+    			button.setDisabled(true);
+    		}
+    	}
+    	
+    	for (TextButton button: jobberQualityGroup.getButtons()) {
+    		if(button.getText().toString().toLowerCase().equals(context.getProposedJobberQuality())) {
+    			button.setDisabled(true);
+    		}
+    	}
+    	
+    	proposeButton = new TextButton("Propose",skin);
+    	exitButton = new TextButton("Exit",skin);
+    	
+		createDialogListeners();
     }
 
     @Override
     public void create() {
-    	stage = new Stage();
-        batch = new SpriteBatch();
         menuUp = context.getManager().get(context.getAssetObject().menuUp);
         menuDown = context.getManager().get(context.getAssetObject().menuDown);
         lobbyUp = context.getManager().get(context.getAssetObject().lobbyUp);
@@ -99,8 +202,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         mapUp = context.getManager().get(context.getAssetObject().mapsUp);
         mapDown = context.getManager().get(context.getAssetObject().mapsDown);
         font = context.getManager().get(context.getAssetObject().menuFont);
-    
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
     }
     
     @Override
@@ -115,7 +216,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         	batch.draw((menuLobbyIsDown)?lobbyDown:lobbyUp, MENU_lobbyButtonX, MENU_lobbyButtonY);
         	font.draw(batch,"Lobby",MENU_lobbyButtonX+25,MENU_lobbyButtonY+21);
         	batch.draw((menuMapsIsDown)?mapDown:mapUp, MENU_mapsButtonX, MENU_mapsButtonY);
-        	font.draw(batch,"Change Map",MENU_mapsButtonX+15,MENU_mapsButtonY+21);
+        	font.draw(batch,"Game Settings",MENU_mapsButtonX+8,MENU_mapsButtonY+21);
         }
         batch.end();
         
@@ -127,8 +228,251 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     @Override
     public void dispose() {
     }
+    /*
+     * Fill dialog selectbox with map names
+     */
+    public void fillSelectBox() {
+        mapStrings = new String[context.getMaps().size()]; 
+    	for(int j =0;j<context.getMaps().size();j++){
+    		mapStrings[j] = context.getMaps().get(j);
+    	}
+		selectBox.setItems(mapStrings);
+		selectBox.setMaxListCount(6);
+		selectBox.setSelected(context.currentMapName);
+		context.setProposedMapName(selectBox.getSelected());
+    }
+    /*
+     * Initialize/create all listeners for buttons/sliders
+     */
+    public void createDialogListeners() {
+    	disengageOff.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+            		button.setDisabled(false);
+            	}
+            	disengageOff.setDisabled(true);
+            	context.setProposedDisengageBehavior("off");
+        	}});
+    	disengageRealistic.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+            		button.setDisabled(false);
+            	}
+            	disengageRealistic.setDisabled(true);
+            	context.setProposedDisengageBehavior("realistic");
+        	}});
+    	disengageSimple.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+            		button.setDisabled(false);
+            	}
+            	disengageSimple.setDisabled(true);
+            	context.setProposedDisengageBehavior("simple");
+        	}});
+    	basicQuality.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+            	for (TextButton button: jobberQualityGroup.getButtons()) {
+            		button.setDisabled(false);
+            	}
+            	basicQuality.setDisabled(true);
+            	context.setProposedJobberQuality("basic");
+        	}});
+    	eliteQuality.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+            	for (TextButton button: jobberQualityGroup.getButtons()) {
+            		button.setDisabled(false);
+            	}
+            	eliteQuality.setDisabled(true);
+            	context.setProposedJobberQuality("elite");
+        	}});
+    	
+    	proposeButton.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		dialog.getContentTable().clear();
+        		context.sendSettingsPacket();
+		    	dialog.setVisible(false);
+		    	Gdx.input.setInputProcessor(input);
+		    	context.getControlScene().getBnavComponent().getChatBar().getTextfield().setText(
+		    			"/propose gameSettings");
+	    		context.getControlScene().getBnavComponent().getChatBar().sendChat();
+	    		menuButtonIsDown = false;
+	    		menuLobbyIsDown = false;
+	        	menuMapsIsDown = false;  
+			} 
+    	});
+    	exitButton.addListener(new ClickListener() {
+    		@Override
+            public void clicked(InputEvent event, float x, float y) {
+    			dialog.getContentTable().clear();
+    			dialog.setVisible(false);
+    			Gdx.input.setInputProcessor(input);
+        		menuButtonIsDown = false;
+        		menuLobbyIsDown = false;
+            	menuMapsIsDown = false;
+			} 
+        });
 
-
+    	turnText.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				try {
+					turnDuration_slider.setValue((float)Integer.parseInt(turnText.getText()));
+				}catch(NumberFormatException e) {
+					
+				}
+				context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
+			}
+		});
+		roundText.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				try {
+					roundDuration_slider.setValue((float)Integer.parseInt(roundText.getText()));
+				}catch(NumberFormatException e) {
+					
+				}
+				context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
+			}
+		});
+		sinkPenaltyText.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				try {
+					sinkPenalty_slider.setValue((float)Integer.parseInt(sinkPenaltyText.getText()));
+					context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+				}catch(NumberFormatException e) {
+					
+				}
+			}
+		});
+		turnDuration_slider.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            	turnText.setText(String.valueOf((int)turnDuration_slider.getValue()));
+				context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
+            }});
+		roundDuration_slider.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            	roundText.setText(String.valueOf((int)roundDuration_slider.getValue()));
+				context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
+            }});
+		sinkPenalty_slider.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            	sinkPenaltyText.setText(String.valueOf((int)sinkPenalty_slider.getValue()));
+				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+            }});
+		
+		selectBox.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            	try {
+                	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
+                	if(pixmap != null) {
+	                	Texture textureMap = new Texture(pixmap);
+	                	Image map = new Image(textureMap);
+	                	cell.setActor(map);
+	                	dialog.setSize(650, 575);
+	                	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+                	}else {
+                        System.out.println("Map preview not available");
+                        dialog.setSize(413, 331);
+                		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+                		cell.setActor(previewLabel);
+                	}
+                	context.setProposedMapName(selectBox.getSelected());
+            	}catch(Exception e) {
+            		System.out.println("File does not exist");	
+            	}
+            }
+        });
+    }
+    
+    /*
+     * Fill tables in the given popup dialog (game setings)
+     */
+    public void fillTable() {
+		table = new Table();
+		sliderTable = new Table();
+		disengageTable = new Table();
+		qualityTable = new Table();
+		mapTable = new Table();
+		selectionTable = new Table();
+		tableContainer = new Container<Table>();
+		tableContainer.setActor(table);
+		table.add(sliderTable).pad(2.0f).row();
+		table.add(disengageTable).pad(2.0f).row();
+		table.add(qualityTable).pad(2.0f).row();
+		table.add(mapTable).pad(2.0f).row();
+		table.add(selectionTable).pad(2.0f).row();
+		//
+		sliderTable.add(turnLabel);
+		sliderTable.add(turnDuration_slider);
+		sliderTable.add(turnText).width(60).pad(5.0f).row();
+		sliderTable.add(roundLabel);
+		sliderTable.add(roundDuration_slider);
+		sliderTable.add(roundText).width(60).pad(5.0f).row();
+		sliderTable.add(sinkLabel);
+		sliderTable.add(sinkPenalty_slider);
+		sliderTable.add(sinkPenaltyText).width(60).pad(5.0f).row();
+		//
+		disengageTable.add(disengageLabel).pad(5.0f);
+		disengageTable.add(disengageOff).pad(5.0f);
+		disengageTable.add(disengageRealistic).pad(5.0f);
+		disengageTable.add(disengageSimple).pad(5.0f).row();
+		//
+		qualityTable.add(jobberLabel).pad(5.0f);
+		qualityTable.add(basicQuality).pad(5.0f);
+		qualityTable.add(eliteQuality).pad(5.0f).row();
+		cell = mapTable.add().colspan(3);
+		mapTable.add().row();
+		mapTable.add(selectBox).colspan(3);
+		selectionTable.add(proposeButton);
+		selectionTable.add(exitButton);
+    	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
+    	if(pixmap != null) {
+        	Texture textureMap = new Texture(pixmap);
+        	Image map = new Image(textureMap);
+        	cell.setActor(map);
+        	dialog.setSize(650, 575);
+        	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+    	}else {
+    		dialog.setSize(413, 331);
+    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+    		cell.setActor(previewLabel);
+    	}
+		dialog.getContentTable().add(tableContainer).row();
+    }
+    
+    /*
+     * Create the actual popup dialog
+     */
+    public void createDialog() {
+		dialog.setMovable(true);
+		dialog.setResizable(true);
+		dialog.setVisible(true);
+		fillSelectBox();
+		fillTable();
+		stage.addActor(dialog);
+		dialog.show(stage);
+		if(cell.getActor() instanceof Label) {
+			dialog.setSize(413, 331);
+    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+		}else {
+			dialog.setSize(650, 575);
+			dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+		}
+		input = Gdx.input.getInputProcessor();
+		Gdx.input.setInputProcessor(stage);
+    }
+    
     @Override
     public boolean handleClick(float x, float y, int button) {
     	if ((!menuButtonIsDown) && isClickingMenuButton(x,y)) {
@@ -151,97 +495,13 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	}
     	else if(menuButtonIsDown && isClickingMapsButton(x,y)) {
     		menuMapsIsDown = true;
-            mapStrings = new String[context.getMaps().size()]; 
-        	for(int j =0;j<context.getMaps().size();j++){
-        		mapStrings[j] = context.getMaps().get(j);
-        	}
-            dialog = new Dialog("Map Selection", skin, "dialog") {
-    			protected void result(Object object)
-                {
-    				//if 'No' is pushed
-    				if (object.equals(2L))
-    			    {
-    					dialog.setVisible(false);
-    					Gdx.input.setInputProcessor(input);
-    		    		menuButtonIsDown = false;
-    		    		menuLobbyIsDown = false;
-    		        	menuMapsIsDown = false;
-    			    } else if(object.equals(1L)){
-    			    	dialog.setVisible(false);
-    			    	Gdx.input.setInputProcessor(input);
-    			    	String mapCommand = String.format("/propose changemap %s.txt",selectBox.getSelected());
-    			    	context.getControlScene().getBnavComponent().getChatBar().getTextfield().setText(
-    			    			mapCommand);
-    		    		context.getControlScene().getBnavComponent().getChatBar().sendChat();
-    		    		menuButtonIsDown = false;
-    		    		menuLobbyIsDown = false;
-    		        	menuMapsIsDown = false;    			    
-    			    }
-                }
-    		};
-    		dialog.setMovable(true);
-    		stage.addActor(dialog);
-    		dialog.show(stage);
-    		dialog.setSize(650, 450);
-    		dialog.setResizable(true);
-    		selectBox=new SelectBox<String>(skin);
-    		selectBox.setItems(mapStrings);
-    		selectBox.setMaxListCount(6);
-    		Table table = new Table();
-    		table.add().row();
-    		Cell<?> cell = table.add();
-    		table.add().row();
-    		table.add(selectBox);
-    		dialog.getContentTable().add(table).row();
-    		selectBox.setSelected(context.currentMapName);
-        	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
-        	if(pixmap != null) {
-            	Texture textureMap = new Texture(pixmap);
-            	Image map = new Image(textureMap);
-            	cell.setActor(map);
-            	dialog.setSize(650, 450);
-            	dialog.setPosition(Gdx.graphics.getWidth()/2 - 325, Gdx.graphics.getHeight()/2 - 200);
-        	}else {
-                System.out.println("Map preview not available");
-        		dialog.setSize(400, 250);
-        		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
-        		Label notAvailable = new Label("Map preview not available.",skin);
-        		cell.setActor(notAvailable);
-        	}
-    		selectBox.addListener(new ChangeListener(){
-                @Override
-                public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                	try {
-	                	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
-	                	if(pixmap != null) {
-		                	Texture textureMap = new Texture(pixmap);
-		                	Image map = new Image(textureMap);
-		                	cell.setActor(map);
-		                	dialog.setSize(650, 450);
-		                	dialog.setPosition(Gdx.graphics.getWidth()/2 - 325, Gdx.graphics.getHeight()/2 - 200);
-	                	}else {
-                            System.out.println("Map preview not available");
-	                		dialog.setSize(400, 250);
-	                		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
-	                		Label notAvailable = new Label("Map preview not available.",skin);
-	                		cell.setActor(notAvailable);
-	                	}
-                	}catch(Exception e) {
-                		System.out.println("File does not exist");
-                		
-                	}
-                }
-            });
-    		dialog.button("Change", 1L).pad(20, 20, 20, 20);
-    		dialog.button("Cancel", 2L).pad(20, 20, 20, 20);
-    		dialog.setVisible(true);
-    		input = Gdx.input.getInputProcessor();
-    		Gdx.input.setInputProcessor(stage);
+    		createDialog();
     		return true;
     	}
         else {
             return false;
         }
+    	
     }
 
     /**
@@ -276,8 +536,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     
     @Override
     public boolean handleDrag(float x, float y, float ix, float iy) {
-        // deactivate it with no penalty to the user.
-
         return false;
     }
 
@@ -285,10 +543,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     public boolean handleRelease(float x, float y, int button) {
     	menuLobbyIsDown = false;
     	menuMapsIsDown = false;
-
         return false;
     }
-
 
 	@Override
 	public boolean keyDown(int arg0) {
@@ -334,15 +590,4 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	public boolean handleMouseMove(float x, float y) {
 		return false;
 	}
-	
-	public static Texture createTexture(int width, int height, Color col,
-            float alfa) {
-        Pixmap pixmap = new Pixmap(width, height, Format.Alpha);
-        Color color = col;
-        pixmap.setColor(color.r, color.g, color.b, alfa);
-        pixmap.fillRectangle(0, 0, width, height);
-
-        Texture pixmaptexture = new Texture(pixmap);
-        return pixmaptexture;
-    }
 }

@@ -9,6 +9,7 @@ import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.player.Vote.VOTE_RESULT;
 import com.benberi.cadesim.server.model.player.collision.CollisionCalculator;
+import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.model.player.domain.PlayerLoginRequest;
 import com.benberi.cadesim.server.model.player.move.MoveAnimationTurn;
 import com.benberi.cadesim.server.model.player.move.MoveType;
@@ -124,7 +125,7 @@ public class PlayerManager {
 		setTurnDuration(ServerConfiguration.getTurnDuration());
 		setRoundDuration(ServerConfiguration.getRoundDuration());
 		setDisengageBehavior(ServerConfiguration.getDisengageBehavior());
-		
+		setJobbersQuality(ServerConfiguration.getJobbersQualityAsString());
 	}
 	
     private void setPersistTemporarySettings(boolean value)
@@ -141,7 +142,22 @@ public class PlayerManager {
     {
     	return persistTemporarySettings;
     }
+	/**
+	 * set with string so can load from cli
+	 */
+	public static void setJobbersQuality(String value){
+		ServerConfiguration.setJobbersQuality(value);
+	}
 
+	public static JobbersQuality getJobbersQuality() {
+		
+		return ServerConfiguration.getJobbersQuality();
+	}
+	
+	public static String getJobbersQualityAsString() {
+		return ServerConfiguration.getJobbersQualityAsString();
+	}
+	
 	public int getRespawnDelay() {
 		return respawnDelay;
 	}
@@ -1403,6 +1419,50 @@ public class PlayerManager {
 				break;
 			}
 		}
+		else if (currentVote.getDescription().equals("gamesettings"))
+		{
+			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
+			switch(v)
+			{
+			case TBD:
+				break;
+			case FOR:
+				ServerConfiguration.setTurnDuration(ServerConfiguration.getProposedTurnDuration() * 10);
+				ServerConfiguration.setRoundDuration(ServerConfiguration.getProposedRoundDuration() * 10);
+				ServerConfiguration.setRespawnDelay(ServerConfiguration.getProposedRespawnDelay());
+				ServerConfiguration.setDisengageBehavior(ServerConfiguration.getProposedDisengageBehavior());
+				ServerConfiguration.setJobbersQuality(ServerConfiguration.getProposedJobbersQualityAsString());
+				setPersistTemporarySettings(false);
+				context.getTimeMachine().stop();
+				String match=null;
+    		    for (String s : ServerConfiguration.getAvailableMaps()) {
+    		        if (s.toLowerCase().startsWith(ServerConfiguration.getProposedMapName().toLowerCase())) {
+    		            match = s;
+    		            break;
+    		        }
+    		    }
+    		    if (match != null) {
+                    ServerConfiguration.overrideNextMapName(match);
+    		    }
+    		    else
+    		    {
+    		        serverPrivateMessage(pl, "Unknown map name.");
+    		    }
+                setShouldSwitchMap(true);
+				for(Player player : players) { // resets all players tokens
+					player.setTurnsUntilControl(0);
+					player.getMoveTokens().assignDefaultTokens();
+				}
+				handleStopVote();
+				break;
+			case AGAINST:
+			case TIMEDOUT:
+				handleStopVote();
+				break;
+			default:
+				break;
+			}
+		}
 		else
 		{
 			ServerContext.log("got a vote description that wasn't understood: " + currentVote.getDescription());
@@ -1512,7 +1572,7 @@ public class PlayerManager {
 		{
 			// cleanup
 			message = message.toLowerCase();
-
+			System.out.println(message);
 			if (message.startsWith("/vote"))
 			{
 				// voting on a current vote
@@ -1538,6 +1598,10 @@ public class PlayerManager {
 				else if (message.equals("/propose restart"))
 	    		{
 					handleStartVote(pl, message, "restart");
+	    		}
+	    		else if (message.startsWith("/propose gamesettings"))
+	    		{
+	    			handleStartVote(pl, message, "gamesettings");
 	    		}
 	    		else if (message.equals("/propose nextmap"))
 	    		{

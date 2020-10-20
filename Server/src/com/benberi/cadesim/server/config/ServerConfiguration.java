@@ -20,15 +20,21 @@ public class ServerConfiguration {
      */
     private static int playerLimit = 5;
     private static int port = 4970;
-    private static int turnDuration  = 300;        // "deciseconds"
-    private static int roundDuration = 18000;      // "deciseconds"
-    private static int respawnDelay  = 2;          // turns
+    private static volatile int turnDuration  = 300;        // "deciseconds"
+    private static volatile int roundDuration = 18000;      // "deciseconds"
+    private static volatile int respawnDelay  = 2;          // turns
+    private static volatile int proposedTurnDuration  = 300;        // "deciseconds"
+    private static volatile int proposedRoundDuration = 18000;      // "deciseconds"
+    private static volatile int proposedRespawnDelay  = 2;          // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
+    private static String proposedMapName = "default.map";
     private static String mapFilter = ".txt";
 	private static String disengageBehavior = "simple";
+	private static String proposedDisengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
+	private static JobbersQuality proposedJobbersQuality = JobbersQuality.ELITE;
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
 	private static String authCode = ""; // by default no auth code
@@ -117,7 +123,29 @@ public class ServerConfiguration {
     public static void setRespawnDelay(int respawnDelay) {
     	ServerConfiguration.respawnDelay = respawnDelay;
     }
+    public static int getProposedTurnDuration() {
+    	return ServerConfiguration.proposedTurnDuration;
+    }
 
+    public static void setProposedTurnDuration(int turnDurationInDeciseconds) {
+    	ServerConfiguration.proposedTurnDuration = turnDurationInDeciseconds;
+    }
+
+    public static int getProposedRoundDuration() {
+		return ServerConfiguration.proposedRoundDuration;
+	}
+
+	public static void setProposedRoundDuration(int roundDurationInDeciseconds) {
+		ServerConfiguration.proposedRoundDuration = roundDurationInDeciseconds;
+	}
+
+    public static int getProposedRespawnDelay() {
+    	return ServerConfiguration.proposedRespawnDelay;
+    }
+
+    public static void setProposedRespawnDelay(int respawnDelay) {
+    	ServerConfiguration.proposedRespawnDelay = respawnDelay;
+    }
     /**
 	 * gets a printable config report.
 	 * Note that the turnDuration/roundDuration are returned
@@ -157,6 +185,14 @@ public class ServerConfiguration {
 
     public static void setMapName(String mapName) {
         ServerConfiguration.mapName = mapName;
+    }
+    
+    public static String getProposedMapName() {
+        return ServerConfiguration.proposedMapName;
+    }
+    
+    public static void setProposedMapName(String mapName) {
+        ServerConfiguration.proposedMapName = mapName;
     }
 
     // setter/getter and generator for the next map in rotation.
@@ -214,6 +250,14 @@ public class ServerConfiguration {
 	public static void setDisengageBehavior(String disengageBehavior) {
 		ServerConfiguration.disengageBehavior = disengageBehavior;
 	}
+	
+	public static String getProposedDisengageBehavior() {
+		return ServerConfiguration.proposedDisengageBehavior ;
+	}
+
+	public static void setProposedDisengageBehavior(String disengageBehavior) {
+		ServerConfiguration.proposedDisengageBehavior = disengageBehavior;
+	}
 
 	public static void setVotingMajority(int votingMajority)
 	{
@@ -257,6 +301,32 @@ public class ServerConfiguration {
 		return ServerConfiguration.jobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
 	}
 
+	public static void setProposedJobbersQuality(String value) throws java.lang.IllegalArgumentException
+	{
+		if (value.toLowerCase().equals("elite"))
+		{
+			ServerConfiguration.proposedJobbersQuality = JobbersQuality.ELITE;
+		}
+		else if (value.toLowerCase().equals("basic"))
+		{
+			ServerConfiguration.proposedJobbersQuality = JobbersQuality.BASIC;
+		}
+		else
+		{
+			throw new java.lang.IllegalArgumentException("jobbersQuality was unexpectedly \"" + value + "\"");
+		}
+		
+	}
+
+	public static JobbersQuality getProposedJobbersQuality() {
+		
+		return ServerConfiguration.proposedJobbersQuality;
+	}
+
+	public static String getProposedJobbersQualityAsString() {
+		return ServerConfiguration.proposedJobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
+	}
+	
 	public static void setDefenderName(String string) {
 		ServerConfiguration.defenderName = string;
 		
