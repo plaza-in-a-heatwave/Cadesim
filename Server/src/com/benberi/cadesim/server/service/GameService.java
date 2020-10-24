@@ -43,6 +43,7 @@ public class GameService implements Runnable {
 
         // renew it
     	context.renewMap();
+    	ServerConfiguration.setCustomMap(false);
     }
 
     @Override

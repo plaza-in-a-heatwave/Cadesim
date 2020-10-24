@@ -171,7 +171,7 @@ public class GameContext {
      * List of maps
      */
     private List<String> maps = new ArrayList<String>();
-    public Pixmap[] pixmapArray;
+    public Pixmap[] pixmapArray = new Pixmap[1];
     public String currentMapName;
     /**
      * If connected to server
@@ -589,15 +589,23 @@ public class GameContext {
     	sendPacket(packet);
     }
     
-    public void sendSettingsPacket() {
+    public void sendSettingsPacket(int[][] map, Boolean customMap, String mapName) {
     	SendSettingsPacket packet = new SendSettingsPacket();
     	packet.setProposedTurnDuration(getProposedTurnDuration());
     	packet.setProposedRoundDuration(getProposedRoundDuration());
     	packet.setProposedSinkPenalty(getProposedSinkPenalty());
     	packet.setProposedDisengageBehavior(getProposedDisengageBehavior());
     	packet.setProposedJobberQuality(getProposedJobberQuality());
-    	packet.setProposedMapName(getProposedMapName());
+    	if(!customMap && map == null) {
+        	packet.setCustomMap(false);
+        	packet.setProposedMapName(getProposedMapName());
+    	}else {
+    		packet.setCustomMapName(mapName);
+    		packet.setCustomMap(true);
+    		packet.setCustomMapArray(map);
+    	}
     	sendPacket(packet);
+    	packet.setCustomMap(false); //make sure to reset
     }
 
     /*

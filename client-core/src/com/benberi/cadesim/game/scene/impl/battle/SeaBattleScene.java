@@ -126,7 +126,6 @@ public class SeaBattleScene implements GameScene {
     public void createMap(int[][] tiles) {
         // if there was a previous map: delete it
         if (blockadeMap != null) { blockadeMap.dispose();}
-
         blockadeMap = new BlockadeMap(context, tiles);
     }
 

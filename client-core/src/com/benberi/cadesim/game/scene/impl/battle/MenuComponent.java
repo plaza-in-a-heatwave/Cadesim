@@ -1,6 +1,13 @@
 package com.benberi.cadesim.game.scene.impl.battle;
 
 import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -27,6 +34,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.scene.SceneComponent;
+import com.benberi.cadesim.game.scene.impl.battle.map.BlockadeMap;
 
 public class MenuComponent extends SceneComponent<SeaBattleScene> implements InputProcessor {
     /**
@@ -48,7 +56,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     private Texture mapUp;
     private Texture mapDown;
     
-    BitmapFont font;
+    private BitmapFont font;
     
     // reference coords - menu control
     private int MENU_REF_X       = 0;
@@ -80,55 +88,62 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private boolean menuLobbyIsDown = false; // initial
 	private boolean menuMapsIsDown = false; // initial
     
+    private JFileChooser fileChooser;
 	public Stage stage;
 	private SelectBox<String> selectBox;
 	private InputProcessor input;
 	private Dialog dialog;
 	public Skin skin;
 	private String[] mapStrings;
+	private int[][] customMap;
+	private boolean mapBoolean = false;
+	private String mapName = "None";
+
 	Texture texture;
 	
 	//Settings buttons (sliders)
-	Slider turnDuration_slider;
-	Slider roundDuration_slider;
-	Slider sinkPenalty_slider;
-	TextField turnText;
-	TextField roundText;
-	TextField sinkPenaltyText;
+	private Slider turnDuration_slider;
+	private Slider roundDuration_slider;
+	private Slider sinkPenalty_slider;
+	private TextField turnText;
+	private TextField roundText;
+	private TextField sinkPenaltyText;
 	//buttons to select disengage behavior
-	TextButton disengageOff;
-	TextButton disengageRealistic;
-	TextButton disengageSimple;
+	private TextButton disengageOff;
+	private TextButton disengageRealistic;
+	private TextButton disengageSimple;
 	//buttons to select job quality
-	TextButton basicQuality;
-	TextButton eliteQuality;
+	private TextButton basicQuality;
+	private TextButton eliteQuality;
+	private TextButton customMapButton;
 	//option buttons
-	TextButton proposeButton ;
-	TextButton exitButton;
+	private TextButton proposeButton ;
+	private TextButton exitButton;
 	
-	Table table;
-	Table sliderTable;
-	Table disengageTable;
-	Table qualityTable;
-	Table mapTable;
-	Table selectionTable;
-	Container<Table> tableContainer;
-	Cell<?> cell;
-	Label disengageLabel;
-	Label turnLabel;
-	Label roundLabel;
-	Label sinkLabel;
-	Label jobberLabel;
-	Label previewLabel;
+	private Table table;
+	private Table sliderTable;
+	private Table disengageTable;
+	private Table qualityTable;
+	private Table mapTable;
+	private Table selectionTable;
+	private Container<Table> tableContainer;
+	private Cell<?> cell;
+	private Label disengageLabel;
+	private Label turnLabel;
+	private Label roundLabel;
+	private Label sinkLabel;
+	private Label jobberLabel;
+	private Label previewLabel;
 	
-	ButtonGroup<TextButton> disengageBehaviorGroup;
-	ButtonGroup<TextButton> jobberQualityGroup;
+	private ButtonGroup<TextButton> disengageBehaviorGroup;
+	private ButtonGroup<TextButton> jobberQualityGroup;
 	
     protected MenuComponent(GameContext context, SeaBattleScene owner) {
         super(context, owner);
         this.context = context;
     	stage = new Stage();
         batch = new SpriteBatch();
+        fileChooser = new JFileChooser();
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         dialog = new Dialog("Game Settings", skin, "dialog");
         menuButton_Shape = new Rectangle(MENU_buttonX, 13, 25, 25);
@@ -172,7 +187,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	basicQuality.getStyle().disabled = basicQuality.getStyle().down;
     	eliteQuality = new TextButton("Elite",skin);
     	eliteQuality.getStyle().disabled = eliteQuality.getStyle().down;
-    	
+    	customMapButton = new TextButton("Choose map...",skin);
+    	customMapButton.getStyle().disabled = customMapButton.getStyle().down;
     	disengageBehaviorGroup.add(disengageOff,disengageRealistic,disengageSimple);
     	jobberQualityGroup.add(basicQuality,eliteQuality);
     	for (TextButton button: disengageBehaviorGroup.getButtons()) {
@@ -232,15 +248,24 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      * Fill dialog selectbox with map names
      */
     public void fillSelectBox() {
-        mapStrings = new String[context.getMaps().size()]; 
-    	for(int j =0;j<context.getMaps().size();j++){
-    		mapStrings[j] = context.getMaps().get(j);
-    	}
-		selectBox.setItems(mapStrings);
-		selectBox.setMaxListCount(6);
-		selectBox.setSelected(context.currentMapName);
-		context.setProposedMapName(selectBox.getSelected());
+    	if(context.getMaps().size() !=0) {
+    		mapStrings = new String[context.getMaps().size()]; 
+        	for(int j =0;j<context.getMaps().size();j++){
+        		mapStrings[j] = context.getMaps().get(j);
+        	}
+    		selectBox.setItems(mapStrings);
+    		selectBox.setMaxListCount(6);
+    		if(context.currentMapName != null) {
+    			selectBox.setSelected(context.currentMapName);
+    			context.setProposedMapName(selectBox.getSelected());
+    		}
+    	}  
     }
+    
+	public void setMapBoolean(boolean mapBoolean) {
+		this.mapBoolean = mapBoolean;
+	}
+	
     /*
      * Initialize/create all listeners for buttons/sliders
      */
@@ -251,6 +276,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             	for (TextButton button: disengageBehaviorGroup.getButtons()) {
             		button.setDisabled(false);
             	}
+            	customMapButton.setDisabled(false);
             	disengageOff.setDisabled(true);
             	context.setProposedDisengageBehavior("off");
         	}});
@@ -260,6 +286,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             	for (TextButton button: disengageBehaviorGroup.getButtons()) {
             		button.setDisabled(false);
             	}
+            	customMapButton.setDisabled(false);
             	disengageRealistic.setDisabled(true);
             	context.setProposedDisengageBehavior("realistic");
         	}});
@@ -269,6 +296,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             	for (TextButton button: disengageBehaviorGroup.getButtons()) {
             		button.setDisabled(false);
             	}
+            	customMapButton.setDisabled(false);
             	disengageSimple.setDisabled(true);
             	context.setProposedDisengageBehavior("simple");
         	}});
@@ -278,6 +306,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             	for (TextButton button: jobberQualityGroup.getButtons()) {
             		button.setDisabled(false);
             	}
+            	customMapButton.setDisabled(false);
             	basicQuality.setDisabled(true);
             	context.setProposedJobberQuality("basic");
         	}});
@@ -287,6 +316,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             	for (TextButton button: jobberQualityGroup.getButtons()) {
             		button.setDisabled(false);
             	}
+            	customMapButton.setDisabled(false);
             	eliteQuality.setDisabled(true);
             	context.setProposedJobberQuality("elite");
         	}});
@@ -295,7 +325,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         	@Override
             public void clicked(InputEvent event, float x, float y) {
         		dialog.getContentTable().clear();
-        		context.sendSettingsPacket();
+        		context.sendSettingsPacket(customMap,mapBoolean, mapName);
 		    	dialog.setVisible(false);
 		    	Gdx.input.setInputProcessor(input);
 		    	context.getControlScene().getBnavComponent().getChatBar().getTextfield().setText(
@@ -315,6 +345,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         		menuButtonIsDown = false;
         		menuLobbyIsDown = false;
             	menuMapsIsDown = false;
+            	customMap = null;
+            	setMapBoolean(false);
+            	customMapButton.setDisabled(false);
 			} 
         });
 
@@ -374,25 +407,89 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	try {
+                	customMapButton.setDisabled(false);
+            		setMapBoolean(false);
+            		customMap = null;
                 	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
                 	if(pixmap != null) {
-	                	Texture textureMap = new Texture(pixmap);
-	                	Image map = new Image(textureMap);
-	                	cell.setActor(map);
-	                	dialog.setSize(650, 575);
-	                	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+	                	setMapPreview(pixmap);
                 	}else {
-                        System.out.println("Map preview not available");
-                        dialog.setSize(413, 331);
-                		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
-                		cell.setActor(previewLabel);
+                		clearMapPreview();
                 	}
-                	context.setProposedMapName(selectBox.getSelected());
+                	context.setProposedMapName(selectBox.getSelected());	
             	}catch(Exception e) {
-            		System.out.println("File does not exist");	
+            		e.printStackTrace();
             	}
             }
         });
+		
+		customMapButton.addListener(new ClickListener() {
+			@Override
+            public void clicked(InputEvent event, float x, float y) {
+				customMapButton.setDisabled(true);
+    			setMapBoolean(true);
+    			clearMapPreview();
+    			selectCustomMap();
+			}
+		});
+    }
+    
+    public void selectCustomMap() {
+		int[][] tempTiles = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
+    	fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
+    	fileChooser.setDialogTitle("Select Map File");
+    	int result = fileChooser.showOpenDialog(null);
+    	if(result == JFileChooser.APPROVE_OPTION) {
+    		File selectedFile = fileChooser.getSelectedFile();
+    		if(selectedFile.length()/1024 < 5) {
+    			int x = 0;
+    	        int y = 0;
+    	        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()))) {
+    	            String line;
+    	            while ((line = br.readLine()) != null) {
+    	                String[] split = line.split(",");
+    	                for (String tile : split) {
+    	                	tempTiles[x][y] = Integer.parseInt(tile);
+    	                    x++;
+    	                }
+    	                x = 0;
+    	                y++;
+    	            }
+    	            tempTiles = flipArray(tempTiles);
+    	        	customMap = tempTiles;
+    	        	mapName = selectedFile.getName();
+    	        } catch (IOException e) {
+    	            e.printStackTrace();
+    	        }
+    		}else {
+    			selectCustomMap();
+    		}
+    	}
+    }
+    
+    /*
+     * Clears map preview with label
+     */
+    public void clearMapPreview() {
+    	if(dialog != null && cell != null && previewLabel != null) {
+            dialog.setSize(413, 331);
+    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+    		cell.setActor(previewLabel);	
+    	}
+    }
+    
+    /*
+     * Sets map preview to selected map screenshot 
+    */
+    public void setMapPreview(Pixmap pixmap) {
+    	if(dialog != null && cell != null) {
+    		Texture textureMap = new Texture(pixmap);
+        	Image map = new Image(textureMap);
+        	cell.setActor(map);
+        	dialog.setSize(650, 575);
+        	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+    	}
     }
     
     /*
@@ -433,22 +530,27 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		qualityTable.add(eliteQuality).pad(5.0f).row();
 		cell = mapTable.add().colspan(3);
 		mapTable.add().row();
-		mapTable.add(selectBox).colspan(3);
+		mapTable.add(selectBox).colspan(1);
+		mapTable.add(customMapButton).colspan(2);
 		selectionTable.add(proposeButton);
 		selectionTable.add(exitButton);
-    	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
-    	if(pixmap != null) {
-        	Texture textureMap = new Texture(pixmap);
-        	Image map = new Image(textureMap);
-        	cell.setActor(map);
-        	dialog.setSize(650, 575);
-        	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
-    	}else {
-    		dialog.setSize(413, 331);
-    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
-    		cell.setActor(previewLabel);
-    	}
-		dialog.getContentTable().add(tableContainer).row();
+		try {
+	    	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
+	    	if(pixmap != null) {
+	        	Texture textureMap = new Texture(pixmap);
+	        	Image map = new Image(textureMap);
+	        	cell.setActor(map);
+	        	dialog.setSize(650, 575);
+	        	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+	    	}else {
+	    		dialog.setSize(413, 331);
+	    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+	    		cell.setActor(previewLabel);
+	    	}
+			dialog.getContentTable().add(tableContainer).row();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
     }
     
     /*
@@ -502,6 +604,17 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             return false;
         }
     	
+    }
+    /**
+     * Helper method, flip array horizontally
+     */
+    public static int[][] flipArray(int[][] theArray) {
+        for(int i = 0; i < (theArray.length / 2); i++) {
+            int[] temp = theArray[i];
+            theArray[i] = theArray[theArray.length - i - 1];
+            theArray[theArray.length - i - 1] = temp;
+        }
+        return theArray;
     }
 
     /**

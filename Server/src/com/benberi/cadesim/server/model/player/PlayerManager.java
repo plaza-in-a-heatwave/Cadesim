@@ -1115,7 +1115,7 @@ public class PlayerManager {
         for (Player p : listRegisteredPlayers()) {
         	p.setFirstEntry(true);
         	p.setNeedsRespawn(true);
-        	p.getPackets().sendBoard();
+            p.getPackets().sendBoard();
         	p.getMoveTokens().setAutomaticSealGeneration(true); // bugfix disparity between client and server
         	p.getPackets().sendFlags();
         	sendAfterTurn();
@@ -1434,20 +1434,25 @@ public class PlayerManager {
 				ServerConfiguration.setJobbersQuality(ServerConfiguration.getProposedJobbersQualityAsString());
 				setPersistTemporarySettings(false);
 				context.getTimeMachine().stop();
-				String match=null;
-    		    for (String s : ServerConfiguration.getAvailableMaps()) {
-    		        if (s.toLowerCase().startsWith(ServerConfiguration.getProposedMapName().toLowerCase())) {
-    		            match = s;
-    		            break;
-    		        }
-    		    }
-    		    if (match != null) {
-                    ServerConfiguration.overrideNextMapName(match);
-    		    }
-    		    else
-    		    {
-    		        serverPrivateMessage(pl, "Unknown map name.");
-    		    }
+				if(!ServerConfiguration.isCustomMap()) {
+					String match=null;
+	    		    for (String s : ServerConfiguration.getAvailableMaps()) {
+	    		        if (s.toLowerCase().startsWith(ServerConfiguration.getProposedMapName().toLowerCase())) {
+	    		            match = s;
+	    		            break;
+	    		        }
+	    		    }
+	    		    if (match != null) {
+	                    ServerConfiguration.overrideNextMapName(match);
+	    		    }
+	    		    else
+	    		    {
+	    		        serverPrivateMessage(pl, "Unknown map name.");
+	    		    }		
+				}else {
+					ServerConfiguration.overrideNextMapName(ServerContext.getCustomMapName());
+				}
+			
                 setShouldSwitchMap(true);
 				for(Player player : players) { // resets all players tokens
 					player.setTurnsUntilControl(0);

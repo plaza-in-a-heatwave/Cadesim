@@ -15,6 +15,10 @@ public class SendSettingsPacket extends OutgoingPacket {
 	private String proposedJobberQuality;
 	private String proposedMapName;
 	
+	private int[][] customMapArray;
+	private boolean isCustomMap;
+	private String customMapName;
+	
     public SendSettingsPacket() {
         super(11);
     }
@@ -27,7 +31,20 @@ public class SendSettingsPacket extends OutgoingPacket {
         writeInt(getProposedSinkPenalty());
         writeByteString(getProposedDisengageBehavior());
         writeByteString(getProposedJobberQuality());
-        writeByteString(getProposedMapName());
+        if(isCustomMap()) {
+        	writeInt(1);
+        	writeByteString(getCustomMapName());
+        	if(getCustomMapArray() != null) {
+        		for(int i=0; i < getCustomMapArray().length; ++i){
+        			for(int j=0; j < getCustomMapArray()[i].length; ++j){
+	    		        writeInt(getCustomMapArray()[i][j]);
+	    		    }
+    		   }
+        	}
+        }else {
+        	writeInt(0);
+            writeByteString(getProposedMapName());
+        }
         setLength(getBuffer().readableBytes());
     }
     
@@ -78,4 +95,28 @@ public class SendSettingsPacket extends OutgoingPacket {
     public void setProposedMapName(String value) {
     	this.proposedMapName = value;
     }
+    
+    public void setCustomMapArray(int[][] map) {
+    	this.customMapArray = map;
+    }
+    
+    public int[][] getCustomMapArray() {
+    	return this.customMapArray;
+    }
+
+	public boolean isCustomMap() {
+		return isCustomMap;
+	}
+
+	public void setCustomMap(boolean isCustomMap) {
+		this.isCustomMap = isCustomMap;
+	}
+
+	public String getCustomMapName() {
+		return customMapName;
+	}
+
+	public void setCustomMapName(String customMapName) {
+		this.customMapName = customMapName;
+	}
 }

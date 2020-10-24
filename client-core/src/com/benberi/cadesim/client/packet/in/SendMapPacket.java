@@ -20,7 +20,6 @@ public class SendMapPacket extends ClientPacketExecutor {
             int y = p.readByte();
             map[x][y] = tile;
         }
-        
         getContext().getBattleScene().createMap(map);
         getContext().setConnected(true);
     }

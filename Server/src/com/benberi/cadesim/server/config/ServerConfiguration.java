@@ -45,6 +45,7 @@ public class ServerConfiguration {
     private static int[] breakInfo = {-1, -1}; // seconds
     private static boolean scheduledAutoUpdate = false;
     private static boolean testMode = false;
+    private static boolean customMap = false;
 
 	// uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
@@ -59,6 +60,15 @@ public class ServerConfiguration {
     public static void setTestMode(boolean value) {
         testMode = value;
     }
+    
+    public static boolean isCustomMap() {
+        return customMap;
+    }
+
+    public static void setCustomMap(boolean value) {
+    	customMap = value;
+    }
+
 
     public static String[] getArgs() {
         return args;
