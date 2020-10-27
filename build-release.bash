@@ -78,7 +78,7 @@ mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*">/dev/null
+zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt" --exclude "version.txt">/dev/null
 
 # generate files for http
 for f in *; do
@@ -128,7 +128,7 @@ mkdir "$(basename "$SERVERUSERDIR")" "$(basename "$SERVERHTTPDIR")"
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$SERVERZIPNAME" . -9 --exclude "/$(basename "$SERVERUSERDIR")/*" --exclude "/$(basename "$SERVERHTTPDIR")/*">/dev/null
+zip -r "$SERVERZIPNAME" . -9 --exclude "/$(basename "$SERVERUSERDIR")/*" --exclude "/$(basename "$SERVERHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt">/dev/null
 
 # generate files for http
 for f in *; do
