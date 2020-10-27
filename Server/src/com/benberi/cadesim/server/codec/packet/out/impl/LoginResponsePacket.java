@@ -2,6 +2,7 @@ package com.benberi.cadesim.server.codec.packet.out.impl;
 
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.util.PacketLength;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 
 public class LoginResponsePacket extends OutgoingPacket {
@@ -43,9 +44,12 @@ public class LoginResponsePacket extends OutgoingPacket {
     @Override
     public void encode() {
         setPacketLengthType(PacketLength.BYTE);
-        setLength(5); // byte + (2 * short)
         writeByte(response);
         writeShort(turnDuration);   // 2-byte
         writeShort(roundDuration);  // 2-byte
+        writeShort(ServerConfiguration.getRespawnDelay());
+        writeByteString(ServerConfiguration.getDisengageBehavior());
+        writeByteString(ServerConfiguration.getJobbersQualityAsString());
+        setLength(getBuffer().readableBytes()); // byte + (2 * short)
     }
 }

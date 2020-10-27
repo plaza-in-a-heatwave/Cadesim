@@ -1,5 +1,6 @@
 package com.benberi.cadesim.server.model.cade.map;
 
+import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
@@ -19,54 +20,54 @@ public enum MapType {
     }
 
     public int[][] load(BlockadeMap bmap) {
-        int[][] map = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
-        File file = new File(Constants.mapDirectory + "/" + ServerConfiguration.getMapName());
+    	int[][] finalMap = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
+        if(!ServerConfiguration.isCustomMap()) {
+            int[][] map = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
+        	File file = new File(Constants.mapDirectory + "/" + ServerConfiguration.getMapName());
 
-        int x = 0;
-        int y = 0;
+            int x = 0;
+            int y = 0;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] split = line.split(",");
-                for (String tile : split) {
-                    map[x][y] = Integer.parseInt(tile);
-                    x++;
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] split = line.split(",");
+                    for (String tile : split) {
+                        map[x][y] = Integer.parseInt(tile);
+                        x++;
+                    }
+                    x = 0;
+                    y++;
                 }
-                x = 0;
-                y++;
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
-        }
 
-        int[][] finalMap = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
+            int x1 = 0;
+            int y1 = 0;
 
-        int x1 = 0;
-        int y1 = 0;
-
-        for (int i = 0; i < map.length; i++) {
-            for (int j = map[i].length - 1; j > -1; j--) {
-                finalMap[x1][y1] = map[i][j];
-                y1++;
+            for (int i = 0; i < map.length; i++) {
+                for (int j = map[i].length - 1; j > -1; j--) {
+                    finalMap[x1][y1] = map[i][j];
+                    y1++;
+                }
+                y1 = 0;
+                x1++;
             }
-            y1 = 0;
-            x1++;
-        }
 
-        for(int i = 0; i < map.length; i++) {
-            for (int j = 0; j < finalMap[i].length; j++) {
-                if (isFlag(finalMap[i][j])) {
-                    Flag flag = new Flag(FlagSize.forTile(finalMap[i][j]));
-                    flag.set(i, j);
-                    bmap.addFlag(flag);
-                    finalMap[i][j] = 0;
+            for(int i = 0; i < map.length; i++) {
+                for (int j = 0; j < finalMap[i].length; j++) {
+                    if (isFlag(finalMap[i][j])) {
+                        Flag flag = new Flag(FlagSize.forTile(finalMap[i][j]));
+                        flag.set(i, j);
+                        bmap.addFlag(flag);
+                        finalMap[i][j] = 0;
+                    }
                 }
             }
         }
-
-        return finalMap;
+        return ServerConfiguration.isCustomMap() ? ServerContext.getMapArray() : finalMap;
     }
 
     private boolean isFlag(int tile) {

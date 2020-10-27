@@ -55,6 +55,12 @@ public class GameContext {
      */
     private int turnDuration;
     private int roundDuration;
+    private int proposedTurnDuration;
+    private int proposedRoundDuration;
+    private int proposedSinkPenalty;
+    private String proposedDisengageBehavior;
+    private String proposedJobberQuality;
+    private String proposedMapName;
 
     public int getTurnDuration() {
     	return this.turnDuration;
@@ -71,6 +77,54 @@ public class GameContext {
 	public void setRoundDuration(int roundDuration) {
 		this.roundDuration = roundDuration;
 	}
+	//Separate turn/round duration variables because they updated every second
+    public int getProposedTurnDuration() {
+    	return this.proposedTurnDuration;
+    }
+
+	public void setProposedTurnDuration(int turnDuration) {
+    	this.proposedTurnDuration = turnDuration;
+    }
+
+    public int getProposedRoundDuration() {
+		return proposedRoundDuration;
+	}
+
+	public void setProposedRoundDuration(int roundDuration) {
+		this.proposedRoundDuration = roundDuration;
+	}
+    public int getProposedSinkPenalty() {
+    	return this.proposedSinkPenalty;
+    }
+
+	public void setProposedSinkPenalty(int sinkPenalty) {
+    	this.proposedSinkPenalty = sinkPenalty;
+    }
+	
+    public String getProposedDisengageBehavior() {
+    	return this.proposedDisengageBehavior;
+    }
+
+	public void setProposedDisengageBehavior(String disengageBehavior) {
+    	this.proposedDisengageBehavior = disengageBehavior;
+    }
+	
+    public String getProposedJobberQuality() {
+    	return this.proposedJobberQuality;
+    }
+
+	public void setProposedJobberQuality(String jobberQuality) {
+    	this.proposedJobberQuality = jobberQuality;
+    }
+	
+    public String getProposedMapName() {
+    	return this.proposedMapName;
+    }
+
+	public void setProposedMapName(String mapName) {
+    	this.proposedMapName = mapName;
+    }
+
     private SceneAssetManager assetManager;
 
     /**
@@ -117,7 +171,7 @@ public class GameContext {
      * List of maps
      */
     private List<String> maps = new ArrayList<String>();
-    public Pixmap[] pixmapArray;
+    public Pixmap[] pixmapArray = new Pixmap[1];
     public String currentMapName;
     /**
      * If connected to server
@@ -534,6 +588,25 @@ public class GameContext {
     	PostMessagePacket packet = new PostMessagePacket();
     	packet.setMessage(message);
     	sendPacket(packet);
+    }
+    
+    public void sendSettingsPacket(int[][] map, Boolean customMap, String mapName) {
+    	SendSettingsPacket packet = new SendSettingsPacket();
+    	packet.setProposedTurnDuration(getProposedTurnDuration());
+    	packet.setProposedRoundDuration(getProposedRoundDuration());
+    	packet.setProposedSinkPenalty(getProposedSinkPenalty());
+    	packet.setProposedDisengageBehavior(getProposedDisengageBehavior());
+    	packet.setProposedJobberQuality(getProposedJobberQuality());
+    	if(!customMap && map == null) {
+        	packet.setCustomMap(false);
+        	packet.setProposedMapName(getProposedMapName());
+    	}else {
+    		packet.setCustomMapName(mapName);
+    		packet.setCustomMap(true);
+    		packet.setCustomMapArray(map);
+    	}
+    	sendPacket(packet);
+    	packet.setCustomMap(false); //make sure to reset
     }
 
     /*

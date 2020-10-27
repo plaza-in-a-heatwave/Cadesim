@@ -57,6 +57,9 @@ public class ServerContext {
     private RegressionTests regressionTests;
 
     private byte pingCounter = 0;
+    
+    private static int[][] mapArray;
+    private static String customMapName;
 
     public byte incrementPingCounter() {
         return ++pingCounter;
@@ -159,4 +162,17 @@ public class ServerContext {
     public RegressionTests getRegressionTests() {
         return regressionTests;
     }
+	public static int[][] getMapArray() {
+		return ServerContext.mapArray;
+	}
+	public static void setMapArray(int[][] mapArray) {
+		ServerContext.mapArray = mapArray;
+	}
+	
+	public static String getCustomMapName() {
+		return ServerContext.customMapName;
+	}
+	public static void setCustomMapName(String name) {
+		ServerContext.customMapName = name;
+	}
 }

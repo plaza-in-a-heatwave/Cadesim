@@ -101,4 +101,8 @@ public class OutGoingPackets {
      * delivers map names to client
      */
     public static final int SEND_MAPNAMES = 20;
+    /**
+     * delivers settings to client
+     */
+    public static final int GAME_SETTINGS = 21;
 }

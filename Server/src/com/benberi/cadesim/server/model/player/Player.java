@@ -167,6 +167,9 @@ public class Player extends Position {
      * @param c     the channel, or null if isBot
      * If creating a bot, remember to call register().
      */
+    public Player() {
+    	
+    }
     public Player(ServerContext ctx, Channel c) {
         this.animation = new MoveAnimationStructure();
     	this.joinTime = System.currentTimeMillis();
@@ -184,6 +187,12 @@ public class Player extends Position {
         set(-1, -1); // not spawned
     }
 
+    public void calculateRoute() {
+	}
+    
+    public void performLogic() { 	
+    }
+    
     /**
      * Logical updates during the game
      */

@@ -62,6 +62,7 @@ public class ServerPacketManager {
         executors.put(IncomingPackets.POST_MESSAGE, new PostMessagePacket(context));
         executors.put(IncomingPackets.SWAP_MOVE, new PlayerSwapMovesPacket(context));
         executors.put(IncomingPackets.CLIENT_ALIVE, new ClientAlivePacket(context));
+        executors.put(IncomingPackets.GAME_SETTINGS, new ReceiveSettingsPacket(context));
     }
 
     /**

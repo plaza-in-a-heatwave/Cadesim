@@ -17,4 +17,5 @@ public class IncomingPackets {
     public static final int POST_MESSAGE = 8;
     public static final int SWAP_MOVE = 9;
     public static final int CLIENT_ALIVE = 10;
+    public static final int GAME_SETTINGS = 11;
 }
