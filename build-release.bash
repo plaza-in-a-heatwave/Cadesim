@@ -90,8 +90,6 @@ rm "version.txt" # temporary build file
 popd>/dev/null
 
 # process getdown
-echo "$CLIENTBUILDDIR"
-ls "$CLIENTBUILDDIR"
 java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$CLIENTBUILDDIR"
 pushd "$CLIENTBUILDDIR">/dev/null
 mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"

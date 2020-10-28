@@ -82,3 +82,6 @@ To disable automatic updates: add ```autoupdate=no``` to user.config
 - use gradle (>6) to create the release: ```gradle release``` (also builds server)
     - this requires you to have bash in ```%PATH%``` if building on windows.
 - For more details on the process see ```build.gradle``` and ```build-release.bash```.
+
+# Releases
+See https://github.com/plaza-in-a-heatwave/Cadesim/tree/release for prebuilt jars.
