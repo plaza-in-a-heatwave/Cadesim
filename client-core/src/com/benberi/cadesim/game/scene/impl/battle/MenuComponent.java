@@ -585,9 +585,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         	menuButtonIsDown = false;
         	menuLobbyIsDown = false;
         	menuMapsIsDown = false;
-        	if(dialog != null) {
-        		dialog.setVisible(true);
-        	}
         	return false;
         }
     	else if(menuButtonIsDown && isClickingLobbyButton(x,y)) {
