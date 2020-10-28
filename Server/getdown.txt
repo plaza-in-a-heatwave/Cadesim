@@ -1,6 +1,6 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /)
 # TODO #69 add subdirectory
-appbase = https://gucadesim.imfast.io/cadesim-server/
+appbase = https://plaza-in-a-heatwave.github.io/cadesim-updates/growup/server/
 
 # UI Configuration
 ui.name = CadeSim Server Updater

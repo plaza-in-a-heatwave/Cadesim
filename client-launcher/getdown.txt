@@ -1,5 +1,5 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /)
-appbase = https://gucadesim.imfast.io/
+appbase = https://plaza-in-a-heatwave.github.io/cadesim-updates/growup/client/
 version = 0109925
 
 # UI Configuration
