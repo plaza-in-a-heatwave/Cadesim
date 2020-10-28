@@ -85,3 +85,8 @@ To disable automatic updates: add ```autoupdate=no``` to user.config
 
 # Releases
 See https://github.com/plaza-in-a-heatwave/Cadesim/tree/release for prebuilt jars.
+
+# Deploying
+- Make changes to the code until happy with the feature/bugfix
+- Run build-release.bash to create the release versions
+- Run deploy-xxx.bash when happy with the release versions, where xxx is the specific flavor of Cadesim.
