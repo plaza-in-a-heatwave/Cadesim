@@ -1,5 +1,5 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /)
-appbase = https://plaza-in-a-heatwave.github.io/cadesim-updates/growup/client/
+appbase = https://plaza-in-a-heatwave.github.io/cadesim/growup/client/http/
 version = 0109925
 
 # UI Configuration
@@ -14,7 +14,7 @@ ui.status = 30, 136, 364, 80
 ui.status_text = FFEC48
 
 # Application jar files
-code = cadesim-client.jar
+code = cadesim.jar
 
 # The main entry point for the application
 class = com.benberi.cadesim.desktop.DesktopLauncher

@@ -12,6 +12,9 @@ echo "* please exit the release dir   *"
 echo "* before creating the release.  *"
 echo "*********************************"
 
+# jars can have different names when released for compatibility
+CLIENTJARNAME="cadesim.jar"        # also remember to change this in getdown.txt
+SERVERJARNAME="cadesim-server.jar"
 
 # project dirs
 ROOT="$(realpath "$(dirname "$0")")"
@@ -82,11 +85,13 @@ for file in "${clientfiles[@]}"; do
     cp -r "$file" "$CLIENTBUILDDIR"
 done
 # move this separately, it's huge. from build task.
-mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/cadesim-client.jar
+mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/"$CLIENTJARNAME"
 rm "version.txt" # temporary build file
 popd>/dev/null
 
 # process getdown
+echo "$CLIENTBUILDDIR"
+ls "$CLIENTBUILDDIR"
 java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$CLIENTBUILDDIR"
 pushd "$CLIENTBUILDDIR">/dev/null
 mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"
@@ -135,7 +140,7 @@ for file in "${serverfiles[@]}"; do
     cp -r "$file" "$SERVERBUILDDIR";
 done
 # move this separately, it's huge. from build task.
-mv build/libs/server*.jar "$SERVERBUILDDIR"/cadesim-server.jar
+mv build/libs/server*.jar "$SERVERBUILDDIR"/"$SERVERJARNAME"
 popd>/dev/null
 
 # process getdown
