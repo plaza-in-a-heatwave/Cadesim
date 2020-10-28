@@ -88,7 +88,10 @@ public class GameServerBootstrap {
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
         // set up maps
-        ServerConfiguration.loadAvailableMaps();
+        if (!ServerConfiguration.loadAvailableMaps()) {
+            ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
+            System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
+        }
         ServerContext.log("Loaded " + ServerConfiguration.getAvailableMaps().size() + " maps.");
         ServerConfiguration.pregenerateNextMapName();
 
@@ -354,7 +357,7 @@ public class GameServerBootstrap {
                 	);
                     ServerContext.log("No map specified, automatically chose random map: " + ServerConfiguration.getMapName());
                 } catch(NullPointerException e) {
-                    ServerContext.log("Failed to find maps folder. create a folder called \"maps\" in the same directory.");
+                    ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
                     System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
                 }
             }
@@ -362,7 +365,7 @@ public class GameServerBootstrap {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
                 ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
             }
-            
+
             // test mode overrides
             if (cmd.hasOption("j")) {
                 ServerConfiguration.setTestMode(true);
@@ -372,15 +375,15 @@ public class GameServerBootstrap {
                         Constants.TEST_MAPNAME
                     );
                 } catch (NullPointerException e) {
-                    ServerContext.log("Failed to find maps folder. create a folder called \"maps\" in the same directory.");
+                    ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
                     System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
                 }
-                
+
                 // reduce turn duration to 0.1s. (TODO #71 possibly could be 0s with tweaks to time machine)
                 ServerConfiguration.setTurnDuration(1); // 0.1s
                 ServerConfiguration.setRoundDuration(315360000); // 1 year to be safe
             }
-            
+
             // check co-dependent arguments e.g. turn/round time
             if (ServerConfiguration.getRoundDuration() < ServerConfiguration.getTurnDuration())
             {

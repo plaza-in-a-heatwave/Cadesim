@@ -2,3 +2,17 @@ apply plugin: "java"
 
 sourceCompatibility = 1.8
 sourceSets.main.java.srcDirs = [ "src/" ]
+
+project.ext.mainClassName = "com.benberi.cadesim.server.service.GameServerBootstrap"
+
+task dist(dependsOn: classes, type: Jar) {
+    from files(sourceSets.main.output.classesDirs)
+    from files(sourceSets.main.output.resourcesDir)
+    from {configurations.compile.collect {zipTree(it)}}
+ 
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+}
+// TODO. dist still generates a small jar with "build", and the full jar with "release".
+// it should generate no jar unless called directly with release.

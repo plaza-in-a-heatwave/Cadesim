@@ -1,6 +1,4 @@
 buildscript {
-    
-
     repositories {
         mavenLocal()
         mavenCentral()
@@ -8,7 +6,6 @@ buildscript {
         jcenter()
     }
     dependencies {
-        
 
     }
 }
@@ -19,7 +16,7 @@ allprojects {
 
     version = '1.0'
     ext {
-        appName = "BlockadeSimulator"
+        appName = "Cadesim"
         gdxVersion = '1.9.6'
         roboVMVersion = '2.3.1'
         box2DLightsVersion = '1.4'
@@ -83,4 +80,21 @@ project(":server") {
 
 tasks.eclipse.doLast {
     delete ".project"
+}
+
+task clean(type:Delete) {
+   delete "release"
+}
+
+task release(type: Exec) {
+    dependsOn ":client-launcher:dist"    // client jar
+    dependsOn ":server:dist"             // server jar
+    workingDir "$projectDir"
+    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+        // bash must be accessible from your %PATH% environment variable
+        // e.g. append "C:\Program Files (x86)\Git\Bin\" to PATH.
+        commandLine 'cmd', '/c', 'bash build-release.bash'
+    } else {
+        commandLine 'bash build-release.bash'
+    }
 }
