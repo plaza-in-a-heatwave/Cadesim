@@ -1,5 +1,6 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /)
-appbase = https://plaza-in-a-heatwave.github.io/cadesim/growup/client/http/
+# URL is case sensitive.
+appbase = https://plaza-in-a-heatwave.github.io/Cadesim/growup/client/http/
 version = 0109925
 
 # UI Configuration

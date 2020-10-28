@@ -1,6 +1,7 @@
-# The URL from which the client is downloaded (must start with http:// and end with trailing /)
 # TODO #69 add subdirectory
-appbase = https://plaza-in-a-heatwave.github.io/cadesim/growup/server/http/
+# The URL from which the client is downloaded (must start with http:// and end with trailing /)
+# URL is case sensitive.
+appbase = https://plaza-in-a-heatwave.github.io/Cadesim/growup/server/http/
 
 # UI Configuration
 ui.name = CadeSim Server Updater
