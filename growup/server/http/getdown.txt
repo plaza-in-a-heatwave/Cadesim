@@ -1,0 +1,27 @@
+# The URL from which the client is downloaded (must start with http:// and end with trailing /)
+# TODO #69 add subdirectory
+appbase = https://plaza-in-a-heatwave.github.io/cadesim-updates/growup/server/
+
+# UI Configuration
+ui.name = CadeSim Server Updater
+ui.icon = growup.png
+ui.background_image = getdown-bg.png
+ui.hide_decorations = true
+ui.progress = 30, 220, 364, 17
+ui.progress_bar = C9B612
+ui.progress_text = FBFAD8
+ui.status = 30, 136, 364, 80
+ui.status_text = FFEC48
+
+strict_comments = true
+resource = getdown-bg.png
+resource = growup.png
+resource = getdown.jar
+#TODO #69 add maps??
+
+# getdown insists on running an app, but the server will restart itself,
+# so here we pass getdown a configuration that instantly quits
+# and allow server to handle its own restart.
+code = cadesim-server.jar
+class = com.benberi.cadesim.server.service.GameServerBootstrap
+apparg = --do-nothing
