@@ -5,6 +5,7 @@ proxy.txt
 gettingdown.lock
 build/
 release/
+version.txt
 
 # log file
 *.log

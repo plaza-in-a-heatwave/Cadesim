@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
+echo "this script will create a release version of cadesim."
+echo ""
+echo ""
+echo "*********************************"
+echo "* build-release.bash running... *"
+echo "*                               *"
+echo "* make sure environment has:    *"
+echo "*    grep, cut, zip, java       *"
+echo "*                               *"
+echo "* please exit the release dir   *"
+echo "* before creating the release.  *"
+echo "*********************************"
 
-# build a release version of cadesim.
 
 # project dirs
 ROOT="$(realpath "$(dirname "$0")")"
@@ -32,16 +43,17 @@ pushd "$ROOT">/dev/null
 echo "using root directory $(pwd)"
 
 # make build structure
-
+echo "using build prefix: $BUILDPREFIX"
 if [ -d "$BUILDPREFIX" ]; then
     rm -r "$BUILDPREFIX"
-    echo "$BUILDPREFIX existed, removed it"
+    echo "  build prefix already exists, removing it"
 fi
 if ! mkdir -p "$CLIENTBUILDDIR" "$SERVERBUILDDIR"; then
     echo "failed making $CLIENTBUILDDIR and/or $SERVERBUILDDIR".
     exit 1
 else
-    echo "made $CLIENTBUILDDIR and $SERVERBUILDDIR"
+    echo "making client in: $CLIENTBUILDDIR"
+    echo "making server in: $SERVERBUILDDIR"
 fi
 
 # +-------------+
@@ -52,6 +64,10 @@ echo ""
 echo "***********************"
 echo "* making client...    *"
 echo "***********************"
+
+pushd "$CLIENT">/dev/null
+grep "version = " "getdown.txt" | cut -d" " -f 3 >"version.txt" # update version.txt to match getdown.txt
+
 declare -a clientfiles=(
     "bg.png"
     "getdown.jar"
@@ -62,12 +78,12 @@ declare -a clientfiles=(
     "user.config"
     "version.txt"
 )
-pushd "$CLIENT">/dev/null
 for file in "${clientfiles[@]}"; do
     cp -r "$file" "$CLIENTBUILDDIR"
 done
 # move this separately, it's huge. from build task.
 mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/cadesim-client.jar
+rm "version.txt" # temporary build file
 popd>/dev/null
 
 # process getdown
@@ -103,6 +119,9 @@ echo ""
 echo "***********************"
 echo "* making server...    *"
 echo "***********************"
+
+pushd "$SERVER">/dev/null
+
 declare -a serverfiles=(
     "maps"
     "bg.png"
@@ -112,7 +131,6 @@ declare -a serverfiles=(
     "growup.ico"
     "growup.png"
 )
-pushd "$SERVER">/dev/null
 for file in "${serverfiles[@]}"; do
     cp -r "$file" "$SERVERBUILDDIR";
 done
