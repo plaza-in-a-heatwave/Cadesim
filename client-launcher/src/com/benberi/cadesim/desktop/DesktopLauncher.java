@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Properties;
@@ -20,31 +19,47 @@ public class DesktopLauncher {
 			@Override
 			public void run() {
 				try {
+					String[] url = null;
+					String[] version = null;
+					String line = null;
 					BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
-					sc.readLine();
-					//get server url from getDown.txt
-					String cadesimUrl = sc.readLine();
-					String[] url = cadesimUrl.split("=");
-					//read version from getDown.txt
-					String cadeSimVersion = sc.readLine();
-					String[] version = cadeSimVersion.split("=");
-					String txtVersion = version[1].replaceAll("\\s+","");
-					URL cadesimServer = new URL(url[1] + "version.txt");
-					//read version from server
-					BufferedReader reader = new BufferedReader(
-							new InputStreamReader(cadesimServer.openStream()));
-					String serverVersion = reader.readLine().replaceAll("\\s+","");
-					boolean updateBool = serverVersion.equals(txtVersion);
-					if(!updateBool) {
-						Constants.SERVER_VERSION_IDENTICAL = false;
-						System.out.println("Your client is out-of-date.");
-						System.out.println("Current version: " + txtVersion + ", Newer version: " + serverVersion);
-					}else {
-						Constants.SERVER_VERSION_IDENTICAL = true;
-						System.out.println("Your client is up-to-date.");
-						System.out.println("Current version: " + txtVersion);
+					while((line = sc.readLine())!=null) {
+						if(line.isEmpty() || line.startsWith("#")) {
+							continue;
+						}
+						//remove spaces
+						line = line.replaceAll("\\s", "");
+						//check getdown.txt for url
+						if(line.startsWith("appbase=")) {
+							url = line.split("=");
+						}
+						//check getdown.txt for version
+						if(line.startsWith("version=")) {
+							version = line.split("=");
+						}
+						if(version != null && url != null) {
+							break;
+						}
 					}
-					sc.close();
+					if(version != null && url != null) {
+						String txtVersion = version[1].replaceAll("\\s+","");
+						URL cadesimServer = new URL(url[1] + "version.txt");
+						//read version from server
+						BufferedReader reader = new BufferedReader(
+								new InputStreamReader(cadesimServer.openStream()));
+						String serverVersion = reader.readLine().replaceAll("\\s+","");
+						boolean updateBool = serverVersion.equals(version[1].replaceAll("\\s+",""));
+						if(!updateBool) {
+							Constants.SERVER_VERSION_IDENTICAL = false;
+							System.out.println("Your client is out-of-date.");
+							System.out.println("Current version: " + txtVersion + ", Newer version: " + serverVersion);
+						}else {
+							Constants.SERVER_VERSION_IDENTICAL = true;
+							System.out.println("Your client is up-to-date.");
+							System.out.println("Current version: " + txtVersion);
+						}
+						sc.close();
+					}
 				}
 				 catch (IOException e) {
 					e.printStackTrace();
@@ -57,12 +72,10 @@ public class DesktopLauncher {
 
 		// load the properties config
 		Properties prop = new Properties();
-		String fileName = "user.config";
-		InputStream is = null;
 		try {
-		    is = new FileInputStream(fileName);
-		    prop.load(is);
-		} catch (FileNotFoundException e) {
+		    prop.load(new FileInputStream("user.config"));
+		}
+		catch (FileNotFoundException e) {
 		    e.printStackTrace();
 		}
 		catch (IOException e) {

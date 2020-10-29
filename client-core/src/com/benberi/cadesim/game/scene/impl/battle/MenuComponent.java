@@ -28,6 +28,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.Gdx;
@@ -135,6 +136,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private Label jobberLabel;
 	private Label previewLabel;
 	
+	private int turnMax = 10000;
+	private int roundMax = 10000;
+	private int sinkPenaltyMax = 10000;
+	
 	private ButtonGroup<TextButton> disengageBehaviorGroup;
 	private ButtonGroup<TextButton> jobberQualityGroup;
 	
@@ -160,15 +165,84 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		
 		selectBox=new SelectBox<String>(skin);
 		
-    	turnDuration_slider = new Slider(1.0f, 10000f, 1.0f, false, skin);
-    	roundDuration_slider = new Slider(1.0f, 10000f, 1.0f, false, skin);
+    	turnDuration_slider = new Slider(1.0f, 10000f, 10.0f, false, skin);
+    	roundDuration_slider = new Slider(1.0f, 10000f, 10.0f, false, skin);
     	sinkPenalty_slider = new Slider(0.0f, 10000f, 1.0f, false, skin);
     	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
     	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
     	sinkPenalty_slider.setValue((float)context.getProposedSinkPenalty());
     	turnText = new TextField("",skin);
+    	turnText.setMaxLength(5);
+    	turnText.setTextFieldFilter(new TextFieldFilter() {
+			@Override
+			public boolean acceptChar(TextField textField, char c) { //filter out letters and include range
+				try {
+					if(!Character.isDigit(c)) {
+						return false;
+					}
+					if(Integer.parseInt(textField.getText() + c) <= turnMax && Character.isDigit(c)) {
+						return true;
+					}else if(Integer.parseInt(textField.getText() + c) > turnMax && Character.isDigit(c)) {
+						textField.setText(Integer.toString(turnMax));
+						turnDuration_slider.setValue((float)turnMax);
+						return false;
+					}else {
+						return false;
+					}
+				}
+				catch(Exception e) {
+					return true;
+				}
+			}
+    	});
     	roundText = new TextField("",skin);
+    	roundText.setMaxLength(5);
+    	roundText.setTextFieldFilter(new TextFieldFilter() { //filter out letters and include range
+			@Override
+			public boolean acceptChar(TextField textField, char c) {
+				try {
+					if(!Character.isDigit(c)) {
+						return false;
+					}
+					if(Integer.parseInt(textField.getText() + c) <= roundMax && Character.isDigit(c)) {
+						return true;
+					}else if(Integer.parseInt(textField.getText() + c) > roundMax && Character.isDigit(c)) {
+						textField.setText(Integer.toString(roundMax));
+						roundDuration_slider.setValue((float)roundMax);
+						return false;
+					}else {
+						return false;
+					}
+				}
+				catch(Exception e) {
+					return true;
+				}
+			}
+    	});
     	sinkPenaltyText = new TextField("",skin);
+    	sinkPenaltyText.setMaxLength(5);
+    	sinkPenaltyText.setTextFieldFilter(new TextFieldFilter() { //filter out letters and include range
+			@Override
+			public boolean acceptChar(TextField textField, char c) {
+				try {
+					if(!Character.isDigit(c)) {
+						return false;
+					}
+					if(Integer.parseInt(textField.getText() + c) <= sinkPenaltyMax && Character.isDigit(c)) {
+						return true;
+					}else if(Integer.parseInt(textField.getText() + c) > sinkPenaltyMax && Character.isDigit(c)) {
+						textField.setText(Integer.toString(sinkPenaltyMax));
+						sinkPenalty_slider.setValue((float)sinkPenaltyMax);
+						return false;
+					}else { 
+						return false;
+					}
+				}
+				catch(Exception e) {
+					return true;
+				}
+			}
+    	});
     	
     	turnText.setText(String.valueOf(context.getProposedTurnDuration()));
     	roundText.setText(String.valueOf(context.getProposedRoundDuration()));
@@ -324,6 +398,12 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	proposeButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
+        		//sanity check if user chooses 0 for round/turn duration
+        		if(context.getProposedRoundDuration() == 0) {
+        			context.setProposedRoundDuration(1);
+        		}else if(context.getProposedTurnDuration() == 0) {
+        			context.setProposedTurnDuration(1);
+        		}
         		dialog.getContentTable().clear();
         		context.sendSettingsPacket(customMap,mapBoolean, mapName);
 		    	dialog.setVisible(false);
@@ -339,6 +419,12 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	exitButton.addListener(new ClickListener() {
     		@Override
             public void clicked(InputEvent event, float x, float y) {
+    			//sanity check if user chooses 0 for round/turn duration
+        		if(context.getProposedRoundDuration() == 0) {
+        			context.setProposedRoundDuration(1);
+        		}else if(context.getProposedTurnDuration() == 0) {
+        			context.setProposedTurnDuration(1);
+        		}
     			dialog.getContentTable().clear();
     			dialog.setVisible(false);
     			Gdx.input.setInputProcessor(input);
@@ -350,16 +436,17 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             	customMapButton.setDisabled(false);
 			} 
         });
-
     	turnText.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
 					turnDuration_slider.setValue((float)Integer.parseInt(turnText.getText()));
+					if(!turnText.getText().isEmpty()) {
+						context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
+					}
 				}catch(NumberFormatException e) {
 					
 				}
-				context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
 			}
 		});
 		roundText.addListener(new ChangeListener() {
@@ -367,10 +454,12 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
 					roundDuration_slider.setValue((float)Integer.parseInt(roundText.getText()));
+					if(!roundText.getText().isEmpty()) {
+						context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
+					}
 				}catch(NumberFormatException e) {
 					
 				}
-				context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
 			}
 		});
 		sinkPenaltyText.addListener(new ChangeListener() {
@@ -378,7 +467,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
 					sinkPenalty_slider.setValue((float)Integer.parseInt(sinkPenaltyText.getText()));
-					context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+					if(!sinkPenaltyText.getText().isEmpty()) {
+						context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+					}
 				}catch(NumberFormatException e) {
 					
 				}
@@ -400,7 +491,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	sinkPenaltyText.setText(String.valueOf((int)sinkPenalty_slider.getValue()));
-				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+//				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
             }});
 		
 		selectBox.addListener(new ChangeListener(){
