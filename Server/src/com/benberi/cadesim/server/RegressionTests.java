@@ -130,6 +130,11 @@ public class RegressionTests {
         }
 
         // optional further parameters
+
+        /**
+         * Note: The expected damage will be slightly rounded
+         * to avoid direct floating point comparisons.
+         */
         public void expectChangeDamage(float initial, float expected) {
             useDamage = true;
             damage[0] = initial;
@@ -404,8 +409,8 @@ public class RegressionTests {
      */
     private void testAlmostEquals(String scenario, String test, double expected, double result, double tolerance) {
         testTotal++;
-        Double exp = new Double(expected);
-        Double res = new Double(result);
+        Double exp = expected;
+        Double res = result;
         if ((((expected + tolerance) >= result) && (expected - tolerance <= result))
                 || (((expected + tolerance) <= result) && (expected - tolerance >= result))) {
             pass(scenario, test, exp, res);
@@ -871,6 +876,38 @@ public class RegressionTests {
             s.add(t1);
             s.add(t2);
             listOfScenarios.add(new TestScenario("wind and whirl collision & sink #26 (4.1)", s));
+        }
+
+        // two ships side by side, one damaged sinks in 2nd turn.
+        // assert that the sinking ship can't deal damage after it sinks.
+        {
+            TestShip t1 = new TestShip(CUTTER, Team.DEFENDER);
+            t1.setMoves(N,N,N,N);
+            t1.setShots(
+                    0, 1,
+                    0, 1,
+                    0, 1,
+                    0, 1);
+            t1.expectChangePosition(4,3, 4,3);
+            t1.expectChangeFace(NORTH, NORTH);
+            t1.setInitialDamage(5); // max is 8
+            t1.expectSunkInTurn(1);
+
+            TestShip t2 = new TestShip(WB, Team.ATTACKER);
+            t2.setMoves(N,N,N,N);
+            t2.setShots(
+                    2, 0,
+                    2, 0,
+                    0, 0,
+                    0, 0);
+            t2.expectChangePosition(5,3, 5,3);
+            t2.expectChangeFace(NORTH, NORTH);
+            t2.expectChangeDamage(0, 2f/1.5f); // sinking ships dont deal damage
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            listOfScenarios.add(new TestScenario("sinking ships dont deal damage", s));
         }
     }
 }
