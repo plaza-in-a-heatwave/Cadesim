@@ -27,7 +27,9 @@ import com.benberi.cadesim.game.scene.impl.battle.map.tile.impl.Whirlpool;
 import com.benberi.cadesim.game.scene.impl.battle.map.tile.impl.Wind;
 import com.benberi.cadesim.game.scene.impl.control.BattleControlComponent;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 
 public class SeaBattleScene implements GameScene {
 
@@ -60,6 +62,20 @@ public class SeaBattleScene implements GameScene {
      * The sea texture
      */
     private Texture sea;
+    
+    /**
+     * The islands texture
+     */
+    private Texture alkaid_island;
+    private Texture pukru_island;
+    private Texture doyle_island;
+    private Texture isle_keris_island;
+    
+    private ArrayList<Texture> islandList = new ArrayList<Texture>();
+    
+    Texture selectedIsland = alkaid_island;
+    
+	Random random = new Random();
 
     /**
      * The shape renderer
@@ -127,6 +143,7 @@ public class SeaBattleScene implements GameScene {
         // if there was a previous map: delete it
         if (blockadeMap != null) { blockadeMap.dispose();}
         blockadeMap = new BlockadeMap(context, tiles);
+    	selectedIsland = islandList.get(random.nextInt(3));
     }
 
     private void recountVessels() {
@@ -141,6 +158,16 @@ public class SeaBattleScene implements GameScene {
         this.batch = new SpriteBatch();
         information.create();
         sea = context.getManager().get(context.getAssetObject().sea);
+        alkaid_island = context.getManager().get(context.getAssetObject().alkaid_island);
+        pukru_island = context.getManager().get(context.getAssetObject().pukru_island);
+        doyle_island = context.getManager().get(context.getAssetObject().doyle_island);
+        isle_keris_island = context.getManager().get(context.getAssetObject().isle_keris_island);
+        
+        islandList.add(alkaid_island);
+        islandList.add(pukru_island);
+        islandList.add(doyle_island);
+        islandList.add(isle_keris_island);
+    	
         sea.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
         this.mainmenu = new MenuComponent(context, this);
@@ -431,7 +458,7 @@ public class SeaBattleScene implements GameScene {
         Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
 
         drawSea();
-
+        drawIsland();
         // Render the map
         renderSeaBattle();
 
@@ -452,6 +479,14 @@ public class SeaBattleScene implements GameScene {
      */
     private void drawSea() {
         batch.draw(sea, -2000, -1000, 0, 0, 5000, 5000);
+    }
+    
+    private void drawIsland() {
+    	if(selectedIsland == pukru_island) {
+    		batch.draw(selectedIsland, -1190,1090);
+    	}else {
+            batch.draw(selectedIsland, -1290,1050);
+    	}
     }
 
     /**

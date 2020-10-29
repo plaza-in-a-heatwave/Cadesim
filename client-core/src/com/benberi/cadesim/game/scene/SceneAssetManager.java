@@ -120,6 +120,10 @@ public class SceneAssetManager {
 	private final static String CELL = "sea/cell.png";
 	private final static String SAFE = "sea/safezone.png";
 	private final static String SEA = "sea/sea1.png";
+	private final static String ALKAID_ISLAND = "sea/alkaid_island.png";
+	private final static String PUKRU_ISLAND = "sea/pukru_island.png";
+	private final static String DOYLE_ISLAND = "sea/doyle_island.png";
+	private final static String ISLE_KERIS_ISLAND = "sea/isle_keris_island.png";
 	
 	private final static String BIGROCK ="sea/rocks_big.png";
 	private final static String SMALLROCK = "sea/rocks_small.png";
@@ -279,7 +283,10 @@ public class SceneAssetManager {
 	public AssetDescriptor<Texture> cell = new AssetDescriptor<Texture>(CELL, Texture.class);
 	public AssetDescriptor<Texture> safe = new AssetDescriptor<Texture>(SAFE, Texture.class);
 	public AssetDescriptor<Texture> sea = new AssetDescriptor<Texture>(SEA, Texture.class);
-	
+	public AssetDescriptor<Texture> alkaid_island = new AssetDescriptor<Texture>(ALKAID_ISLAND, Texture.class);
+	public AssetDescriptor<Texture> pukru_island = new AssetDescriptor<Texture>(PUKRU_ISLAND, Texture.class);
+	public AssetDescriptor<Texture> doyle_island = new AssetDescriptor<Texture>(DOYLE_ISLAND, Texture.class);
+	public AssetDescriptor<Texture> isle_keris_island = new AssetDescriptor<Texture>(ISLE_KERIS_ISLAND, Texture.class);
 	public AssetDescriptor<Texture> whirlpool = new AssetDescriptor<Texture>(WHIRLPOOL, Texture.class);
 	public AssetDescriptor<Texture> wind = new AssetDescriptor<Texture>(WIND, Texture.class);
 	public AssetDescriptor<Texture> bigrock = new AssetDescriptor<Texture>(BIGROCK, Texture.class);
@@ -397,6 +404,10 @@ public class SceneAssetManager {
 	
     public void loadSeaBattle() {
     	manager.load(sea);
+    	manager.load(alkaid_island);
+    	manager.load(pukru_island);
+    	manager.load(doyle_island);
+    	manager.load(isle_keris_island);
     	manager.load(cell);
     	manager.load(safe);
     	manager.load(bigrock);
