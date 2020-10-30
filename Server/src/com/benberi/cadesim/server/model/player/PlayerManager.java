@@ -16,6 +16,7 @@ import com.benberi.cadesim.server.model.player.move.MoveType;
 import com.benberi.cadesim.server.model.player.vessel.Vessel;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
+import com.benberi.cadesim.server.service.InstanceFileManager;
 import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
@@ -233,13 +234,13 @@ public class PlayerManager {
         return updateScheduledAfterGame;
     }
 
-    void notifyScheduledUpdate() {
+    public void notifyScheduledUpdate() {
         lastUpdateNotificationMillis = System.currentTimeMillis();
         serverBroadcastMessage("~~RESTART NOTICE~~ The server will restart when this game ends ( " + (String.format("%d", (Math.round(context.getTimeMachine().getRoundTime() / 60.0))))
                 + " minutes) for scheduled maintenance, and should be back online within a few minutes.");
     }
 
-    boolean shouldNotifyScheduledUpdate() {
+    public boolean shouldNotifyScheduledUpdate() {
         return isUpdateScheduledAfterGame() && ((System.currentTimeMillis()
                 - lastUpdateNotificationMillis) >= Constants.BROADCAST_SCHEDULED_UPDATE_INTERVAL_MILLIS);
     }
@@ -276,35 +277,6 @@ public class PlayerManager {
             // also check for players who might have logged in but not
             // registered - then timed out
             timeoutUnregisteredPlayers();
-
-            // also check if we need to update the server
-            // (either by regular update time or continuous reboot dev feature)
-            // TODO this code is only here because the mechanism is convenient.
-            // it is not related to player management functionality. It should
-            // be moved to a more appropriate admin loop when possible.
-            if (ServerConfiguration.isScheduledAutoUpdate())
-            {
-                if (
-                    ((ServerConfiguration.getNextUpdateDateTimeScheduled().toEpochSecond() <=
-                    ZonedDateTime.now().toEpochSecond()) && (!Constants.ENABLE_CONTINUOUS_REBOOT)) ||
-                    ((context.getUpTimeMillis() > Constants.CONTINOUS_REBOOT_INTERVAL) && Constants.ENABLE_CONTINUOUS_REBOOT)
-                )
-                {
-                    setUpdateScheduledAfterGame(true);
-
-                    // if no players in game, end the game now
-                    if (0 == context.getPlayerManager().listRegisteredPlayers().size()) {
-                        ServerContext.log("There were no players in the current game, so ending game early.");
-                        context.getTimeMachine().stop();
-                    }
-                }
-
-                // notify players of a pending restart every few minutes.
-                // the first notification should be sent instantly.
-                if (shouldNotifyScheduledUpdate()) {
-                    notifyScheduledUpdate();
-                }
-            }
 
             // #83 check for lagged out players
             for (Player p : listRegisteredPlayers()) {
