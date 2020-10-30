@@ -17,6 +17,8 @@ strict_comments = true
 resource = getdown-bg.png
 resource = growup.png
 resource = getdown.jar
+resource = start_servers.py
+resource = stop_servers.py
 #TODO #69 add maps??
 
 # getdown insists on running an app, but the server will restart itself,
