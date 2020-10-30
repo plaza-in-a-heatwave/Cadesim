@@ -28,6 +28,7 @@ import com.benberi.cadesim.game.scene.impl.battle.map.tile.impl.Wind;
 import com.benberi.cadesim.game.scene.impl.control.BattleControlComponent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -162,12 +163,8 @@ public class SeaBattleScene implements GameScene {
         pukru_island = context.getManager().get(context.getAssetObject().pukru_island);
         doyle_island = context.getManager().get(context.getAssetObject().doyle_island);
         isle_keris_island = context.getManager().get(context.getAssetObject().isle_keris_island);
-        
-        islandList.add(alkaid_island);
-        islandList.add(pukru_island);
-        islandList.add(doyle_island);
-        islandList.add(isle_keris_island);
-    	
+        //add all island Textures in one go
+        Collections.addAll(islandList,alkaid_island, pukru_island, doyle_island, isle_keris_island);
         sea.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
         this.mainmenu = new MenuComponent(context, this);
@@ -177,7 +174,10 @@ public class SeaBattleScene implements GameScene {
     @Override
     public void update(){
         // update the camera
-        camera.update();
+    	camera.update();
+    	//keep user from scrolling to far to black screens
+    	camera.position.x = clamp(camera.position.x, Gdx.graphics.getWidth() , -Gdx.graphics.getWidth() - 100);
+    	camera.position.y = clamp(camera.position.y, Gdx.graphics.getHeight() + 800, -Gdx.graphics.getHeight() + 500);
         if (currentSlot > -1) { 
         	if (vesselsCountWithCurrentPhase != vesselsCountNonSinking) { //bug fix-new players joining
         		MovePhase phase = MovePhase.getNext(currentPhase);
@@ -831,5 +831,16 @@ public class SeaBattleScene implements GameScene {
 				getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
 				getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
 		);
+    }
+    
+    /**
+     * Helper method to clamp values in certain range
+     */
+    public float clamp(float x, float f, int min) {
+        if(x > min) {
+            if(x < f) {
+                return x;
+            } else return f;
+        } else return min;
     }
 }
