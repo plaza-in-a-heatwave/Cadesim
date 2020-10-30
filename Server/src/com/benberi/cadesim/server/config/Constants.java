@@ -44,6 +44,7 @@ public class Constants {
     public static final int EXIT_ERROR_CANT_FIND_MAPS           = 130;
     public static final int EXIT_ERROR_CANT_CREATE_LOGS         = 129;
     public static final int EXIT_ERROR_CANT_BIND_LOCAL          = 128;
+    public static final int EXIT_SUCCESS_SHUTDOWN_BY_STOPFILE   = 2;
     public static final int EXIT_SUCCESS_SCHEDULED_UPDATE       = 1;
     public static final int EXIT_SUCCESS                        = 0;
 
@@ -138,6 +139,17 @@ public class Constants {
     public static final String AUTO_UPDATING_ID_FILE_NAME        = "id.tmp";
     public static final int AUTO_UPDATE_MAX_LOCK_WAIT_MS         = 600 * 1000; // 10 min
     public static final int AUTO_UPDATE_MAX_WAIT_GETDOWN_MS      = 300 * 1000; //  5 min
+
+    /**
+     * InstanceFileManager file instance names and stop file names
+     */
+    public static final String INSTANCE_FILENAME_PREFIX = ".CADESIM_INSTANCE_";
+    public static final String STOP_FILENAME            = ".STOP";
+
+    /**
+     * checks for stopfile every n seconds
+     */
+    public static final int SERVER_STOPFILE_CHECK_MILLIS = 5000;
 
     /**
      * Enable some developer features, for instance a continuous reboot mode.

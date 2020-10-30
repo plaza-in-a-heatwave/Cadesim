@@ -1,5 +1,7 @@
 package com.benberi.cadesim.server.service;
 
+import java.time.ZonedDateTime;
+
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
@@ -128,6 +130,37 @@ public class GameService implements Runnable {
 
                 playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
             }
+
+        // do some server-wide admin tasks
+
+        // #94 check whether a stopfile is present and quits if so.
+        InstanceFileManager.handleStopFilePresent();
+
+        // check if we need to autoupdate the server
+        // (either by regular update time or continuous reboot dev feature)
+        if (ServerConfiguration.isScheduledAutoUpdate())
+        {
+            if (
+                ((ServerConfiguration.getNextUpdateDateTimeScheduled().toEpochSecond() <=
+                ZonedDateTime.now().toEpochSecond()) && (!Constants.ENABLE_CONTINUOUS_REBOOT)) ||
+                ((context.getUpTimeMillis() > Constants.CONTINOUS_REBOOT_INTERVAL) && Constants.ENABLE_CONTINUOUS_REBOOT)
+            )
+            {
+                context.getPlayerManager().setUpdateScheduledAfterGame(true);
+
+                // if no players in game, end the game now
+                if (0 == context.getPlayerManager().listRegisteredPlayers().size()) {
+                    ServerContext.log("There were no players in the current game, so ending game early.");
+                    context.getTimeMachine().stop();
+                }
+            }
+
+            // notify players of a pending restart every few minutes.
+            // the first notification should be sent instantly.
+            if (context.getPlayerManager().shouldNotifyScheduledUpdate()) {
+                context.getPlayerManager().notifyScheduledUpdate();
+            }
+        }
 
         } catch (Exception e) {
             e.printStackTrace();

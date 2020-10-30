@@ -133,6 +133,8 @@ declare -a serverfiles=(
     "getdown-bg.png"
     "growup.ico"
     "growup.png"
+    "start_servers.py"
+    "stop_servers.py"
 )
 for file in "${serverfiles[@]}"; do
     cp -r "$file" "$SERVERBUILDDIR";

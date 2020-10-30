@@ -1,1 +1,3 @@
 /bin/
+.CADESIM_INSTANCE_*
+.STOP
