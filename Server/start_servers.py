@@ -3,7 +3,7 @@
 # example script that launches some Cadesim servers. Feel free to change these arguments.
 # to run: python3 start_servers.py
 
-import subprocess
+import subprocess,platform
 
 # windows fix for Popen not detaching https://stackoverflow.com/a/13593257
 # (close_fds arg is the equivalent for linux)
@@ -16,5 +16,8 @@ for server_args in [
     "java -jar cadesim-server.jar -p 4973 --schedule-updates 04:00",
     "java -jar cadesim-server.jar -p 4974 --schedule-updates 04:00",
 ]:
-    print("started Cadesim instance (pid: " + str(subprocess.Popen(server_args.split(" "), close_fds=True, creationflags=DETACHED_PROCESS).pid) + ")")
+    if(any(platform.win32_ver())):
+        print("started Cadesim instance (pid: " + str(subprocess.Popen(server_args.split(" "), close_fds=True, creationflags=DETACHED_PROCESS).pid) + ")")
+    else:
+        print("started Cadesim instance (pid: " + str(subprocess.Popen(server_args.split(" "), close_fds=True).pid) + ")")
 print("\n\nDone! use stop_servers.py to stop.")
