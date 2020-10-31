@@ -1,6 +1,8 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /). URL is case sensitive.
 appbase = https://plaza-in-a-heatwave.github.io/Cadesim/growup/client/http/
-version = 20201030
+
+# The version number is auto generated in build-release and is only used by getdown.
+version = 20201031152801
 
 # UI Configuration
 ui.name = CadeSim Updater
