@@ -9,7 +9,7 @@
 ({
     BUILDFLAVOR="$1"
 
-    if [ "$FLAVOR" == "" ]; then
+    if [ "$BUILDFLAVOR" == "" ]; then
         echo "usage: $(basename "$0") buildflavor"
         exit 0
     fi
