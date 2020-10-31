@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The server context containing references to every massive part of the
@@ -81,8 +82,11 @@ public class ServerContext {
 
     static {
     	new File(Constants.logDirectory).mkdirs();
+
+        // log filenames are timestamped to reduce chance of conflict. Additionally a random int is used.
+        // conflicting logs interleave, but otherwise work as normal.
         String datePrefix = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss-SSSSSSX_").withZone(ZoneOffset.UTC)
-                .format(Instant.now());
+                .format(Instant.now()) + ThreadLocalRandom.current().nextInt(0, 2147483647) + "_";
         logFile = new File(Constants.logDirectory + "/" + datePrefix + Constants.logName);
         try {
             logFile.createNewFile();
