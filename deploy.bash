@@ -5,8 +5,15 @@
 # == assumes you are running the repo under git.
 
 # {}:   prevents file disappearing on checkout: https://stackoverflow.com/a/2358491
-# () &: without these windows refuses to checkout original branch (as deploy-growup.bash is locked)
+# () &: without these windows refuses to checkout original branch (as deploy.bash is locked)
 ({
+    BUILDFLAVOR="$1"
+
+    if [ "$FLAVOR" == "" ]; then
+        echo "usage: $(basename "$0") buildflavor"
+        exit 0
+    fi
+
     ROOT="$(realpath "$(dirname "$0")")"
 
     # 0. save current branch
@@ -15,21 +22,21 @@
     # 1. change to release branch
     if ! git checkout release --; then
         echo "FATAL ERROR can't checkout release. quitting."
-        exit
+        exit 2
     fi
 
-    # 2. add latest to growup dir
-    rm -r "$ROOT"/growup
-    mkdir "$ROOT"/growup
-    cp -r release/* "$ROOT"/growup/
+    # 2. add latest to BUILDFLAVOR dir
+    rm -r "$ROOT"/"$BUILDFLAVOR"
+    mkdir "$ROOT"/"$BUILDFLAVOR"
+    cp -r release/* "$ROOT"/"$BUILDFLAVOR"/
 
     # 3. apply git
-    git add "$ROOT"/growup/
+    git add "$ROOT"/"$BUILDFLAVOR"/
     git commit -m "release-$(date --iso-8601=s)"
     git push
 
     # 4. change back
     git checkout "$CURRENTBRANCH"
 
-    exit
+    exit 0
 }) &

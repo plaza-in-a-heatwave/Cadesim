@@ -96,4 +96,4 @@ See https://github.com/plaza-in-a-heatwave/Cadesim/tree/release for prebuilt jar
 # Deploying
 - Make changes to the code until happy with the feature/bugfix
 - Run build-release.bash to create the release versions
-- Run deploy-xxx.bash when happy with the release versions, where xxx is the specific flavor of Cadesim.
+- Run ```deploy.bash flavorname``` when happy with the release versions, where flavorname is the specific flavor of Cadesim. (e.g. different flagnames). This is to support each flavor having its own branch in future.
