@@ -196,7 +196,7 @@ public class PlayerManager {
 		return gameEnded;
 	}
 
-	private void setGameEnded(boolean gameEnded) {
+	public void setGameEnded(boolean gameEnded) {
 		this.gameEnded = gameEnded;
 	}
 

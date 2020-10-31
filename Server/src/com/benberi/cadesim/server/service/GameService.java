@@ -152,6 +152,7 @@ public class GameService implements Runnable {
                 if (0 == context.getPlayerManager().listRegisteredPlayers().size()) {
                     ServerContext.log("There were no players in the current game, so ending game early.");
                     context.getTimeMachine().stop();
+                    context.getPlayerManager().setGameEnded(true);
                 }
             }
 
