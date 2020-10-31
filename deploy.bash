@@ -31,6 +31,7 @@
     cp -r release/* "$ROOT"/"$BUILDFLAVOR"/
 
     # 3. apply git
+    git pull
     git add "$ROOT"/"$BUILDFLAVOR"/
     git commit -m "release-$(date --iso-8601=s)"
     git push
