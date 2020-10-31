@@ -17,9 +17,12 @@ strict_comments = true
 resource = getdown-bg.png
 resource = growup.png
 resource = getdown.jar
-resource = start_servers.py
 resource = stop_servers.py
 #TODO #69 add maps??
+
+# Note start_servers.py is not included as a resource as this is configurable
+# on the server side. This is unlike stop_servers.py which has no
+# user-servicable parts.
 
 # getdown insists on running an app, but the server will restart itself,
 # so here we pass getdown a configuration that instantly quits
