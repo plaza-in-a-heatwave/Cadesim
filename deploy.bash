@@ -33,7 +33,7 @@
     # 3. apply git
     git pull
     git add "$ROOT"/"$BUILDFLAVOR"/
-    git commit -m "release-$(date --iso-8601=s)"
+    git commit -m "automatically generated release for $BUILDFLAVOR on $(date --iso-8601=s)"
     git push
 
     # 4. change back

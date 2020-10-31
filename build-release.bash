@@ -6,7 +6,7 @@ echo "*********************************"
 echo "* build-release.bash running... *"
 echo "*                               *"
 echo "* make sure environment has:    *"
-echo "*    grep, cut, zip, java       *"
+echo "* grep, cut, zip, java, sed     *"
 echo "*                               *"
 echo "* please exit the release dir   *"
 echo "* before creating the release.  *"
@@ -69,7 +69,12 @@ echo "* making client...    *"
 echo "***********************"
 
 pushd "$CLIENT">/dev/null
-grep "version = " "getdown.txt" | cut -d" " -f 3 >"version.txt" # update version.txt to match getdown.txt
+
+# change client version numbers. these are only used by getdown.
+oldversion=$(grep "version = " "getdown.txt" | cut -d" " -f 3)
+newversion=$(date +%Y%m%d%H%M%S)
+sed -i -E "s/version.*=.*$oldversion/version = $newversion/" "getdown.txt"
+echo "$newversion" >"version.txt" # update version.txt to match getdown.txt
 
 declare -a clientfiles=(
     "bg.png"
@@ -111,6 +116,12 @@ for f in *; do
         fi
     fi
 done
+
+# restore old version number to file after we've copied it
+pushd "$CLIENT">/dev/null
+sed -i -E "s/version.*=.*$newversion/version = $oldversion/" "getdown.txt"
+popd>/dev/null
+
 popd>/dev/null
 echo "done making client."
 
