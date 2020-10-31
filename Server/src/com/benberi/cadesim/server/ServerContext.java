@@ -49,7 +49,7 @@ public class ServerContext {
      */
     private BlockadeMap map;
 
-    private static File logFile;
+    private static File logFile = null;
 
     private ServerPacketManager packets;
 
@@ -80,8 +80,8 @@ public class ServerContext {
         this.regressionTests = new RegressionTests(this, false); // verbose switch
     }
 
-    static {
-    	new File(Constants.logDirectory).mkdirs();
+    public static void createLogFile() {
+        new File(Constants.logDirectory).mkdirs();
 
         // log filenames are timestamped to reduce chance of conflict. Additionally a random int is used.
         // conflicting logs interleave, but otherwise work as normal.
@@ -98,6 +98,9 @@ public class ServerContext {
     }
 
     public static void log(String message) {
+        if (logFile == null) {
+            createLogFile();
+        }
         try {
         	String timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
             message = "[" + timestamp + "]: " + message + "\n";

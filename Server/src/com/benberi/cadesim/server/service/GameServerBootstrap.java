@@ -39,6 +39,7 @@ public class GameServerBootstrap {
      * To measure the start time of the server
      */
     private static long start;
+
     public GameServerBootstrap() {
         context = new ServerContext();
     }
@@ -85,6 +86,29 @@ public class GameServerBootstrap {
      */
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         start = System.currentTimeMillis();
+
+        // quick parse to check for the do-nothing argument. If it's there, exit immediately.
+        // this is necessary to avoid spam during the autoupdate process.
+        // (we use --do-nothing as getdown.jar wants to start an application.)
+        {
+            Options options = new Options();
+            options.addOption("z", "do-nothing", false, "Start the app and immediately exit.");
+
+            CommandLineParser parser = new DefaultParser();
+            CommandLine cmd = null;
+            try {
+                cmd = parser.parse(options, args);
+
+                // immediately exit. this option used to provide getdown
+                // with something executable to run during update stages.
+                if (cmd.hasOption("z")) {
+                    System.exit(Constants.EXIT_SUCCESS);
+                }
+            } catch (ParseException e) {
+                // pass the error through to the main parser
+            }
+        }
+
         ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
 
         // set up maps
@@ -118,19 +142,12 @@ public class GameServerBootstrap {
         options.addOption("t", "turn-duration", true, "turn duration seconds, minimum " + Constants.MIN_TURN_DURATION + ", (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
         options.addOption("u", "schedule-updates", true, "schedule automatic updates to take place at HH:MM. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTimeScheduled().toString()) + ")");
         options.addOption("v", "voting-majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
-        options.addOption("z", "do-nothing", false, "Start the app and immediately exit.");
 
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
         try {
             cmd = parser.parse(options, args);
-
-            // immediately exit. this option used to provide getdown
-            // with something executable to run during update stages.
-            if (cmd.hasOption("z")) {
-                System.exit(Constants.EXIT_SUCCESS);
-            }
 
             // clean up after previous update session if needed
             // last session's args required to id this new process
