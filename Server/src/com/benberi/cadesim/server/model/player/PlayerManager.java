@@ -16,12 +16,10 @@ import com.benberi.cadesim.server.model.player.move.MoveType;
 import com.benberi.cadesim.server.model.player.vessel.Vessel;
 import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
-import com.benberi.cadesim.server.service.InstanceFileManager;
 import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -278,14 +276,22 @@ public class PlayerManager {
             // registered - then timed out
             timeoutUnregisteredPlayers();
 
-            // #83 check for lagged out players
+            // per-player actions
             for (Player p : listRegisteredPlayers()) {
+                // #83 check for lagged out players. Did they time out?
                 long response = p.getLastResponseTime();
-
-                // did they time out?
                 if ((now - response) > Constants.PLAYER_LAG_TIMEOUT_MS) {
                     serverBroadcastMessage(p.getName() + " timed out!");
                     this.kickPlayer(p);
+                }
+
+                // send flag updates for the first turn. these may have lagged out during turn change.
+                // TODO this is a fix for a race condition.
+                // When changing map, the flag packets are applied to the client before the mapchange.
+                // this fix repeatedly re-applies them every few seconds for the first turn only.
+                // a proper client-side fix should be implemented when possible.
+                if (context.getTimeMachine().getIsFirstTurn()) {
+                    p.getPackets().sendFlags();
                 }
             }
         }
@@ -947,7 +953,6 @@ public class PlayerManager {
                 pl.getPackets().sendDamage();
                 pl.getPackets().sendTokens();
                 pl.getPackets().sendFlags();
-                pl.getPackets().sendPlayerFlags();
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
                 printCommandHelp(pl); // private message with commands
@@ -1002,6 +1007,14 @@ public class PlayerManager {
             } catch (Exception e) {
                 ServerContext.log("while disconnecting player " + player.getName() + ", caught exception " + e);
             }
+
+            // bugfix: recalculate flags for aesthetic reasons
+            // otherwise any flags owned by the removed player stay the same color until the
+            // end of the round when they are recalculated.
+            calculateInfluenceFlags();
+            for (Player p : listRegisteredPlayers()) {
+                p.getPackets().sendFlags();
+            }
         }
     }
 
@@ -1033,7 +1046,6 @@ public class PlayerManager {
             p.getPackets().sendPositions();
             sendMoveBar(p);
             p.getPackets().sendFlags();
-            p.getPackets().sendPlayerFlags();
         }
     }
 
@@ -1088,7 +1100,6 @@ public class PlayerManager {
         	p.setNeedsRespawn(true);
             p.getPackets().sendBoard();
         	p.getMoveTokens().setAutomaticSealGeneration(true); // bugfix disparity between client and server
-        	p.getPackets().sendFlags();
         	sendAfterTurn();
         }
         
