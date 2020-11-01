@@ -950,7 +950,6 @@ public class PlayerManager {
                 pl.getPackets().sendPlayerFlags();
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
-                printTeams(null, true);     // total counts of players in server
                 printCommandHelp(pl); // private message with commands
             }
         }
