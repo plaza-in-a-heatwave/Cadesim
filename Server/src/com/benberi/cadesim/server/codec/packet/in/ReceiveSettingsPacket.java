@@ -51,5 +51,6 @@ public class ReceiveSettingsPacket extends ServerPacketExecutor {
             	ServerConfiguration.setCustomMap(false);
             }
         }
+        context.getPlayerManager().handleMessage(pl, "/propose gameSettings");
     }
 }

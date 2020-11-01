@@ -407,10 +407,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         		dialog.getContentTable().clear();
         		context.sendSettingsPacket(customMap,mapBoolean, mapName);
 		    	dialog.setVisible(false);
-		    	Gdx.input.setInputProcessor(input);
-		    	context.getControlScene().getBnavComponent().getChatBar().getTextfield().setText(
-		    			"/propose gameSettings");
-	    		context.getControlScene().getBnavComponent().getChatBar().sendChat();
+
 	    		menuButtonIsDown = false;
 	    		menuLobbyIsDown = false;
 	        	menuMapsIsDown = false;  
