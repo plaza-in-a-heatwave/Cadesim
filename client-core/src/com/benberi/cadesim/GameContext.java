@@ -214,7 +214,18 @@ public class GameContext {
 	}
 
 	/**
+	 * return the lag counter, as-is.
+	 *
+	 * use this method to inspect the lag counter.
+	 */
+	public byte getLagCounter() {
+	    return lagCounter;
+	}
+
+	/**
 	 * return the lag counter, incremented.
+	 * When responding to lag requests from the server, use this method
+	 * to generate a value you can return.
 	 */
 	public byte getNextLagCounter() {
 	    return ++lagCounter;

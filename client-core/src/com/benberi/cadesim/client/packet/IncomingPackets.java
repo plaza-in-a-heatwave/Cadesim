@@ -23,7 +23,6 @@ public class IncomingPackets {
     public static final int  REMOVE_PLAYER_SHIP  = 14;
     public static final int  SEND_MOVES          = 15;
     public static final int  SET_FLAGS           = 16;
-    public static final int  SET_PLAYER_FLAGS    = 17;
     public static final int  SET_TEAM_NAMES      = 18;
     public static final int  RECEIVE_MESSAGE     = 19;
     public static final int  LIST_ALL_MAPS       = 20;

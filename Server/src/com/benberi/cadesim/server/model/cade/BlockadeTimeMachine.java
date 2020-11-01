@@ -32,6 +32,11 @@ public class BlockadeTimeMachine {
      * Has time machine ticked yet
      */
     private boolean firstRunThisGame = true;
+    
+    /**
+     * Have we had a turn end yet
+     */
+    private boolean isFirstTurn = true;
 
     /**
      * Are we in test mode
@@ -59,9 +64,19 @@ public class BlockadeTimeMachine {
 	/**
 	 * helper method to get whether the time machine has ticked yet
 	 */
-
 	public boolean firstRunThisGame() {
 	    return firstRunThisGame;
+	}
+	
+	/**
+	 * Helper method to get whether we're in the first turn of the new game
+	 */
+	public boolean getIsFirstTurn() {
+	    return isFirstTurn;
+	}
+	
+	public void setIsFirstTurn(boolean value) {
+	    isFirstTurn = value;
 	}
 
     /**
@@ -181,11 +196,13 @@ public class BlockadeTimeMachine {
      */
     public void renewTurn() {
         turnTime = context.getPlayerManager().getTurnDuration();
+        isFirstTurn = false;
     }
 
     public void renewRound() {
     	roundTime = context.getPlayerManager().getRoundDuration();
         isLastTurn = false;
+        isFirstTurn = true;
 
         // reset breaks
         breakTime        = ServerConfiguration.getBreak()[0] * 10; // to deciseconds

@@ -270,32 +270,29 @@ public class PlayerPacketManager {
         player.sendPacket(packet);
     }
 
+    /**
+     * Send the overall list of flags, and which of those are controlled by players.
+     */
     public void sendFlags() {
         SetFlagsPacket packet = new SetFlagsPacket();
         packet.setPointsDefender(player.getContext().getPlayerManager().getPointsDefender());
         packet.setPointsAttacker(player.getContext().getPlayerManager().getPointsAttacker());
         packet.setFlags(player.getContext().getMap().getFlags());
 
-        player.sendPacket(packet);
-    }
-
-    public void sendPlayerFlags() {
-        if (player.getFlags() == null) {
-            return;
+        if (player.getFlags() != null) {
+            packet.setPlayers(player.getContext().getPlayerManager().listRegisteredPlayers());
         }
-        SetPlayerFlagsPacket packet = new SetPlayerFlagsPacket();
-        packet.setPlayers(player.getContext().getPlayerManager().listRegisteredPlayers());
 
         player.sendPacket(packet);
     }
-    
+
     public void sendReceiveMessage(String player, String message) {
     	ReceiveMessagePacket packet = new ReceiveMessagePacket();
     	packet.setPlayer(player);
     	packet.setMessage(message);
     	this.player.sendPacket(packet);
     }
-    
+
     public void sendSettings(String player) {
     	SendSettingsPacket packet = new SendSettingsPacket();
     	this.player.sendPacket(packet);

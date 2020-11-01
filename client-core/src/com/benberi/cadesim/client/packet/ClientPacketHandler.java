@@ -120,7 +120,6 @@ public class ClientPacketHandler {
         packets.put(IncomingPackets.REMOVE_PLAYER_SHIP,  new RemovePlayerShip(context));
         packets.put(IncomingPackets.SEND_MOVES,          new SendMovesPacket(context));
         packets.put(IncomingPackets.SET_FLAGS,           new SetFlagsPacket(context));
-        packets.put(IncomingPackets.SET_PLAYER_FLAGS,    new SetPlayerFlagsPacket(context));
         packets.put(IncomingPackets.SET_TEAM_NAMES,      new SetTeamNamesPacket(context));
         packets.put(IncomingPackets.RECEIVE_MESSAGE,     new ReceiveMessagePacket(context));
         packets.put(IncomingPackets.LIST_ALL_MAPS,       new ListAllMapsPacket(context));
