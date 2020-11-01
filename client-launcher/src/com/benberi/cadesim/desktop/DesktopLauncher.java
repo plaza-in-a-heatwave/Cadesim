@@ -1,12 +1,9 @@
 package com.benberi.cadesim.desktop;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Properties;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -15,60 +12,6 @@ import com.benberi.cadesim.Constants;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-		Thread updateThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					String[] url = null;
-					String[] version = null;
-					String line = null;
-					BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
-					while((line = sc.readLine())!=null) {
-						if(line.isEmpty() || line.startsWith("#")) {
-							continue;
-						}
-						//remove spaces
-						line = line.replaceAll("\\s", "");
-						//check getdown.txt for url
-						if(line.startsWith("appbase=")) {
-							url = line.split("=");
-						}
-						//check getdown.txt for version
-						if(line.startsWith("version=")) {
-							version = line.split("=");
-						}
-						if(version != null && url != null) {
-							break;
-						}
-					}
-					if(version != null && url != null) {
-						String txtVersion = version[1].replaceAll("\\s+","");
-						URL cadesimServer = new URL(url[1] + "version.txt");
-						//read version from server
-						BufferedReader reader = new BufferedReader(
-								new InputStreamReader(cadesimServer.openStream()));
-						String serverVersion = reader.readLine().replaceAll("\\s+","");
-						boolean updateBool = serverVersion.equals(version[1].replaceAll("\\s+",""));
-						if(!updateBool) {
-							Constants.SERVER_VERSION_IDENTICAL = false;
-							System.out.println("Your client is out-of-date.");
-							System.out.println("Current version: " + txtVersion + ", Newer version: " + serverVersion);
-						}else {
-							Constants.SERVER_VERSION_IDENTICAL = true;
-							System.out.println("Your client is up-to-date.");
-							System.out.println("Current version: " + txtVersion);
-						}
-						sc.close();
-					}
-				}
-				 catch (IOException e) {
-					e.printStackTrace();
-					System.out.println("Unable to check server version.");
-					Constants.SERVER_VERSION_IDENTICAL = true; // don't update if cannot connect to server
-				}
-			}
-		
-		});
 
 		// load the properties config
 		Properties prop = new Properties();
@@ -89,13 +32,34 @@ public class DesktopLauncher {
 		String updateType = prop.getProperty("autoupdate");
 		if ((updateType != null) && (!updateType.equalsIgnoreCase("yes")))
 		{
-			System.out.println("Automatic updates are disabled.");
+			System.out.println("Automatic updates are disabled in user.config.");
 		}
-		else
-		{
-			System.out.println("Automatic updates are enabled.");
-			System.out.println("Checking for updates...");
-			updateThread.start();
+		else {
+			// check for updates each run, unless a flag is passed.
+	        // getdown will set this for example
+	        boolean autoupdate = true; // by default
+	        for (String s : arg) {
+	            if (s.equals("--no-update")) {
+	                autoupdate = false;
+	            }
+	        }
+	        if (!autoupdate) {
+	            System.out.println("Automatic updates are disabled by CLI.");
+	        }
+	        else
+	        {
+	            System.out.println("Automatic updates are enabled. Checking for updates...");
+                try {
+                    System.out.println("Performing update; deleting digest files...");
+                    new File("digest.txt").delete();
+                    new File("digest2.txt").delete();
+                    System.out.println("Performing update; closing client and running getdown...");
+                    new ProcessBuilder("java", "-jar", "getdown.jar").start();
+                    System.exit(0);
+                }catch(Exception e){
+                    System.out.println("Unable to start getdown.jar; run manually. Please delete digest files and re-run. " + e);
+                }
+	        }
 		}
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();

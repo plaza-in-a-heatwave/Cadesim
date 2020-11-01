@@ -70,12 +70,6 @@ echo "***********************"
 
 pushd "$CLIENT">/dev/null
 
-# change client version numbers. these are only used by getdown.
-oldversion=$(grep "version = " "getdown.txt" | cut -d" " -f 3)
-newversion=$(date +%Y%m%d%H%M%S)
-sed -i -E "s/version.*=.*$oldversion/version = $newversion/" "getdown.txt"
-echo "$newversion" >"version.txt" # update version.txt to match getdown.txt
-
 declare -a clientfiles=(
     "bg.png"
     "getdown.jar"
@@ -84,14 +78,12 @@ declare -a clientfiles=(
     "growup.ico"
     "growup.png"
     "user.config"
-    "version.txt"
 )
 for file in "${clientfiles[@]}"; do
     cp -r "$file" "$CLIENTBUILDDIR"
 done
 # move this separately, it's huge. from build task.
 mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/"$CLIENTJARNAME"
-rm "version.txt" # temporary build file
 popd>/dev/null
 
 # process getdown
@@ -102,7 +94,7 @@ mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt" --exclude "version.txt">/dev/null
+zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt">/dev/null
 
 # generate files for http
 for f in *; do
@@ -116,11 +108,6 @@ for f in *; do
         fi
     fi
 done
-
-# restore old version number to file after we've copied it
-pushd "$CLIENT">/dev/null
-sed -i -E "s/version.*=.*$newversion/version = $oldversion/" "getdown.txt"
-popd>/dev/null
 
 popd>/dev/null
 echo "done making client."

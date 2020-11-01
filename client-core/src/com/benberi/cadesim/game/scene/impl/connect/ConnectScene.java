@@ -222,40 +222,12 @@ public class ConnectScene implements GameScene, InputProcessor {
         buttonConn = new ImageButton(loginButtonStyle); //Set the button up
         buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
-            	//only run if there is an update listed on server
-            	if(!Constants.SERVER_VERSION_IDENTICAL) {
-	                try {
-	                	System.out.println("Performing update; deleting necessary files...");
-	                	//delete required files in order to update client
-	                	File digest1 = new File("digest.txt");
-	                	File digest2 = new File("digest2.txt");
-	                	File version = new File("version.txt");
-                		digest1.delete();
-                		System.out.println("Deleted file: digest.txt");
-                		digest2.delete();
-                		System.out.println("Deleted file: digest2.txt");
-                		version.delete();
-                		System.out.println("Deleted file: version.txt");
-						ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
-						@SuppressWarnings("unused")
-						Process p = pb.start(); //assign to process for something in future
-						System.out.println("Performing update; closing client and running getdown...");
-						System.exit(0);
-					}catch(Exception e){
-						System.out.println(e);
-						System.out.println("Unable to start getdown.jar; run manually.");
-						System.out.println("Be sure to delete digest files before running.");
-						}
-	                
-	                }
-	            else {
-	                try {
-	                    performLogin();
-	                    buttonConn.toggle();
-	                } catch (UnknownHostException e) {
-	                    return;
-	                }
-	            }
+                try {
+                    performLogin();
+                    buttonConn.toggle();
+                } catch (UnknownHostException e) {
+                    return;
+                }
             }});
         buttonConn.setPosition(165, 290);
       //login button
