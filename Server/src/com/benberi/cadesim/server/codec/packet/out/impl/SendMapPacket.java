@@ -24,7 +24,6 @@ public class SendMapPacket extends OutgoingPacket {
     public void encode() {
         int[][] map = bmap.getMap();
         setPacketLengthType(PacketLength.SHORT);
-        writeByte(ServerConfiguration.getIslandId());
         writeByteString(ServerConfiguration.getMapName());
         for (int x = 0; x < map.length; x++) {
             for (int y = 0; y < map[x].length; y++) {
@@ -36,6 +35,7 @@ public class SendMapPacket extends OutgoingPacket {
                 }
             }
         }
+        writeByte(ServerConfiguration.getIslandId());
         setLength(getBuffer().readableBytes());
     }
 }
