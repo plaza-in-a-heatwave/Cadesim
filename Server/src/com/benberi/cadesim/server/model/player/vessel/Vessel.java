@@ -81,9 +81,7 @@ public abstract class Vessel {
 	/**
      * map human readable ship ids to integer ids
      */
-    public static final HashMap<String, Integer> VESSEL_STRINGS = new HashMap<String, Integer>() {/**
-         * 
-         */
+    public static final HashMap<String, Integer> VESSEL_STRINGS = new HashMap<String, Integer>() {
         private static final long serialVersionUID = 1L;
 
     {

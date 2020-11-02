@@ -158,8 +158,9 @@ public class Constants {
      */
     public static final boolean ENABLE_DEVELOPER_FEATURES = false;
 
-    public static final boolean ENABLE_CONTINUOUS_REBOOT  = ENABLE_DEVELOPER_FEATURES;
+    public static final boolean ENABLE_CONTINUOUS_REBOOT  = ENABLE_DEVELOPER_FEATURES && false; // be kind to devs
     public static final int     CONTINOUS_REBOOT_INTERVAL = 60000;  // 60,000 ms, 60 sec
 
     public static final boolean ENABLE_CHOOSE_BLACKSHIP = ENABLE_DEVELOPER_FEATURES; // allow blackship
+    public static final boolean ENABLE_BOTSPAWN_INGAME  = ENABLE_DEVELOPER_FEATURES; // spawn a bot from the client
 }

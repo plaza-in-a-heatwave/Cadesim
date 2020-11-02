@@ -27,6 +27,15 @@ import java.util.Queue;
 import java.util.Random;
 
 public class PlayerManager {
+    private static int uniqueBotCounter = 0;
+    /**
+     * Get a unique name for a bot.
+     * @return a unique name for a bot.
+     */
+    public static String getUniqueBotName() {
+        uniqueBotCounter += 1;
+        return "bot_" + uniqueBotCounter;
+    }
 
     /**
      * List of players in the game
@@ -704,12 +713,13 @@ public class PlayerManager {
     
     /**
      * Create new NPC.
-     * @param name its name
-     * @param vesselID its ship type enum
-     * @param team its team (team type enum)
-     * @param startPosition -1,-1 to start not spawned, or >=0,>=0 to start on the map.
-     * @param startFace     which way to face to start with?
-     * @param startDamage   how much damage to spawn in with
+     * @param name            its name. If null, use a guaranteed unique one.
+     * @param vesselID        its ship type enum
+     * @param team            its team (team type enum)
+     * @param startPosition   -1,-1 to start not spawned, or >=0,>=0 to start on the map.
+     * @param startFace       which way to face to start with?
+     * @param startDamage     how much damage to spawn in with
+     * @param joinImmediately if true, player joins immediately (beware potential concurrent modification). if false, player is queued.
      */
     public Player createBot(
             String name,
@@ -717,19 +727,39 @@ public class PlayerManager {
             Team team,
             int[] startPosition,
             VesselFace startFace,
-            float startDamage
+            float startDamage,
+            boolean joinImmediately
     ) {
-        Player p = registerPlayer(null);
-        p.register(
-                name,
-                vesselID,
-                team.getID(),
-                startPosition,
-                startFace,
-                startDamage,
-                true
-        );
-        return p;
+        if (name == null) { name = PlayerManager.getUniqueBotName(); }
+        if (joinImmediately) {
+            Player p = registerPlayer(null);
+            p.register(
+                    name,
+                    vesselID,
+                    team.getID(),
+                    startPosition,
+                    startFace,
+                    startDamage,
+                    true
+            );
+            return p;
+        }
+        else
+        {
+            queuePlayerLogin(
+                    new PlayerLoginRequest(
+                            new Player(context, null),
+                            name,
+                            vesselID,
+                            team.getID(),
+                            Constants.PROTOCOL_VERSION,
+                            startPosition,
+                            startFace,
+                            startDamage
+                    )
+            );
+            return null;
+        }
     }
 
     /**
@@ -876,6 +906,7 @@ public class PlayerManager {
     public void queuePlayerLogin(PlayerLoginRequest request) {
         queuedLoginRequests.add(request);
     }
+    
 
     /**
      * Handles all player login requests
@@ -891,77 +922,103 @@ public class PlayerManager {
             int ship = request.getShip();
             int team = request.getTeam();
 
-            // skip any players that aren't in our player list - these
-            // are glitches left over from login attempts
-            boolean found = false;
-            for (Player p : players)
-            {
-                if (p.getName() == pl.getName())
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                continue;
-            }
-
-            int response = LoginResponsePacket.SUCCESS;
-
-            if (version != Constants.PROTOCOL_VERSION) {
+            // do we want to spawn a bot or a player?
+            if (pl.isBot()) {
+                // bugfix - can't register channel the normal way or players will have concurrent access error.
+                players.add(pl);
                 ServerContext.log(
-                    "Warning: Player protocol version " + version +
-                    " does not match server " + Constants.PROTOCOL_VERSION
+                    "[player joined] New player added to channel " +
+                    pl.getIP() + ". " +
+                    printPlayers()
                 );
-                response = LoginResponsePacket.BAD_VERSION;
-            }
-            else if (getPlayerByName(name) != null) {
-                ServerContext.log(
-                        "Warning: Player name " + name+
-                        " is already in use"
+                
+                // complete the login
+                pl.register(
+                        name,
+                        ship,
+                        team,
+                        request.getStartPosition(),
+                        request.getStartFace(),
+                        request.getStartDamage(),
+                        true
                 );
-                response = LoginResponsePacket.NAME_IN_USE;
-            }
-            else if (
-            	(name.contains(Constants.bannedSubstring)) ||
-            	(name.length() <= 0) ||
-            	(name.length() > Constants.MAX_NAME_SIZE))
-            {
-                ServerContext.log(
-                        "Warning: Player chose bad name (" + name+ ")"
-                );
-            	response = LoginResponsePacket.BAD_NAME;
-            }
-            else if (!Vessel.VESSEL_IDS.containsKey(ship)) {
-                ServerContext.log(
-                        "Warning: Player chose bad ship (" + ship + ")"
-                );
-                response = LoginResponsePacket.BAD_SHIP;
-            }
-            else if ((!Constants.ENABLE_CHOOSE_BLACKSHIP) && (Vessel.VESSEL_IDS.get(ship).equals("blackship"))) {
-                ServerContext.log(
-                        "Warning: Player chose black ship, but it is not allowed."
-                );
-                response = LoginResponsePacket.BAD_SHIP;
-            }
-
-            pl.getPackets().sendLoginResponse(response);
-
-            if (response == LoginResponsePacket.SUCCESS) {
-            	pl.getPackets().sendMapList();
-                pl.register(name, ship, team);
-                pl.getPackets().sendBoard();
-                pl.getPackets().sendTeams();
-                pl.getPackets().sendPlayers();
-                pl.getPackets().sendDamage();
-                pl.getPackets().sendTokens();
-                pl.getPackets().sendFlags();
                 sendPlayerForAll(pl);
                 serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
-                printCommandHelp(pl); // private message with commands
             }
-        }
+            else
+            {
+                // skip any players that aren't in our player list - these
+                // are glitches left over from login attempts
+                boolean found = false;
+                for (Player p : players)
+                {
+                    if (p.getName() == pl.getName())
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    continue;
+                }
+
+                int response = LoginResponsePacket.SUCCESS;
+
+                if (version != Constants.PROTOCOL_VERSION) {
+                    ServerContext.log(
+                        "Warning: Player protocol version " + version +
+                        " does not match server " + Constants.PROTOCOL_VERSION
+                    );
+                    response = LoginResponsePacket.BAD_VERSION;
+                }
+                else if (getPlayerByName(name) != null) {
+                    ServerContext.log(
+                            "Warning: Player name " + name+
+                            " is already in use"
+                    );
+                    response = LoginResponsePacket.NAME_IN_USE;
+                }
+                else if (
+                    (name.contains(Constants.bannedSubstring)) ||
+                    (name.length() <= 0) ||
+                    (name.length() > Constants.MAX_NAME_SIZE))
+                {
+                    ServerContext.log(
+                            "Warning: Player chose bad name (" + name+ ")"
+                    );
+                    response = LoginResponsePacket.BAD_NAME;
+                }
+                else if (!Vessel.VESSEL_IDS.containsKey(ship)) {
+                    ServerContext.log(
+                            "Warning: Player chose bad ship (" + ship + ")"
+                    );
+                    response = LoginResponsePacket.BAD_SHIP;
+                }
+                else if ((!Constants.ENABLE_CHOOSE_BLACKSHIP) && (Vessel.VESSEL_IDS.get(ship).equals("blackship"))) {
+                    ServerContext.log(
+                            "Warning: Player chose black ship, but it is not allowed."
+                    );
+                    response = LoginResponsePacket.BAD_SHIP;
+                }
+
+                pl.getPackets().sendLoginResponse(response);
+
+                if (response == LoginResponsePacket.SUCCESS) {
+                    pl.getPackets().sendMapList();
+                    pl.register(name, ship, team);
+                    pl.getPackets().sendBoard();
+                    pl.getPackets().sendTeams();
+                    pl.getPackets().sendPlayers();
+                    pl.getPackets().sendDamage();
+                    pl.getPackets().sendTokens();
+                    pl.getPackets().sendFlags();
+                    sendPlayerForAll(pl);
+                    serverBroadcastMessage("Welcome " + pl.getName() + " (" + pl.getTeam() + ")");
+                    printCommandHelp(pl); // private message with commands
+                }
+            }
+            }
     }
 
     /**
@@ -1063,8 +1120,10 @@ public class PlayerManager {
 
     public void queueOutgoing() {
         for (Player p : players) {
-            p.getPackets().queueOutgoingPackets();
-            p.getChannel().flush();
+            if (!p.isBot()) {
+                p.getPackets().queueOutgoingPackets();
+                p.getChannel().flush();
+            }
         }
     }
 
@@ -1502,9 +1561,22 @@ public class PlayerManager {
         			"The following Cadesim commands are supported: /propose, /vote, /info, /show"
         	);
     	}
-    	
+
     }
     
+    @SuppressWarnings("unused")
+    private void printDevCommandHelp(Player pl) {
+        printDevCommandHelp(pl, "");
+    }
+
+    private void printDevCommandHelp(Player pl, String optionalErrorMessage) {
+        serverPrivateMessage(
+                pl, "usage: /dev\n" +
+            "    spawn class team x y faceNESW damage" +
+            (optionalErrorMessage.equals("")?"":("\n\n    (error: " + optionalErrorMessage + ")"))
+        );
+    }
+
     private void printTeams(Player pl, boolean verbose) {
         int numAttackers = 0;
         int numDefenders = 0;
@@ -1784,6 +1856,43 @@ public class PlayerManager {
                         "    maps (get a list of all available maps)\n" +
                         "    players, teams"
                     );
+    		    }
+    		}
+    		else if (message.startsWith("/dev")) {
+    		    if (!Constants.ENABLE_DEVELOPER_FEATURES) {
+    		        printCommandHelp(pl);
+    		    }
+    		    else
+    		    {
+    		        if (message.startsWith("/dev spawn") && Constants.ENABLE_BOTSPAWN_INGAME) {
+    		            String[] spawnparams = message.substring("/dev spawn".length()).trim().split(" ");
+    		            if (spawnparams.length != 6) { // class team x y faceNESW damage
+    		                printDevCommandHelp(pl, "/dev spawn: got " + spawnparams.length + " params, expected " + 6);
+    		            }
+    		            else
+    		            {
+    		                try {
+    		                    int[] pos = new int[2];
+    		                    pos[0] = Integer.parseInt(spawnparams[2]);
+    		                    pos[1] = Integer.parseInt(spawnparams[3]);
+    		                    createBot(
+		                            null,
+		                            Vessel.VESSEL_STRINGS.get(spawnparams[0]),
+		                            Team.teamStringToEnum(spawnparams[1]),
+		                            pos,
+		                            VesselFace.FACE_STRINGS.get(spawnparams[4]),
+		                            Float.parseFloat(spawnparams[5]),
+		                            false // queue bot to avoid concurrent array modification
+		                        );
+    		                }
+    		                catch (Exception e) {
+    		                    printDevCommandHelp(pl, "/dev spawn: parse failed");
+    		                }
+    		            }
+    		        }
+    		        else {
+    		            printDevCommandHelp(pl, "unrecognised /dev command or option not enabled");
+    		        }
     		    }
     		}
 			else

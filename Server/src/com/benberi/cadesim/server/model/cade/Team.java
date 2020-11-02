@@ -29,6 +29,19 @@ public enum Team {
         }
     }
     
+    public static Team teamStringToEnum(String team) {
+        switch (team) {
+        case "DEFENDER":
+            return DEFENDER;
+        case "ATTACKER":
+            return ATTACKER;
+        case "NEUTRAL":
+            return NEUTRAL;
+        default:
+            return NEUTRAL;
+        }
+    }
+
     @Override
     public String toString()
     {

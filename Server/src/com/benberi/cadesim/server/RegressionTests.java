@@ -234,7 +234,8 @@ public class RegressionTests {
                     t.testShips.get(i).team,
                     t.testShips.get(i).position[0],
                     t.testShips.get(i).face[0],
-                    t.testShips.get(i).damage[0]
+                    t.testShips.get(i).damage[0],
+                    true // join immediately, don't queue
             );
 
             // place the moves & shots
