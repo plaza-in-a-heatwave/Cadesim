@@ -13,6 +13,7 @@ public class SendMapPacket extends ClientPacketExecutor {
     @Override
     public void execute(Packet p) {
         int[][] map = new int[20][36];
+        getContext().setIslandId(p.readByte());
         getContext().currentMapName  = p.readByteString().replace(".txt", ""); 
         while(p.getBuffer().readableBytes() >= 3) {
             int tile = p.readByte();

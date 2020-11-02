@@ -66,6 +66,17 @@ public enum MapType {
                     }
                 }
             }
+        }else {
+        	for(int i = 0; i < ServerContext.getMapArray().length; i++) {
+                for (int j = 0; j < ServerContext.getMapArray()[i].length; j++) {
+                    if (isFlag(ServerContext.getMapArray()[i][j])) {
+                        Flag flag = new Flag(FlagSize.forTile(ServerContext.getMapArray()[i][j]));
+                        flag.set(i, j);
+                        bmap.addFlag(flag);
+                        ServerContext.getMapArray()[i][j] = 0;
+                    }
+                }
+            }
         }
         return ServerConfiguration.isCustomMap() ? ServerContext.getMapArray() : finalMap;
     }

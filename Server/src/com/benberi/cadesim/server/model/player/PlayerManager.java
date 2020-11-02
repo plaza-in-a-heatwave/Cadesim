@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 
 public class PlayerManager {
 
@@ -81,7 +82,10 @@ public class PlayerManager {
      * is a vote in progress
      */
     private Vote currentVote = null;
-    
+    /**
+     * random number generator
+     */
+    Random randomGenerator = new Random();
     /**
      * restart conditions
      */
@@ -1066,6 +1070,8 @@ public class PlayerManager {
 
     public void renewGame()
     {
+    	//set island once per server restart
+    	ServerConfiguration.setIslandId(randomGenerator.nextInt(3));
     	// empty temporary ban list
     	temporaryBannedIPs.clear();
     	

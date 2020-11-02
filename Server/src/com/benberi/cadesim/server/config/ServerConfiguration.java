@@ -20,6 +20,7 @@ public class ServerConfiguration {
      */
     private static int playerLimit = 5;
     private static int port = 4970;
+    private static volatile int islandId = 0;
     private static volatile int turnDuration  = 300;        // "deciseconds"
     private static volatile int roundDuration = 18000;      // "deciseconds"
     private static volatile int respawnDelay  = 2;          // turns
@@ -410,4 +411,12 @@ public class ServerConfiguration {
         ServerConfiguration.breakInfo[0] = duration;
         ServerConfiguration.breakInfo[1] = interval;
     }
+
+	public static int getIslandId() {
+		return islandId;
+	}
+
+	public static void setIslandId(int islandId) {
+		ServerConfiguration.islandId = islandId;
+	}
 }

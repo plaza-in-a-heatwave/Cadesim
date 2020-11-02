@@ -30,7 +30,6 @@ import com.benberi.cadesim.game.scene.impl.control.BattleControlComponent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Random;
 
 public class SeaBattleScene implements GameScene {
 
@@ -75,8 +74,6 @@ public class SeaBattleScene implements GameScene {
     private ArrayList<Texture> islandList = new ArrayList<Texture>();
     
     Texture selectedIsland = alkaid_island;
-    
-	Random random = new Random();
 
     /**
      * The shape renderer
@@ -144,7 +141,7 @@ public class SeaBattleScene implements GameScene {
         // if there was a previous map: delete it
         if (blockadeMap != null) { blockadeMap.dispose();}
         blockadeMap = new BlockadeMap(context, tiles);
-    	selectedIsland = islandList.get(random.nextInt(3));
+    	selectedIsland = islandList.get(context.getIslandId());
     }
 
     private void recountVessels() {

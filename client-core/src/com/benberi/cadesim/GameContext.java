@@ -45,6 +45,7 @@ public class GameContext {
     public boolean isInLobby = true;
 
     private int shipId = 0;
+    private int islandId = 0;
     /**
      * to allow client to display popup messages properly
      */
@@ -700,5 +701,13 @@ public class GameContext {
 
 	public void setClientInitiatedDisconnect(boolean clientDisconnected) {
 		this.clientDisconnected = clientDisconnected;
+	}
+
+	public int getIslandId() {
+		return islandId;
+	}
+
+	public void setIslandId(int islandId) {
+		this.islandId = islandId;
 	}
 }
