@@ -20,7 +20,7 @@ public class Constants {
 	 * Version of server
 	 */
 	public static final String VERSION = "1.9.93";
-    public static final int PROTOCOL_VERSION = 1993; // MUST match client
+    public static final int PROTOCOL_VERSION = 1994; // MUST match client
 
     /**
      * Log paths to use

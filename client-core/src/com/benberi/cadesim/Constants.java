@@ -18,7 +18,7 @@ public class Constants {
      * Version of client
      */
     public static  String VERSION = "1.9.93";
-    public static final int PROTOCOL_VERSION = 1993; // MUST match server
+    public static final int PROTOCOL_VERSION = 1994; // MUST match server
 
 	public static final int MAX_NAME_SIZE = 19;   // name of player
 
