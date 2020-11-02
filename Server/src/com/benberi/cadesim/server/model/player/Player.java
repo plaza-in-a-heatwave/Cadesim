@@ -904,10 +904,6 @@ public class Player extends Position {
 
         respawn();
 
-        for (Player p : context.getPlayerManager().listRegisteredPlayers()) {
-            p.packets.sendRespawn(this);
-        }
-
         setPreviouslyOutOfSafe(false);
         packets.sendDamage();
         packets.sendTokens();
