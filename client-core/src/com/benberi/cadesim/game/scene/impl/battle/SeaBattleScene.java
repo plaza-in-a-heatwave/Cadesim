@@ -12,7 +12,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
+import com.benberi.cadesim.client.packet.out.PostMessagePacket;
 import com.benberi.cadesim.game.entity.projectile.CannonBall;
 import com.benberi.cadesim.game.entity.vessel.*;
 import com.benberi.cadesim.game.entity.vessel.move.MoveAnimationTurn;
@@ -441,14 +443,31 @@ public class SeaBattleScene implements GameScene {
             if (vessel.isSinking()) {
                 waitingForSink = true;
             }
+            waitingForSink=true;
         }
-        if (isTurnFinished() && (!waitingForSink)) {
-            setTurnFinished(false); // for next time
-            BattleControlComponent b = context.getControlScene().getBnavComponent();
-            b.updateMoveHistoryAfterTurn();  // post-process tooltips
-            b.resetPlacedMovesAfterTurn();   // reset moves post-turn
-            b.setLockedDuringAnimate(false); // unlock control
-            setAnimationOngoing(false);      // mark animation done
+        BattleControlComponent b = context.getControlScene().getBnavComponent();
+        if (b.isLockedDuringAnimate()) {
+
+            // this condition breaks the lock if we've been timed out for too long
+            boolean unlockTimedOut = ((System.currentTimeMillis() - b.getTimeSinceLockedDuringAnimate()) >=
+                    Constants.MAX_CLIENT_LOCK_MILLIS);
+
+            if ((isTurnFinished() && (!waitingForSink)) || unlockTimedOut)
+            {
+                // this is an error condition.
+                if (unlockTimedOut) {
+                    context.sendPostMessagePacket(
+                            "/bug client unlock timeout threshold reached: " + Constants.MAX_CLIENT_LOCK_MILLIS + "ms."
+                    );
+                }
+
+                setTurnFinished(false); // for next time
+                b.updateMoveHistoryAfterTurn();  // post-process tooltips
+                b.resetPlacedMovesAfterTurn();   // reset moves post-turn
+                b.setLockedDuringAnimate(false); // unlock control
+                setAnimationOngoing(false);      // mark animation done
+            }
+
         }
         information.update();
     }

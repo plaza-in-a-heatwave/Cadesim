@@ -73,9 +73,17 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     }
 
     // should we lock our controls during animation phase?
+    private long timeSinceLockedDuringAnimate;
+    public long getTimeSinceLockedDuringAnimate() {
+        return timeSinceLockedDuringAnimate;
+    }
+
     private boolean lockedDuringAnimate = false;
     public void setLockedDuringAnimate(boolean value) {
         lockedDuringAnimate = value;
+        if (lockedDuringAnimate) {
+            timeSinceLockedDuringAnimate = System.currentTimeMillis();
+        }
     }
     public boolean isLockedDuringAnimate() {
         return lockedDuringAnimate;
