@@ -1425,7 +1425,8 @@ public class PlayerManager {
 				if(!ServerConfiguration.isCustomMap()) {
 					String match=null;
 	    		    for (String s : ServerConfiguration.getAvailableMaps()) {
-	    		        if (s.toLowerCase().startsWith(ServerConfiguration.getProposedMapName().toLowerCase())) {
+	    		    	//match the entire string instead of start
+	    		        if (s.toLowerCase().matches(ServerConfiguration.getProposedMapName().toLowerCase() + ServerConfiguration.getMapFilter())) {
 	    		            match = s;
 	    		            break;
 	    		        }
