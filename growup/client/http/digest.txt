@@ -1,5 +1,4 @@
-getdown.txt = 87bb04cd86f09b599e0070281c6c51d3
-cadesim.jar = 19bca79dd9313510bdd1e0a3ddde6da3
+getdown.txt = 10f67edef5b6bd42a90334fbb32faf8c
+cadesim.jar = 9772c25faa80a1cea56c4bc359fda5d5
 user.config = c13e5d33b6cd4f47a872a146c8a1129e
-version.txt = b564065c75f56e8b59f3f851b9f404e5
-digest.txt = fbb9328fe69d22c3db776b32fb10375c
+digest.txt = cb8adb318529fdbb71a21a72d79299f4
