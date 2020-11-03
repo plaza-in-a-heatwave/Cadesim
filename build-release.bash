@@ -109,6 +109,9 @@ for f in *; do
     fi
 done
 
+# generate a version.txt file for backward compatibility with older clients.
+echo $(date +%Y%m%d%H%M%S)>"$(basename "$CLIENTHTTPDIR")"/"version.txt"
+
 popd>/dev/null
 echo "done making client."
 
