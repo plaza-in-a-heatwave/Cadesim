@@ -138,6 +138,11 @@ public class SeaBattleScene implements GameScene {
     }
 
     public void createMap(int[][] tiles) {
+        // if there was a dialog window open, close it
+        if (getMenu().isSettingsDialogOpen()) {
+            getMenu().closeSettingsDialog();
+        }
+
         // if there was a previous map: delete it
         if (blockadeMap != null) { blockadeMap.dispose();}
         blockadeMap = new BlockadeMap(context, tiles);
@@ -469,6 +474,10 @@ public class SeaBattleScene implements GameScene {
 
     public GameInformation getInformation() {
         return information;
+    }
+
+    public MenuComponent getMenu() {
+        return mainmenu;
     }
 
     /**

@@ -143,6 +143,34 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private ButtonGroup<TextButton> disengageBehaviorGroup;
 	private ButtonGroup<TextButton> jobberQualityGroup;
 	
+	/**
+	 * Allow other parts of Cadesim to close the dialog
+	 */
+	public void closeSettingsDialog() {
+	    //sanity check if user chooses 0 for round/turn duration
+        if(context.getProposedRoundDuration() == 0) {
+            context.setProposedRoundDuration(1);
+        }else if(context.getProposedTurnDuration() == 0) {
+            context.setProposedTurnDuration(1);
+        }
+        dialog.getContentTable().clear();
+        dialog.setVisible(false);
+        Gdx.input.setInputProcessor(input);
+        menuButtonIsDown = false;
+        menuLobbyIsDown = false;
+        menuMapsIsDown = false;
+        customMap = null;
+        setMapBoolean(false);
+        customMapButton.setDisabled(false);
+	}
+
+	/**
+	 * Allow other parts of Cadesim to check whether the dialog is open
+	 */
+	public boolean isSettingsDialogOpen() {
+	    return dialog.isVisible();
+	}
+
     protected MenuComponent(GameContext context, SeaBattleScene owner) {
         super(context, owner);
         this.context = context;
@@ -416,21 +444,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	exitButton.addListener(new ClickListener() {
     		@Override
             public void clicked(InputEvent event, float x, float y) {
-    			//sanity check if user chooses 0 for round/turn duration
-        		if(context.getProposedRoundDuration() == 0) {
-        			context.setProposedRoundDuration(1);
-        		}else if(context.getProposedTurnDuration() == 0) {
-        			context.setProposedTurnDuration(1);
-        		}
-    			dialog.getContentTable().clear();
-    			dialog.setVisible(false);
-    			Gdx.input.setInputProcessor(input);
-        		menuButtonIsDown = false;
-        		menuLobbyIsDown = false;
-            	menuMapsIsDown = false;
-            	customMap = null;
-            	setMapBoolean(false);
-            	customMapButton.setDisabled(false);
+    			closeSettingsDialog();
 			} 
         });
     	turnText.addListener(new ChangeListener() {
