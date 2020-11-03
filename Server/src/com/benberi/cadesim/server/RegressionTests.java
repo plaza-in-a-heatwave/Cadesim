@@ -909,5 +909,24 @@ public class RegressionTests {
             s.add(t2);
             listOfScenarios.add(new TestScenario("sinking ships dont deal damage", s));
         }
+
+        // two ships facing each other but offset laterally by 1 square. 2 squares between them.
+        // assert that when one turns left, another turns right, they cannot collide.
+        {
+            TestShip t1 = new TestShip(WB, Team.DEFENDER);
+            t1.setMoves(L,N,N,N);
+            t1.expectChangePosition(11,30, 12,31);
+            t1.expectChangeFace(EAST, NORTH);
+
+            TestShip t2 = new TestShip(WB, Team.ATTACKER);
+            t2.setMoves(R,N,N,N);
+            t2.expectChangePosition(14,31, 13,32);
+            t2.expectChangeFace(WEST, NORTH);
+
+            List<TestShip> s = new ArrayList<>();
+            s.add(t1);
+            s.add(t2);
+            listOfScenarios.add(new TestScenario("ships with two empty spaces in between them cannot collide", s));
+        }
     }
 }
