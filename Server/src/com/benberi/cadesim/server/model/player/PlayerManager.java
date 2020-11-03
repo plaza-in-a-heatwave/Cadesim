@@ -1565,7 +1565,6 @@ public class PlayerManager {
 		{
 			// cleanup
 			message = message.toLowerCase();
-			System.out.println(message);
 			if (message.startsWith("/vote"))
 			{
 				// voting on a current vote
@@ -1785,6 +1784,9 @@ public class PlayerManager {
                         "    players, teams"
                     );
     		    }
+    		}
+    		else if (message.startsWith("/bug")) {
+    		    // pass - the error will appear in the logs
     		}
 			else
 			{
