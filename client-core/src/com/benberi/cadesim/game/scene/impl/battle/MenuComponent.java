@@ -120,6 +120,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	//option buttons
 	private TextButton proposeButton ;
 	private TextButton exitButton;
+	private TextButton defaultButton;
 	
 	private Table table;
 	private Table sliderTable;
@@ -136,9 +137,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private Label jobberLabel;
 	private Label previewLabel;
 	
-	private int turnMax = 10000;
-	private int roundMax = 10000;
-	private int sinkPenaltyMax = 10000;
+	private int turnMax = 60;
+	private int roundMax = 7200;
+	private int sinkPenaltyMax = 10;
 	
 	private ButtonGroup<TextButton> disengageBehaviorGroup;
 	private ButtonGroup<TextButton> jobberQualityGroup;
@@ -193,9 +194,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		
 		selectBox=new SelectBox<String>(skin);
 		
-    	turnDuration_slider = new Slider(1.0f, 10000f, 10.0f, false, skin);
-    	roundDuration_slider = new Slider(1.0f, 10000f, 10.0f, false, skin);
-    	sinkPenalty_slider = new Slider(0.0f, 10000f, 1.0f, false, skin);
+    	turnDuration_slider = new Slider(5.0f, (float)turnMax, 10.0f, false, skin);
+    	roundDuration_slider = new Slider(30.0f, (float)roundMax, 10.0f, false, skin);
+    	sinkPenalty_slider = new Slider(0.0f, (float)sinkPenaltyMax, 1.0f, false, skin);
     	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
     	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
     	sinkPenalty_slider.setValue((float)context.getProposedSinkPenalty());
@@ -307,6 +308,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	
     	proposeButton = new TextButton("Propose",skin);
     	exitButton = new TextButton("Exit",skin);
+    	defaultButton = new TextButton("Default",skin);
     	
 		createDialogListeners();
     }
@@ -432,19 +434,67 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         		}else if(context.getProposedTurnDuration() == 0) {
         			context.setProposedTurnDuration(1);
         		}
+				if(!roundText.getText().isEmpty()) {
+					context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
+				}
+				if(!turnText.getText().isEmpty()) {
+					context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
+				}
+				if(!sinkPenaltyText.getText().isEmpty()) {
+					context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+				}
+				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+            	context.setProposedMapName(selectBox.getSelected());
         		dialog.getContentTable().clear();
         		context.sendSettingsPacket(customMap,mapBoolean, mapName);
 		    	dialog.setVisible(false);
-
 	    		menuButtonIsDown = false;
 	    		menuLobbyIsDown = false;
 	        	menuMapsIsDown = false;  
 			} 
     	});
+    	
+    	defaultButton.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+				selectBox.setSelected(context.currentMapName);
+        		roundText.setText(String.valueOf(context.getDefaultRoundDuration()));
+        		turnText.setText(String.valueOf(context.getDefaultTurnDuration()));
+        		sinkPenaltyText.setText(String.valueOf(context.getDefaultSinkPenalty()));
+				if(!roundText.getText().isEmpty()) {
+					context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
+				}
+				if(!turnText.getText().isEmpty()) {
+					context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
+				}
+				if(!sinkPenaltyText.getText().isEmpty()) {
+					context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+				}
+            	for (TextButton button: jobberQualityGroup.getButtons()) {
+            		button.setDisabled(false);
+            	}
+            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+            		button.setDisabled(false);
+            	}
+            	customMapButton.setDisabled(false);
+            	eliteQuality.setDisabled(true);
+            	disengageSimple.setDisabled(true);
+				context.setProposedDisengageBehavior("simple");
+				context.setProposedJobberQuality("elite");
+            	context.setProposedMapName(selectBox.getSelected());
+            	context.sendSettingsPacket(customMap,mapBoolean, mapName);
+        		closeSettingsDialog();
+			} 
+    	});
     	exitButton.addListener(new ClickListener() {
     		@Override
             public void clicked(InputEvent event, float x, float y) {
+    	    	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
+    	    	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
+    	    	sinkPenalty_slider.setValue((float)context.getProposedSinkPenalty());
     			closeSettingsDialog();
+    			
 			} 
         });
     	turnText.addListener(new ChangeListener() {
@@ -452,9 +502,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
 					turnDuration_slider.setValue((float)Integer.parseInt(turnText.getText()));
-					if(!turnText.getText().isEmpty()) {
-						context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
-					}
 				}catch(NumberFormatException e) {
 					
 				}
@@ -465,9 +512,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
 					roundDuration_slider.setValue((float)Integer.parseInt(roundText.getText()));
-					if(!roundText.getText().isEmpty()) {
-						context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
-					}
 				}catch(NumberFormatException e) {
 					
 				}
@@ -478,9 +522,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
 					sinkPenalty_slider.setValue((float)Integer.parseInt(sinkPenaltyText.getText()));
-					if(!sinkPenaltyText.getText().isEmpty()) {
-						context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
-					}
 				}catch(NumberFormatException e) {
 					
 				}
@@ -490,19 +531,16 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	turnText.setText(String.valueOf((int)turnDuration_slider.getValue()));
-				context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
             }});
 		roundDuration_slider.addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	roundText.setText(String.valueOf((int)roundDuration_slider.getValue()));
-				context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
             }});
 		sinkPenalty_slider.addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	sinkPenaltyText.setText(String.valueOf((int)sinkPenalty_slider.getValue()));
-//				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
             }});
 		
 		selectBox.addListener(new ChangeListener(){
@@ -517,8 +555,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	                	setMapPreview(pixmap);
                 	}else {
                 		clearMapPreview();
-                	}
-                	context.setProposedMapName(selectBox.getSelected());	
+                	}	
             	}catch(Exception e) {
             		e.printStackTrace();
             	}
@@ -636,6 +673,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		mapTable.add(customMapButton).colspan(2);
 		selectionTable.add(proposeButton);
 		selectionTable.add(exitButton);
+		selectionTable.add(defaultButton);
 		try {
 	    	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
 	    	if(pixmap != null) {

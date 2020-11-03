@@ -62,6 +62,12 @@ public class GameContext {
     private String proposedDisengageBehavior;
     private String proposedJobberQuality;
     private String proposedMapName;
+    
+    private int defaultTurnDuration;
+    private int defaultRoundDuration;
+    private int defaultSinkPenalty;
+    private String defaultDisengageBehavior;
+    private String defaultJobberQuality;
 
     public int getTurnDuration() {
     	return this.turnDuration;
@@ -124,6 +130,45 @@ public class GameContext {
 
 	public void setProposedMapName(String mapName) {
     	this.proposedMapName = mapName;
+    }
+	
+    public int getDefaultTurnDuration() {
+    	return this.defaultTurnDuration;
+    }
+
+	public void setDefaultTurnDuration(int turnDuration) {
+    	this.defaultTurnDuration = turnDuration;
+    }
+
+    public int getDefaultRoundDuration() {
+		return defaultRoundDuration;
+	}
+
+	public void setDefaultRoundDuration(int roundDuration) {
+		this.defaultRoundDuration = roundDuration;
+	}
+    public int getDefaultSinkPenalty() {
+    	return this.defaultSinkPenalty;
+    }
+
+	public void setDefaultSinkPenalty(int sinkPenalty) {
+    	this.defaultSinkPenalty = sinkPenalty;
+    }
+	
+    public String getDefaultDisengageBehavior() {
+    	return this.defaultDisengageBehavior;
+    }
+
+	public void setDefaultDisengageBehavior(String disengageBehavior) {
+    	this.defaultDisengageBehavior = disengageBehavior;
+    }
+	
+    public String getDefaultJobberQuality() {
+    	return this.defaultJobberQuality;
+    }
+
+	public void setDefaultJobberQuality(String jobberQuality) {
+    	this.defaultJobberQuality = jobberQuality;
     }
 
     private SceneAssetManager assetManager;

@@ -27,6 +27,13 @@ public class LoginResponsePacket extends ClientPacketExecutor {
         String jobberQuality = p.readByteString();
         getContext().setTurnDuration(turnDuration);
         getContext().setRoundDuration(roundDuration);
+        
+        getContext().setDefaultTurnDuration(turnDuration);
+        getContext().setDefaultRoundDuration(roundDuration);
+        getContext().setDefaultSinkPenalty(sinkPenalty);
+        getContext().setDefaultDisengageBehavior(disengageBehavior);
+        getContext().setDefaultJobberQuality(jobberQuality);
+        
         getContext().setProposedTurnDuration(turnDuration);
         getContext().setProposedRoundDuration(roundDuration);
         getContext().setProposedSinkPenalty(sinkPenalty);

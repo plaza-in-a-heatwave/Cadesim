@@ -293,11 +293,6 @@ public class PlayerPacketManager {
     	this.player.sendPacket(packet);
     }
 
-    public void sendSettings(String player) {
-    	SendSettingsPacket packet = new SendSettingsPacket();
-    	this.player.sendPacket(packet);
-    }
-
     public void queueOutgoing(OutgoingPacket packet) {
         outgoingPackets.add(packet);
     }

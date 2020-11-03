@@ -21,21 +21,27 @@ public class ServerConfiguration {
     private static int playerLimit = 5;
     private static int port = 4970;
     private static volatile int islandId = 0;
-    private static volatile int turnDuration  = 300;        // "deciseconds"
-    private static volatile int roundDuration = 18000;      // "deciseconds"
-    private static volatile int respawnDelay  = 2;          // turns
-    private static volatile int proposedTurnDuration  = 300;        // "deciseconds"
-    private static volatile int proposedRoundDuration = 18000;      // "deciseconds"
-    private static volatile int proposedRespawnDelay  = 2;          // turns
+    private static volatile boolean isSettingsChanged = false;
+    private static volatile int initialTurnDuration  = 300;        // "deciseconds"
+    private static volatile int initialRoundDuration = 18000;      // "deciseconds"
+    private static volatile int initialRespawnDelay  = 2;          // turns
+    private static volatile int turnDuration  = getInitialTurnDuration();        // "deciseconds"
+    private static volatile int roundDuration = getInitialRoundDuration();       // "deciseconds"
+    private static volatile int respawnDelay  = getInitialRespawnDelay();          // turns
+    private static volatile int proposedTurnDuration  = getInitialTurnDuration();        // "deciseconds"
+    private static volatile int proposedRoundDuration = getInitialRoundDuration();     // "deciseconds"
+    private static volatile int proposedRespawnDelay  = getInitialRespawnDelay();       // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
     private static String proposedMapName = "default.map";
     private static String mapFilter = ".txt";
-	private static String disengageBehavior = "simple";
-	private static String proposedDisengageBehavior = "simple";
+	private static String initialDisengageBehavior = "simple";
+	private static String disengageBehavior = getInitialDisengageBehavior();
+	private static String proposedDisengageBehavior = getInitialDisengageBehavior();
 	private static int votingMajority = 75;        // percent
-	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
-	private static JobbersQuality proposedJobbersQuality = JobbersQuality.ELITE;
+	private static JobbersQuality initialJobbersQuality = JobbersQuality.ELITE;
+	private static JobbersQuality jobbersQuality = getInitialJobbersQuality();
+	private static JobbersQuality proposedJobbersQuality = getInitialJobbersQuality();
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
 	private static String authCode = ""; // by default no auth code
@@ -110,6 +116,7 @@ public class ServerConfiguration {
     public static void setPort(int port) {
         ServerConfiguration.port = port;
     }
+    
 
     public static int getTurnDuration() {
     	return ServerConfiguration.turnDuration;
@@ -134,6 +141,19 @@ public class ServerConfiguration {
     public static void setRespawnDelay(int respawnDelay) {
     	ServerConfiguration.respawnDelay = respawnDelay;
     }
+    
+    public static int getInitialRoundDuration() {
+		return ServerConfiguration.initialRoundDuration;
+	}
+
+    public static int getInitialRespawnDelay() {
+    	return ServerConfiguration.initialRespawnDelay;
+    }
+
+    public static int getInitialTurnDuration() {
+    	return ServerConfiguration.initialTurnDuration;
+    }
+    
     public static int getProposedTurnDuration() {
     	return ServerConfiguration.proposedTurnDuration;
     }
@@ -262,6 +282,19 @@ public class ServerConfiguration {
 	public static String getRandomMapName() {
         return ServerConfiguration.mapList.get(Utils.randInt(0, mapList.size()-1));
     }
+	
+	public static String getInitialDisengageBehavior() {
+		return ServerConfiguration.initialDisengageBehavior ;
+	}
+
+	public static String getInitialJobbersQualityAsString() {
+		return ServerConfiguration.initialJobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
+	}
+	
+	public static JobbersQuality getInitialJobbersQuality() {
+		
+		return ServerConfiguration.initialJobbersQuality;
+	}
 
 	public static String getDisengageBehavior() {
 		return ServerConfiguration.disengageBehavior ;
@@ -419,5 +452,15 @@ public class ServerConfiguration {
 
 	public static void setIslandId(int islandId) {
 		ServerConfiguration.islandId = islandId;
+	}
+
+	public static boolean isSettingsChanged() {
+		return ServerConfiguration.isSettingsChanged;
+		
+	}
+	
+	public static void setSettingsChanged(boolean changed) {
+		ServerConfiguration.isSettingsChanged = changed;
+		
 	}
 }

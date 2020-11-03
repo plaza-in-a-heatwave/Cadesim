@@ -124,11 +124,11 @@ public class PlayerManager {
 	 */
 	private void resetTemporarySettings()
 	{
-		setRespawnDelay(ServerConfiguration.getRespawnDelay());
-		setTurnDuration(ServerConfiguration.getTurnDuration());
-		setRoundDuration(ServerConfiguration.getRoundDuration());
-		setDisengageBehavior(ServerConfiguration.getDisengageBehavior());
-		setJobbersQuality(ServerConfiguration.getJobbersQualityAsString());
+		setRespawnDelay(ServerConfiguration.getInitialRespawnDelay());
+		setTurnDuration(ServerConfiguration.getInitialTurnDuration());
+		setRoundDuration(ServerConfiguration.getInitialRoundDuration());
+		setDisengageBehavior(ServerConfiguration.getInitialDisengageBehavior());
+		setJobbersQuality(ServerConfiguration.getInitialJobbersQualityAsString());
 	}
 	
     private void setPersistTemporarySettings(boolean value)
@@ -252,7 +252,6 @@ public class PlayerManager {
      */
     public void tick() {
         BlockadeTimeMachine tm = context.getTimeMachine();
-
         // Send time ~ every second
     	long now = System.currentTimeMillis();
         if (now - lastTimeSend >= 1000) {
@@ -1415,13 +1414,14 @@ public class PlayerManager {
 			case TBD:
 				break;
 			case FOR:
-				ServerConfiguration.setTurnDuration(ServerConfiguration.getProposedTurnDuration() * 10);
-				ServerConfiguration.setRoundDuration(ServerConfiguration.getProposedRoundDuration() * 10);
-				ServerConfiguration.setRespawnDelay(ServerConfiguration.getProposedRespawnDelay());
-				ServerConfiguration.setDisengageBehavior(ServerConfiguration.getProposedDisengageBehavior());
-				ServerConfiguration.setJobbersQuality(ServerConfiguration.getProposedJobbersQualityAsString());
-				setPersistTemporarySettings(false);
+				setPersistTemporarySettings(true);
 				context.getTimeMachine().stop();
+				setTurnDuration(ServerConfiguration.getProposedTurnDuration() * 10);
+				setRoundDuration(ServerConfiguration.getProposedRoundDuration() * 10);
+				setRespawnDelay(ServerConfiguration.getProposedRespawnDelay());
+				setDisengageBehavior(ServerConfiguration.getProposedDisengageBehavior());
+				setJobbersQuality(ServerConfiguration.getProposedJobbersQualityAsString());
+				
 				if(!ServerConfiguration.isCustomMap()) {
 					String match=null;
 	    		    for (String s : ServerConfiguration.getAvailableMaps()) {
@@ -1441,7 +1441,6 @@ public class PlayerManager {
 				}else {
 					ServerConfiguration.overrideNextMapName(ServerContext.getCustomMapName());
 				}
-			
                 setShouldSwitchMap(true);
 				for(Player player : players) { // resets all players tokens
 					player.setTurnsUntilControl(0);
@@ -1550,9 +1549,9 @@ public class PlayerManager {
     private String proposeSetHelp()
     {
     	return "usage: /propose set <parameter> <value> -\n" +
-		"    turnduration (between 1 and 10000 inclusive)\n" +
-		"    roundduration (between 1 and 10000 inclusive)\n" +
-		"    sinkpenalty (between 0 and 10000 inclusive)\n" +
+		"    turnduration (between 1 and 60 inclusive)\n" +
+		"    roundduration (between 1 and 7200 inclusive)\n" +
+		"    sinkpenalty (between 0 and 10 inclusive)\n" +
 		"    disengage-behavior (off|realistic|simple)\n";
     }
 
@@ -1667,7 +1666,7 @@ public class PlayerManager {
 	    			{
 	    				try {
 	    					int value = Integer.parseInt((message.substring("/propose set turnduration ".length())));
-	    					if (value > 0 && value <= 10000)
+	    					if (value > 0 && value <= 30)
 	    					{
 	    						handleStartVote(pl, message, "set turnduration " + value);
 	    					}
@@ -1685,7 +1684,7 @@ public class PlayerManager {
 	    			{
 	    				try {
 	    					int value = Integer.parseInt((message.substring("/propose set roundduration ".length())));
-	    					if (value > 0 && value <= 10000)
+	    					if (value > 0 && value <= 7200)
 	    					{
 	    						handleStartVote(pl, message, "set roundduration " + value);
 	    					}
@@ -1703,7 +1702,7 @@ public class PlayerManager {
 	    			{
 	    				try {
 	    					int value = Integer.parseInt((message.substring("/propose set sinkpenalty ".length())));
-	    					if (value >= 0 && value <= 10000)
+	    					if (value >= 0 && value <= 10)
 	    					{
 	    						handleStartVote(pl, message, "set sinkpenalty " + value);
 	    					}
