@@ -68,7 +68,7 @@ public class CollisionCalculator {
             			(pl.getMoves().getMove(turn) == MoveType.LEFT || pl.getMoves().getMove(turn) == MoveType.RIGHT)) {
             		collided.add(p);
             	}
-            }else if(previous.equals(target)){
+            }else if(previous.equals(target) && finalPosition.equals(target)){
             	if(phase == 1) {
             		collided.add(p);
             	}
@@ -76,6 +76,7 @@ public class CollisionCalculator {
             	continue;
             }else {
 	            if(next.equals(target)) {
+	            	System.out.println("Next: "+next);
 	            	collided.add(p);
 	            }
             }
