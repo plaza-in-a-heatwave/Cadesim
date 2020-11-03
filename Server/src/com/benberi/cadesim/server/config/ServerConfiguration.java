@@ -183,6 +183,7 @@ public class ServerConfiguration {
                 "    Multiclient permitted: " + getMultiClientMode() + ",\n" +
                 "    Breaks duration/interval: " + getBreak()[0] + ":" + getBreak()[1] + ",\n" +
                 "    Update scheduled for: " + (!isScheduledAutoUpdate()?"not set":(String.format("%02d", getNextUpdateDateTimeScheduled().getHour()) + ":" + String.format("%02d", getNextUpdateDateTimeScheduled().getMinute()))) + ",\n" +
+                "    Server time is: " + ZonedDateTime.now() +
                 "]";
     }
 

@@ -14,7 +14,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.client.packet.out.PostMessagePacket;
 import com.benberi.cadesim.game.entity.projectile.CannonBall;
 import com.benberi.cadesim.game.entity.vessel.*;
 import com.benberi.cadesim.game.entity.vessel.move.MoveAnimationTurn;
@@ -443,7 +442,6 @@ public class SeaBattleScene implements GameScene {
             if (vessel.isSinking()) {
                 waitingForSink = true;
             }
-            waitingForSink=true;
         }
         BattleControlComponent b = context.getControlScene().getBnavComponent();
         if (b.isLockedDuringAnimate()) {
