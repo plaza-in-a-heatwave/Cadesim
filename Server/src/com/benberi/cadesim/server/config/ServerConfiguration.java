@@ -24,7 +24,7 @@ public class ServerConfiguration {
     private static volatile boolean isSettingsChanged = false;
     private static volatile int initialTurnDuration  = 300;        // "deciseconds"
     private static volatile int initialRoundDuration = 18000;      // "deciseconds"
-    private static volatile int initialRespawnDelay  = 2;          // turns
+    private static volatile int initialRespawnDelay  = 1;          // turns
     private static volatile int turnDuration  = getInitialTurnDuration();        // "deciseconds"
     private static volatile int roundDuration = getInitialRoundDuration();       // "deciseconds"
     private static volatile int respawnDelay  = getInitialRespawnDelay();          // turns
