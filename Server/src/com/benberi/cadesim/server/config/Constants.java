@@ -123,8 +123,8 @@ public class Constants {
 	/**
 	 * minimum times
 	 */
-	public static final int MIN_TURN_DURATION = 10;
-	public static final int MIN_ROUND_DURATION = 60;
+	public static final int MIN_TURN_DURATION  = 5;
+	public static final int MIN_ROUND_DURATION = 30;
 
 	/**
 	 * minimum values for breaks

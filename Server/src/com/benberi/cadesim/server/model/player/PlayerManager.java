@@ -1549,8 +1549,8 @@ public class PlayerManager {
     private String proposeSetHelp()
     {
     	return "usage: /propose set <parameter> <value> -\n" +
-		"    turnduration (between 1 and 60 inclusive)\n" +
-		"    roundduration (between 1 and 7200 inclusive)\n" +
+		"    turnduration (between " + Constants.MIN_TURN_DURATION + " and 60 inclusive)\n" +
+		"    roundduration (between " + Constants.MIN_ROUND_DURATION + " and 7200 inclusive)\n" +
 		"    sinkpenalty (between 0 and 10 inclusive)\n" +
 		"    disengage-behavior (off|realistic|simple)\n";
     }
@@ -1666,7 +1666,7 @@ public class PlayerManager {
 	    			{
 	    				try {
 	    					int value = Integer.parseInt((message.substring("/propose set turnduration ".length())));
-	    					if (value > 0 && value <= 30)
+	    					if (value >= Constants.MIN_TURN_DURATION && value <= 60)
 	    					{
 	    						handleStartVote(pl, message, "set turnduration " + value);
 	    					}
@@ -1684,7 +1684,7 @@ public class PlayerManager {
 	    			{
 	    				try {
 	    					int value = Integer.parseInt((message.substring("/propose set roundduration ".length())));
-	    					if (value > 0 && value <= 7200)
+	    					if (value >= Constants.MIN_ROUND_DURATION && value <= 7200)
 	    					{
 	    						handleStartVote(pl, message, "set roundduration " + value);
 	    					}

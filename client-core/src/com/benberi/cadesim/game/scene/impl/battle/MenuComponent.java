@@ -194,7 +194,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		
 		selectBox=new SelectBox<String>(skin);
 		
-    	turnDuration_slider = new Slider(5.0f, (float)turnMax, 10.0f, false, skin);
+    	turnDuration_slider = new Slider(5.0f, (float)turnMax, 5.0f, false, skin);
     	roundDuration_slider = new Slider(30.0f, (float)roundMax, 10.0f, false, skin);
     	sinkPenalty_slider = new Slider(0.0f, (float)sinkPenaltyMax, 1.0f, false, skin);
     	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
