@@ -195,7 +195,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		selectBox=new SelectBox<String>(skin);
 		
     	turnDuration_slider = new Slider(5.0f, (float)turnMax, 5.0f, false, skin);
-    	roundDuration_slider = new Slider(30.0f, (float)roundMax, 10.0f, false, skin);
+    	roundDuration_slider = new Slider(30.0f, (float)roundMax, 300.0f, false, skin);
     	sinkPenalty_slider = new Slider(0.0f, (float)sinkPenaltyMax, 1.0f, false, skin);
     	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
     	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
@@ -308,7 +308,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	
     	proposeButton = new TextButton("Propose",skin);
     	exitButton = new TextButton("Exit",skin);
-    	defaultButton = new TextButton("Default",skin);
+    	defaultButton = new TextButton("Reset defaults",skin);
     	
 		createDialogListeners();
     }
@@ -458,33 +458,54 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	defaultButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-				selectBox.setSelected(context.currentMapName);
+        	    // set boxes
+				turnText.setText(String.valueOf(context.getDefaultTurnDuration()));
         		roundText.setText(String.valueOf(context.getDefaultRoundDuration()));
-        		turnText.setText(String.valueOf(context.getDefaultTurnDuration()));
         		sinkPenaltyText.setText(String.valueOf(context.getDefaultSinkPenalty()));
-				if(!roundText.getText().isEmpty()) {
-					context.setProposedRoundDuration(Integer.parseInt(roundText.getText()));
-				}
-				if(!turnText.getText().isEmpty()) {
-					context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
-				}
-				if(!sinkPenaltyText.getText().isEmpty()) {
-					context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
-				}
+
+        		// set sliders
+        		turnDuration_slider.setValue((float)context.getDefaultTurnDuration());
+        		roundDuration_slider.setValue((float)context.getDefaultRoundDuration());
+				sinkPenalty_slider.setValue((float)context.getDefaultSinkPenalty());
+
+				// reset default jobberQuality behavior
             	for (TextButton button: jobberQualityGroup.getButtons()) {
             		button.setDisabled(false);
             	}
+            	switch(context.getDefaultDisengageBehavior()) {
+                case "basic":
+                    basicQuality.setDisabled(true);
+                    break;
+                case "elite":
+                    eliteQuality.setDisabled(true);
+                    break;
+                default:
+                    eliteQuality.setDisabled(true);
+                }
+
+            	// reset default disengage behavior
             	for (TextButton button: disengageBehaviorGroup.getButtons()) {
             		button.setDisabled(false);
             	}
+            	switch(context.getDefaultDisengageBehavior()) {
+            	case "off":
+            	    disengageOff.setDisabled(true);
+            	    break;
+            	case "simple":
+            	    disengageSimple.setDisabled(true);
+            	    break;
+            	case "realistic":
+            	    disengageRealistic.setDisabled(true);
+            	    break;
+            	default:
+            	    disengageSimple.setDisabled(true);
+            	}
+
+            	// selected map
+            	selectBox.setSelected(context.currentMapName);
+
+            	// misc
             	customMapButton.setDisabled(false);
-            	eliteQuality.setDisabled(true);
-            	disengageSimple.setDisabled(true);
-				context.setProposedDisengageBehavior("simple");
-				context.setProposedJobberQuality("elite");
-            	context.setProposedMapName(selectBox.getSelected());
-            	context.sendSettingsPacket(customMap,mapBoolean, mapName);
-        		closeSettingsDialog();
 			} 
     	});
     	exitButton.addListener(new ClickListener() {
