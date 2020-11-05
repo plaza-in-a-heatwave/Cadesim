@@ -19,6 +19,5 @@ code = cadesim.jar
 class = com.benberi.cadesim.desktop.DesktopLauncher
 
 strict_comments = true
-resource = user.config
 
 apparg = --no-update
