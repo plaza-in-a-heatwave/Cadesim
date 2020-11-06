@@ -148,12 +148,13 @@ public class ConnectScene implements GameScene, InputProcessor {
     private int indexResolution;
     private Random random = new Random();
     
-    private Map<Integer,int[]> resolutionWidthDiction = new HashMap<Integer, int[]>();
+    private Map<Integer,int[]> resolutionWidthDiction;
     
     public ConnectScene(GameContext ctx) {
         this.context = ctx;
+        resolutionWidthDiction = new HashMap<Integer, int[]>();
         resolutionWidthDiction.put(800, new int[]{640,484,328,360});
-        resolutionWidthDiction.put(1024, new int[]{702,546,390,460});
+        resolutionWidthDiction.put(1024, new int[]{722,566,410,480});
         resolutionWidthDiction.put(1280, new int[]{832,676,520,660});
         resolutionWidthDiction.put(1366, new int[]{932,776,620,640});
         resolutionWidthDiction.put(1440, new int[]{932,776,620,690});
