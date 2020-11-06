@@ -195,7 +195,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		selectBox=new SelectBox<String>(skin);
 		
     	turnDuration_slider = new Slider(5.0f, (float)turnMax, 5.0f, false, skin);
-    	roundDuration_slider = new Slider(30.0f, (float)roundMax, 300.0f, false, skin);
+    	roundDuration_slider = new Slider(30.0f, (float)roundMax, 5.0f, false, skin);
     	sinkPenalty_slider = new Slider(0.0f, (float)sinkPenaltyMax, 1.0f, false, skin);
     	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
     	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
@@ -213,7 +213,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 						return true;
 					}else if(Integer.parseInt(textField.getText() + c) > turnMax && Character.isDigit(c)) {
 						textField.setText(Integer.toString(turnMax));
-						turnDuration_slider.setValue((float)turnMax);
+						getTurnSlider().setValue((float)turnMax);
 						return false;
 					}else {
 						return false;
@@ -261,7 +261,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 						return true;
 					}else if(Integer.parseInt(textField.getText() + c) > sinkPenaltyMax && Character.isDigit(c)) {
 						textField.setText(Integer.toString(sinkPenaltyMax));
-						sinkPenalty_slider.setValue((float)sinkPenaltyMax);
+						getSinkPenaltySlider().setValue((float)sinkPenaltyMax);
 						return false;
 					}else { 
 						return false;
@@ -374,54 +374,44 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      * Initialize/create all listeners for buttons/sliders
      */
     public void createDialogListeners() {
-    	disengageOff.addListener(new ClickListener() {
+    	getDisengageOffButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
-            		button.setDisabled(false);
-            	}
-            	customMapButton.setDisabled(false);
-            	disengageOff.setDisabled(true);
+        		clearDisengageBehavior();
+        		getCustomMapButton().setDisabled(false);
+            	setDisengageButton("off", true);
             	context.setProposedDisengageBehavior("off");
         	}});
-    	disengageRealistic.addListener(new ClickListener() {
+    	getDisengageRealisticButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
-            		button.setDisabled(false);
-            	}
-            	customMapButton.setDisabled(false);
-            	disengageRealistic.setDisabled(true);
+        		clearDisengageBehavior();
+        		getCustomMapButton().setDisabled(false);
+            	setDisengageButton("realistic", true);
             	context.setProposedDisengageBehavior("realistic");
         	}});
-    	disengageSimple.addListener(new ClickListener() {
+    	getDisengageSimpleButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
-            		button.setDisabled(false);
-            	}
-            	customMapButton.setDisabled(false);
-            	disengageSimple.setDisabled(true);
+        		clearDisengageBehavior();
+        		getCustomMapButton().setDisabled(false);
+            	setDisengageButton("simple", true);
             	context.setProposedDisengageBehavior("simple");
         	}});
-    	basicQuality.addListener(new ClickListener() {
+    	getBasicQualityButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-            	for (TextButton button: jobberQualityGroup.getButtons()) {
-            		button.setDisabled(false);
-            	}
-            	customMapButton.setDisabled(false);
-            	basicQuality.setDisabled(true);
+            	clearQuality();
+            	getCustomMapButton().setDisabled(false);
+            	setQualityButton("basic", true);
             	context.setProposedJobberQuality("basic");
         	}});
-    	eliteQuality.addListener(new ClickListener() {
+    	getEliteQualityButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-            	for (TextButton button: jobberQualityGroup.getButtons()) {
-            		button.setDisabled(false);
-            	}
-            	customMapButton.setDisabled(false);
-            	eliteQuality.setDisabled(true);
+        		clearQuality();
+        		getCustomMapButton().setDisabled(false);
+            	setQualityButton("elite", true);
             	context.setProposedJobberQuality("elite");
         	}});
     	
@@ -464,56 +454,30 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         		sinkPenaltyText.setText(String.valueOf(context.getDefaultSinkPenalty()));
 
         		// set sliders
-        		turnDuration_slider.setValue((float)context.getDefaultTurnDuration());
-        		roundDuration_slider.setValue((float)context.getDefaultRoundDuration());
-				sinkPenalty_slider.setValue((float)context.getDefaultSinkPenalty());
+        		getTurnSlider().setValue((float)context.getDefaultTurnDuration());
+        		getRoundSlider().setValue((float)context.getDefaultRoundDuration());
+        		getSinkPenaltySlider().setValue((float)context.getDefaultSinkPenalty());
 
-				// reset default jobberQuality behavior
-            	for (TextButton button: jobberQualityGroup.getButtons()) {
-            		button.setDisabled(false);
-            	}
-            	switch(context.getDefaultDisengageBehavior()) {
-                case "basic":
-                    basicQuality.setDisabled(true);
-                    break;
-                case "elite":
-                    eliteQuality.setDisabled(true);
-                    break;
-                default:
-                    eliteQuality.setDisabled(true);
-                }
-
-            	// reset default disengage behavior
-            	for (TextButton button: disengageBehaviorGroup.getButtons()) {
-            		button.setDisabled(false);
-            	}
-            	switch(context.getDefaultDisengageBehavior()) {
-            	case "off":
-            	    disengageOff.setDisabled(true);
-            	    break;
-            	case "simple":
-            	    disengageSimple.setDisabled(true);
-            	    break;
-            	case "realistic":
-            	    disengageRealistic.setDisabled(true);
-            	    break;
-            	default:
-            	    disengageSimple.setDisabled(true);
-            	}
+				// reset buttons
+        		clearDisengageBehavior();
+        		clearQuality();
+        		
+        		setDisengageButton(context.getDefaultDisengageBehavior(), true);
+        		setQualityButton(context.getDefaultJobberQuality(), true);
 
             	// selected map
             	selectBox.setSelected(context.currentMapName);
 
             	// misc
-            	customMapButton.setDisabled(false);
+            	getCustomMapButton().setDisabled(false);
 			} 
     	});
     	exitButton.addListener(new ClickListener() {
     		@Override
             public void clicked(InputEvent event, float x, float y) {
-    	    	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
-    	    	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
-    	    	sinkPenalty_slider.setValue((float)context.getProposedSinkPenalty());
+    			getTurnSlider().setValue((float)context.getProposedTurnDuration());
+    			getRoundSlider().setValue((float)context.getProposedRoundDuration());
+    			getSinkPenaltySlider().setValue((float)context.getProposedSinkPenalty());
     			closeSettingsDialog();
     			
 			} 
@@ -522,7 +486,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
-					turnDuration_slider.setValue((float)Integer.parseInt(turnText.getText()));
+					getTurnSlider().setValue((float)Integer.parseInt(turnText.getText()));
 				}catch(NumberFormatException e) {
 					
 				}
@@ -532,7 +496,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
-					roundDuration_slider.setValue((float)Integer.parseInt(roundText.getText()));
+					getRoundSlider().setValue((float)Integer.parseInt(roundText.getText()));
 				}catch(NumberFormatException e) {
 					
 				}
@@ -542,33 +506,33 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
-					sinkPenalty_slider.setValue((float)Integer.parseInt(sinkPenaltyText.getText()));
+					getSinkPenaltySlider().setValue((float)Integer.parseInt(sinkPenaltyText.getText()));
 				}catch(NumberFormatException e) {
 					
 				}
 			}
 		});
-		turnDuration_slider.addListener(new ChangeListener(){
+		getTurnSlider().addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-            	turnText.setText(String.valueOf((int)turnDuration_slider.getValue()));
+            	turnText.setText(String.valueOf((int)getTurnSlider().getValue()));
             }});
-		roundDuration_slider.addListener(new ChangeListener(){
+		getRoundSlider().addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-            	roundText.setText(String.valueOf((int)roundDuration_slider.getValue()));
+            	roundText.setText(String.valueOf((int)getRoundSlider().getValue()));
             }});
-		sinkPenalty_slider.addListener(new ChangeListener(){
+		getSinkPenaltySlider().addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-            	sinkPenaltyText.setText(String.valueOf((int)sinkPenalty_slider.getValue()));
+            	sinkPenaltyText.setText(String.valueOf((int)getSinkPenaltySlider().getValue()));
             }});
 		
 		selectBox.addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	try {
-                	customMapButton.setDisabled(false);
+                	getCustomMapButton().setDisabled(false);
             		setMapBoolean(false);
             		customMap = null;
                 	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
@@ -583,10 +547,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             }
         });
 		
-		customMapButton.addListener(new ClickListener() {
+		getCustomMapButton().addListener(new ClickListener() {
 			@Override
             public void clicked(InputEvent event, float x, float y) {
-				customMapButton.setDisabled(true);
+				getCustomMapButton().setDisabled(true);
     			setMapBoolean(true);
     			clearMapPreview();
     			selectCustomMap();
@@ -671,23 +635,23 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		table.add(selectionTable).pad(2.0f).row();
 		//
 		sliderTable.add(turnLabel);
-		sliderTable.add(turnDuration_slider);
+		sliderTable.add(getTurnSlider());
 		sliderTable.add(turnText).width(60).pad(5.0f).row();
 		sliderTable.add(roundLabel);
-		sliderTable.add(roundDuration_slider);
+		sliderTable.add(getRoundSlider());
 		sliderTable.add(roundText).width(60).pad(5.0f).row();
 		sliderTable.add(sinkLabel);
-		sliderTable.add(sinkPenalty_slider);
+		sliderTable.add(getSinkPenaltySlider());
 		sliderTable.add(sinkPenaltyText).width(60).pad(5.0f).row();
 		//
 		disengageTable.add(disengageLabel).pad(5.0f);
-		disengageTable.add(disengageOff).pad(5.0f);
-		disengageTable.add(disengageRealistic).pad(5.0f);
-		disengageTable.add(disengageSimple).pad(5.0f).row();
+		disengageTable.add(getDisengageOffButton()).pad(5.0f);
+		disengageTable.add(getDisengageRealisticButton()).pad(5.0f);
+		disengageTable.add(getDisengageSimpleButton()).pad(5.0f).row();
 		//
 		qualityTable.add(jobberLabel).pad(5.0f);
-		qualityTable.add(basicQuality).pad(5.0f);
-		qualityTable.add(eliteQuality).pad(5.0f).row();
+		qualityTable.add(getBasicQualityButton()).pad(5.0f);
+		qualityTable.add(getEliteQualityButton()).pad(5.0f).row();
 		cell = mapTable.add().colspan(3);
 		mapTable.add().row();
 		mapTable.add(selectBox).colspan(1);
@@ -860,5 +824,119 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	@Override
 	public boolean handleMouseMove(float x, float y) {
 		return false;
+	}
+
+	public Slider getTurnSlider() {
+		return turnDuration_slider;
+	}
+	
+	public Slider getRoundSlider() {
+		return roundDuration_slider;
+	}
+	
+	public Slider getSinkPenaltySlider() {
+		return sinkPenalty_slider;
+	}
+	
+	public TextButton getCurrentDisengageButton() {
+    	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+    		if(button.isDisabled()) {
+    			return button;
+    		}
+    	}
+    	return null;
+	}
+	
+	public void setDisengageButton(String description, boolean toggle) {
+		switch (description)
+		{
+		     case "simple":
+		    	 getDisengageSimpleButton().setDisabled(toggle);
+		    	 break;
+		     case "realistic":
+		    	 getDisengageRealisticButton().setDisabled(toggle);
+		    	 break;
+		     case "off":
+		    	 getDisengageOffButton().setDisabled(toggle);
+		    	 break;
+		     default:
+		    	 getDisengageOffButton().setDisabled(toggle);
+		    	 break;
+		}
+	}
+	
+	public void clearDisengageBehavior() {
+    	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+    		button.setDisabled(false);
+    	}
+	}
+	
+	public TextButton getDisengageOffButton() {
+		return disengageOff;
+	}
+	
+	public TextButton getDisengageRealisticButton() {
+		return disengageRealistic;
+	}
+	
+	public TextButton getDisengageSimpleButton() {
+		return disengageSimple;
+	}
+	
+	public TextButton getCurrentQualityButton() {
+    	for (TextButton button: jobberQualityGroup.getButtons()) {
+    		if(button.isDisabled()) {
+    			return button;
+    		}
+    	}
+    	return null;
+	}
+	
+	public void setQualityButton(String description, boolean toggle) {
+		switch (description)
+		{
+		     case "basic":
+		    	 getBasicQualityButton().setDisabled(toggle);
+		    	 break;
+		     case "elite":
+		    	 getEliteQualityButton().setDisabled(toggle);
+		    	 break;
+		     default:
+		    	 getBasicQualityButton().setDisabled(toggle);
+		    	 break;
+		}
+	}
+	
+	public void clearQuality() {
+    	for (TextButton button: jobberQualityGroup.getButtons()) {
+    		button.setDisabled(false);
+    	}
+	}
+	
+	public TextButton getBasicQualityButton() {
+		return basicQuality;
+	}
+	
+	public TextButton getEliteQualityButton() {
+		return eliteQuality;
+	}
+	
+	public TextButton getCustomMapButton() {
+		return customMapButton;
+	}
+	
+	public void setCustomMapButton(int value) {
+		switch (value)
+		{
+			case 0:
+				getCustomMapButton().setDisabled(false);
+				break;
+			case 1:
+				getCustomMapButton().setDisabled(true);
+				break;
+			default:
+				getCustomMapButton().setDisabled(false);
+				break;
+		}
 	}
 }

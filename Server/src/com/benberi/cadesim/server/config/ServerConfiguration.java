@@ -28,8 +28,8 @@ public class ServerConfiguration {
     private static volatile int turnDuration  = getInitialTurnDuration();        // "deciseconds"
     private static volatile int roundDuration = getInitialRoundDuration();       // "deciseconds"
     private static volatile int respawnDelay  = getInitialRespawnDelay();          // turns
-    private static volatile int proposedTurnDuration  = getInitialTurnDuration();        // "deciseconds"
-    private static volatile int proposedRoundDuration = getInitialRoundDuration();     // "deciseconds"
+    private static volatile int proposedTurnDuration  = getInitialTurnDuration()/10;        // "deciseconds"
+    private static volatile int proposedRoundDuration = getInitialRoundDuration()/10;     // "deciseconds"
     private static volatile int proposedRespawnDelay  = getInitialRespawnDelay();       // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
@@ -189,14 +189,14 @@ public class ServerConfiguration {
                 "    Player limit:" + getPlayerLimit() + ",\n" +
                 "    Map Name:" + getMapName() + ",\n" +
                 "    Port:" + getPort() + ",\n" +
-                "    Turn duration:" + getTurnDuration() / 10 + "s,\n" +
-                "    Round duration:" + getRoundDuration() / 10 + "s,\n" +
-                "    Sink delay:" + getRespawnDelay() + " turns,\n" +
+                "    Turn duration:" + getProposedTurnDuration() + "s,\n" +
+                "    Round duration:" + getProposedRoundDuration() + "s,\n" +
+                "    Sink delay:" + getProposedRespawnDelay() + " turns,\n" +
                 "    Map rotation period:" + ((getMapRotationPeriod()== -1)?"[rotation off] -1":getMapRotationPeriod() + " turns") + ",\n" +
-                "    Disengage behavior:" + getDisengageBehavior() + ",\n" +
+                "    Disengage behavior:" + getProposedDisengageBehavior() + ",\n" +
                 "    Vote majority percentage: " +
                 (isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ",\n" +
-                "    Jobbers quality: " + getJobbersQualityAsString() + ",\n" +
+                "    Jobbers quality: " + getProposedJobbersQualityAsString() + ",\n" +
                 "    Team names: " + getAttackerName() + "," + getDefenderName() + ",\n" +
                 "    Auth code: \"" + getAuthCode() + "\"" + ",\n" +
                 "    Run continuous: " + getRunContinuousMode() + ",\n" +

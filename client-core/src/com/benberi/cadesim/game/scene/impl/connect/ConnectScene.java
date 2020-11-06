@@ -3,6 +3,8 @@ package com.benberi.cadesim.game.scene.impl.connect;
 import java.io.*;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -84,6 +86,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     private TextField code;
 
     private Texture background;
+    private Texture smallBackground;
     private Texture textfieldTexture;
     private Texture loginButtonUp;
     private Texture loginButtonDown;
@@ -135,9 +138,21 @@ public class ConnectScene implements GameScene, InputProcessor {
     private String[] oldResolution;
     private Dialog dialog;
     private int indexResolution;
-
+    
+    private Map<Integer,int[]> resolutionWidthDiction = new HashMap<Integer, int[]>();
+    
     public ConnectScene(GameContext ctx) {
         this.context = ctx;
+        resolutionWidthDiction.put(800, new int[]{640,484,328,360});
+        resolutionWidthDiction.put(1024, new int[]{702,546,390,460});
+        resolutionWidthDiction.put(1280, new int[]{832,676,520,660});
+        resolutionWidthDiction.put(1366, new int[]{932,776,620,640});
+        resolutionWidthDiction.put(1440, new int[]{932,776,620,690});
+        resolutionWidthDiction.put(1600, new int[]{1032,876,720,770});
+        resolutionWidthDiction.put(1680, new int[]{1032,876,720,830});
+        resolutionWidthDiction.put(1920, new int[]{1182,1026,870,920});
+        resolutionWidthDiction.put(2500, new int[]{1482,1326,1170,1230});
+        resolutionWidthDiction.put(3600, new int[]{2082,1926,1770,1700});
     }
     
     @Override
@@ -205,6 +220,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         
         batch = new SpriteBatch();
         background = context.getManager().get(context.getAssetObject().background);
+        smallBackground = context.getManager().get(context.getAssetObject().smallBackground);
         textfieldTexture = context.getManager().get(context.getAssetObject().textfieldTexture);
 
         loginButtonStyle = new ImageButtonStyle();
@@ -229,7 +245,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                     return;
                 }
             }});
-        buttonConn.setPosition(165, 290);
+        buttonConn.setPosition(Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] + 5, 290);
       //login button
         
         mapEditorButtonStyle = new ImageButtonStyle();
@@ -266,17 +282,17 @@ public class ConnectScene implements GameScene, InputProcessor {
 
         name = new TextField( prop.getProperty("user.username"), style);
         name.setSize(120, 49);
-        name.setPosition(170, MAIN_GROUP_OFFSET_Y + 325);
+        name.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] - 10), MAIN_GROUP_OFFSET_Y + 325);
 
         address = new TextField( prop.getProperty("user.last_address"), style);
         address.setSize(120, 49);
-        address.setPosition(326, MAIN_GROUP_OFFSET_Y + 325);
+        address.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[1] - 10), MAIN_GROUP_OFFSET_Y + 325);
         
         code = new TextField(Constants.SERVER_CODE, style);
         code.setPasswordCharacter('*');
         code.setPasswordMode(true);
         code.setSize(120, 49);
-        code.setPosition(482, MAIN_GROUP_OFFSET_Y + 325);
+        code.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[2] - 10), MAIN_GROUP_OFFSET_Y + 325);
         
         SelectBox.SelectBoxStyle selectBoxStyle = new SelectBox.SelectBoxStyle();
         selectBoxStyle.background = new Image(
@@ -295,19 +311,19 @@ public class ConnectScene implements GameScene, InputProcessor {
 
         teamType = new SelectBox<>(selectBoxStyle);
         teamType.setSize(150, 44);
-        teamType.setPosition(640, 105);
+        teamType.setPosition(Gdx.graphics.getWidth() - 160, 105);
         
         resolutionType = new SelectBox<>(selectBoxStyle);
         resolutionType.setSize(150, 44);
-        resolutionType.setPosition(640, 155);
+        resolutionType.setPosition(Gdx.graphics.getWidth() - 160, 155);
 
         shipType = new SelectBox<>(selectBoxStyle);
         shipType.setSize(150, 44);
-        shipType.setPosition(640, 5);
+        shipType.setPosition(Gdx.graphics.getWidth() - 160, 5);
         
         roomLabel = new SelectBox<RoomNumberLabel>(selectBoxStyle);
         roomLabel.setSize(150.0f, 44.0f);
-        roomLabel.setPosition(640, 55);
+        roomLabel.setPosition(Gdx.graphics.getWidth() - 160, 55);
 
         baghlah = context.getManager().get(context.getAssetObject().baghlahSkin);
         blackship = context.getManager().get(context.getAssetObject().blackshipSkin);
@@ -547,10 +563,14 @@ public class ConnectScene implements GameScene, InputProcessor {
         }
         stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         batch.begin();
-        batch.draw(background, 0, 0);
+        if(Gdx.graphics.getWidth() >= 2500) {
+        	batch.draw(background, 0, 0);
+        }else {
+        	batch.draw(smallBackground, 0, 0);
+        }
         if (state == ConnectionSceneState.DEFAULT) {
-        	titleFont.draw(batch, "Blockade Simulator", 156, MAIN_GROUP_OFFSET_Y + 450);
-        	notesFont.draw(batch, chosenGreeting,       587, MAIN_GROUP_OFFSET_Y + 429);
+        	titleFont.draw(batch, "Blockade Simulator", Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0], MAIN_GROUP_OFFSET_Y + 450);
+        	notesFont.draw(batch, chosenGreeting,       Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] -431), MAIN_GROUP_OFFSET_Y + 429);
 			notesFont.draw(batch, "Version " + Constants.VERSION + " by Cyclist & Fatigue, based on the Cadesim by Benberi", 15, 75);
         	notesFont.draw(batch, "Inspired by the original Dachimpy Cadesim", 15, 50);
         	notesFont.draw(batch, "Found a bug? Let us know!", 15, 25);
@@ -560,13 +580,13 @@ public class ConnectScene implements GameScene, InputProcessor {
             notesFont.setColor(Color.WHITE);
         	
             font.setColor(Color.WHITE);
-            font.draw(batch, "Display name:",   160, MAIN_GROUP_OFFSET_Y + 400);
-            font.draw(batch, "Server address:", 316, MAIN_GROUP_OFFSET_Y + 400);
-            font.draw(batch, "Server code:",    472, MAIN_GROUP_OFFSET_Y + 400);
-	        batch.draw(textfieldTexture, 160, MAIN_GROUP_OFFSET_Y + 325, 140, 49);
-	        batch.draw(textfieldTexture, 316, MAIN_GROUP_OFFSET_Y + 325, 140, 49);
-	        batch.draw(textfieldTexture, 472, MAIN_GROUP_OFFSET_Y + 325, 140, 49);
-            font.draw(batch, "Settings:", 640, 195);
+            font.draw(batch, "Display name:",   Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0], MAIN_GROUP_OFFSET_Y + 400);
+            font.draw(batch, "Server address:", Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[1], MAIN_GROUP_OFFSET_Y + 400);
+            font.draw(batch, "Server code:",    Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[2], MAIN_GROUP_OFFSET_Y + 400);
+	        batch.draw(textfieldTexture, Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0], MAIN_GROUP_OFFSET_Y + 325, 140, 49);
+	        batch.draw(textfieldTexture, Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[1], MAIN_GROUP_OFFSET_Y + 325, 140, 49);
+	        batch.draw(textfieldTexture, Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[2], MAIN_GROUP_OFFSET_Y + 325, 140, 49);
+            font.draw(batch, "Settings:", Gdx.graphics.getWidth() - 160, 220);
             batch.end();
 
             // buttons need to be drawn, then ship texture is drawn over them
@@ -576,9 +596,9 @@ public class ConnectScene implements GameScene, InputProcessor {
             Texture t;
             batch.begin();
             font.setColor(new Color(0.1f, 0.1f, 0.1f, 1));
-            font.draw(batch, "Connect", 340, MAIN_GROUP_OFFSET_Y + 296);
+            font.draw(batch, "Connect", (resolutionWidthDiction.get(Gdx.graphics.getWidth())[3]), MAIN_GROUP_OFFSET_Y + 296);
             t = shipType.getSelected().getType();
-            batch.draw(t, 735, 5); // draw t, whatever it may be
+            batch.draw(t, Gdx.graphics.getWidth() - 65, 5); // draw t, whatever it may be
             batch.end();
             
             stage_dialog.act();

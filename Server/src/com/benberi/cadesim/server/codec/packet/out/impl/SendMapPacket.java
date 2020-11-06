@@ -23,7 +23,13 @@ public class SendMapPacket extends OutgoingPacket {
 
     public void encode() {
         int[][] map = bmap.getMap();
-        setPacketLengthType(PacketLength.SHORT);
+        setPacketLengthType(PacketLength.MEDIUM);
+        writeInt(ServerConfiguration.getProposedTurnDuration());   // 2-byte
+        writeInt(ServerConfiguration.getProposedRoundDuration());  // 2-byte
+        writeInt(ServerConfiguration.getProposedRespawnDelay());
+	    writeByteString(ServerConfiguration.getProposedDisengageBehavior());
+	    writeByteString(ServerConfiguration.getProposedJobbersQualityAsString());
+	    writeInt(ServerConfiguration.isCustomMap()? 1 : 0);
         writeByteString(ServerConfiguration.getMapName());
         for (int x = 0; x < map.length; x++) {
             for (int y = 0; y < map[x].length; y++) {

@@ -19,6 +19,7 @@ import com.benberi.cadesim.game.scene.impl.connect.ConnectionSceneState;
 import com.benberi.cadesim.game.scene.GameScene;
 import com.benberi.cadesim.game.scene.SceneAssetManager;
 import com.benberi.cadesim.game.scene.TextureCollection;
+import com.benberi.cadesim.game.scene.impl.battle.MenuComponent;
 import com.benberi.cadesim.game.scene.impl.battle.SeaBattleScene;
 import com.benberi.cadesim.game.scene.impl.control.ControlAreaScene;
 import com.benberi.cadesim.game.scene.impl.mapeditor.MapEditorMapScene;
@@ -400,10 +401,18 @@ public class GameContext {
     public SeaBattleScene getBattleScene() {
         return (SeaBattleScene) scenes.get(1);
     }
+    
     public ControlAreaScene getControlScene() {
         return (ControlAreaScene) scenes.get(0);
     }
-
+    
+    public MenuComponent getBattleSceneMenu() {
+    	if(scenes.get(1) instanceof SeaBattleScene) {
+        	SeaBattleScene seaBattle = (SeaBattleScene) scenes.get(1);
+            return seaBattle.mainmenu; 
+    	}
+        return null;
+    }
     public boolean isConnected() {
         return connected;
     }
