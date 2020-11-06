@@ -82,32 +82,50 @@ declare -a clientfiles=(
     "version.txt"
 )
 for file in "${clientfiles[@]}"; do
-    cp -r "$file" "$CLIENTBUILDDIR"
+    if ! cp -r "$file" "$CLIENTBUILDDIR"; then
+        echo "failed to copy required client file $file to $CLIENTBUILDDIR."
+        exit 1
+    fi
 done
 # move this separately, it's huge. from build task.
-mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/"$CLIENTJARNAME"
+if ! mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/"$CLIENTJARNAME"; then
+    echo "failed to move build/libs/client-launcher*.jar to $CLIENTBUILDDIR"/"$CLIENTJARNAME"
+    exit 1
+fi
 rm "version.txt" # temporary build file
 popd>/dev/null
 
 # process getdown
-java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$CLIENTBUILDDIR"
+if ! java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$CLIENTBUILDDIR"; then
+    echo "failed to run getdown digester."
+    exit 1
+fi
 pushd "$CLIENTBUILDDIR">/dev/null
-mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"
+if ! mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"; then
+    echo "failed to make directory $(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")."
+    exit 1
+fi
 
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt" --exclude "version.txt">/dev/null
+if ! zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt" --exclude "version.txt">/dev/null; then
+    echo "failed to zip client files."
+    exit 1
+fi
 
 # generate files for http
 for f in *; do
     if [ ! "$f" == "$(basename "$CLIENTUSERDIR")" ] && [ ! "$f" == "$(basename "$CLIENTHTTPDIR")" ]; then
         if [ -e "$f" ]; then
-            mv "$f" "$(basename "$CLIENTHTTPDIR")"
+            if ! mv "$f" "$(basename "$CLIENTHTTPDIR")"; then
+                echo "failed to move $f to $(basename "$CLIENTHTTPDIR")."
+                exit 1
+            fi
         else
             # guard against glob not matching
             echo "    ERROR: directory was unexpectedly empty."
-            exit 2
+            exit 1
         fi
     fi
 done
@@ -144,24 +162,36 @@ for file in "${serverfiles[@]}"; do
     cp -r "$file" "$SERVERBUILDDIR";
 done
 # move this separately, it's huge. from build task.
-mv build/libs/server*.jar "$SERVERBUILDDIR"/"$SERVERJARNAME"
+if ! mv build/libs/server*.jar "$SERVERBUILDDIR"/"$SERVERJARNAME"; then
+    echo "failed to move build/libs/server*.jar to $SERVERBUILDDIR"/"$SERVERJARNAME"
+    exit 1
+fi
 popd>/dev/null
 
 # process getdown
 java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$SERVERBUILDDIR"
 pushd "$SERVERBUILDDIR">/dev/null
-mkdir "$(basename "$SERVERUSERDIR")" "$(basename "$SERVERHTTPDIR")"
+if ! mkdir "$(basename "$SERVERUSERDIR")" "$(basename "$SERVERHTTPDIR")"; then
+    echo "failed to mkdir $(basename "$SERVERUSERDIR")" "$(basename "$SERVERHTTPDIR")"
+    exit 1
+fi
 
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$SERVERZIPNAME" . -9 --exclude "/$(basename "$SERVERUSERDIR")/*" --exclude "/$(basename "$SERVERHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt">/dev/null
+if ! zip -r "$SERVERZIPNAME" . -9 --exclude "/$(basename "$SERVERUSERDIR")/*" --exclude "/$(basename "$SERVERHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt">/dev/null; then
+    echo "failed to zip server files."
+    exit 1
+fi
 
 # generate files for http
 for f in *; do
     if [ ! "$f" == "$(basename "$SERVERUSERDIR")" ] && [ ! "$f" == "$(basename "$SERVERHTTPDIR")" ]; then
         if [ -e "$f" ]; then
-            mv "$f" "$(basename "$SERVERHTTPDIR")"
+            if ! mv "$f" "$(basename "$SERVERHTTPDIR")"; then
+                echo "failed to move $f to $(basename "$CLIENTHTTPDIR")."
+                exit 1
+            fi
         else
             # guard against glob not matching
             echo "    ERROR: directory was unexpectedly empty."

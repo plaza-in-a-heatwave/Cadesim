@@ -16,8 +16,14 @@
 
     ROOT="$(realpath "$(dirname "$0")")"
 
-    # 0. save current branch
+    # 0. save current branch, or commit if detached head
+    HEAD=$(git rev-parse --abbrev-ref --symbolic-full-name HEAD)
     CURRENTBRANCH="$(git branch --show-current)"
+    if [ "$HEAD" == "$CURRENTBRANCH" ]; then
+        RETURNTO="$(git branch --show-current)" # on a branch
+    else
+        RETURNTO="$(git rev-parse HEAD)" # detached head
+    fi
 
     # 1. change to release branch
     if ! git checkout release --; then
@@ -37,7 +43,7 @@
     git push
 
     # 4. change back
-    git checkout "$CURRENTBRANCH"
+    git checkout "$RETURNTO"
 
     exit 0
 }) &
