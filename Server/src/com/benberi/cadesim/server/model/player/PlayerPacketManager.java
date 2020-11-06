@@ -43,6 +43,14 @@ public class PlayerPacketManager {
     }
     
     /**
+     * Sends the game settings to the client
+     */
+    public void sendGameSettings() {
+        SendGameSettings packet = new SendGameSettings();
+        player.sendPacket(packet);
+    }
+    
+    /**
      * Sends the team names to the client
      */
     public void sendTeams() {

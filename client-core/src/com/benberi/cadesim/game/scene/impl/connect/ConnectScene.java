@@ -1,11 +1,19 @@
 package com.benberi.cadesim.game.scene.impl.connect;
 
 import java.io.*;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
+
+import org.apache.commons.io.IOUtils;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
@@ -138,6 +146,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     private String[] oldResolution;
     private Dialog dialog;
     private int indexResolution;
+    private Random random = new Random();
     
     private Map<Integer,int[]> resolutionWidthDiction = new HashMap<Integer, int[]>();
     
@@ -239,7 +248,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
                 try {
-                    performLogin();
+                    performUpdateCheck();
                     buttonConn.toggle();
                 } catch (UnknownHostException e) {
                     return;
@@ -279,11 +288,14 @@ public class ConnectScene implements GameScene, InputProcessor {
         		context.getManager().get(context.getAssetObject().cursor)).getDrawable();
         style.selection = new Image(
         		context.getManager().get(context.getAssetObject().selection)).getDrawable();
-
-        name = new TextField( prop.getProperty("user.username"), style);
+        if(prop.getProperty("user.username") == null) {
+        	name = new TextField("User"+Integer.toString(random.nextInt(9999)), style);
+        }else {
+        	name = new TextField( prop.getProperty("user.username"), style);	
+        }
         name.setSize(120, 49);
         name.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] - 10), MAIN_GROUP_OFFSET_Y + 325);
-
+        
         address = new TextField( prop.getProperty("user.last_address"), style);
         address.setSize(120, 49);
         address.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[1] - 10), MAIN_GROUP_OFFSET_Y + 325);
@@ -383,8 +395,12 @@ public class ConnectScene implements GameScene, InputProcessor {
         /*
          * Parse server code/port data for rooms
          */
-        try {	
-			room_info = ConnectScene.getProperty("user.config", "user.room_locations");
+        try {
+        	if(ConnectScene.getProperty("user.config", "user.room_locations") == null) {
+        		
+        	}else {
+        		room_info = ConnectScene.getProperty("user.config", "user.room_locations");
+        	}
 			//Split info for each room (Port:Server Code)
 			String[] rooms = room_info.split(",");
 			for (int i = 0; i < rooms.length; i++) {
@@ -414,14 +430,22 @@ public class ConnectScene implements GameScene, InputProcessor {
         // set previous values/defaults from config file
         try 
         {
-        	shipType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_ship")));
+        	if(prop.getProperty("user.last_ship") == null || prop.getProperty("user.last_ship").matches("[0-9]+")) {
+        		shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
+        	}else {
+        		shipType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_ship")));
+        	}
         }
         catch(IndexOutOfBoundsException e) {
         	shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
         }
         try 
         {
-        	resolutionType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_resolution")));
+        	if(prop.getProperty("user.last_resolution") == null) {
+        		resolutionType.setSelectedIndex(0);
+        	}else {
+        		resolutionType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_resolution")));
+        	}
         }
         catch(IndexOutOfBoundsException e) {
         	resolutionType.setSelectedIndex(0);
@@ -429,14 +453,24 @@ public class ConnectScene implements GameScene, InputProcessor {
         
         try
         {
-        	teamType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_team")));
+        	if(prop.getProperty("user.last_team") == null || 
+        			prop.getProperty("user.last_team").matches("[0-9]+")) {
+        		teamType.setSelectedIndex(0);
+        	}else {
+        		teamType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_team")));
+        	}
         }
         catch(IndexOutOfBoundsException e)
         {
         	teamType.setSelectedIndex(0);
         }
         try {
-            roomLabel.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_room_index")));
+        	if(prop.getProperty("user.last_room_index") == null || 
+        			prop.getProperty("user.last_room_index").matches("[0-9]+")) {
+        		roomLabel.setSelectedIndex(0);
+        	}else {
+        		roomLabel.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_room_index")));
+        	}
         }
         catch (IndexOutOfBoundsException e) {
             roomLabel.setSelectedIndex(0);
@@ -747,7 +781,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                     stage.setKeyboardFocus(address);
                 } else {
                     try {
-                        performLogin();
+                        performUpdateCheck();
                     } catch (UnknownHostException e) {
                         return failed;
                     }
@@ -795,6 +829,81 @@ public class ConnectScene implements GameScene, InputProcessor {
         return false;
     }
 
+    private void performUpdateCheck() throws UnknownHostException{
+		// load the properties config
+		Properties prop = new Properties();
+		try {
+		    prop.load(new FileInputStream("user.config"));
+		}
+		catch (FileNotFoundException e) {
+		    e.printStackTrace();
+		}
+		catch (IOException e) {
+		    e.printStackTrace();
+		}
+
+		// schedule update.
+		//     enabled  if not defined.
+        //     enabled  if defined and == "yes".
+		//     disabled if defined and != "yes".
+		String updateType = prop.getProperty("autoupdate");
+		if ((updateType != null) && (!updateType.equalsIgnoreCase("yes")))
+		{
+			System.out.println("Automatic updates are disabled in user.config.");
+			performLogin();
+		}
+		else {
+			// check for updates each run, unless a flag is passed.
+	        if (!Constants.AUTO_UPDATE) {
+	            System.out.println("Automatic updates are disabled by CLI.");
+	            performLogin();
+	        }
+	        else
+	        {
+	        	try {
+	        		System.out.println("Automatic updates are enabled. Checking for updates...");
+		            String line = null;
+		            String[] url = null;
+		            BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
+		            while((line = sc.readLine())!=null) {	
+						if(line.isEmpty() || line.startsWith("#")) {	
+							continue;	
+						}	
+						//remove spaces	
+						line = line.replaceAll("\\s", "");	
+						//check getdown.txt for url	
+						if(line.startsWith("appbase=")) {	
+							url = line.split("=");
+							sc.close();
+							break;
+						}
+		            }
+	                try {
+	                	if(new String(Files.readAllBytes(Paths.get("version.txt"))) != 
+	                			IOUtils.toString(new URL(url[1]+"version.txt").openStream(),StandardCharsets.UTF_8)) {
+		                    System.out.println("Performing update; deleting digest files...");
+		                    new File("version.txt").delete();
+		                    new File("digest.txt").delete();
+		                    new File("digest2.txt").delete();
+		                    System.out.println("Performing update; closing client and running getdown...");
+		                    new ProcessBuilder("java", "-jar", "getdown.jar").start();
+		                    System.exit(0);
+	                	}else {
+	                		performLogin();
+	                	}
+	                }catch(IOException e){
+	                    System.out.println("File not found." + e);
+	                    //if for some reason version.txt is not there
+	                    new File("version.txt").createNewFile();
+	                    performUpdateCheck();
+	                }
+	        	}catch(Exception e) {
+	        		System.out.println("Unable to start getdown.jar; run manually. Please delete digest files and re-run. " + e);
+	        	}
+	        }        
+		}
+    }
+    
     private void performLogin() throws UnknownHostException {
         loginAttemptTimestampMillis = System.currentTimeMillis();
 

@@ -21,3 +21,5 @@ class = com.benberi.cadesim.desktop.DesktopLauncher
 strict_comments = true
 
 apparg = --no-update
+
+resource = version.txt

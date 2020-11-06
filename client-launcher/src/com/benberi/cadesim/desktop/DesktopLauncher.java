@@ -1,8 +1,8 @@
 package com.benberi.cadesim.desktop;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -12,7 +12,7 @@ import com.benberi.cadesim.Constants;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-
+		
 		// load the properties config
 		Properties prop = new Properties();
 		try {
@@ -24,53 +24,50 @@ public class DesktopLauncher {
 		catch (IOException e) {
 		    e.printStackTrace();
 		}
-
-		// schedule update.
-		//     enabled  if not defined.
-        //     enabled  if defined and == "yes".
-		//     disabled if defined and != "yes".
-		String updateType = prop.getProperty("autoupdate");
-		if ((updateType != null) && (!updateType.equalsIgnoreCase("yes")))
-		{
-			System.out.println("Automatic updates are disabled in user.config.");
-		}
-		else {
-			// check for updates each run, unless a flag is passed.
-	        // getdown will set this for example
-	        boolean autoupdate = true; // by default
-	        for (String s : arg) {
-	            if (s.equals("--no-update")) {
-	                autoupdate = false;
-	            }
-	        }
-	        if (!autoupdate) {
-	            System.out.println("Automatic updates are disabled by CLI.");
-	        }
-	        else
-	        {
-	            System.out.println("Automatic updates are enabled. Checking for updates...");
-                try {
-                    System.out.println("Performing update; deleting digest files...");
-                    new File("digest.txt").delete();
-                    new File("digest2.txt").delete();
-                    System.out.println("Performing update; closing client and running getdown...");
-                    new ProcessBuilder("java", "-jar", "getdown.jar").start();
-                    System.exit(0);
-                }catch(Exception e){
-                    System.out.println("Unable to start getdown.jar; run manually. Please delete digest files and re-run. " + e);
-                }
-	        }
+		
+        for (String s : arg) {
+            if (s.equals("--no-update")) {
+				Constants.AUTO_UPDATE = false;
+			}
 		}
 
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		BlockadeSimulator cadesim = new BlockadeSimulator();
-
 		config.resizable = false;
-		config.width = Integer.parseInt(prop.getProperty("user.width"));
-		config.height = Integer.parseInt(prop.getProperty("user.height"));
+		if(prop.getProperty("user.width") == null || (prop.getProperty("user.width").matches("[0-9]{3,}")) ||
+				prop.getProperty("user.height") == null || (prop.getProperty("user.height").matches("[0-9]{3,}")) ||
+				prop.getProperty("user.last_resolution") == null || (prop.getProperty("user.last_resolution").matches("[0-9]+"))) {
+			int width = 800;
+			int height = 600;
+			config.width = width;
+			config.height = height;
+			try {
+				changeProperty("user.config","user.last_resolution", "0");
+				changeProperty("user.config","user.width", Integer.toString(width));
+				changeProperty("user.config","user.height", Integer.toString(height));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else {
+			config.width = Integer.parseInt(prop.getProperty("user.width"));
+			config.height = Integer.parseInt(prop.getProperty("user.height"));
+		}
 		//config.backgroundFPS = 20;    // bugfix high CPU
 		config.vSyncEnabled = false; // "
 		config.title = "CadeSim: v" + Constants.VERSION;
 		new LwjglApplication(cadesim, config);
 	}
+	
+    public static void changeProperty(String filename, String key, String value) throws IOException {
+        Properties prop =new Properties();
+        prop.load(new FileInputStream(filename));
+        prop.setProperty(key, value);
+        prop.store(new FileOutputStream(filename),null);
+    }
+
+    public static String getProperty(String filename, String key) throws IOException {
+        Properties prop =new Properties();
+        prop.load(new FileInputStream(filename));
+        return prop.getProperty(key);
+    }
 }

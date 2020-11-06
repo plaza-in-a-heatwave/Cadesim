@@ -13,25 +13,6 @@ public class SendMapPacket extends ClientPacketExecutor {
     @Override
     public void execute(Packet p) {
         int[][] map = new int[20][36];
-        //set GUI settings each time settings are changed
-        if(getContext().getBattleSceneMenu() != null) {
-            getContext().getBattleSceneMenu().clearDisengageBehavior();
-            getContext().getBattleSceneMenu().clearQuality();
-    	    getContext().getBattleSceneMenu().getTurnSlider().setValue((float)p.readInt());
-    	    getContext().getBattleSceneMenu().getRoundSlider().setValue((float)p.readInt());
-    	    getContext().getBattleSceneMenu().getSinkPenaltySlider().setValue((float)p.readInt());
-    	    getContext().getBattleSceneMenu().setDisengageButton(p.readByteString(), true);
-    	    getContext().getBattleSceneMenu().setQualityButton(p.readByteString(), true);
-    	    getContext().getBattleSceneMenu().setCustomMapButton(p.readInt());
-        }else {// if menu is null then just process reading byte info
-    	    p.readInt();
-    	    p.readInt();
-    	    p.readInt();
-    	    p.readByteString();
-    	    p.readByteString();
-    	    p.readInt();
-        }
-	    
         getContext().currentMapName  = p.readByteString().replace(".txt", ""); 
         while(p.getBuffer().readableBytes() >= 3) {
             int tile = p.readByte();

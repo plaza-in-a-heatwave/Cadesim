@@ -950,6 +950,7 @@ public class PlayerManager {
             if (response == LoginResponsePacket.SUCCESS) {
             	pl.getPackets().sendMapList();
                 pl.register(name, ship, team);
+                pl.getPackets().sendGameSettings();
                 pl.getPackets().sendBoard();
                 pl.getPackets().sendTeams();
                 pl.getPackets().sendPlayers();
@@ -1104,6 +1105,7 @@ public class PlayerManager {
         	p.setFirstEntry(true);
         	p.setNeedsRespawn(true);
             p.getPackets().sendBoard();
+            p.getPackets().sendGameSettings();
         	p.getMoveTokens().setAutomaticSealGeneration(true); // bugfix disparity between client and server
         	sendAfterTurn();
         }

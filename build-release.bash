@@ -69,7 +69,8 @@ echo "* making client...    *"
 echo "***********************"
 
 pushd "$CLIENT">/dev/null
-
+newversion=$(date +%Y%m%d%H%M%S)
+echo "$newversion" >"version.txt" # update version#
 declare -a clientfiles=(
     "bg.png"
     "getdown.jar"
@@ -78,12 +79,14 @@ declare -a clientfiles=(
     "growup.ico"
     "growup.png"
     "user.config"
+    "version.txt"
 )
 for file in "${clientfiles[@]}"; do
     cp -r "$file" "$CLIENTBUILDDIR"
 done
 # move this separately, it's huge. from build task.
 mv build/libs/client-launcher*.jar "$CLIENTBUILDDIR"/"$CLIENTJARNAME"
+rm "version.txt" # temporary build file
 popd>/dev/null
 
 # process getdown
@@ -94,7 +97,7 @@ mkdir "$(basename "$CLIENTUSERDIR")" "$(basename "$CLIENTHTTPDIR")"
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt">/dev/null
+zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt" --exclude "version.txt">/dev/null
 
 # generate files for http
 for f in *; do

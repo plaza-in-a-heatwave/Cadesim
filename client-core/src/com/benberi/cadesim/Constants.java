@@ -46,4 +46,5 @@ public class Constants {
     public static final boolean ENABLE_LAG_TEST_MODE    = ENABLE_DEVELOPER_FEATURES; // toggle with /lagtestmode. disabled when in lobby.
 
     public static final int MAX_CLIENT_LOCK_MILLIS = 20000; // last resort: force unlock once we reach 20s if not already unlocked.
+    public static boolean AUTO_UPDATE = true;
 }
