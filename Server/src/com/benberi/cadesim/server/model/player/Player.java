@@ -163,6 +163,22 @@ public class Player extends Position {
     private boolean isBot;
 
     /**
+     * Whether the ship has been abandoned on the board or not.
+     */
+    private boolean isAbandoned = false;
+
+    public boolean isAbandoned() {
+        return isAbandoned;
+    }
+
+    /**
+     * mark a ship abandoned. cannot be undone.
+     */
+    public void setAbandoned() {
+        this.isAbandoned = true;
+    }
+
+    /**
      * @param ctx   the server context
      * @param c     the channel, or null if isBot
      * If creating a bot, remember to call register().
