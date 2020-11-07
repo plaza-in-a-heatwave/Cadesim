@@ -431,7 +431,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         // set previous values/defaults from config file
         try 
         {
-        	if(prop.getProperty("user.last_ship") == null || prop.getProperty("user.last_ship").matches("[0-9]+")) {
+        	if(prop.getProperty("user.last_ship") == null || !(prop.getProperty("user.last_ship").matches("[0-9]+"))) {
         		shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
         	}else {
         		shipType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_ship")));
@@ -455,7 +455,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         try
         {
         	if(prop.getProperty("user.last_team") == null || 
-        			prop.getProperty("user.last_team").matches("[0-9]+")) {
+        			!(prop.getProperty("user.last_team").matches("[0-9]+"))) {
         		teamType.setSelectedIndex(0);
         	}else {
         		teamType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_team")));
@@ -467,7 +467,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         }
         try {
         	if(prop.getProperty("user.last_room_index") == null || 
-        			prop.getProperty("user.last_room_index").matches("[0-9]+")) {
+        			!(prop.getProperty("user.last_room_index").matches("[0-9]+"))) {
         		roomLabel.setSelectedIndex(0);
         	}else {
         		roomLabel.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_room_index")));
