@@ -76,6 +76,8 @@ public class ClientPacketHandler {
             case IncomingPackets.SEND_DAMAGE:
             case IncomingPackets.SEND_MOVE_TOKENS:
             case IncomingPackets.TARGET_SEAL:
+            case IncomingPackets.LIST_ALL_MAPS:
+            case IncomingPackets.GAME_SETTINGS:
                 // only handle these packets
                 break;
             default:
