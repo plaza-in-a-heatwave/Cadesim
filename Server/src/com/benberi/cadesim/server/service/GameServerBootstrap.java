@@ -125,7 +125,7 @@ public class GameServerBootstrap {
         options.addOption("a", "max-players", true, "Set max players allowed (default: " + ServerConfiguration.getPlayerLimit() + ")");
         options.addOption("b", "disengage-behavior", true, "disengage button behavior (\"off\", \"simple\", \"realistic\") (default: " + ServerConfiguration.getDisengageBehavior() + ")");
         options.addOption("c", "auth-code", true, "provide a text authcode to limit access. This is NOT a password, it WILL be written to logs etc. (default: \"" + ServerConfiguration.getAuthCode() + "\")");
-        options.addOption("d", "respawn-delay", true, "respawn delay (in turns) after sinking (default: " + ServerConfiguration.getRespawnDelay() + ")");
+        options.addOption("d", "respawn-delay", true, "respawn delay (in turns) (default: " + ServerConfiguration.getRespawnDelay() + ")");
         options.addOption("e", "token-expiry-turns", true, "set token expiry, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getTokenExpiry() + ")");
         options.addOption("f", "enable-breaks", true, "two tuple (duration sec, interval sec) e.g. 60,600 is 1 min break every 10 min. minimum break is 10, minimum interval is 60. (default: not enabled " + ServerConfiguration.getBreak() + ")");
         options.addOption("g", "permit-multiclient", true, "enable players to login with more than 1 client at a time, (on or off) (default: " + ServerConfiguration.getMultiClientMode() + ")");

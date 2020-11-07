@@ -59,14 +59,14 @@ public class GameContext {
     private int roundDuration;
     private int proposedTurnDuration;
     private int proposedRoundDuration;
-    private int proposedSinkPenalty;
+    private int proposedrespawnDelay;
     private String proposedDisengageBehavior;
     private String proposedJobberQuality;
     private String proposedMapName;
     
     private int defaultTurnDuration;
     private int defaultRoundDuration;
-    private int defaultSinkPenalty;
+    private int defaultrespawnDelay;
     private String defaultDisengageBehavior;
     private String defaultJobberQuality;
 
@@ -101,12 +101,12 @@ public class GameContext {
 	public void setProposedRoundDuration(int roundDuration) {
 		this.proposedRoundDuration = roundDuration;
 	}
-    public int getProposedSinkPenalty() {
-    	return this.proposedSinkPenalty;
+    public int getProposedrespawnDelay() {
+    	return this.proposedrespawnDelay;
     }
 
-	public void setProposedSinkPenalty(int sinkPenalty) {
-    	this.proposedSinkPenalty = sinkPenalty;
+	public void setProposedRespawnDelay(int respawnDelay) {
+    	this.proposedrespawnDelay = respawnDelay;
     }
 	
     public String getProposedDisengageBehavior() {
@@ -148,12 +148,12 @@ public class GameContext {
 	public void setDefaultRoundDuration(int roundDuration) {
 		this.defaultRoundDuration = roundDuration;
 	}
-    public int getDefaultSinkPenalty() {
-    	return this.defaultSinkPenalty;
+    public int getDefaultrespawnDelay() {
+    	return this.defaultrespawnDelay;
     }
 
-	public void setDefaultSinkPenalty(int sinkPenalty) {
-    	this.defaultSinkPenalty = sinkPenalty;
+	public void setDefaultRespawnDelay(int respawnDelay) {
+    	this.defaultrespawnDelay = respawnDelay;
     }
 	
     public String getDefaultDisengageBehavior() {
@@ -660,7 +660,7 @@ public class GameContext {
     	SendSettingsPacket packet = new SendSettingsPacket();
     	packet.setProposedTurnDuration(getProposedTurnDuration());
     	packet.setProposedRoundDuration(getProposedRoundDuration());
-    	packet.setProposedSinkPenalty(getProposedSinkPenalty());
+    	packet.setProposedRespawnDelay(getProposedrespawnDelay());
     	packet.setProposedDisengageBehavior(getProposedDisengageBehavior());
     	packet.setProposedJobberQuality(getProposedJobberQuality());
     	if(!customMap && map == null) {

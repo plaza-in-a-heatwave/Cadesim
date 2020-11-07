@@ -105,10 +105,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	//Settings buttons (sliders)
 	private Slider turnDuration_slider;
 	private Slider roundDuration_slider;
-	private Slider sinkPenalty_slider;
+	private Slider respawnDelay_slider;
 	private TextField turnText;
 	private TextField roundText;
-	private TextField sinkPenaltyText;
+	private TextField respawnDelayText;
 	//buttons to select disengage behavior
 	private TextButton disengageOff;
 	private TextButton disengageRealistic;
@@ -139,7 +139,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	
 	private int turnMax = 60;
 	private int roundMax = 7200;
-	private int sinkPenaltyMax = 10;
+	private int respawnDelayMax = 10;
 	
 	private ButtonGroup<TextButton> disengageBehaviorGroup;
 	private ButtonGroup<TextButton> jobberQualityGroup;
@@ -188,7 +188,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		disengageLabel = new Label("Disengage Behavior:",skin);
 		turnLabel = new Label("Turn Duration (seconds):",skin);
 		roundLabel = new Label("Round Duration (seconds):",skin);
-		sinkLabel = new Label("Sink Penalty (turns):",skin);
+		sinkLabel = new Label("Respawn Delay (turns):",skin);
 		jobberLabel = new Label("Jobber Quality:", skin);
 		previewLabel = new Label("Map preview not available.",skin);
 		
@@ -196,10 +196,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		
     	turnDuration_slider = new Slider(5.0f, (float)turnMax, 5.0f, false, skin);
     	roundDuration_slider = new Slider(30.0f, (float)roundMax, 5.0f, false, skin);
-    	sinkPenalty_slider = new Slider(0.0f, (float)sinkPenaltyMax, 1.0f, false, skin);
+    	respawnDelay_slider = new Slider(0.0f, (float)respawnDelayMax, 1.0f, false, skin);
     	turnDuration_slider.setValue((float)context.getProposedTurnDuration());
     	roundDuration_slider.setValue((float)context.getProposedRoundDuration());
-    	sinkPenalty_slider.setValue((float)context.getProposedSinkPenalty());
+    	respawnDelay_slider.setValue((float)context.getProposedrespawnDelay());
     	turnText = new TextField("",skin);
     	turnText.setMaxLength(5);
     	turnText.setTextFieldFilter(new TextFieldFilter() {
@@ -248,20 +248,20 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				}
 			}
     	});
-    	sinkPenaltyText = new TextField("",skin);
-    	sinkPenaltyText.setMaxLength(5);
-    	sinkPenaltyText.setTextFieldFilter(new TextFieldFilter() { //filter out letters and include range
+    	respawnDelayText = new TextField("",skin);
+    	respawnDelayText.setMaxLength(5);
+    	respawnDelayText.setTextFieldFilter(new TextFieldFilter() { //filter out letters and include range
 			@Override
 			public boolean acceptChar(TextField textField, char c) {
 				try {
 					if(!Character.isDigit(c)) {
 						return false;
 					}
-					if(Integer.parseInt(textField.getText() + c) <= sinkPenaltyMax && Character.isDigit(c)) {
+					if(Integer.parseInt(textField.getText() + c) <= respawnDelayMax && Character.isDigit(c)) {
 						return true;
-					}else if(Integer.parseInt(textField.getText() + c) > sinkPenaltyMax && Character.isDigit(c)) {
-						textField.setText(Integer.toString(sinkPenaltyMax));
-						getSinkPenaltySlider().setValue((float)sinkPenaltyMax);
+					}else if(Integer.parseInt(textField.getText() + c) > respawnDelayMax && Character.isDigit(c)) {
+						textField.setText(Integer.toString(respawnDelayMax));
+						getRespawnDelaySlider().setValue((float)respawnDelayMax);
 						return false;
 					}else { 
 						return false;
@@ -275,7 +275,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	
     	turnText.setText(String.valueOf(context.getProposedTurnDuration()));
     	roundText.setText(String.valueOf(context.getProposedRoundDuration()));
-    	sinkPenaltyText.setText(String.valueOf(context.getProposedSinkPenalty()));
+    	respawnDelayText.setText(String.valueOf(context.getProposedrespawnDelay()));
     	
     	disengageBehaviorGroup = new ButtonGroup<TextButton>();
     	jobberQualityGroup = new ButtonGroup<TextButton>();
@@ -430,11 +430,11 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				if(!turnText.getText().isEmpty()) {
 					context.setProposedTurnDuration(Integer.parseInt(turnText.getText()));
 				}
-				if(!sinkPenaltyText.getText().isEmpty()) {
-					context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+				if(!respawnDelayText.getText().isEmpty()) {
+					context.setProposedRespawnDelay(Integer.parseInt(respawnDelayText.getText()));
 				}
-				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
-				context.setProposedSinkPenalty(Integer.parseInt(sinkPenaltyText.getText()));
+				context.setProposedRespawnDelay(Integer.parseInt(respawnDelayText.getText()));
+				context.setProposedRespawnDelay(Integer.parseInt(respawnDelayText.getText()));
             	context.setProposedMapName(selectBox.getSelected());
         		dialog.getContentTable().clear();
         		context.sendSettingsPacket(customMap,mapBoolean, mapName);
@@ -451,12 +451,12 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         	    // set boxes
 				turnText.setText(String.valueOf(context.getDefaultTurnDuration()));
         		roundText.setText(String.valueOf(context.getDefaultRoundDuration()));
-        		sinkPenaltyText.setText(String.valueOf(context.getDefaultSinkPenalty()));
+        		respawnDelayText.setText(String.valueOf(context.getDefaultrespawnDelay()));
 
         		// set sliders
         		getTurnSlider().setValue((float)context.getDefaultTurnDuration());
         		getRoundSlider().setValue((float)context.getDefaultRoundDuration());
-        		getSinkPenaltySlider().setValue((float)context.getDefaultSinkPenalty());
+        		getRespawnDelaySlider().setValue((float)context.getDefaultrespawnDelay());
 
 				// reset buttons
         		clearDisengageBehavior();
@@ -477,7 +477,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             public void clicked(InputEvent event, float x, float y) {
     			getTurnSlider().setValue((float)context.getProposedTurnDuration());
     			getRoundSlider().setValue((float)context.getProposedRoundDuration());
-    			getSinkPenaltySlider().setValue((float)context.getProposedSinkPenalty());
+    			getRespawnDelaySlider().setValue((float)context.getProposedrespawnDelay());
     			closeSettingsDialog();
     			
 			} 
@@ -502,11 +502,11 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				}
 			}
 		});
-		sinkPenaltyText.addListener(new ChangeListener() {
+		respawnDelayText.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				try {
-					getSinkPenaltySlider().setValue((float)Integer.parseInt(sinkPenaltyText.getText()));
+					getRespawnDelaySlider().setValue((float)Integer.parseInt(respawnDelayText.getText()));
 				}catch(NumberFormatException e) {
 					
 				}
@@ -522,10 +522,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	roundText.setText(String.valueOf((int)getRoundSlider().getValue()));
             }});
-		getSinkPenaltySlider().addListener(new ChangeListener(){
+		getRespawnDelaySlider().addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-            	sinkPenaltyText.setText(String.valueOf((int)getSinkPenaltySlider().getValue()));
+            	respawnDelayText.setText(String.valueOf((int)getRespawnDelaySlider().getValue()));
             }});
 		
 		selectBox.addListener(new ChangeListener(){
@@ -641,8 +641,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		sliderTable.add(getRoundSlider());
 		sliderTable.add(roundText).width(60).pad(5.0f).row();
 		sliderTable.add(sinkLabel);
-		sliderTable.add(getSinkPenaltySlider());
-		sliderTable.add(sinkPenaltyText).width(60).pad(5.0f).row();
+		sliderTable.add(getRespawnDelaySlider());
+		sliderTable.add(respawnDelayText).width(60).pad(5.0f).row();
 		//
 		disengageTable.add(disengageLabel).pad(5.0f);
 		disengageTable.add(getDisengageOffButton()).pad(5.0f);
@@ -834,8 +834,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		return roundDuration_slider;
 	}
 	
-	public Slider getSinkPenaltySlider() {
-		return sinkPenalty_slider;
+	public Slider getRespawnDelaySlider() {
+		return respawnDelay_slider;
 	}
 	
 	public TextButton getCurrentDisengageButton() {

@@ -22,13 +22,13 @@ public class ReceiveSettingsPacket extends ServerPacketExecutor {
     public void execute(Player pl, Packet p) {
         int turnDuration = p.readInt();
         int roundDuration = p.readInt();
-        int sinkPenalty = p.readInt();
+        int respawnDelay = p.readInt();
         String disengageBehavior = p.readByteString();
         String jobberQuality = p.readByteString();
         int customMapBool = p.readInt();
         ServerConfiguration.setProposedTurnDuration(turnDuration);
         ServerConfiguration.setProposedRoundDuration(roundDuration);
-        ServerConfiguration.setProposedRespawnDelay(sinkPenalty);
+        ServerConfiguration.setProposedRespawnDelay(respawnDelay);
         ServerConfiguration.setProposedDisengageBehavior(disengageBehavior);
         ServerConfiguration.setProposedJobbersQuality(jobberQuality);
         if(customMapBool == 0) {

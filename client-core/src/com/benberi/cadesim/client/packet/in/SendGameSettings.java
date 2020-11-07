@@ -18,7 +18,7 @@ public class SendGameSettings extends ClientPacketExecutor {
             getContext().getBattleSceneMenu().clearQuality();
     	    getContext().getBattleSceneMenu().getTurnSlider().setValue((float)p.readInt());
     	    getContext().getBattleSceneMenu().getRoundSlider().setValue((float)p.readInt());
-    	    getContext().getBattleSceneMenu().getSinkPenaltySlider().setValue((float)p.readInt());
+    	    getContext().getBattleSceneMenu().getRespawnDelaySlider().setValue((float)p.readInt());
     	    getContext().getBattleSceneMenu().setDisengageButton(p.readByteString(), true);
     	    getContext().getBattleSceneMenu().setQualityButton(p.readByteString(), true);
     	    getContext().getBattleSceneMenu().setCustomMapButton(p.readInt());

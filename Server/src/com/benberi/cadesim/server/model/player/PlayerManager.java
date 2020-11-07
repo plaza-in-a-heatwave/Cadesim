@@ -1342,7 +1342,7 @@ public class PlayerManager {
 				break;
 			}
 		}
-		else if (currentVote.getDescription().startsWith("set sinkpenalty "))
+		else if (currentVote.getDescription().startsWith("set respawnDelay "))
 		{
 			VOTE_RESULT v = currentVote.castVote(pl, voteFor);
 			switch(v)
@@ -1356,12 +1356,12 @@ public class PlayerManager {
 
 				setRespawnDelay(
 					Integer.parseInt(
-						currentVote.getDescription().substring("set sinkpenalty ".length())
+						currentVote.getDescription().substring("set respawnDelay ".length())
 					)
 				);
 				
 				serverBroadcastMessage(
-	            	"The sinking penalty was changed to " + getRespawnDelay() +
+	            	"The respawn delay was changed to " + getRespawnDelay() +
 	            	". It will revert back to " + ServerConfiguration.getRespawnDelay() +
 	            	" when the round times out, or when players vote restart."
 	            );
@@ -1553,7 +1553,7 @@ public class PlayerManager {
     	return "usage: /propose set <parameter> <value> -\n" +
 		"    turnduration (between " + Constants.MIN_TURN_DURATION + " and 60 inclusive)\n" +
 		"    roundduration (between " + Constants.MIN_ROUND_DURATION + " and 7200 inclusive)\n" +
-		"    sinkpenalty (between 0 and 10 inclusive)\n" +
+		"    respawnDelay (between 0 and 10 inclusive)\n" +
 		"    disengage-behavior (off|realistic|simple)\n";
     }
 
@@ -1700,13 +1700,13 @@ public class PlayerManager {
 	    					serverPrivateMessage(pl, proposeSetHelp());
 	    				}
 	    			}
-	    			else if (message.startsWith("/propose set sinkpenalty"))
+	    			else if (message.startsWith("/propose set respawnDelay"))
 	    			{
 	    				try {
-	    					int value = Integer.parseInt((message.substring("/propose set sinkpenalty ".length())));
+	    					int value = Integer.parseInt((message.substring("/propose set respawnDelay ".length())));
 	    					if (value >= 0 && value <= 10)
 	    					{
-	    						handleStartVote(pl, message, "set sinkpenalty " + value);
+	    						handleStartVote(pl, message, "set respawnDelay " + value);
 	    					}
 	    					else
 	    					{

@@ -22,7 +22,7 @@ public class LoginResponsePacket extends ClientPacketExecutor {
         int response = p.readByte();
         int turnDuration = p.readShort();
         int roundDuration = p.readShort();
-        int sinkPenalty = p.readShort();
+        int respawnDelay = p.readShort();
         String disengageBehavior = p.readByteString();
         String jobberQuality = p.readByteString();
         getContext().setTurnDuration(turnDuration);
@@ -30,13 +30,13 @@ public class LoginResponsePacket extends ClientPacketExecutor {
         
         getContext().setDefaultTurnDuration(turnDuration);
         getContext().setDefaultRoundDuration(roundDuration);
-        getContext().setDefaultSinkPenalty(sinkPenalty);
+        getContext().setDefaultRespawnDelay(respawnDelay);
         getContext().setDefaultDisengageBehavior(disengageBehavior);
         getContext().setDefaultJobberQuality(jobberQuality);
         
         getContext().setProposedTurnDuration(turnDuration);
         getContext().setProposedRoundDuration(roundDuration);
-        getContext().setProposedSinkPenalty(sinkPenalty);
+        getContext().setProposedRespawnDelay(respawnDelay);
         getContext().setProposedDisengageBehavior(disengageBehavior);
         getContext().setProposedJobberQuality(jobberQuality);
         getContext().handleLoginResponse(response);

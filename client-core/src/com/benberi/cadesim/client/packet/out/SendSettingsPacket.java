@@ -10,7 +10,7 @@ public class SendSettingsPacket extends OutgoingPacket {
 	
 	private int proposedTurnDuration;
 	private int proposedRoundDuration;
-	private int proposedSinkPenalty;
+	private int proposedRespawnDelay;
 	private String proposedDisengageBehavior;
 	private String proposedJobberQuality;
 	private String proposedMapName;
@@ -28,7 +28,7 @@ public class SendSettingsPacket extends OutgoingPacket {
         setPacketLengthType(PacketLength.MEDIUM);
         writeInt(getProposedTurnDuration());
         writeInt(getProposedRoundDuration());
-        writeInt(getProposedSinkPenalty());
+        writeInt(getProposedRespawnDelay());
         writeByteString(getProposedDisengageBehavior());
         writeByteString(getProposedJobberQuality());
         if(isCustomMap()) {
@@ -64,12 +64,12 @@ public class SendSettingsPacket extends OutgoingPacket {
     	this.proposedRoundDuration = value;
     }
 
-    public int getProposedSinkPenalty() {
-    	return this.proposedSinkPenalty;
+    public int getProposedRespawnDelay() {
+    	return this.proposedRespawnDelay;
     }
 	
-    public void setProposedSinkPenalty(int value) {
-    	this.proposedSinkPenalty = value;
+    public void setProposedRespawnDelay(int value) {
+    	this.proposedRespawnDelay = value;
     }
     
     public String getProposedDisengageBehavior() {
