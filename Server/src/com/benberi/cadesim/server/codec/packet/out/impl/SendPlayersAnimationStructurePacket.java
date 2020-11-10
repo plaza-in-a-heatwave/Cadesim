@@ -28,6 +28,7 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
         writeByte(players.size());
 
         for (Player p : players) {
+        	
             // Write the name of the player as a key
             writeByteString(p.getName());
 
@@ -35,7 +36,8 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
 
                 // The turn
                 MoveAnimationTurn turn = p.getAnimationStructure().getTurn(slot);
-
+                writeByte(p.getAnimationStructure().getTurn(slot).getSpinCollision() ? 1 : 0);
+                writeByte(p.getAnimationStructure().getTurn(slot).getFace().getDirectionId());
                 // Write the data
                 writeByte(turn.getMoveToken().getId());
                 writeByte(turn.getAnimation().getId());

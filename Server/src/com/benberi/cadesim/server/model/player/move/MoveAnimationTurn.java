@@ -1,14 +1,17 @@
 package com.benberi.cadesim.server.model.player.move;
 
+import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 
 public class MoveAnimationTurn {
 
     private VesselMovementAnimation animation = VesselMovementAnimation.NO_ANIMATION; // phase 1
     private VesselMovementAnimation subAnimation = VesselMovementAnimation.NO_ANIMATION; // phase 2
+    private VesselFace face;
     private int leftShoots;
     private int rightShoots;
     private boolean sunk;
+    private boolean spinCollision = false;
     private MoveType moveToken = MoveType.NONE; // #83 bugfix some animations failing when move wasn't set
 
     public VesselMovementAnimation getAnimation() {
@@ -57,5 +60,21 @@ public class MoveAnimationTurn {
 
     public MoveType getMoveToken() {
         return moveToken;
+    }
+
+	public VesselFace getFace() {
+		return face;
+	}
+
+	public void setFace(VesselFace face) {
+		this.face = face;
+	}
+	
+    public void setSpinCollision(boolean flag) {
+        this.spinCollision = flag;
+    }
+    
+    public boolean getSpinCollision() {
+        return this.spinCollision;
     }
 }

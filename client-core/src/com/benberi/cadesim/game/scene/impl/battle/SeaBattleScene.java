@@ -200,6 +200,9 @@ public class SeaBattleScene implements GameScene {
                          if (turn.isSunk()) {
                              vessel.setSinking(true);
                          }
+                         if(turn.getSpinCollision()) { // for turning ship inside whirlpool
+                        	 vessel.setRotationIndex(turn.getFace().getDirectionId());
+                         }
                      }
                      currentPhase = MovePhase.MOVE_TOKEN;
                      currentSlot++;
@@ -357,6 +360,7 @@ public class SeaBattleScene implements GameScene {
                     }
                     else {
                         // When ship moving forward, we may not want to use the curve
+
                         int add = move.getIncrementXForRotation(vessel.getRotationIndex());
                         if (add == -1 || add == 1) {
                             current.x += (velocityForward * add);
@@ -373,7 +377,7 @@ public class SeaBattleScene implements GameScene {
 
                     int result = (int) (vessel.getAnimation().getCurrentStep() * 100);
                     vessel.getAnimation().tickAnimationTicks(velocityTurns * 100);
-
+                    
                     // check if the step is reached to the end, and dispose the movement
                     if (result >= 100) {
                         vessel.setX(end.x);
@@ -400,7 +404,6 @@ public class SeaBattleScene implements GameScene {
                         vessel.tickRotation();
                         vessel.getAnimation().setTickIndex(vessel.getAnimation().getTickIndex() + 1);
                     }
-
                 }
             }
             
@@ -623,12 +626,30 @@ public class SeaBattleScene implements GameScene {
             batch.end();
             
             // render move bar
-            int BAR_HEIGHT_ABOVE_SHIP = 15; // px
+            int BAR_HEIGHT_ABOVE_SHIP = 8; // px
             int BAR_HEIGHT = 7;
             renderer.begin(ShapeRenderer.ShapeType.Line);
             float x = getIsometricX(vessel.getX(), vessel.getY(), vessel);
             float y = getIsometricY(vessel.getX(), vessel.getY(), vessel);
-
+            //custom move bar location for specific ships
+            switch(vessel.getClass().getSimpleName()) {
+	            case "Warfrig":
+	            	switch(vessel.getRotationIndex()) {
+		            case 2:
+		            	x = getIsometricX((float) (vessel.getX()-0.3), vessel.getY(), vessel);
+		            case 6:
+		            	x = getIsometricX((float) (vessel.getX()-0.3), vessel.getY(), vessel);
+	            	}
+	            case "Xebec":
+	            	BAR_HEIGHT_ABOVE_SHIP = 0; // px
+	            	switch(vessel.getRotationIndex()) {
+		            case 2:
+		            	x = getIsometricX((float) (vessel.getX()-0.1), vessel.getY(), vessel);
+		            case 6:
+		            	x = getIsometricX((float) (vessel.getX()-0.1), vessel.getY(), vessel);
+	            	}
+            }
+ 
             int width = vessel.getMoveType().getBarWidth() + 1;
             renderer.setColor(Color.BLACK);
 

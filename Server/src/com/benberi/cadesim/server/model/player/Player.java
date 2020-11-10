@@ -68,14 +68,14 @@ public class Player extends Position {
     /**
      * The animation structure
      */
-    private MoveAnimationStructure animation;
+    private volatile MoveAnimationStructure animation;
 
     private JobbersQuality jobbersQuality = ServerConfiguration.getJobbersQuality();
 
     /**
      * The face of the player (rotation id)
      */
-    private VesselFace face = VesselFace.EAST;
+    private volatile VesselFace face = VesselFace.EAST;
 
     private MoveGenerator moveGenerator;
 
@@ -131,7 +131,7 @@ public class Player extends Position {
     /**
      * The collision storage
      */
-    private PlayerCollisionStorage collisionStorage;
+    private volatile PlayerCollisionStorage collisionStorage;
 
     /**
      * If the player needs a respawn
@@ -336,7 +336,7 @@ public class Player extends Position {
      * @return {@link #collisionStorage}
      */
     public PlayerCollisionStorage getCollisionStorage() {
-        return collisionStorage;
+        return this.collisionStorage;
     }
 
     /**
@@ -363,7 +363,7 @@ public class Player extends Position {
      * @return {@link #vessel}
      */
     public Vessel getVessel() {
-        return vessel;
+        return this.vessel;
     }
 
 
@@ -373,7 +373,7 @@ public class Player extends Position {
      * @return  {@link VesselFace}
      */
     public VesselFace getFace() {
-        return face;
+        return this.face;
     }
 
     /**
@@ -652,7 +652,7 @@ public class Player extends Position {
      * @return {@link MoveAnimationStructure}
      */
     public MoveAnimationStructure getAnimationStructure() {
-        return animation;
+        return this.animation;
     }
 
     /**

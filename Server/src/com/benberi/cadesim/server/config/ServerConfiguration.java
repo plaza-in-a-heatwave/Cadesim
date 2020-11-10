@@ -154,6 +154,18 @@ public class ServerConfiguration {
     	return ServerConfiguration.initialTurnDuration;
     }
     
+    public static void setInitialRoundDuration(int value) {
+		ServerConfiguration.initialRoundDuration = value;
+	}
+
+    public static void setInitialRespawnDelay(int value) {
+    	ServerConfiguration.initialRespawnDelay = value;
+    }
+
+    public static void setInitialTurnDuration(int value) {
+    	ServerConfiguration.initialTurnDuration = value;
+    }
+    
     public static int getProposedTurnDuration() {
     	return ServerConfiguration.proposedTurnDuration;
     }

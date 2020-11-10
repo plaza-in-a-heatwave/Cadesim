@@ -76,7 +76,6 @@ public class CollisionCalculator {
             	continue;
             }else {
 	            if(next.equals(target)) {
-	            	System.out.println("Next: "+next);
 	            	collided.add(p);
 	            }
             }
@@ -92,15 +91,22 @@ public class CollisionCalculator {
         		continue;
         	}
             Position next = p;
+            Position finalPosition = p;
             if(p.isSunk()) {
             	next = p;
+            	finalPosition = p;
             }else {
                 if (!p.getCollisionStorage().isPositionChanged()) {
                 	next = context.getMap().getNextActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
+                	finalPosition =  context.getMap().getFinalActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
                 }
             }
-            if(next.equals(target)) {
+            if(finalPosition.equals(target) ) {
             	collided.add(p);
+            }else {
+            	 if(next.equals(target)) {
+                 	collided.add(p);
+                 }
             }
         }
         return collided;
@@ -309,34 +315,32 @@ public class CollisionCalculator {
     	return false;
     }
     
+    
     public boolean checkActionCollision(Player player, Position target, int turn, int phase, boolean setPosition) {
     	if (!setPosition && player.getCollisionStorage().isRecursionStarter()) {
             return false;
         }
-    	
+    	player.getAnimationStructure().getTurn(turn).setFace(player.getFace());
+    	//if player reaches destination for that particular turn
         if (player.equals(target)) {
             return false;
         }
         
+        //check if collided with rock or out-of-bounds
         if (context.getMap().isRock(target.getX(), target.getY(), player) || isOutOfBounds(target)) {
         	player.getVessel().appendDamage(player.getVessel().getRockDamage(), Team.NEUTRAL);
             player.getCollisionStorage().setCollided(turn, phase);
             return true;
         }
-        
+
         Player claimed = players.getPlayerByPosition(target.getX(), target.getY());
+        //the original players next position is claimed by another entity
         if (claimed != null) {
             Position next = claimed;
             if (!claimed.getCollisionStorage().isPositionChanged()) {
                 next = context.getMap().getNextActionTilePosition(claimed.getCollisionStorage().isOnAction() ? claimed.getCollisionStorage().getActionTile() : -1, claimed, phase);
             }
-            
-            if (next.equals(player)) {
-            	collide(player, claimed, turn, phase);
-            	collide(claimed, player, turn, phase);
-                return true;
-            }
-            else if (next.equals(claimed)) {
+            if (next.equals(claimed)) {
                 player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
                 claimed.getVessel().appendDamage(player.getVessel().getRamDamage(), player.getTeam()); //needed if claimed is by a rock 
                 Position bumpPos = context.getMap().getNextActionTilePositionForTile(claimed, context.getMap().getTile(player.getX(), player.getY()));
@@ -353,42 +357,79 @@ public class CollisionCalculator {
                     player.getCollisionStorage().setCollided(turn, phase);
                     return true;
                 }
+            }else {
+                // Make sure that the claimed position moves away successfully
+                if (!checkActionCollision(claimed, target, turn, phase, false)) {
+                	return performActionCollision(player,target,turn,phase,setPosition);
+                }else {
+                    // did not move successfully, collide
+                    collide(player, claimed, turn, phase);
+                    collide(claimed, player, turn, phase);
+                    return true;
+                }
             }
-            if(checkActionCollision(claimed, next, turn, phase, false)) {
-            	collide(player, claimed, turn, phase);
-            	return true;
-            }
-        }
-        List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
-        if (collided.size() > 0) {
-        	collide(player, collided.get(0), turn, phase); //get correct damage instead itself
-        	int playerTile = context.getMap().getTile(player.getX(), player.getY());
-            for (Player p : collided) {
-            	int tile = context.getMap().getTile(p.getX(), p.getY());
-            	//bug: face isn't set each turn; p may not always change face?
-            	if(context.getMap().isWhirlpool(tile)) {
-            		if(context.getMap().isWind(playerTile)) {
-            			p.setFace(p.getFace().getNext());
-            			collide(p, player, turn, phase);
-            		}else {
-            			collide(p, player, turn, phase);
-            		}
-            	}else {
-                	collide(p, player, turn, phase);
-            	}
-            }
-            return true;
-        }
-        if(!player.getCollisionStorage().isCollided(turn)) {
-            if (setPosition) {
-                player.set(target);
-                player.getCollisionStorage().setPositionChanged(true);
-            }
+        }else {
+        	return performActionCollision(player,target,turn,phase,setPosition);
         }
         return false;
     }
 
+    /**
+     * Helper method to reduce duplicate coding
+     * @param p        The current player
+     * @param position The current position
+     * @param turn     The current turn
+     * @param phase    The current phase
+     * @param setPosition Boolean that sets whether we want to change position or not
+     * @return boolean if collides with another player, false if no collision
+     */
+    public boolean performActionCollision(Player player, Position target, int turn, int phase, boolean setPosition) {
+    	List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
+        if (collided.size() > 0) {
+//        	collide(player, collided.get(0), turn, phase); //get correct damage instead itself
+        	int playerTile = context.getMap().getTile(player.getX(), player.getY());
+            for (Player p : collided) {
+            	if(p == player) {
+            		continue;
+            	}
+            	int tile = context.getMap().getTile(p.getX(), p.getY());
+            	//tile is p & playerTile is player
+            	if(context.getMap().isWhirlpool(tile) && context.getMap().isWind(playerTile)) {
+            		collide(p, player, turn, phase);
+            		collide(player, p, turn, phase);
+            		if(phase == 0) {
+	            		p.setFace(p.getFace().getNext());
+	                	p.getAnimationStructure().getTurn(turn).setFace(p.getFace());
+	                	p.getAnimationStructure().getTurn(turn).setSpinCollision(true);
+	            		player.getAnimationStructure().getTurn(turn).setFace(p.getFace());
+	                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
+            		}
 
+            	}else {
+            		collide(p, player, turn, phase);
+            		collide(player, p, turn, phase);
+            		int actionTile = context.getMap().getTile(p.getX(), p.getY());
+            		if(phase == 0 && context.getMap().isWhirlpool(actionTile)) {
+	            		p.setFace(p.getFace().getNext());
+	                	p.getAnimationStructure().getTurn(turn).setFace(p.getFace());
+	                	p.getAnimationStructure().getTurn(turn).setSpinCollision(true);
+	            		player.getAnimationStructure().getTurn(turn).setFace(p.getFace());
+	                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
+            		}
+            	}
+            }
+            return true;
+        }else {
+        	if(!player.getCollisionStorage().isCollided(turn)) {
+            	if(setPosition) {
+            		player.set(target);
+            		player.getCollisionStorage().setPositionChanged(true);
+            	}
+        	}
+        }
+        return false;
+    }
+    
     private boolean checkRockCollision(Player player, int turn, int phase) {
         MoveType move = player.getMoves().getMove(turn);
         Position pos = player;

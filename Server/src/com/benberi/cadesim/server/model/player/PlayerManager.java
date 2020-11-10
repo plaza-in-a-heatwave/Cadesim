@@ -352,7 +352,7 @@ public class PlayerManager {
                      if (p.getCollisionStorage().isCollided(turn) || p.isSunk()) {
                          continue;
                      }
-
+                 	 
                      p.getCollisionStorage().setRecursionStarter(true);
                      // Checks collision for the player, according to his current step #phase index and turn
                      collision.checkCollision(p, turn, phase, true);
@@ -407,7 +407,10 @@ public class PlayerManager {
                     }
 
                     int tile = context.getMap().getTile(player.getX(), player.getY());
-
+                    if(phase == 0) {
+                    	player.getAnimationStructure().getTurn(turn).setFace(player.getFace());
+                    }
+  
                     if (player.getCollisionStorage().isOnAction()) {
                         tile = player.getCollisionStorage().getActionTile();
                     }
@@ -444,15 +447,16 @@ public class PlayerManager {
 	                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
 	                    }
                     }
-                    else if (context.getMap().isWhirlpool(tile))//whirls
+                    else if (context.getMap().isWhirlpool(tile)){//whirls
                     	if(!p.getCollisionStorage().isCollided(turn)) {
                             p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
                             p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
                     	}else {
                     		p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
                     	}
+                    }
                 }
-
+               
                 p.getCollisionStorage().setBumped(false);
                 p.getCollisionStorage().clear();
                 p.getCollisionStorage().setOnAction(-1);

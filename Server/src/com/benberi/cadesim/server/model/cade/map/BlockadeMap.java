@@ -176,6 +176,39 @@ public class BlockadeMap {
         return pos;
     }
 
+    public Position getFinalActionTilePosition(int tile, Position pos, int phase) {
+        if (tile == -1) {
+            tile = map[pos.getX()][pos.getY()];
+        }
+        // No phase 2 (2 because 0 and 1) for winds
+        if (tile >= 3 && tile <= 6 && phase == 1) {
+            return pos;
+        }
+
+        switch (tile) {
+            case WIND_NORTH:
+                return pos.copy().addY(1);
+            case WIND_SOUTH:
+                return pos.copy().addY(-1);
+            case WIND_WEST:
+                return pos.copy().addX(-1);
+            case WIND_EAST:
+                return pos.copy().addX(1);
+
+            case WP_NE:
+                return pos.copy().addY(-1).addX(-1);
+ 
+            case WP_NW:
+            	return pos.copy().addX(1).addY(-1);
+            case WP_SE:
+            	return pos.copy().addX(-1).addY(1);
+            case WP_SW:
+            	return pos.copy().addY(1).addX(1);
+        }
+
+        return pos;
+    }
+    
     public VesselFace getNextActionTileFace(VesselFace face) {
         return face.getNext();
     }
