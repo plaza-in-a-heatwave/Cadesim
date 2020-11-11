@@ -200,9 +200,6 @@ public class SeaBattleScene implements GameScene {
                          if (turn.isSunk()) {
                              vessel.setSinking(true);
                          }
-                         if(turn.getSpinCollision()) { // for turning ship inside whirlpool
-                        	 vessel.setRotationIndex(turn.getFace().getDirectionId());
-                         }
                      }
                      currentPhase = MovePhase.MOVE_TOKEN;
                      currentSlot++;
@@ -239,7 +236,6 @@ public class SeaBattleScene implements GameScene {
             if (vessel.getMoveDelay() != -1) {
                 vessel.tickMoveDelay();
             }
-
             if (!vessel.isMoving()) {
                 if (currentSlot != -1) {
                     MoveAnimationTurn turn = vessel.getStructure().getTurn(currentSlot);
@@ -267,7 +263,10 @@ public class SeaBattleScene implements GameScene {
 
                             }
                             else {
-                                vessel.performBump(MoveType.NONE, turn.getSubAnimation());
+                            	if(turn.getSpinCollision()) { // for turning ship inside whirlpool
+                            		vessel.setRotationIndex(turn.getFace().getDirectionId());
+                                }
+                            	vessel.performBump(MoveType.NONE, turn.getSubAnimation());
                             }
                             turn.setSubAnimation(VesselMovementAnimation.NO_ANIMATION);
                         }
@@ -316,13 +315,13 @@ public class SeaBattleScene implements GameScene {
                             }
                         }
                         else if (vessel.getCurrentPerformingMove() == VesselMovementAnimation.BUMP_PHASE_2 && distance >= vector.getDistance() / 2 && !vector.isPlayedMiddleAnimation()) {
-                            vessel.tickBumpRotation(1);
+                        	vessel.tickBumpRotation(1);
                             vector.setPlayedMiddleAnimation(true);
                         }
                     }
                     else {
                         if (vessel.getCurrentPerformingMove() == VesselMovementAnimation.BUMP_PHASE_1 || vessel.getCurrentPerformingMove().getId() >= 12) {
-                            vessel.setX(vessel.getX() + (vector.getDirectionX() * 2f * Gdx.graphics.getDeltaTime()));
+                        	vessel.setX(vessel.getX() + (vector.getDirectionX() * 2f * Gdx.graphics.getDeltaTime()));
                             vessel.setY(vessel.getY() + (vector.getDirectionY() * 2f * Gdx.graphics.getDeltaTime()));
                             if (vector.getStart().dst(new Vector2(vessel.getX(), vessel.getY())) >= vector.getDistance()) {
                                 vessel.setPosition(vector.getEnd().x, vector.getEnd().y);

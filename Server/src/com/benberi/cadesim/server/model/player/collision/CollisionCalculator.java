@@ -92,22 +92,40 @@ public class CollisionCalculator {
         	}
             Position next = p;
             Position finalPosition = p;
+            @SuppressWarnings("unused")
+			Position finalPlayerPosition = p;
             if(p.isSunk()) {
             	next = p;
             	finalPosition = p;
+            	finalPlayerPosition = pl;
             }else {
                 if (!p.getCollisionStorage().isPositionChanged()) {
                 	next = context.getMap().getNextActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
                 	finalPosition =  context.getMap().getFinalActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
+                	finalPlayerPosition =  context.getMap().getFinalActionTilePosition(pl.getCollisionStorage().isOnAction() ? pl.getCollisionStorage().getActionTile() : -1, pl, phase);
                 }
             }
-            if(finalPosition.equals(target) ) {
-            	collided.add(p);
-            }else {
-            	 if(next.equals(target)) {
+            int tile = context.getMap().getTile(pl.getX(), pl.getY());
+            int otherTile = context.getMap().getTile(p.getX(), p.getY());
+            if(context.getMap().isWind(tile) && context.getMap().isWind(otherTile)) {
+            	if(next.equals(target)) {
                  	collided.add(p);
-                 }
-            }
+                }
+            }else{
+            	//bug still exists on some scenarios unable to find which scenario
+//            	if(next.equals(finalPlayerPosition) && (!context.getMap().isWhirlpool(tile))) {
+//            		collided.add(p);
+//		        }
+//            	if(finalPosition.equals(finalPlayerPosition)) {
+//            		collided.add(p);
+//            	}
+            	if(finalPosition.equals(target) && (!context.getMap().isWhirlpool(tile))) {
+            		collided.add(p);
+		        }
+            	if(next.equals(target)) {
+   	             	collided.add(p);
+	   	        }
+           }
         }
         return collided;
     }
@@ -321,7 +339,7 @@ public class CollisionCalculator {
             return false;
         }
     	player.getAnimationStructure().getTurn(turn).setFace(player.getFace());
-    	//if player reaches destination for that particular turn
+//    	//if player reaches destination for that particular turn
         if (player.equals(target)) {
             return false;
         }
@@ -332,7 +350,6 @@ public class CollisionCalculator {
             player.getCollisionStorage().setCollided(turn, phase);
             return true;
         }
-
         Player claimed = players.getPlayerByPosition(target.getX(), target.getY());
         //the original players next position is claimed by another entity
         if (claimed != null) {
@@ -357,16 +374,10 @@ public class CollisionCalculator {
                     player.getCollisionStorage().setCollided(turn, phase);
                     return true;
                 }
-            }else {
-                // Make sure that the claimed position moves away successfully
-                if (!checkActionCollision(claimed, target, turn, phase, false)) {
-                	return performActionCollision(player,target,turn,phase,setPosition);
-                }else {
-                    // did not move successfully, collide
-                    collide(player, claimed, turn, phase);
-                    collide(claimed, player, turn, phase);
-                    return true;
-                }
+            }            	//if claimed doesn't move away
+        	if (checkActionCollision(claimed, next, turn, phase, false)) {
+        		collide(player, player, turn, phase);
+        		return true;
             }
         }else {
         	return performActionCollision(player,target,turn,phase,setPosition);
@@ -386,7 +397,6 @@ public class CollisionCalculator {
     public boolean performActionCollision(Player player, Position target, int turn, int phase, boolean setPosition) {
     	List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
         if (collided.size() > 0) {
-//        	collide(player, collided.get(0), turn, phase); //get correct damage instead itself
         	int playerTile = context.getMap().getTile(player.getX(), player.getY());
             for (Player p : collided) {
             	if(p == player) {
@@ -404,7 +414,6 @@ public class CollisionCalculator {
 	            		player.getAnimationStructure().getTurn(turn).setFace(p.getFace());
 	                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
             		}
-
             	}else {
             		collide(p, player, turn, phase);
             		collide(player, p, turn, phase);
