@@ -34,9 +34,9 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		BlockadeSimulator cadesim = new BlockadeSimulator();
 		config.resizable = false;
-		if(prop.getProperty("user.width") == null || (prop.getProperty("user.width").matches("[0-9]{3,}")) ||
-				prop.getProperty("user.height") == null || (prop.getProperty("user.height").matches("[0-9]{3,}")) ||
-				prop.getProperty("user.last_resolution") == null || (prop.getProperty("user.last_resolution").matches("[0-9]+"))) {
+		if(prop.getProperty("user.width") == null || !(prop.getProperty("user.width").matches("[0-9]{3,}")) ||
+				prop.getProperty("user.height") == null || !(prop.getProperty("user.height").matches("[0-9]{3,}")) ||
+				prop.getProperty("user.last_resolution") == null || !(prop.getProperty("user.last_resolution").matches("[0-9]+"))) {
 			int width = 800;
 			int height = 600;
 			config.width = width;
