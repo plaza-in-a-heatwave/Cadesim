@@ -612,7 +612,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         chatContainer.add(textField).width(resolutionWidthDiction.get(Gdx.graphics.getWidth())[0]).padRight(5f);
         chatContainer.add(sendMessageButton).padRight(5f);
         //add subtables to main table
-        chatTable.add(chatScroller).growX().height(135).padRight(3f).padBottom(3f).row();
+        chatTable.add(chatScroller).growX().height(135).padRight(5f).padBottom(3f).row();
         chatTable.add(chatContainer).growX();
         chatTable.pack();
         
