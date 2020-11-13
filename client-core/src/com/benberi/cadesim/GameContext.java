@@ -637,7 +637,7 @@ public class GameContext {
     	sendPacket(packet);
     }
     
-    public void sendPostMessagePacket(String message) {
+    public void sendPostMessagePacket(String message, String channel) {
         // #83 enable and disable lag test mode.
         if (Constants.ENABLE_LAG_TEST_MODE) {
             if (message.equals("/lagtestmode")) {
@@ -653,6 +653,7 @@ public class GameContext {
         
     	PostMessagePacket packet = new PostMessagePacket();
     	packet.setMessage(message);
+    	packet.setChannel(channel);
     	sendPacket(packet);
     }
     

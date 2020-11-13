@@ -296,6 +296,7 @@ public class PlayerPacketManager {
 
     public void sendReceiveMessage(String player, String message) {
     	ReceiveMessagePacket packet = new ReceiveMessagePacket();
+    	packet.setContext(this.player.getContext());
     	packet.setPlayer(player);
     	packet.setMessage(message);
     	this.player.sendPacket(packet);

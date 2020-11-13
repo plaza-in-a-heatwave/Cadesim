@@ -13,7 +13,7 @@ public class Constants {
      */
     public static final String serverBroadcast = "<cadesim_broadcast>";
     public static final String serverPrivate   = "<cadesim_private>";
-
+    public static final String serverTeam   = "<cadesim_team>";
     /**
      * Version of client
      */

@@ -20,5 +20,6 @@ public class PostMessagePacket extends ServerPacketExecutor {
     public void execute(Player pl, Packet p) {
         // pass to message handler
         context.getPlayerManager().handleMessage(pl, p.readIntString());
+        pl.setChatChannel(p.readByteString());
     }
 }

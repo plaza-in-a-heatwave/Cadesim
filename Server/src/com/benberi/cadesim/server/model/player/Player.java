@@ -33,7 +33,7 @@ public class Player extends Position {
      * Bots have a null channel
      */
     private Channel channel;
-
+    private String chatChannel = "global";
     /**
      * The packet manager
      * Bots have a null packet manager
@@ -931,5 +931,13 @@ public class Player extends Position {
 
     public void setBot(boolean isBot) {
         this.isBot = isBot;
+    }
+    
+    public void setChatChannel(String channel) {
+        this.chatChannel = channel;
+    }
+    
+    public String getChatChannel() {
+        return this.chatChannel;
     }
 }
