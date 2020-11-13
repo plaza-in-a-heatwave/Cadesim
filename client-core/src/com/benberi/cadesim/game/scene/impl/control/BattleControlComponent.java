@@ -620,7 +620,9 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         
         initListeners();
     }
-
+    /**
+     * initialize listeners for LibGdx actors
+     */
 	public void initListeners() {
     	chatScroller.addListener(new InputListener() {
     		public void enter(InputEvent event, float x, float y, int pointer, Actor actor) {
@@ -685,7 +687,9 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
                 sendChat();
         }});
     }
-	
+    /**
+     * initialize all textures
+     */
     public void initTextures() {
         font = context.getManager().get(context.getAssetObject().controlFont);
         title = context.getManager().get(context.getAssetObject().title);
@@ -769,7 +773,9 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         setDamagePercentage(0);
         setBilgePercentage(0);
     }
-    
+    /**
+     * set up the input processor for the chat and game
+     */
     public void setup() {
         inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(context.getInputProcessor());
@@ -836,7 +842,9 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 			chatMessages.getCells().removeValue(cell, true);
 		}
 	}
-	
+    /**
+     * Send message from messenger to users
+     */
     public void sendChat() {
         String message = getTextField().getText();
 
