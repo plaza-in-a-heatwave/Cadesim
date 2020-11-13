@@ -210,7 +210,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         greetings.add("Every day I'm Simulatin'");
         greetings.add("Matured in oak casks for 24 months");
         greetings.add("Probably SFW");
-        greetings.add("Sea monsters are alw2082ays Kraken jokes");
+        greetings.add("Sea monsters are always Kraken jokes");
         greetings.add("Without a shadow of a Trout");
         greetings.add("Just for the Halibut");
         greetings.add("Placing Moves, not Moving Plaice");
