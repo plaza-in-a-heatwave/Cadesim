@@ -63,7 +63,6 @@ public class SeaBattleScene implements GameScene {
      * The sea texture
      */
     private Texture sea;
-    
     /**
      * The islands texture
      */
@@ -458,7 +457,7 @@ public class SeaBattleScene implements GameScene {
                 if (unlockTimedOut) {
                     context.sendPostMessagePacket(
                             "/bug client unlock timeout threshold reached: " + Constants.MAX_CLIENT_LOCK_MILLIS + "ms."
-                    );
+                    ,"global");
                 }
 
                 setTurnFinished(false); // for next time

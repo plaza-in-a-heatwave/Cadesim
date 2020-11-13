@@ -105,6 +105,8 @@ public class PlayerManager {
 	private int turnDuration;
 	private int roundDuration;
 	private String disengageBehavior;
+	@SuppressWarnings("unused")
+	private String chatChannel = "global";
 
 	/**
 	 * helper method to split string into parts
@@ -858,6 +860,17 @@ public class PlayerManager {
     }
 
     /**
+     * Gets a player by its name
+     * @param name  The player name
+     * @return The player
+     */
+    public Team getPlayerTeamByName(String name) {
+    	if(getPlayerByName(name).getTeam() == null) {
+    		return Team.ATTACKER;
+    	}
+    	return getPlayerByName(name).getTeam();
+    }
+    /**
      * Sends a player for all players
      *
      * @param player    The player to send
@@ -1142,7 +1155,7 @@ public class PlayerManager {
             }
     	}
     }
-    
+
     /**
      * send a message to a single player from the server
      */
@@ -1799,6 +1812,7 @@ public class PlayerManager {
 				printCommandHelp(pl);
 			}
 		}
+		
 		else
 		{
 			// dont broadcast server commands, but broadcast everything else

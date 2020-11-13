@@ -12,15 +12,21 @@ public class PostMessagePacket extends OutgoingPacket {
     }
     
     private String message;
+    private String channel;
 
     public void setMessage(String message) {
         this.message = message;
+    }
+    
+    public void setChannel(String channel) {
+        this.channel = channel;
     }
 
     @Override
     public void encode() {
         setPacketLengthType(PacketLength.MEDIUM);
         writeIntString(message);
+        writeByteString(channel); //sending chat channel (global or team)
         setLength(getBuffer().readableBytes());
     }
 }

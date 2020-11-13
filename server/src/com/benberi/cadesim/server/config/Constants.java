@@ -14,6 +14,7 @@ public class Constants {
 	 */
 	public static final String bannedSubstring  = "cadesim"; // players not allowed to use this in their name
 	public static final String serverBroadcast  = "<cadesim_broadcast>";
+	public static final String serverTeam    = "<cadesim_team>";
 	public static final String serverPrivate    = "<cadesim_private>";
 
 	/**

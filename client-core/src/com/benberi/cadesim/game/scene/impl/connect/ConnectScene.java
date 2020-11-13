@@ -163,6 +163,10 @@ public class ConnectScene implements GameScene, InputProcessor {
         resolutionWidthDiction.put(1920, new int[]{1182,1026,870,920});
         resolutionWidthDiction.put(2500, new int[]{1482,1326,1170,1230});
         resolutionWidthDiction.put(3600, new int[]{2082,1926,1770,1700});
+        //safety net for custom resolution width
+        if(!(resolutionWidthDiction.containsKey(Gdx.graphics.getWidth()))) {
+        	resolutionWidthDiction.put(Gdx.graphics.getWidth(), new int[]{640,484,328,360});
+        }
     }
     
     @Override
@@ -257,7 +261,6 @@ public class ConnectScene implements GameScene, InputProcessor {
             }});
         buttonConn.setPosition(Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] + 5, 290);
       //login button
-        
         mapEditorButtonStyle = new ImageButtonStyle();
         mapEditorButtonUp = context.getManager().get(context.getAssetObject().mapEditorButtonUp);
         mapEditorButtonDown = context.getManager().get(context.getAssetObject().mapEditorButtonDown);
@@ -338,7 +341,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         roomLabel.setSize(150.0f, 44.0f);
         roomLabel.setPosition(Gdx.graphics.getWidth() - 160, 55);
 
-        baghlah = context.getManager().get(context.getAssetObject().baghlahSkin);
+        baghlah = context.getManager().get(context.getAssetObject().baghlah);
         blackship = context.getManager().get(context.getAssetObject().blackshipSkin);
         dhow = context.getManager().get(context.getAssetObject().dhowSkin);
         fanchuan = context.getManager().get(context.getAssetObject().fanchuanSkin);
