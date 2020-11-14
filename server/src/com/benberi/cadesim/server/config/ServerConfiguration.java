@@ -16,7 +16,9 @@ public class ServerConfiguration {
 	 */
 
     /**
-     * Server defaults. Overridden by CLI during initialisation.
+     * Server configuration defaults. Overridden by CLI during initialisation.
+     *
+     * (For unchanging values, e.g. moves per turn, use constants.java)
      */
     private static int playerLimit = 5;
     private static int port = 4970;
@@ -53,12 +55,21 @@ public class ServerConfiguration {
     private static boolean scheduledAutoUpdate = false;
     private static boolean testMode = false;
     private static boolean customMap = false;
+    private static boolean checkForUpdatesOnStartup = false;
 
-	// uninitializable defaults
+    // uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
     private static ZonedDateTime nextUpdateDateTimeScheduled = null; // updated once on startup
     private static String[] args; // store the args received on the commandline
+
+    public static boolean getCheckForUpdatesOnStartup() {
+        return checkForUpdatesOnStartup;
+    }
+
+    public static void setcheckForUpdatesOnStartup(boolean checkForUpdatesOnStartup) {
+        ServerConfiguration.checkForUpdatesOnStartup = checkForUpdatesOnStartup;
+    }
 
     public static boolean isTestMode() {
         return testMode;

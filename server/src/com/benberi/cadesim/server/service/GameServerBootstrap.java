@@ -12,6 +12,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -87,6 +88,9 @@ public class GameServerBootstrap {
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         start = System.currentTimeMillis();
 
+        // save args into config
+        ServerConfiguration.setArgs(args);
+
         // quick parse to check for the do-nothing argument. If it's there, exit immediately.
         // this is necessary to avoid spam during the autoupdate process.
         // (we use --do-nothing as getdown.jar wants to start an application.)
@@ -99,7 +103,7 @@ public class GameServerBootstrap {
             try {
                 cmd = parser.parse(options, args);
 
-                // immediately exit. this option used to provide getdown
+                // immediately exit before any other args are parsed. This option used to provide getdown
                 // with something executable to run during update stages.
                 if (cmd.hasOption("z")) {
                     System.exit(Constants.EXIT_SUCCESS);
@@ -132,6 +136,7 @@ public class GameServerBootstrap {
         options.addOption("h", "help", false, "Show help and exit");
         options.addOption("j", "test-mode", false, "Run test suites and exit");
         options.addOption("k", "run-continuous", true, "endlessly cycle maps (on or off) (default: " + ServerConfiguration.getRunContinuousMode() + ")");
+        options.addOption("l", "update-at-startup", false, "check for updates at startup. (default: " + ServerConfiguration.getCheckForUpdatesOnStartup() + ")");
         options.addOption("m", "map", true, "Set map name or leave blank for random (default: " + ServerConfiguration.getMapName() + ")");
         options.addOption("n", "team-names", true, "names for the attacker and defender, comma separated, " + Constants.MAX_TEAMNAME_SIZE + " characters max (default: " + ServerConfiguration.getAttackerName() + "," + ServerConfiguration.getDefenderName() + ")");
         options.addOption("o", "map-rotation", true, "randomly rotate map every n turns, or -1 for never. Do not set to 0. (default: " + ServerConfiguration.getMapRotationPeriod() + ")");
@@ -142,18 +147,40 @@ public class GameServerBootstrap {
         options.addOption("t", "turn-duration", true, "turn duration seconds, minimum " + Constants.MIN_TURN_DURATION + ", (default: " + ServerConfiguration.getTurnDuration() / 10 + ")");
         options.addOption("u", "schedule-updates", true, "schedule automatic updates to take place at HH:MM. (default: " + ((!ServerConfiguration.isScheduledAutoUpdate())?"not set":ServerConfiguration.getNextUpdateDateTimeScheduled().toString()) + ")");
         options.addOption("v", "voting-majority", true, "voting majority percent (0 to 100 inclusive), or -1 to disable (default: " + ServerConfiguration.getVotingMajority() + ")");
+        options.addOption("z", "do-nothing", false, "Start the app and immediately exit."); // here for inclusion in --help
 
         CommandLineParser parser = new DefaultParser();
 
         CommandLine cmd = null;
         try {
             cmd = parser.parse(options, args);
+        }
+        catch (ParseException e) {
+            ServerContext.log("Failed to parse comand line properties" + e.toString());
+            Updater.cleanupAfterRestart(); // bugfix to stop other servers crashing if this one crashes
+            help(options);
+        }
 
-            // clean up after previous update session if needed
-            // last session's args required to id this new process
-            ServerConfiguration.setArgs(args);
-            Updater.cleanupAfterRestart();
+        // handle updater logic.
+        // clean up after previous update session (if applicable) and handle startup updates.
+        if (cmd.hasOption("l")) {
+            ServerConfiguration.setcheckForUpdatesOnStartup(true); // set first as it may be unset later
+        }
+        Updater.cleanupAfterRestart(); // may unset checkForUpdatesOnStartup flag
+        if (ServerConfiguration.getCheckForUpdatesOnStartup()) {
+            try {
+                Updater.update();
+            } catch(IOException|InterruptedException e) {
+                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
+            }
+        }
 
+        // check invalid options
+        if (cmd.hasOption("z")) {
+            assert false: "Erroneously parsed do-nothing flag twice.";
+        }
+
+        try {
             // check independent options
             if (cmd.hasOption("h")) {
                 help(options);
@@ -409,7 +436,7 @@ public class GameServerBootstrap {
             GameServerBootstrap bootstrap = new GameServerBootstrap();
             bootstrap.startServer();
 
-        } catch (ParseException | NumberFormatException e) {
+        } catch (NumberFormatException e) {
             ServerContext.log("Failed to parse comand line properties" + e.toString());
             help(options);
         }

@@ -74,7 +74,7 @@ public class GameService implements Runnable {
                 if (playerManager.isUpdateScheduledAfterGame()) {
                     context.getPlayerManager().kickAllPlayers();
 
-                    context.getUpdater().update();
+                    Updater.update();
                 }
 
                 // handle switching maps.
