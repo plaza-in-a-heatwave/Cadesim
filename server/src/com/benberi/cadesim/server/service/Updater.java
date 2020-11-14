@@ -47,7 +47,6 @@ public class Updater {
         // add a few sec delay before doing anything to give any
         // previous instances a chance to exit
         try {
-            ServerContext.log("[updater] Sleeping for a few seconds to give previous server processes a chance to exit.");
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             // pass
@@ -64,7 +63,7 @@ public class Updater {
                 lastUpdateWasOurs = true;
             }
         } catch (IOException e) {
-            ServerContext.log("[updater] Couldn't open idfile so assume wasn't ours (or isn't there)");
+            // Couldn't open idfile so assume wasn't ours (or isn't there)
         }
 
         // if last update was ours, clean up
@@ -76,21 +75,19 @@ public class Updater {
             boolean deleteSucceeded = true;
             for (String s : toDelete) {
                 File f = new File(s);
-                if (f.delete()) {
-                    ServerContext.log("[updater] deleted " + f.getPath() + " on startup.");
-                } else {
-                    ServerContext.log("[updater] couldn't delete " + f.getPath() + " on startup");
+                if (!f.delete()) {
+                    ServerContext.log("[updater] Error: couldn't delete " + f.getPath() + " on startup");
                     deleteSucceeded = false;
                 }
             }
 
             if (!deleteSucceeded) {
-                ServerContext.log("[updater] Error: delete of at least one update file failed.");
+                ServerContext.log("[updater] Error: delete of at least one update file failed. This may impact other local Cadesim servers.");
             }
         }
         else
         {
-            ServerContext.log("[updater] the lockfile isn't ours (or there is no lockfile), so doing nothing.");
+            // the lockfile isn't ours (or there is no lockfile), so doing nothing.
         }
     }
 

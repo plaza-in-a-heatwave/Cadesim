@@ -49,6 +49,7 @@ public class GameServerBootstrap {
      * @throws InterruptedException
      */
     private void startServer() throws InterruptedException {
+        ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
         ServerContext.log("Using config: " + ServerConfiguration.getConfig());
         ServerContext.log("Starting up the host server....");
         CadeServer server = new CadeServer(context, this); // to notify back its done
@@ -87,6 +88,11 @@ public class GameServerBootstrap {
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         start = System.currentTimeMillis();
 
+        // add a shutdown hook and print a log message when this happens.
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() { ServerContext.log("Cadesim shut down successfully. Doei!"); }
+        });
+
         // quick parse to check for the do-nothing argument. If it's there, exit immediately.
         // this is necessary to avoid spam during the autoupdate process.
         // (we use --do-nothing as getdown.jar wants to start an application.)
@@ -109,14 +115,11 @@ public class GameServerBootstrap {
             }
         }
 
-        ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
-
         // set up maps
         if (!ServerConfiguration.loadAvailableMaps()) {
             ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
             System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
         }
-        ServerContext.log("Loaded " + ServerConfiguration.getAvailableMaps().size() + " maps.");
         ServerConfiguration.pregenerateNextMapName();
 
         // set up CLI options
@@ -372,7 +375,6 @@ public class GameServerBootstrap {
                 	ServerConfiguration.setMapName(
                         ServerConfiguration.getRandomMapName()
                 	);
-                    ServerContext.log("No map specified, automatically chose random map: " + ServerConfiguration.getMapName());
                 } catch(NullPointerException e) {
                     ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
                     System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
@@ -380,7 +382,6 @@ public class GameServerBootstrap {
             }
             else {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
-                ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
             }
 
             // test mode overrides
