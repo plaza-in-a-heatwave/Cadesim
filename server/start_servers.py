@@ -21,4 +21,5 @@ for server_args in [
         print("started Cadesim instance (pid: " + str(subprocess.Popen(server_args.split(" "), close_fds=True, creationflags=DETACHED_PROCESS).pid) + ")")
     else:
         print("started Cadesim instance (pid: " + str(subprocess.Popen(server_args.split(" "), close_fds=True).pid) + ")")
-print("\n\nDone! use stop_servers.py to stop.")
+print("\n\nDone! You can now close this window.")
+print("Use stop_servers.py to stop, or restart_servers.py to restart.")
