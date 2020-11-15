@@ -36,12 +36,12 @@ import com.benberi.cadesim.server.config.ServerConfiguration;
  *
  */
 public class Updater {
-    public Updater(ServerContext context) {
-    }
 
     /**
      * Updater: cleanup any files left over from update at startup. Additionally, if
      * we locked the directory, unlock it.
+     *
+     * Usage: run just after startup.
      */
     public static void cleanupAfterRestart() {
         // add a few sec delay before doing anything to give any
@@ -69,6 +69,10 @@ public class Updater {
 
         // if last update was ours, clean up
         if (lastUpdateWasOurs) {
+
+            // bugfix - prevent endless updates on startup as we've already updated
+            ServerConfiguration.setcheckForUpdatesOnStartup(false);
+ 
             ArrayList<String> toDelete = new ArrayList<>();
             toDelete.add(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME + System.getProperty("file.separator")
                     + Constants.AUTO_UPDATING_ID_FILE_NAME);
@@ -97,7 +101,7 @@ public class Updater {
     /**
      * Updater: helper to clean up lock file & restart in case of error
      */
-    void cleanupAndRestart() {
+    private static void cleanupAndRestart() {
         File f = new File(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
         if (f.delete()) {
             ServerContext.log("[updater] deleted lockfile " + f.getPath());
@@ -113,7 +117,7 @@ public class Updater {
      *
      * @throws IOException
      */
-    private void restartServer() {
+    private static void restartServer() {
         // get the name of the jar file
         String jarFileName = "";
         CodeSource codeSource = GameServerBootstrap.class.getProtectionDomain().getCodeSource();
@@ -168,8 +172,10 @@ public class Updater {
      *
      * @throws InterruptedException
      * @throws IOException
+     *
+     * Usage: use to check for updates at a given time.
      */
-    public void update() throws InterruptedException, IOException {
+    public static void update() throws InterruptedException, IOException {
         // check for updates and restart the server if we need to
         java.io.File f = new java.io.File(Constants.AUTO_UPDATING_LOCK_DIRECTORY_NAME);
         int sleep_ms = 2000;
@@ -203,7 +209,7 @@ public class Updater {
                 ServerContext.log("[updater] Successfully created " + idfilename);
             } catch (IOException e) {
                 ServerContext.log("[updater] Couldn't create " + idfilename + "(" + e.getMessage() + ")");
-                this.cleanupAndRestart();
+                cleanupAndRestart();
             }
 
             // delete digests. otherwise getdown will
@@ -216,7 +222,7 @@ public class Updater {
             // run getdown
             try {
                 ProcessBuilder pb = new ProcessBuilder("java", "-jar", "getdown.jar");
-                Process p = pb.start(); // assign to process for something in future
+                Process p = pb.start();
 
                 ServerContext.log("[updater] waiting for getdown to finish before restarting server...");
                 if (p.waitFor(Constants.AUTO_UPDATE_MAX_WAIT_GETDOWN_MS, TimeUnit.MILLISECONDS)) { // blocks, times out
