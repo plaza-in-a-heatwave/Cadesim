@@ -33,16 +33,21 @@ Specify round and turn times too:
 java -jar cadesim-server.jar --schedule-updates 04:00 -p 2345 -t 30 -r 900
 ```
 
+To have the server check for updates at startup:
+```
+java -jar cadesim-server.jar --update-at-startup
+```
+
 For full usage call with ```--help```.
 
 Additional developer options can be added at compile-time.
 
 ### Scripts
-Start and stop scripts (**start_servers.py** and **stop_servers.py**) are provided.
+Start and stop scripts (**start_servers.py**,  **stop_servers.py**, and **restart_servers.py**) are provided.
 
-These can be used to start a group of several servers at once.
+These can be used to start/stop/restart a group of several servers at once.
 
-Change the commandline arguments in **start_servers.py** as needed. You shouldn't have to change anything in **stop_servers.py**. 
+Change the commandline arguments in **start_servers.py** as needed. You shouldn't have to change anything in **stop_servers.py** or **restart_servers.py**.
 
 ## Releasing
 - modify any desired files before release

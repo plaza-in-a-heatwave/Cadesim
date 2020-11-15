@@ -1,5 +1,4 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /). The URL is case sensitive.
-# TODO #69 add subdirectory
 appbase = https://plaza-in-a-heatwave.github.io/Cadesim/growup/server/http/
 
 # UI Configuration
@@ -18,6 +17,7 @@ resource = getdown-bg.png
 resource = growup.png
 resource = getdown.jar
 resource = stop_servers.py
+resource = restart_servers.py
 #TODO #69 add maps??
 
 # Note start_servers.py is not included as a resource as this is configurable

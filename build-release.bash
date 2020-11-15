@@ -97,7 +97,7 @@ popd>/dev/null
 
 # process getdown
 if ! java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$CLIENTBUILDDIR"; then
-    echo "failed to run getdown digester."
+    echo "failed to digest files. (hint: add new filenames to update build-release.bash?)"
     exit 1
 fi
 pushd "$CLIENTBUILDDIR">/dev/null
@@ -157,6 +157,7 @@ declare -a serverfiles=(
     "growup.png"
     "start_servers.py"
     "stop_servers.py"
+    "restart_servers.py"
 )
 for file in "${serverfiles[@]}"; do
     cp -r "$file" "$SERVERBUILDDIR";
@@ -169,7 +170,10 @@ fi
 popd>/dev/null
 
 # process getdown
-java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$SERVERBUILDDIR"
+if ! java -classpath getdown-core-*.jar com.threerings.getdown.tools.Digester "$SERVERBUILDDIR"; then
+    echo "failed to digest files. (hint: add new filenames to update build-release.bash?)"
+    exit 1
+fi
 pushd "$SERVERBUILDDIR">/dev/null
 if ! mkdir "$(basename "$SERVERUSERDIR")" "$(basename "$SERVERHTTPDIR")"; then
     echo "failed to mkdir $(basename "$SERVERUSERDIR")" "$(basename "$SERVERHTTPDIR")"
