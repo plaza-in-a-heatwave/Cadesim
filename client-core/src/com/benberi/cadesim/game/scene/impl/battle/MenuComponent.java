@@ -320,6 +320,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	defaultButton = new TextButton("Reset defaults",skin);
     	audio_slider.setSize(10, 100);
     	audio_slider.setPosition(Gdx.graphics.getWidth() - 30, Gdx.graphics.getHeight()- 220);
+    	audio_slider.setValue(0.05f);
     	stage.addActor(audio_slider);
 		createDialogListeners();
     }
