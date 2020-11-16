@@ -69,8 +69,8 @@ echo "* making client...    *"
 echo "***********************"
 
 pushd "$CLIENT">/dev/null
-newversion=$(date +%Y%m%d%H%M%S)
-echo "$newversion" >"version.txt" # update version#
+VERSIONTXT=$(date +%Y%m%d%H%M%S)
+echo "$VERSIONTXT">"version.txt" # update version#
 declare -a clientfiles=(
     "bg.png"
     "getdown.jar"
@@ -131,7 +131,7 @@ for f in *; do
 done
 
 # generate a version.txt file for backward compatibility with older clients.
-echo $(date +%Y%m%d%H%M%S)>"$(basename "$CLIENTHTTPDIR")"/"version.txt"
+echo "$VERSIONTXT">"$(basename "$CLIENTHTTPDIR")"/"version.txt"
 
 popd>/dev/null
 echo "done making client."
