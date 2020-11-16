@@ -6,16 +6,15 @@ import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.BlockadeTimeMachine;
 import com.benberi.cadesim.server.codec.packet.ServerPacketManager;
 import com.benberi.cadesim.server.config.Constants;
+import com.benberi.cadesim.server.config.ServerConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ThreadLocalRandom;
+import java.time.format.DateTimeFormatterBuilder;
 
 /**
  * The server context containing references to every massive part of the
@@ -48,7 +47,14 @@ public class ServerContext {
      */
     private BlockadeMap map;
 
+    /*
+     * Logging options
+     */
     private static File logFile = null;
+    private static File unifiedLogFile = null;
+    public final static boolean LOG_MODE_INSTANCE = true;  // cheap enum for logMode lol
+    public final static boolean LOG_MODE_UNIFIED  = false;
+    private static boolean logMode = LOG_MODE_UNIFIED;
 
     private ServerPacketManager packets;
 
@@ -74,38 +80,91 @@ public class ServerContext {
         this.map = new BlockadeMap(this);
         this.packets = new ServerPacketManager(this);
         this.regressionTests = new RegressionTests(this, false); // verbose switch
+
+        // instruct the logger to switch across to using per-instance logs
+        // now that we have access to context info and can create meaningful logfile names
+        ServerContext.setLogMode(ServerContext.LOG_MODE_INSTANCE);
     }
 
-    public static void createLogFile() {
-        new File(Constants.logDirectory).mkdirs();
-
-        // log filenames are timestamped to reduce chance of conflict. Additionally a random int is used.
-        // conflicting logs interleave, but otherwise work as normal.
-        String datePrefix = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss-SSSSSSX_").withZone(ZoneOffset.UTC)
-                .format(Instant.now()) + ThreadLocalRandom.current().nextInt(0, 2147483647) + "_";
-        logFile = new File(Constants.logDirectory + "/" + datePrefix + Constants.logName);
-        try {
-            logFile.createNewFile();
-            log("Using logfile: " + logFile.getPath());
-        } catch (IOException e) {
-            System.out.println("failed to create log file: " + logFile.getName() + " , check log directory permissions");
-            System.exit(Constants.EXIT_ERROR_CANT_CREATE_LOGS);
-        }
+    public static boolean getLogMode() {
+        return logMode;
+    }
+    public static void setLogMode(boolean logMode) {
+        ServerContext.logMode = logMode;
     }
 
+    /**
+     * Log a message. Depending on logMode, will log to either a unified or an instance logfile.
+     * @param message the message to log.
+     */
     public static void log(String message) {
-        if (logFile == null) {
-            createLogFile();
+        // format message
+        String timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(
+            new DateTimeFormatterBuilder().appendInstant(3).toFormatter()
+        );
+        message = "[" + timestamp + "]: " + message + "\n";
+
+        // put to file
+        if (getLogMode() == ServerContext.LOG_MODE_UNIFIED) {
+            logUnified(message);
+        }
+        else
+        {
+            logInstance(message);
+        }
+
+        // also print to stdout so we can see what's going on...
+        System.out.print(message);
+    }
+
+    /**
+     * Print to a "unified log" file that is shared with all cadesim instances.
+     * This is only to be used before the main logfile is created. Useful for catching error messages.
+     * This approach taken so that main logfiles can be per-instance and also be named according to port etc.
+     *
+     * Use setLogMode() to change to instance logs.
+     *
+     * @param message the message to log.
+     */
+    private static void logUnified(String message) {
+        if (unifiedLogFile == null) {
+            new File(Constants.logDirectory).mkdirs();
+            unifiedLogFile = new File(Constants.logDirectory + "/" + "unified_" + Constants.logName);
+            try {
+                unifiedLogFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println("failed to create unifiedLogFile: " + unifiedLogFile.getName() + " , check log directory permissions");
+                System.exit(Constants.EXIT_ERROR_CANT_CREATE_LOGS);
+            }
         }
         try {
-        	String timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
-            message = "[" + timestamp + "]: " + message + "\n";
+            Files.write(ServerContext.unifiedLogFile.toPath(), message.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-            // put to log file
+    /**
+     * Print to an "instance log" which is unique for each instance of cadesim.
+     * This is to be used after server bootstraps.
+     * Use setLogMode() to change to unified, but you probably won't want to do this.
+     * @param message
+     */
+    private static void logInstance(String message) {
+        if (logFile == null) {
+            new File(Constants.logDirectory).mkdirs();
+
+            // TODO names are based on ports. Could we hash each port to a unique room name?
+            logFile = new File(Constants.logDirectory + "/" + "port_" + ServerConfiguration.getPort() + "_" + Constants.logName);
+            try {
+                logFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println("failed to create log file: " + logFile.getName() + " , check log directory permissions");
+                System.exit(Constants.EXIT_ERROR_CANT_CREATE_LOGS);
+            }
+        }
+        try {
             Files.write(ServerContext.logFile.toPath(), message.getBytes(), StandardOpenOption.APPEND);
-
-            // also print to stdout so we can see what's going on...
-            System.out.print(message);
         } catch (IOException e) {
             e.printStackTrace();
         }

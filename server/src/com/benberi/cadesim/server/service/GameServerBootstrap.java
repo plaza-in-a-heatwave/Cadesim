@@ -50,7 +50,6 @@ public class GameServerBootstrap {
      * @throws InterruptedException
      */
     private void startServer() throws InterruptedException {
-        ServerContext.log("Using config: " + ServerConfiguration.getConfig());
         ServerContext.log("Starting up the host server....");
         CadeServer server = new CadeServer(context, this); // to notify back its done
         executorService.execute(server);
@@ -113,14 +112,11 @@ public class GameServerBootstrap {
             }
         }
 
-        ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
-
         // set up maps
         if (!ServerConfiguration.loadAvailableMaps()) {
             ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
             System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
         }
-        ServerContext.log("Loaded " + ServerConfiguration.getAvailableMaps().size() + " maps.");
         ServerConfiguration.pregenerateNextMapName();
 
         // set up CLI options
@@ -161,19 +157,11 @@ public class GameServerBootstrap {
             help(options);
         }
 
-        // handle updater logic.
-        // clean up after previous update session (if applicable) and handle startup updates.
+        // handle updater cleanup logic after previous update session (if applicable).
         if (cmd.hasOption("l")) {
             ServerConfiguration.setcheckForUpdatesOnStartup(true); // set first as it may be unset later
         }
         Updater.cleanupAfterRestart(); // may unset checkForUpdatesOnStartup flag
-        if (ServerConfiguration.getCheckForUpdatesOnStartup()) {
-            try {
-                Updater.update();
-            } catch(IOException|InterruptedException e) {
-                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
-            }
-        }
 
         // check invalid options
         if (cmd.hasOption("z")) {
@@ -399,7 +387,6 @@ public class GameServerBootstrap {
                 	ServerConfiguration.setMapName(
                         ServerConfiguration.getRandomMapName()
                 	);
-                    ServerContext.log("No map specified, automatically chose random map: " + ServerConfiguration.getMapName());
                 } catch(NullPointerException e) {
                     ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
                     System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
@@ -407,7 +394,6 @@ public class GameServerBootstrap {
             }
             else {
             	ServerConfiguration.setMapName(cmd.getOptionValue("m"));
-                ServerContext.log("Using user specified map:" + ServerConfiguration.getMapName());
             }
 
             // test mode overrides
@@ -433,12 +419,36 @@ public class GameServerBootstrap {
             	help(options);
             }
 
-            GameServerBootstrap bootstrap = new GameServerBootstrap();
-            bootstrap.startServer();
-
         } catch (NumberFormatException e) {
             ServerContext.log("Failed to parse comand line properties" + e.toString());
             help(options);
+        }
+
+        // create the bootstrap. this loads our config, among other things.
+        GameServerBootstrap bootstrap = new GameServerBootstrap();
+
+        // log welcome message
+        ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
+        ServerContext.log("Using config: " + ServerConfiguration.getConfig());
+
+        // add a shutdown hook and print a log message when this happens.
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() { ServerContext.log("Cadesim shut down successfully. Doei!"); }
+        });
+
+        // decide: do we need to update or should we start server?
+        if (ServerConfiguration.getCheckForUpdatesOnStartup()) {
+            // this should be done after the context has been instantiated
+            // so that updater log() messages go to the instance logfile.
+            try {
+                Updater.update();
+            } catch(IOException|InterruptedException e) {
+                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
+            }
+        }
+        else
+        {
+            bootstrap.startServer();
         }
     }
 }
