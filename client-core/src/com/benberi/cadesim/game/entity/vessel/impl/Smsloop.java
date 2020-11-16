@@ -13,6 +13,8 @@ import com.benberi.cadesim.util.PackedObjectOrientation;
 public class Smsloop extends Vessel {
 	public static final String VESSELNAME = "smsloop";
 
+	private static String cannonsize = "small";
+	
     public Smsloop(GameContext context, String name, int x, int y) {
         super(context, name, x, y);
     }
@@ -37,6 +39,11 @@ public class Smsloop extends Vessel {
     public CannonBall createCannon(GameContext ctx, Vessel source, Vector2 target) {
         return new SmallCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_small"),
                 getContext().getTextures().getMisc("hit"));
+    }  
+    
+    @Override
+    public String getCannonSize() {
+    	return cannonsize;
     }
 
     @Override

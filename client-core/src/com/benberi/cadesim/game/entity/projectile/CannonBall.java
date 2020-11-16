@@ -58,7 +58,7 @@ public class CannonBall extends Sprite {
         this.ending.setRegionY(0);
     }
 
-    public boolean finnishedEndingAnimation() {
+    public boolean finishedEndingAnimation() {
         return ending.getRegionX() >= ending.getTexture().getWidth();
     }
 

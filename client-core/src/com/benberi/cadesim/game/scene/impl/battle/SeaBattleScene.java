@@ -3,6 +3,7 @@ package com.benberi.cadesim.game.scene.impl.battle;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -63,6 +64,9 @@ public class SeaBattleScene implements GameScene {
      * The sea texture
      */
     private Texture sea;
+    
+    private Texture seaBattleCursor;
+    private Pixmap cursorPixmap;
     /**
      * The islands texture
      */
@@ -125,6 +129,23 @@ public class SeaBattleScene implements GameScene {
      * Is the turn finished? (internal flag)
      */
     private boolean turnFinished;
+    /**
+     * Sound effects
+     */
+    private float sound_volume = 0.05f;
+
+	private Sound cannonBigSound;
+    private Sound cannonSmallSound;
+    private Sound cannonMediumSound;
+    private Sound cannonHitSound;
+    private Sound splashSound;
+    private Sound moveSound;
+    private Sound bumpSound;
+    private Sound sunkSound;
+    @SuppressWarnings("unused")
+	private Sound creakSound;
+    private boolean isStartedShooting = false;
+    
     private boolean isTurnFinished() {
         return turnFinished;
     }
@@ -146,7 +167,7 @@ public class SeaBattleScene implements GameScene {
         // if there was a previous map: delete it
         if (blockadeMap != null) { blockadeMap.dispose();}
         blockadeMap = new BlockadeMap(context, tiles);
-    	selectedIsland = islandList.get(context.getIslandId());
+        selectedIsland = islandList.get(context.getIslandId());
     }
 
     private void recountVessels() {
@@ -160,44 +181,77 @@ public class SeaBattleScene implements GameScene {
         renderer = new ShapeRenderer();
         this.batch = new SpriteBatch();
         information.create();
+        initSounds();
+        initTextures();
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
+        this.mainmenu = new MenuComponent(context, this);
+        mainmenu.create();
+    }
+    /*
+     * Initialize sound effects for game
+     */
+    public void initSounds() {
+        cannonBigSound = context.getManager().get(context.getAssetObject().cannonbig_sound);
+        cannonSmallSound = context.getManager().get(context.getAssetObject().cannonsmall_sound);
+        cannonMediumSound = context.getManager().get(context.getAssetObject().cannonmedium_sound);
+        cannonHitSound = context.getManager().get(context.getAssetObject().hit_sound);
+        splashSound = context.getManager().get(context.getAssetObject().splash_sound);
+        moveSound = context.getManager().get(context.getAssetObject().move2_sound);
+        bumpSound = context.getManager().get(context.getAssetObject().rockhit_sound);
+        sunkSound = context.getManager().get(context.getAssetObject().shipsunk_sound);
+        creakSound = context.getManager().get(context.getAssetObject().creak_sound);
+    }
+    /*
+     * Initialize textures for game
+     */
+    public void initTextures() {
         sea = context.getManager().get(context.getAssetObject().sea);
         alkaid_island = context.getManager().get(context.getAssetObject().alkaid_island);
         pukru_island = context.getManager().get(context.getAssetObject().pukru_island);
         doyle_island = context.getManager().get(context.getAssetObject().doyle_island);
         isle_keris_island = context.getManager().get(context.getAssetObject().isle_keris_island);
+        seaBattleCursor = context.getManager().get(context.getAssetObject().seaBattleCursor);
+        if (!seaBattleCursor.getTextureData().isPrepared()) {
+            seaBattleCursor.getTextureData().prepare();
+        }
+        cursorPixmap = seaBattleCursor.getTextureData().consumePixmap();
         //add all island Textures in one go
         Collections.addAll(islandList,alkaid_island, pukru_island, doyle_island, isle_keris_island);
         sea.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
-        this.mainmenu = new MenuComponent(context, this);
-        mainmenu.create();
     }
+    public float getSound_volume() {
+		return sound_volume;
+	}
 
+	public void setSound_volume(float sound_volume) {
+		this.sound_volume = sound_volume;
+	}
     @Override
     public void update(){
         // update the camera
-    	camera.update();
-    	//keep user from scrolling to far to black screens
-    	camera.position.x = clamp(camera.position.x, Gdx.graphics.getWidth() , -Gdx.graphics.getWidth() - 100);
-    	camera.position.y = clamp(camera.position.y, Gdx.graphics.getHeight() + 800, -Gdx.graphics.getHeight() + 500);
+        camera.update();
+        //keep user from scrolling to far to black screens
+        camera.position.x = clamp(camera.position.x, Gdx.graphics.getWidth() , -Gdx.graphics.getWidth() - 100);
+        camera.position.y = clamp(camera.position.y, Gdx.graphics.getHeight() + 800, -Gdx.graphics.getHeight() + 500);
         if (currentSlot > -1) { 
-        	if (vesselsCountWithCurrentPhase != vesselsCountNonSinking) { //bug fix-new players joining
-        		MovePhase phase = MovePhase.getNext(currentPhase);
-        		if (phase == null) {
+            if (vesselsCountWithCurrentPhase != vesselsCountNonSinking) { //bug fix-new players joining
+                MovePhase phase = MovePhase.getNext(currentPhase);
+                if (phase == null) {
                     for (Vessel v : context.getEntities().listVesselEntities()) {
                         v.setMovePhase(null);
                     }
-	        		currentPhase = phase;
-	                recountVessels();
-        		}
-        	}
-        	else if (vesselsCountWithCurrentPhase == vesselsCountNonSinking) {
+                    currentPhase = phase;
+                    recountVessels();
+                }
+            }
+            else if (vesselsCountWithCurrentPhase == vesselsCountNonSinking) {
                  MovePhase phase = MovePhase.getNext(currentPhase);
                  if (phase == null) {
                      for (Vessel vessel : context.getEntities().listVesselEntities()) {
                          MoveAnimationTurn turn = vessel.getStructure().getTurn(currentSlot);
                          if (turn.isSunk()) {
                              vessel.setSinking(true);
+                         	 sunkSound.play(getSound_volume());
                          }
                      }
                      currentPhase = MovePhase.MOVE_TOKEN;
@@ -223,13 +277,13 @@ public class SeaBattleScene implements GameScene {
 
         boolean waitingForSink = false; // in case a ship needs to finish sinking before the turn can end
         for (Vessel vessel : context.getEntities().listVesselEntities()) {
-        	MovePhase phase = MovePhase.getNext(vessel.getMovePhase());
+            MovePhase phase = MovePhase.getNext(vessel.getMovePhase());
             if (vessel.isSinking()) {
-            	if(!vessel.isSinkingTexture()) {
-            		vessel.tickNonSinkingTexture();
-            	}else {
-            		vessel.tickSinkingTexture();
-            	}
+                if(!vessel.isSinkingTexture()) {
+                    vessel.tickNonSinkingTexture();
+                }else {
+                    vessel.tickSinkingTexture();
+                }
                 continue;
             }
             if (vessel.getMoveDelay() != -1) {
@@ -242,10 +296,11 @@ public class SeaBattleScene implements GameScene {
                         if (turn.getAnimation() != VesselMovementAnimation.NO_ANIMATION && vessel.getMoveDelay() == -1) {
                             if (!VesselMovementAnimation.isBump(turn.getAnimation())) {
                                 vessel.performMove(turn.getAnimation());
-
+                                moveSound.play(getSound_volume());
                             }
                             else {
                                 vessel.performBump(turn.getTokenUsed(), turn.getAnimation());
+                                bumpSound.play(getSound_volume());
                             }
 
                             turn.setAnimation(VesselMovementAnimation.NO_ANIMATION);
@@ -262,10 +317,11 @@ public class SeaBattleScene implements GameScene {
 
                             }
                             else {
-                            	if(turn.getSpinCollision()) { // for turning ship inside whirlpool
-                            		vessel.setRotationIndex(turn.getFace().getDirectionId());
+                                if(turn.getSpinCollision()) { // for turning ship inside whirlpool
+                                    vessel.setRotationIndex(turn.getFace().getDirectionId());
+                                    bumpSound.play(getSound_volume());
                                 }
-                            	vessel.performBump(MoveType.NONE, turn.getSubAnimation());
+                                vessel.performBump(MoveType.NONE, turn.getSubAnimation());
                             }
                             turn.setSubAnimation(VesselMovementAnimation.NO_ANIMATION);
                         }
@@ -281,10 +337,28 @@ public class SeaBattleScene implements GameScene {
                         }
                         else {
                             if (turn.getLeftShoots() > 0) {
+                            	isStartedShooting = true;
+                                switch(vessel.getCannonSize()) {
+                                    case "large":
+                                        cannonBigSound.play(getSound_volume());
+                                    case "medium":
+                                        cannonMediumSound.play(getSound_volume());
+                                    case "small":
+                                        cannonSmallSound.play(getSound_volume());
+                                }
                                 vessel.performLeftShoot(turn.getLeftShoots());
                                 turn.setLeftShoots(0);
                             }
                             if (turn.getRightShoots() > 0) {
+                            	isStartedShooting = true;
+                                switch(vessel.getCannonSize()) {
+                                    case "large":
+                                        cannonBigSound.play(getSound_volume());
+                                    case "medium":
+                                        cannonMediumSound.play(getSound_volume());
+                                    case "small":
+                                        cannonSmallSound.play(getSound_volume());
+                                }
                                 vessel.performRightShoot(turn.getRightShoots());
                                 turn.setRightShoots(0);
                             }
@@ -314,13 +388,13 @@ public class SeaBattleScene implements GameScene {
                             }
                         }
                         else if (vessel.getCurrentPerformingMove() == VesselMovementAnimation.BUMP_PHASE_2 && distance >= vector.getDistance() / 2 && !vector.isPlayedMiddleAnimation()) {
-                        	vessel.tickBumpRotation(1);
+                            vessel.tickBumpRotation(1);
                             vector.setPlayedMiddleAnimation(true);
                         }
                     }
                     else {
                         if (vessel.getCurrentPerformingMove() == VesselMovementAnimation.BUMP_PHASE_1 || vessel.getCurrentPerformingMove().getId() >= 12) {
-                        	vessel.setX(vessel.getX() + (vector.getDirectionX() * 2f * Gdx.graphics.getDeltaTime()));
+                            vessel.setX(vessel.getX() + (vector.getDirectionX() * 2f * Gdx.graphics.getDeltaTime()));
                             vessel.setY(vessel.getY() + (vector.getDirectionY() * 2f * Gdx.graphics.getDeltaTime()));
                             if (vector.getStart().dst(new Vector2(vessel.getX(), vessel.getY())) >= vector.getDistance()) {
                                 vessel.setPosition(vector.getEnd().x, vector.getEnd().y);
@@ -407,14 +481,14 @@ public class SeaBattleScene implements GameScene {
             
             // let camera move with vessel if it's supposed to
             if (cameraFollowsVessel) {
-    			if(camera != null && context.myVessel != null) {
-    				Vessel myVessel = context.getEntities().getVesselByName(context.myVessel);
-	    			camera.translate(
-	    					getIsometricX(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.x,
-	    					getIsometricY(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.y
-	    			);
-    			}
-        	}
+                if(camera != null && context.myVessel != null) {
+                    Vessel myVessel = context.getEntities().getVesselByName(context.myVessel);
+                    camera.translate(
+                            getIsometricX(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.x,
+                            getIsometricY(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.y
+                    );
+                }
+            }
 
             if (vessel.isSmoking()) {
                 vessel.tickSmoke();
@@ -431,7 +505,8 @@ public class SeaBattleScene implements GameScene {
                     if (!c.reached()) {
                         c.move();
                     } else {
-                        if (c.finnishedEndingAnimation()) {
+                        if (c.finishedEndingAnimation()) {
+           
                             itr.remove();
                         }
                         else {
@@ -506,11 +581,11 @@ public class SeaBattleScene implements GameScene {
     }
     
     private void drawIsland() {
-    	if(selectedIsland == pukru_island) {
-    		batch.draw(selectedIsland, -1190,1090);
-    	}else {
+        if(selectedIsland == pukru_island) {
+            batch.draw(selectedIsland, -1190,1090);
+        }else {
             batch.draw(selectedIsland, -1290,1050);
-    	}
+        }
     }
 
     /**
@@ -594,7 +669,7 @@ public class SeaBattleScene implements GameScene {
 
         for (Vessel vessel : context.getEntities().listVesselEntities()) {
             // render cannon balls
-        	for (CannonBall c : vessel.getCannonballs()) {
+            for (CannonBall c : vessel.getCannonballs()) {
                 float cx = getIsometricX(c.getX(), c.getY(), c);
                 float cy = getIsometricY(c.getX(), c.getY(), c);
                 if (!canDraw(cx, cy, c.getRegionWidth(), c.getRegionHeight())) {
@@ -608,10 +683,28 @@ public class SeaBattleScene implements GameScene {
                     cx = getIsometricX(c.getX(), c.getY(), c.getEndingAnimationRegion());
                     cy = getIsometricY(c.getX(), c.getY(), c.getEndingAnimationRegion());
                     batch.draw(c.getEndingAnimationRegion(), cx, cy);
+                    if(isStartedShooting)
+                    {
+                        isStartedShooting = false;
+                        switch(vessel.getCannonSize()) {
+    	                	case "large":
+    	                		cannonBigSound.stop();
+    	                	case "medium":
+    	                		cannonMediumSound.stop();
+    	                	case "small":
+    	                		cannonSmallSound.stop();
+    	            	}
+    	            	if(c.getEndingAnimationRegion().getTexture() == context.getManager().get(context.getAssetObject().hit)) {
+    	            		cannonHitSound.play(getSound_volume());
+    	            	}else {
+    	            		splashSound.play(getSound_volume());
+    	            	}
+                    }
+
                 }
             }
 
-        	// render smoke
+            // render smoke
             if (vessel.isSmoking()) {
                 TextureRegion r = vessel.getShootSmoke();
                 float cx = getIsometricX(vessel.getX(), vessel.getY(), r);
@@ -624,29 +717,11 @@ public class SeaBattleScene implements GameScene {
             batch.end();
             
             // render move bar
-            int BAR_HEIGHT_ABOVE_SHIP = 8; // px
+            int BAR_HEIGHT_ABOVE_SHIP = 15; // px
             int BAR_HEIGHT = 7;
             renderer.begin(ShapeRenderer.ShapeType.Line);
             float x = getIsometricX(vessel.getX(), vessel.getY(), vessel);
             float y = getIsometricY(vessel.getX(), vessel.getY(), vessel);
-            //custom move bar location for specific ships
-            switch(vessel.getClass().getSimpleName()) {
-	            case "Warfrig":
-	            	switch(vessel.getRotationIndex()) {
-		            case 2:
-		            	x = getIsometricX((float) (vessel.getX()-0.3), vessel.getY(), vessel);
-		            case 6:
-		            	x = getIsometricX((float) (vessel.getX()-0.3), vessel.getY(), vessel);
-	            	}
-	            case "Xebec":
-	            	BAR_HEIGHT_ABOVE_SHIP = 0; // px
-	            	switch(vessel.getRotationIndex()) {
-		            case 2:
-		            	x = getIsometricX((float) (vessel.getX()-0.1), vessel.getY(), vessel);
-		            case 6:
-		            	x = getIsometricX((float) (vessel.getX()-0.1), vessel.getY(), vessel);
-	            	}
-            }
  
             int width = vessel.getMoveType().getBarWidth() + 1;
             renderer.setColor(Color.BLACK);
@@ -749,12 +824,14 @@ public class SeaBattleScene implements GameScene {
         if (mainmenu.handleDrag(sx, sy, x, y)) {
             return true;
         }
-    	if (sy > camera.viewportHeight) {
-            return false;
-        }
+        if(!mainmenu.audio_slider.isVisible()) {
+            if (sy > camera.viewportHeight) {
+                return false;
+            }
 
-        if (this.canDragMap) {
-            camera.translate(-x, y);
+            if (this.canDragMap) {
+                camera.translate(-x, y);
+            }
         }
 
         return true;
@@ -765,19 +842,39 @@ public class SeaBattleScene implements GameScene {
         if (mainmenu.handleClick(x, y, button)) {
             return true;
         }
-        if (y < camera.viewportHeight) {
-        	// handle camera not following vessel
-        	cameraFollowsVessel = false;
+        if(!mainmenu.audio_slider.isVisible()) {
+            if (y < camera.viewportHeight) {
+                // handle camera not following vessel
+                cameraFollowsVessel = false;
 
-            this.canDragMap = true;
-            return true;
+                this.canDragMap = true;
+                return true;
+            }
+            this.canDragMap = false;	
         }
-        this.canDragMap = false;
         return false;
     }
 
+    private void handleMouseIcon(float x, float y)
+    {
+        if(y < 400) {
+            if(context.isConnected()) {
+                if(x > Gdx.graphics.getWidth() - 60 && y < 35 || (mainmenu.isMenuButtonIsDown() && mainmenu.isClickingMenuTable(x, y))) {
+                    Gdx.graphics.setCursor(Gdx.graphics.newCursor(null, 0, 0));
+                }else {
+                    Gdx.graphics.setCursor(Gdx.graphics.newCursor(cursorPixmap, 0, 0));
+                }
+            }else {
+                Gdx.graphics.setCursor(Gdx.graphics.newCursor(null, 0, 0));
+            }
+        }else {
+            Gdx.graphics.setCursor(Gdx.graphics.newCursor(null, 0, 0));
+        }
+    }
+    
     @Override
     public boolean handleMouseMove(float x, float y) {
+        handleMouseIcon(x,y);
         if (mainmenu.handleMouseMove(x, y)) {
             return true;
         }
@@ -789,23 +886,23 @@ public class SeaBattleScene implements GameScene {
         if (mainmenu.handleRelease(x, y, button)) {
             return true;
         }
-    	if (y < camera.viewportHeight) {
-    		// handle camera following/not following vessel
-        	if (button == Input.Buttons.RIGHT) {
-        		cameraFollowsVessel = false;
-        	} else {
-        		this.cameraFollowsVessel = true;
-        		try {
-	        		Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
-	        		camera.translate(
-	        				getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
-	        				getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
-	        		);
-        		}catch(NullPointerException e){
-        			//TO-DO -fix issue with null pointer
-        		}
-        	}
-    		
+        if (y < camera.viewportHeight) {
+            // handle camera following/not following vessel
+            if (button == Input.Buttons.RIGHT) {
+                cameraFollowsVessel = false;
+            } else {
+                this.cameraFollowsVessel = true;
+                try {
+                    Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
+                    camera.translate(
+                            getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
+                            getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
+                    );
+                }catch(NullPointerException e){
+                    //TO-DO -fix issue with null pointer
+                }
+            }
+            
             return true;
         }
         
@@ -870,9 +967,9 @@ public class SeaBattleScene implements GameScene {
     public void initializePlayerCamera(Vessel vessel) {
         cameraFollowsVessel = true; // force reset
         camera.translate(
-				getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
-				getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
-		);
+                getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
+                getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
+        );
     }
     
     /**

@@ -12,7 +12,9 @@ import com.benberi.cadesim.util.PackedObjectOrientation;
 
 public class Junk extends Vessel {
 	public static final String VESSELNAME = "junk";
-
+	
+	private static String cannonsize = "large";
+	
     public Junk(GameContext context, String name, int x, int y) {
         super(context, name, x, y);
     }
@@ -38,7 +40,12 @@ public class Junk extends Vessel {
         return new LargeCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_large"),
                 getContext().getTextures().getMisc("hit"));
     }
-
+    
+    @Override
+    public String getCannonSize() {
+    	return cannonsize;
+    }
+    
     @Override
     public VesselMoveType getMoveType() {
         return VesselMoveType.THREE_MOVES;

@@ -13,6 +13,8 @@ import com.benberi.cadesim.util.PackedObjectOrientation;
 public class Blackship extends Vessel {
 	public static final String VESSELNAME = "blackship";
 
+	private static String cannonsize = "large";
+	
     public Blackship(GameContext context, String name, int x, int y) {
         super(context, name, x, y);
     }
@@ -37,6 +39,11 @@ public class Blackship extends Vessel {
     public CannonBall createCannon(GameContext ctx, Vessel source, Vector2 target) {
         return new LargeCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_large"),
                 getContext().getTextures().getMisc("hit"));
+    }
+    
+    @Override
+    public String getCannonSize() {
+    	return cannonsize;
     }
 
     @Override

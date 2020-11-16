@@ -3,6 +3,7 @@ package com.benberi.cadesim.game.scene;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -99,7 +100,6 @@ public class SceneAssetManager {
 	private final static String XEBEC = "vessel/xebec/sail.png";
 	
 	private final static String BAGHLAH_SINKING = "vessel/baghlah/sink.png";
-//	private final static String blackship_sinking ="vessel/blackship/sink.png";
 	private final static String DHOW_SINKING = "vessel/dhow/sink.png";
 	private final static String FANCHUAN_SINKING ="vessel/fanchuan/sink.png";
 	private final static String GRANDFRIG_SINKING = "vessel/grandfrig/sink.png";
@@ -161,7 +161,8 @@ public class SceneAssetManager {
     private final static String TEXTFIELDTEXTURE = "skin/textfield.png";
     private final static String LOGINBUTTON = "skin/login.png";
     private final static String LOGINBUTTONHOVER = "skin/login-hover.png";
-
+    
+    private final static String SEABATTLE_CURSOR = "skin/cursor.png";
     private final static String CURSOR = "skin/textfield-cursor.png";
     private final static String SELECTION  = "skin/textfield-selection.png";
     
@@ -233,6 +234,8 @@ public class SceneAssetManager {
     /*
      * asset descriptors for textures
      */
+    public AssetDescriptor<Texture> seaBattleCursor = new AssetDescriptor<Texture>(SEABATTLE_CURSOR, Texture.class);
+    
 	public AssetDescriptor<Texture> baghlahSkin = new AssetDescriptor<Texture>(BAGHLAHSKIN, Texture.class);
 	public AssetDescriptor<Texture> blackshipSkin = new AssetDescriptor<Texture>(BLACKSHIPSKIN, Texture.class);
 	public AssetDescriptor<Texture> dhowSkin = new AssetDescriptor<Texture>(DHOWSKIN, Texture.class);
@@ -404,7 +407,47 @@ public class SceneAssetManager {
 	
 	public AssetDescriptor<BitmapFont> chatMessageFont;
 	
+	public final String CANNONHIT_SOUND = "sounds/cannonball_hit.ogg";
+	public final String CANNONSPLASH_SOUND = "sounds/cannonball_splash.ogg";
+	public final String CANNONSPLASH2_SOUND = "sounds/cannonball_splash2.ogg";
+	public final String CANNONFIREBIG_SOUND = "sounds/cannon_fire_big.ogg";
+	public final String CANNONFIREMEDIUM_SOUND = "sounds/cannon_fire_medium.ogg";
+	public final String CANNONFIRESMALL_SOUND = "sounds/cannon_fire_small.ogg";
+	public final String ROCKHIT_SOUND = "sounds/rock_damage.ogg";
+	public final String MOVE_SOUND = "sounds/ship_moves.ogg";
+	public final String MOVE2_SOUND = "sounds/ship_moves2.ogg";
+	public final String SHIPSUNK_SOUND = "sounds/ship_sunk.ogg";
+	public final String WHIRLPOOL_SOUND = "sounds/whirlpool.ogg";
+	public final String WHIRLPOOL_SOUND2 = "sounds/whirlpool2.ogg";
+	public final String WIND_SOUND = "sounds/wind.ogg";
+	public final String CREAK_SOUND = "sounds/ambient_creak_1.ogg";
+	
+	public AssetDescriptor<Sound> hit_sound = new AssetDescriptor<Sound>(CANNONHIT_SOUND, Sound.class);
+	public AssetDescriptor<Sound> splash_sound = new AssetDescriptor<Sound>(CANNONSPLASH_SOUND, Sound.class);
+	public AssetDescriptor<Sound> cannonbig_sound = new AssetDescriptor<Sound>(CANNONFIREBIG_SOUND, Sound.class);
+	public AssetDescriptor<Sound> cannonmedium_sound = new AssetDescriptor<Sound>(CANNONFIREMEDIUM_SOUND, Sound.class);
+	public AssetDescriptor<Sound> cannonsmall_sound = new AssetDescriptor<Sound>(CANNONFIRESMALL_SOUND, Sound.class);
+	public AssetDescriptor<Sound> rockhit_sound = new AssetDescriptor<Sound>(ROCKHIT_SOUND, Sound.class);
+	public AssetDescriptor<Sound> move_sound = new AssetDescriptor<Sound>(MOVE_SOUND, Sound.class);
+	public AssetDescriptor<Sound> move2_sound = new AssetDescriptor<Sound>(MOVE2_SOUND, Sound.class);
+	public AssetDescriptor<Sound> shipsunk_sound = new AssetDescriptor<Sound>(SHIPSUNK_SOUND, Sound.class);
+	public AssetDescriptor<Sound> creak_sound = new AssetDescriptor<Sound>(CREAK_SOUND, Sound.class);
+	
+	public void loadSounds() {
+		manager.load(hit_sound);
+		manager.load(splash_sound);
+		manager.load(cannonbig_sound);
+		manager.load(cannonmedium_sound);
+		manager.load(cannonsmall_sound);
+		manager.load(rockhit_sound);
+		manager.load(move_sound);
+		manager.load(move2_sound);
+		manager.load(shipsunk_sound);
+		manager.load(creak_sound);
+	}
+	
     public void loadSeaBattle() {
+    	manager.load(seaBattleCursor);
     	manager.load(sea);
     	manager.load(alkaid_island);
     	manager.load(pukru_island);
@@ -431,8 +474,7 @@ public class SceneAssetManager {
     	manager.load(lobbyDown);
     	manager.load(mapsUp);
     	manager.load(mapsDown);
-    	manager.load(battleSelection);
-    	
+    	manager.load(battleSelection);	
     }
     
     public void loadShipInfo() {

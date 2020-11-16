@@ -13,6 +13,8 @@ import com.benberi.cadesim.util.PackedObjectOrientation;
 public class Xebec extends Vessel {
 	public static final String VESSELNAME = "xebec";
 
+	private static String cannonsize = "large";
+	
     public Xebec(GameContext context, String name, int x, int y) {
         super(context, name, x, y);
     }
@@ -38,7 +40,12 @@ public class Xebec extends Vessel {
         return new MediumCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_large"),
                 getContext().getTextures().getMisc("hit"));
     }
-
+    
+    @Override
+    public String getCannonSize() {
+    	return cannonsize;
+    }
+    
     @Override
     public VesselMoveType getMoveType() {
         return VesselMoveType.THREE_MOVES;

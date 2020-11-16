@@ -13,6 +13,8 @@ import com.benberi.cadesim.util.PackedObjectOrientation;
 public class Baghlah extends Vessel {
 	public static final String VESSELNAME = "baghlah";
 	
+	private static String cannonsize = "medium";
+	
     public Baghlah(GameContext context, String name, int x, int y) {
         super(context, name, x, y);
     }
@@ -35,8 +37,13 @@ public class Baghlah extends Vessel {
 
     @Override
     public CannonBall createCannon(GameContext ctx, Vessel source, Vector2 target) {
-        return new MediumCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_small"),
+        return new MediumCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_large"),
                 getContext().getTextures().getMisc("hit"));
+    }
+    
+    @Override
+    public String getCannonSize() {
+    	return cannonsize;
     }
 
     @Override

@@ -26,18 +26,18 @@ public class TurnAnimationPacket extends ClientPacketExecutor {
             if (vessel != null) {
                 for (int slot = 0; slot < 4; slot++) {
                     MoveAnimationTurn turn = vessel.getStructure().getTurn(slot);
-                    turn.setSpinCollision(p.readByte() == 1);
-                    turn.setFace(VesselFace.forId(p.readByte()));
                     turn.setTokenUsed(MoveType.forId(p.readByte()));
                     turn.setAnimation(VesselMovementAnimation.forId(p.readByte()));
                     turn.setSubAnimation(VesselMovementAnimation.forId(p.readByte()));
                     turn.setLeftShoots(p.readByte());
                     turn.setRightShoots(p.readByte());
                     turn.setSunk(p.readByte() == 1);
+                    turn.setSpinCollision(p.readByte() == 1);
+                    turn.setFace(VesselFace.forId(p.readByte()));
                 }
             }
             else {
-                p.getBuffer().readerIndex(p.getBuffer().readerIndex() + 4);
+                p.getBuffer().readerIndex(p.getBuffer().readerIndex() + 16);
             }
 
         }

@@ -36,8 +36,6 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
 
                 // The turn
                 MoveAnimationTurn turn = p.getAnimationStructure().getTurn(slot);
-                writeByte(p.getAnimationStructure().getTurn(slot).getSpinCollision() ? 1 : 0);
-                writeByte(p.getAnimationStructure().getTurn(slot).getFace().getDirectionId());
                 // Write the data
                 writeByte(turn.getMoveToken().getId());
                 writeByte(turn.getAnimation().getId());
@@ -45,6 +43,8 @@ public class SendPlayersAnimationStructurePacket extends OutgoingPacket {
                 writeByte(turn.getLeftShoots());
                 writeByte(turn.getRightShoots());
                 writeByte(turn.isSunk() ? 1 : 0);
+                writeByte(p.getAnimationStructure().getTurn(slot).getSpinCollision() ? 1 : 0);
+                writeByte(p.getAnimationStructure().getTurn(slot).getFace().getDirectionId());
             }
         }
 

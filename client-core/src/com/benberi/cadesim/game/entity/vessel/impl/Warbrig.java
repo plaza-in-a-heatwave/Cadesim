@@ -12,7 +12,9 @@ import com.benberi.cadesim.util.PackedObjectOrientation;
 
 public class Warbrig extends Vessel {
 	public static final String VESSELNAME = "warbrig";
-
+	
+	private static String cannonsize = "medium";
+	
     public Warbrig(GameContext context, String name, int x, int y) {
         super(context, name, x, y);
     }
@@ -38,7 +40,12 @@ public class Warbrig extends Vessel {
         return new MediumCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_small"),
                 getContext().getTextures().getMisc("hit"));
     }
-
+    
+    @Override
+    public String getCannonSize() {
+    	return cannonsize;
+    }
+    
     @Override
     public VesselMoveType getMoveType() {
         return VesselMoveType.THREE_MOVES;

@@ -51,6 +51,11 @@ public abstract class Vessel extends Entity {
      * The name of this vessel player
      */
     private String name;
+    
+    /**
+     * The cannonsize of player;
+     */
+    private String cannonsize;
 
     /**
      * If the vessel is moving
@@ -168,6 +173,10 @@ public abstract class Vessel extends Entity {
 
     public void setNumberOfMoves(int moves) {
         this.numberOfMoves = moves;
+    }
+    
+    public String getCannonSize() {
+        return cannonsize;
     }
 
     public boolean isSinking() {

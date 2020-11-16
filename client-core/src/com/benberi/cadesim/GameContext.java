@@ -311,6 +311,7 @@ public class GameContext {
         assetManager.loadConnectSceneTextures();
         assetManager.loadAllShipTextures();
         assetManager.loadShipInfo();
+        assetManager.loadSounds();
         assetManager.loadSeaBattle();
         assetManager.loadFonts();
         assetManager.loadControl();

@@ -32,6 +32,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.scene.SceneComponent;
@@ -42,6 +43,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      * The context
      */
     private GameContext context;
+    /*
+     * input processor for stage
+     */
+    public InputMultiplexer inputMultiplexer;
     /**
      * Batch renderer for sprites and textures
      */
@@ -103,6 +108,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	Texture texture;
 	
 	//Settings buttons (sliders)
+	public Slider audio_slider;
 	private Slider turnDuration_slider;
 	private Slider roundDuration_slider;
 	private Slider sinkPenalty_slider;
@@ -137,6 +143,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private Label jobberLabel;
 	private Label previewLabel;
 	
+	private float audioMax = 0.25f;
 	private int turnMax = 60;
 	private int roundMax = 7200;
 	private int sinkPenaltyMax = 10;
@@ -179,9 +186,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         batch = new SpriteBatch();
         fileChooser = new JFileChooser();
         skin = new Skin(Gdx.files.internal("uiskin.json"));
+        Skin sliderskin = new Skin(Gdx.files.internal("skin/uiskin.json"));
         dialog = new Dialog("Game Settings", skin, "dialog");
         menuButton_Shape = new Rectangle(MENU_buttonX, 13, 25, 25);
-        menuTable_Shape = new Rectangle(MENU_tableX, 30, 80, 80);
+        menuTable_Shape = new Rectangle(MENU_tableX, 30, 80, 200);
         menuLobby_Shape = new Rectangle(MENU_lobbyButtonX, 50, 70, 22);
         menuMap_Shape = new Rectangle(MENU_mapsButtonX, 80, 70, 22);
         
@@ -193,7 +201,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		previewLabel = new Label("Map preview not available.",skin);
 		
 		selectBox=new SelectBox<String>(skin);
-		
+		audio_slider = new Slider(0.0f, audioMax, 0.01f,true, sliderskin);
+		audio_slider.setVisible(false);
     	turnDuration_slider = new Slider(5.0f, (float)turnMax, 5.0f, false, skin);
     	roundDuration_slider = new Slider(30.0f, (float)roundMax, 5.0f, false, skin);
     	sinkPenalty_slider = new Slider(0.0f, (float)sinkPenaltyMax, 1.0f, false, skin);
@@ -309,7 +318,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	proposeButton = new TextButton("Propose",skin);
     	exitButton = new TextButton("Exit",skin);
     	defaultButton = new TextButton("Reset defaults",skin);
-    	
+    	audio_slider.setSize(10, 100);
+    	audio_slider.setPosition(Gdx.graphics.getWidth() - 30, Gdx.graphics.getHeight()- 220);
+    	stage.addActor(audio_slider);
 		createDialogListeners();
     }
 
@@ -348,6 +359,14 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     @Override
     public void dispose() {
     }
+    
+    public void setup() {
+        inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(context.getInputProcessor());
+        inputMultiplexer.addProcessor(stage);
+        Gdx.input.setInputProcessor(inputMultiplexer);
+    }
+    
     /*
      * Fill dialog selectbox with map names
      */
@@ -527,7 +546,11 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	sinkPenaltyText.setText(String.valueOf((int)getSinkPenaltySlider().getValue()));
             }});
-		
+		audio_slider.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            	context.getBattleScene().setSound_volume((float)audio_slider.getValue());
+            }});
 		selectBox.addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -704,12 +727,15 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     public boolean handleClick(float x, float y, int button) {
     	if ((!menuButtonIsDown) && isClickingMenuButton(x,y)) {
             menuButtonIsDown = true;
+            setup();
+            audio_slider.setVisible(true);
             return true;
         }
         else if(menuButtonIsDown && !isClickingMenuTable(x,y)){
         	menuButtonIsDown = false;
         	menuLobbyIsDown = false;
         	menuMapsIsDown = false;
+        	audio_slider.setVisible(false);
         	return false;
         }
     	else if(menuButtonIsDown && isClickingLobbyButton(x,y)) {
@@ -753,11 +779,11 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      	}
     }
 
-    private boolean isClickingMenuButton(float x, float y) {
+    public boolean isClickingMenuButton(float x, float y) {
         return isPointInRect(x,y,menuButton_Shape);
     }
     
-    private boolean isClickingMenuTable(float x, float y) {
+    public boolean isClickingMenuTable(float x, float y) {
         return isPointInRect(x,y,menuTable_Shape);
     }
     
@@ -938,5 +964,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				getCustomMapButton().setDisabled(false);
 				break;
 		}
+	}
+
+	public boolean isMenuButtonIsDown() {
+		return menuButtonIsDown;
 	}
 }

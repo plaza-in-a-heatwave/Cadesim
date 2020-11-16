@@ -12,6 +12,8 @@ import com.benberi.cadesim.util.PackedObjectOrientation;
 
 public class Lgsloop extends Vessel {
 	public static final String VESSELNAME = "lgsloop";
+	
+	private static String cannonsize = "small";
 
     public Lgsloop(GameContext context, String name, int x, int y) {
         super(context, name, x, y);
@@ -38,7 +40,12 @@ public class Lgsloop extends Vessel {
         return new SmallCannonball(ctx, source, target, getContext().getTextures().getMisc("splash_small"),
                 getContext().getTextures().getMisc("hit"));
     }
-
+    
+    @Override
+    public String getCannonSize() {
+    	return cannonsize;
+    }
+    
     @Override
     public VesselMoveType getMoveType() {
         return VesselMoveType.FOUR_MOVES;
