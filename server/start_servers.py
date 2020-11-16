@@ -10,13 +10,13 @@ import subprocess, platform, time
 DETACHED_PROCESS = 0x00000008
 
 for server_args in [
-    "java -jar cadesim-server.jar -p 4970 --schedule-updates 04:00",
-    "java -jar cadesim-server.jar -p 4971 --schedule-updates 04:00",
-    "java -jar cadesim-server.jar -p 4972 --schedule-updates 04:00",
-    "java -jar cadesim-server.jar -p 4973 --schedule-updates 04:00",
-    "java -jar cadesim-server.jar -p 4974 --schedule-updates 04:00",
+    "java -jar cadesim-server.jar -p 4970 --schedule-updates 04:00 --update-at-startup",
+    "java -jar cadesim-server.jar -p 4971 --schedule-updates 04:00 --update-at-startup",
+    "java -jar cadesim-server.jar -p 4972 --schedule-updates 04:00 --update-at-startup",
+    "java -jar cadesim-server.jar -p 4973 --schedule-updates 04:00 --update-at-startup",
+    "java -jar cadesim-server.jar -p 4974 --schedule-updates 04:00 --update-at-startup",
 ]:
-    time.sleep(0.1) # add time granularity to prevent two servers sharing same logfile
+    time.sleep(0.1) # stagger any races for file locks, flatten system peak load
     if(any(platform.win32_ver())):
         print("started Cadesim instance (pid: " + str(subprocess.Popen(server_args.split(" "), close_fds=True, creationflags=DETACHED_PROCESS).pid) + ")")
     else:
