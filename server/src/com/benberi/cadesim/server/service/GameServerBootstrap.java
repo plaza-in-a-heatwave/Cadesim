@@ -50,8 +50,6 @@ public class GameServerBootstrap {
      * @throws InterruptedException
      */
     private void startServer() throws InterruptedException {
-        ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
-        ServerContext.log("Using config: " + ServerConfiguration.getConfig());
         ServerContext.log("Starting up the host server....");
         CadeServer server = new CadeServer(context, this); // to notify back its done
         executorService.execute(server);
@@ -88,11 +86,6 @@ public class GameServerBootstrap {
      */
     public static void main(String[] args) throws NumberFormatException, InterruptedException{
         start = System.currentTimeMillis();
-
-        // add a shutdown hook and print a log message when this happens.
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-          public void run() { ServerContext.log("Cadesim shut down successfully. Doei!"); }
-        });
 
         // save args into config
         ServerConfiguration.setArgs(args);
@@ -164,19 +157,11 @@ public class GameServerBootstrap {
             help(options);
         }
 
-        // handle updater logic.
-        // clean up after previous update session (if applicable) and handle startup updates.
+        // handle updater cleanup logic after previous update session (if applicable).
         if (cmd.hasOption("l")) {
             ServerConfiguration.setcheckForUpdatesOnStartup(true); // set first as it may be unset later
         }
         Updater.cleanupAfterRestart(); // may unset checkForUpdatesOnStartup flag
-        if (ServerConfiguration.getCheckForUpdatesOnStartup()) {
-            try {
-                Updater.update();
-            } catch(IOException|InterruptedException e) {
-                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
-            }
-        }
 
         // check invalid options
         if (cmd.hasOption("z")) {
@@ -434,12 +419,36 @@ public class GameServerBootstrap {
             	help(options);
             }
 
-            GameServerBootstrap bootstrap = new GameServerBootstrap();
-            bootstrap.startServer();
-
         } catch (NumberFormatException e) {
             ServerContext.log("Failed to parse comand line properties" + e.toString());
             help(options);
+        }
+
+        // create the bootstrap. this loads our config, among other things.
+        GameServerBootstrap bootstrap = new GameServerBootstrap();
+
+        // log welcome message
+        ServerContext.log("Welcome to " + Constants.name + " (version " + Constants.VERSION + ")" + ".");
+        ServerContext.log("Using config: " + ServerConfiguration.getConfig());
+
+        // add a shutdown hook and print a log message when this happens.
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+          public void run() { ServerContext.log("Cadesim shut down successfully. Doei!"); }
+        });
+
+        // decide: do we need to update or should we start server?
+        if (ServerConfiguration.getCheckForUpdatesOnStartup()) {
+            // this should be done after the context has been instantiated
+            // so that updater log() messages go to the instance logfile.
+            try {
+                Updater.update();
+            } catch(IOException|InterruptedException e) {
+                System.exit(Constants.EXIT_ERROR_CANT_UPDATE);
+            }
+        }
+        else
+        {
+            bootstrap.startServer();
         }
     }
 }
