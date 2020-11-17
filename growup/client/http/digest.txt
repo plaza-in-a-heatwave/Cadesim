@@ -1,0 +1,4 @@
+getdown.txt = 75269b503e174a97123085e40d5aa6d5
+cadesim.jar = 236603267088a0fed8856a4e49afb736
+version.txt = 9ae191475e9d7ce314cea619f6bf86f8
+digest.txt = 2677a88e9ab30a5ff45c3cc40d63042d
