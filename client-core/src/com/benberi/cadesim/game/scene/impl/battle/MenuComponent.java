@@ -163,6 +163,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         }
         dialog.getContentTable().clear();
         dialog.setVisible(false);
+        audio_slider.setVisible(false);
         Gdx.input.setInputProcessor(input);
         menuButtonIsDown = false;
         menuLobbyIsDown = false;
@@ -459,6 +460,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         		dialog.getContentTable().clear();
         		context.sendSettingsPacket(customMap,mapBoolean, mapName);
 		    	dialog.setVisible(false);
+		    	audio_slider.setVisible(false);
 	    		menuButtonIsDown = false;
 	    		menuLobbyIsDown = false;
 	        	menuMapsIsDown = false;  
