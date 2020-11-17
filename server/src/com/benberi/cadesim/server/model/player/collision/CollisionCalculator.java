@@ -85,47 +85,22 @@ public class CollisionCalculator {
     }
 
     public List<Player> getPlayersTryingToClaimByAction(Player pl, Position target, int turn, int phase) {
-        List<Player> collided = new ArrayList<>();
+    	List<Player> collided = new ArrayList<>();
         for (Player p : players.listRegisteredPlayers()) {
         	if(p == pl) {
         		continue;
         	}
             Position next = p;
-            Position finalPosition = p;
-            @SuppressWarnings("unused")
-			Position finalPlayerPosition = p;
             if(p.isSunk()) {
             	next = p;
-            	finalPosition = p;
-            	finalPlayerPosition = pl;
             }else {
                 if (!p.getCollisionStorage().isPositionChanged()) {
                 	next = context.getMap().getNextActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
-                	finalPosition =  context.getMap().getFinalActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
-                	finalPlayerPosition =  context.getMap().getFinalActionTilePosition(pl.getCollisionStorage().isOnAction() ? pl.getCollisionStorage().getActionTile() : -1, pl, phase);
                 }
             }
-            int tile = context.getMap().getTile(pl.getX(), pl.getY());
-            int otherTile = context.getMap().getTile(p.getX(), p.getY());
-            if(context.getMap().isWind(tile) && context.getMap().isWind(otherTile)) {
-            	if(next.equals(target)) {
-                 	collided.add(p);
-                }
-            }else{
-            	//bug still exists on some scenarios unable to find which scenario
-//            	if(next.equals(finalPlayerPosition) && (!context.getMap().isWhirlpool(tile))) {
-//            		collided.add(p);
-//		        }
-//            	if(finalPosition.equals(finalPlayerPosition)) {
-//            		collided.add(p);
-//            	}
-            	if(finalPosition.equals(target) && (!context.getMap().isWhirlpool(tile))) {
-            		collided.add(p);
-		        }
-            	if(next.equals(target)) {
-   	             	collided.add(p);
-	   	        }
-           }
+            if(next.equals(target)) {
+            	collided.add(p);
+            }
         }
         return collided;
     }
@@ -357,7 +332,12 @@ public class CollisionCalculator {
             if (!claimed.getCollisionStorage().isPositionChanged()) {
                 next = context.getMap().getNextActionTilePosition(claimed.getCollisionStorage().isOnAction() ? claimed.getCollisionStorage().getActionTile() : -1, claimed, phase);
             }
-            if (next.equals(claimed)) {
+            if (next.equals(player)) {
+            	collide(player, claimed, turn, phase);
+            	collide(claimed, player, turn, phase);
+                return true;
+            }
+            else if (next.equals(claimed)) {
                 player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
                 claimed.getVessel().appendDamage(player.getVessel().getRamDamage(), player.getTeam()); //needed if claimed is by a rock 
                 Position bumpPos = context.getMap().getNextActionTilePositionForTile(claimed, context.getMap().getTile(player.getX(), player.getY()));
@@ -374,15 +354,13 @@ public class CollisionCalculator {
                     player.getCollisionStorage().setCollided(turn, phase);
                     return true;
                 }
-            }            	//if claimed doesn't move away
-        	if (checkActionCollision(claimed, next, turn, phase, false)) {
-        		collide(player, player, turn, phase);
-        		return true;
             }
-        }else {
-        	return performActionCollision(player,target,turn,phase,setPosition);
+            if(checkActionCollision(claimed, next, turn, phase, false)) {
+            	collide(player, claimed, turn, phase);
+            	return true;
+            }
         }
-        return false;
+        return performActionCollision(player,target,turn,phase,setPosition);
     }
 
     /**
