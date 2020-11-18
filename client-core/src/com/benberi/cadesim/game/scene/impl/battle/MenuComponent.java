@@ -97,8 +97,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     private JFileChooser fileChooser;
 	public Stage stage;
 	private SelectBox<String> selectBox;
-	private InputProcessor input;
 	private Dialog dialog;
+
 	public Skin skin;
 	private String[] mapStrings;
 	private int[][] customMap;
@@ -164,7 +164,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         dialog.getContentTable().clear();
         dialog.setVisible(false);
         audio_slider.setVisible(false);
-        Gdx.input.setInputProcessor(input);
         menuButtonIsDown = false;
         menuLobbyIsDown = false;
         menuMapsIsDown = false;
@@ -179,7 +178,11 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	public boolean isSettingsDialogOpen() {
 	    return dialog.isVisible();
 	}
-
+	
+	public Dialog getDialog() {
+		return dialog;
+	}
+	
     protected MenuComponent(GameContext context, SeaBattleScene owner) {
         super(context, owner);
         this.context = context;
@@ -362,13 +365,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     public void dispose() {
     }
     
-    public void setup() {
-        inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(context.getInputProcessor());
-        inputMultiplexer.addProcessor(stage);
-        Gdx.input.setInputProcessor(inputMultiplexer);
-    }
-    
     /*
      * Fill dialog selectbox with map names
      */
@@ -463,7 +459,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		    	audio_slider.setVisible(false);
 	    		menuButtonIsDown = false;
 	    		menuLobbyIsDown = false;
-	        	menuMapsIsDown = false;  
+	        	menuMapsIsDown = false;
+//	        	context.getControlScene().getControl().setup();
 			} 
     	});
     	
@@ -722,15 +719,12 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 			dialog.setSize(650, 575);
 			dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
 		}
-		input = Gdx.input.getInputProcessor();
-		Gdx.input.setInputProcessor(stage);
     }
     
     @Override
     public boolean handleClick(float x, float y, int button) {
     	if ((!menuButtonIsDown) && isClickingMenuButton(x,y)) {
             menuButtonIsDown = true;
-            setup();
             audio_slider.setVisible(true);
             return true;
         }

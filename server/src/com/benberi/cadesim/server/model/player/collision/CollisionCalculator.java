@@ -91,15 +91,37 @@ public class CollisionCalculator {
         		continue;
         	}
             Position next = p;
+            Position finalPosition = p;
+            @SuppressWarnings("unused")
+			Position finalPlayerPosition = p;
             if(p.isSunk()) {
             	next = p;
+            	finalPosition = p;
+            	finalPlayerPosition = pl;
             }else {
                 if (!p.getCollisionStorage().isPositionChanged()) {
                 	next = context.getMap().getNextActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
+                	finalPosition =  context.getMap().getFinalActionTilePosition(p.getCollisionStorage().isOnAction() ? p.getCollisionStorage().getActionTile() : -1, p, phase);
+                	finalPlayerPosition =  context.getMap().getFinalActionTilePosition(pl.getCollisionStorage().isOnAction() ? pl.getCollisionStorage().getActionTile() : -1, pl, phase);
                 }
             }
-            if(next.equals(target)) {
-            	collided.add(p);
+            int tile = context.getMap().getTile(pl.getX(), pl.getY());
+            int otherTile = context.getMap().getTile(p.getX(), p.getY());
+            if(context.getMap().isWind(tile) && context.getMap().isWind(otherTile)) {//case where both on winds
+            	if(next.equals(target)) {
+                 	collided.add(p);
+                }
+            }else if(context.getMap().isWind(tile) && context.getMap().isWhirlpool(otherTile)){ //case where ship is on wind and other in whirlpool
+            	if(finalPosition.equals(target) && (context.getMap().isWind(tile))) {
+            		collided.add(p);
+		        }
+            	if(next.equals(target)) {
+   	             	collided.add(p);
+	   	        }
+            }else if(context.getMap().isWhirlpool(tile) && context.getMap().isWhirlpool(otherTile)) {//case where both in whirlpool
+            	if(next.equals(target)) {
+   	             	collided.add(p);
+	   	        }
             }
         }
         return collided;
@@ -360,7 +382,10 @@ public class CollisionCalculator {
             	return true;
             }
         }
-        return performActionCollision(player,target,turn,phase,setPosition);
+        else {
+        	performActionCollision(player,target,turn,phase,setPosition);
+        }
+        return false;
     }
 
     /**
@@ -373,18 +398,17 @@ public class CollisionCalculator {
      * @return boolean if collides with another player, false if no collision
      */
     public boolean performActionCollision(Player player, Position target, int turn, int phase, boolean setPosition) {
+    	int playerTile = context.getMap().getTile(player.getX(), player.getY());
     	List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
         if (collided.size() > 0) {
-        	int playerTile = context.getMap().getTile(player.getX(), player.getY());
+        	collide(player, collided.get(0), turn, phase);
             for (Player p : collided) {
             	if(p == player) {
             		continue;
             	}
             	int tile = context.getMap().getTile(p.getX(), p.getY());
-            	//tile is p & playerTile is player
             	if(context.getMap().isWhirlpool(tile) && context.getMap().isWind(playerTile)) {
             		collide(p, player, turn, phase);
-            		collide(player, p, turn, phase);
             		if(phase == 0) {
 	            		p.setFace(p.getFace().getNext());
 	                	p.getAnimationStructure().getTurn(turn).setFace(p.getFace());
@@ -392,17 +416,8 @@ public class CollisionCalculator {
 	            		player.getAnimationStructure().getTurn(turn).setFace(p.getFace());
 	                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
             		}
-            	}else {
+            	}else if(context.getMap().isWhirlpool(tile) && context.getMap().isWhirlpool(playerTile)){
             		collide(p, player, turn, phase);
-            		collide(player, p, turn, phase);
-            		int actionTile = context.getMap().getTile(p.getX(), p.getY());
-            		if(phase == 0 && context.getMap().isWhirlpool(actionTile)) {
-	            		p.setFace(p.getFace().getNext());
-	                	p.getAnimationStructure().getTurn(turn).setFace(p.getFace());
-	                	p.getAnimationStructure().getTurn(turn).setSpinCollision(true);
-	            		player.getAnimationStructure().getTurn(turn).setFace(p.getFace());
-	                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
-            		}
             	}
             }
             return true;

@@ -3,6 +3,7 @@ package com.benberi.cadesim.game.scene.impl.battle;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -39,7 +40,10 @@ public class SeaBattleScene implements GameScene {
      * The main game context
      */
     private GameContext context;
-
+    /*
+     * input processor for stage
+     */
+    public InputMultiplexer inputMultiplexer;
     /**
      * The sprite batch renderer
      */
@@ -65,8 +69,6 @@ public class SeaBattleScene implements GameScene {
      */
     private Texture sea;
     
-    private Texture seaBattleCursor;
-    private Pixmap cursorPixmap;
     /**
      * The islands texture
      */
@@ -163,11 +165,22 @@ public class SeaBattleScene implements GameScene {
         if (getMenu().isSettingsDialogOpen()) {
             getMenu().closeSettingsDialog();
         }
-
+        
         // if there was a previous map: delete it
         if (blockadeMap != null) { blockadeMap.dispose();}
         blockadeMap = new BlockadeMap(context, tiles);
         selectedIsland = islandList.get(context.getIslandId());
+    }
+
+    /**
+     * set up the input processor for the chat and game
+     */
+    public void setup() {
+        inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(context.getInputProcessor());
+        inputMultiplexer.addProcessor(context.getControlScene().getBnavComponent().getChatStage());
+        inputMultiplexer.addProcessor(context.getBattleSceneMenu().stage);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     private void recountVessels() {
@@ -210,11 +223,6 @@ public class SeaBattleScene implements GameScene {
         pukru_island = context.getManager().get(context.getAssetObject().pukru_island);
         doyle_island = context.getManager().get(context.getAssetObject().doyle_island);
         isle_keris_island = context.getManager().get(context.getAssetObject().isle_keris_island);
-        seaBattleCursor = context.getManager().get(context.getAssetObject().seaBattleCursor);
-        if (!seaBattleCursor.getTextureData().isPrepared()) {
-            seaBattleCursor.getTextureData().prepare();
-        }
-        cursorPixmap = seaBattleCursor.getTextureData().consumePixmap();
         //add all island Textures in one go
         Collections.addAll(islandList,alkaid_island, pukru_island, doyle_island, isle_keris_island);
         sea.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
@@ -821,16 +829,17 @@ public class SeaBattleScene implements GameScene {
 
     @Override
     public boolean handleDrag(float sx, float sy, float x, float y) {
-        if (mainmenu.handleDrag(sx, sy, x, y)) {
-            return true;
-        }
-        if(!mainmenu.audio_slider.isVisible()) {
+
+        if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
             if (sy > camera.viewportHeight) {
                 return false;
             }
 
             if (this.canDragMap) {
                 camera.translate(-x, y);
+            }
+            if (mainmenu.handleDrag(sx, sy, x, y)) {
+                return true;
             }
         }
 
@@ -842,7 +851,7 @@ public class SeaBattleScene implements GameScene {
         if (mainmenu.handleClick(x, y, button)) {
             return true;
         }
-        if(!mainmenu.audio_slider.isVisible()) {
+        if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
             if (y < camera.viewportHeight) {
                 // handle camera not following vessel
                 cameraFollowsVessel = false;
@@ -854,27 +863,10 @@ public class SeaBattleScene implements GameScene {
         }
         return false;
     }
-
-    private void handleMouseIcon(float x, float y)
-    {
-        if(y < 400) {
-            if(context.isConnected()) {
-                if(x > Gdx.graphics.getWidth() - 60 && y < 35 || (mainmenu.isMenuButtonIsDown() && mainmenu.isClickingMenuTable(x, y))) {
-                    Gdx.graphics.setCursor(Gdx.graphics.newCursor(null, 0, 0));
-                }else {
-                    Gdx.graphics.setCursor(Gdx.graphics.newCursor(cursorPixmap, 0, 0));
-                }
-            }else {
-                Gdx.graphics.setCursor(Gdx.graphics.newCursor(null, 0, 0));
-            }
-        }else {
-            Gdx.graphics.setCursor(Gdx.graphics.newCursor(null, 0, 0));
-        }
-    }
     
     @Override
     public boolean handleMouseMove(float x, float y) {
-        handleMouseIcon(x,y);
+    	setup();
         if (mainmenu.handleMouseMove(x, y)) {
             return true;
         }
@@ -886,27 +878,27 @@ public class SeaBattleScene implements GameScene {
         if (mainmenu.handleRelease(x, y, button)) {
             return true;
         }
-        if (y < camera.viewportHeight) {
-            // handle camera following/not following vessel
-            if (button == Input.Buttons.RIGHT) {
-                cameraFollowsVessel = false;
-            } else {
-                this.cameraFollowsVessel = true;
-                try {
-                    Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
-                    camera.translate(
-                            getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
-                            getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
-                    );
-                }catch(NullPointerException e){
-                    //TO-DO -fix issue with null pointer
+        if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
+        	if (y < camera.viewportHeight) {
+                // handle camera following/not following vessel
+                if (button == Input.Buttons.RIGHT) {
+                    cameraFollowsVessel = false;
+                } else {
+                    this.cameraFollowsVessel = true;
+                    try {
+                        Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
+                        camera.translate(
+                                getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
+                                getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
+                        );
+                    }catch(NullPointerException e){
+                        //TO-DO -fix issue with null pointer
+                    }
                 }
+                return true;
             }
-            
-            return true;
+            this.canDragMap = false;	
         }
-        
-        this.canDragMap = false;
         return false;
     }
 

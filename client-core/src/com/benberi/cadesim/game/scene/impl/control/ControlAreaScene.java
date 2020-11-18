@@ -34,7 +34,6 @@ public class ControlAreaScene implements GameScene {
         	v.getMoveType() != VesselMoveType.FOUR_MOVES, // is it a big ship
         	v.isDoubleShot()                              // single or double shot
         ));
-
         getControl().create();
     }
 

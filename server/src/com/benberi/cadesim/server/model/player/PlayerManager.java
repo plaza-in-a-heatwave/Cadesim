@@ -21,10 +21,14 @@ import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class PlayerManager {
 
@@ -1156,6 +1160,12 @@ public class PlayerManager {
     	}
     }
 
+    static <T> Collection<List<T>> partitionBasedOnSize(List<T> inputList, int size) {
+        final AtomicInteger counter = new AtomicInteger(0);
+        return inputList.stream()
+                    .collect(Collectors.groupingBy(s -> counter.getAndIncrement()/size))
+                    .values();
+}
     /**
      * send a message to a single player from the server
      */
@@ -1168,10 +1178,12 @@ public class PlayerManager {
     	ServerContext.log("[chat] " + Constants.serverPrivate + "(to " + pl.getName() + "):" + message);
     	
     	if (message.length() >= Constants.SPLIT_CHAT_MESSAGES_THRESHOLD) {
-    	    List<String> messageParts = splitEqually(message, Constants.SPLIT_CHAT_MESSAGES_THRESHOLD);
-            for (String s : messageParts) {
-                pl.getPackets().sendReceiveMessage(Constants.serverPrivate, s);
-            }
+    		List<String> items = new ArrayList<String>(Arrays.asList(message.split("\\\n")));
+    		Collection<List<String>> collection = partitionBasedOnSize(items,4);
+    		for (List<String> s : collection) {
+    	        String string = String.join("\n", s);
+    	        pl.getPackets().sendReceiveMessage(Constants.serverPrivate, string);
+    		}
     	}
     	else {
     	    pl.getPackets().sendReceiveMessage(Constants.serverPrivate, message);
@@ -1791,7 +1803,7 @@ public class PlayerManager {
     		        StringBuilder sb = new StringBuilder("---Available maps---\n");
     		        for (int i=0; i<ServerConfiguration.getAvailableMaps().size(); i++)
     		        {
-    		            sb.append("[" + i + "]  " + ServerConfiguration.getAvailableMaps().get(i) + "\n");
+    		            sb.append("[" + i + "] " + ServerConfiguration.getAvailableMaps().get(i) + "\n");
     		        }
     		        serverPrivateMessage(pl, sb.toString());
     		    }

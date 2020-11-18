@@ -126,22 +126,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     }
 
     /**
-     * helper method to activate/deactivate chat depending on mouse position
-     * @param x screenx
-     * @param y screeny
-     */
-    private void handleChat(float x, float y)
-    {
-        if(x > 490 & y > 420) {
-        	if(inputMultiplexer == null) {
-        		setup();
-        	}
-        }else {
-        	chatStage.setKeyboardFocus(null);
-        	inputMultiplexer = null;
-        }
-    }
-    /**
      * helper method to update moves received this turn
      */
     public void updateMoveHistoryWithNewMoves(int lefts, int forwards, int rights)
@@ -260,6 +244,8 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         		displayMessage(sender + ": \"" + message + "\"", chatMessagePlayer);
         	}
     	}
+        chatScroller.layout();
+        chatScroller.scrollTo(0, 0, 0, 0);
     }
     
 	/**
@@ -270,6 +256,8 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     	{
     		displayMessage(sender + ": \"" + message + "\"", chatMessageServerPrivate);
     	}
+        chatScroller.layout();
+        chatScroller.scrollTo(0, 0, 0, 0);
     }
 
     /**
@@ -777,10 +765,10 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
      * set up the input processor for the chat and game
      */
     public void setup() {
-        inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(context.getInputProcessor());
-        inputMultiplexer.addProcessor(chatStage);
-        Gdx.input.setInputProcessor(inputMultiplexer);
+//        inputMultiplexer = new InputMultiplexer();
+//        inputMultiplexer.addProcessor(context.getInputProcessor());
+//        inputMultiplexer.addProcessor(chatStage);
+//        Gdx.input.setInputProcessor(inputMultiplexer);
     }
     /**
      * display a message in the chat
@@ -795,7 +783,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         TextureRegion tr;
         Label.LabelStyle ls = new LabelStyle(
         		context.getManager().get(context.getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
-        
         chat1 = new Label(message, ls);
         // background width will vary depending on the width of the label
         chat1.setWrap(true);
@@ -827,7 +814,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
             chatMessages.getCells().removeValue(cell, true); // rm lingering physical presence
             chatMessages.invalidate();
         }
-        
         chatScroller.layout();
         chatScroller.scrollTo(0, 0, 0, 0);
     }
@@ -1838,7 +1824,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 
     @Override
     public boolean handleMouseMove(float x, float y) {
-    	handleChat(x,y);
         handleTooltipActivation(x, y);
         return false;
     }
