@@ -344,31 +344,20 @@ public class SeaBattleScene implements GameScene {
                             recountVessels();
                         }
                         else {
-                            if (turn.getLeftShoots() > 0) {
-                            	isStartedShooting = true;
-                                switch(vessel.getCannonSize()) {
-                                    case "large":
-                                        cannonBigSound.play(getSound_volume());
-                                    case "medium":
-                                        cannonMediumSound.play(getSound_volume());
-                                    case "small":
-                                        cannonSmallSound.play(getSound_volume());
-                                }
-                                vessel.performLeftShoot(turn.getLeftShoots());
-                                turn.setLeftShoots(0);
-                            }
+                        	if (turn.getLeftShoots() > 0) {
+                        		isStartedShooting = true;
+	                            
+	                            vessel.performLeftShoot(turn.getLeftShoots());
+	                            turn.setLeftShoots(0);
+	                            
+                        	}
+                            
                             if (turn.getRightShoots() > 0) {
                             	isStartedShooting = true;
-                                switch(vessel.getCannonSize()) {
-                                    case "large":
-                                        cannonBigSound.play(getSound_volume());
-                                    case "medium":
-                                        cannonMediumSound.play(getSound_volume());
-                                    case "small":
-                                        cannonSmallSound.play(getSound_volume());
-                                }
+                            	playCannonSounds(vessel,turn.getRightShoots());
                                 vessel.performRightShoot(turn.getRightShoots());
                                 turn.setRightShoots(0);
+                                
                             }
                         }
                     }
@@ -514,7 +503,6 @@ public class SeaBattleScene implements GameScene {
                         c.move();
                     } else {
                         if (c.finishedEndingAnimation()) {
-           
                             itr.remove();
                         }
                         else {
@@ -693,20 +681,12 @@ public class SeaBattleScene implements GameScene {
                     batch.draw(c.getEndingAnimationRegion(), cx, cy);
                     if(isStartedShooting)
                     {
-                        isStartedShooting = false;
-                        switch(vessel.getCannonSize()) {
-    	                	case "large":
-    	                		cannonBigSound.stop();
-    	                	case "medium":
-    	                		cannonMediumSound.stop();
-    	                	case "small":
-    	                		cannonSmallSound.stop();
-    	            	}
     	            	if(c.getEndingAnimationRegion().getTexture() == context.getManager().get(context.getAssetObject().hit)) {
     	            		cannonHitSound.play(getSound_volume());
     	            	}else {
     	            		splashSound.play(getSound_volume());
     	            	}
+    	            	isStartedShooting = false;
                     }
 
                 }
@@ -974,4 +954,30 @@ public class SeaBattleScene implements GameScene {
             } else return f;
         } else return min;
     }
+    
+    public void playCannonSounds(Vessel vessel, int shots) {
+    	if(shots == 1) {
+        	switch(vessel.getCannonSize()) {
+		        case "large":
+		        	cannonBigSound.play(getSound_volume());
+		        case "medium":
+		            cannonMediumSound.play(getSound_volume());
+		        case "small":
+		            cannonSmallSound.play(getSound_volume());
+	    	}
+    	}else if(shots == 2) {
+        	switch(vessel.getCannonSize()) {
+		        case "large":
+		        	//doesn't sound like shooting 2, need to figure out how to add delay
+		        	cannonBigSound.play(getSound_volume());
+		        	cannonBigSound.play(getSound_volume());
+		        case "medium":
+		            cannonMediumSound.play(getSound_volume());
+		            cannonMediumSound.play(getSound_volume());
+		        case "small":
+		            cannonSmallSound.play(getSound_volume());
+		            cannonSmallSound.play(getSound_volume());
+		    	}
+    		}
+    	}
 }

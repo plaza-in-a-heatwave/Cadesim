@@ -92,8 +92,7 @@ public class CollisionCalculator {
         	}
             Position next = p;
             Position finalPosition = p;
-            @SuppressWarnings("unused")
-			Position finalPlayerPosition = p;
+            Position finalPlayerPosition = pl;
             if(p.isSunk()) {
             	next = p;
             	finalPosition = p;
@@ -105,24 +104,12 @@ public class CollisionCalculator {
                 	finalPlayerPosition =  context.getMap().getFinalActionTilePosition(pl.getCollisionStorage().isOnAction() ? pl.getCollisionStorage().getActionTile() : -1, pl, phase);
                 }
             }
-            int tile = context.getMap().getTile(pl.getX(), pl.getY());
-            int otherTile = context.getMap().getTile(p.getX(), p.getY());
-            if(context.getMap().isWind(tile) && context.getMap().isWind(otherTile)) {//case where both on winds
-            	if(next.equals(target)) {
-                 	collided.add(p);
-                }
-            }else if(context.getMap().isWind(tile) && context.getMap().isWhirlpool(otherTile)){ //case where ship is on wind and other in whirlpool
-            	if(finalPosition.equals(target) && (context.getMap().isWind(tile))) {
-            		collided.add(p);
-		        }
-            	if(next.equals(target)) {
-   	             	collided.add(p);
-	   	        }
-            }else if(context.getMap().isWhirlpool(tile) && context.getMap().isWhirlpool(otherTile)) {//case where both in whirlpool
-            	if(next.equals(target)) {
-   	             	collided.add(p);
-	   	        }
-            }
+            if(next.equals(target)) {
+	            collided.add(p);
+   	        }
+//            else if(finalPosition.equals(finalPlayerPosition)) { // proves useful for the wind/whirlpool scenario
+//   	        	collided.add(p);
+//   	        }
         }
         return collided;
     }
@@ -335,6 +322,7 @@ public class CollisionCalculator {
     	if (!setPosition && player.getCollisionStorage().isRecursionStarter()) {
             return false;
         }
+    	//must initialize the turn to a specific face to avoid null exception
     	player.getAnimationStructure().getTurn(turn).setFace(player.getFace());
 //    	//if player reaches destination for that particular turn
         if (player.equals(target)) {
@@ -382,31 +370,13 @@ public class CollisionCalculator {
             	return true;
             }
         }
-        else {
-        	performActionCollision(player,target,turn,phase,setPosition);
-        }
-        return false;
-    }
-
-    /**
-     * Helper method to reduce duplicate coding
-     * @param p        The current player
-     * @param position The current position
-     * @param turn     The current turn
-     * @param phase    The current phase
-     * @param setPosition Boolean that sets whether we want to change position or not
-     * @return boolean if collides with another player, false if no collision
-     */
-    public boolean performActionCollision(Player player, Position target, int turn, int phase, boolean setPosition) {
     	int playerTile = context.getMap().getTile(player.getX(), player.getY());
     	List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
         if (collided.size() > 0) {
         	collide(player, collided.get(0), turn, phase);
             for (Player p : collided) {
-            	if(p == player) {
-            		continue;
-            	}
             	int tile = context.getMap().getTile(p.getX(), p.getY());
+            	//wind & whirlpool scenario, ship in whirlpool must spin
             	if(context.getMap().isWhirlpool(tile) && context.getMap().isWind(playerTile)) {
             		collide(p, player, turn, phase);
             		if(phase == 0) {
@@ -416,22 +386,20 @@ public class CollisionCalculator {
 	            		player.getAnimationStructure().getTurn(turn).setFace(p.getFace());
 	                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
             		}
-            	}else if(context.getMap().isWhirlpool(tile) && context.getMap().isWhirlpool(playerTile)){
+            	}else {
             		collide(p, player, turn, phase);
             	}
             }
             return true;
         }else {
-        	if(!player.getCollisionStorage().isCollided(turn)) {
-            	if(setPosition) {
-            		player.set(target);
-            		player.getCollisionStorage().setPositionChanged(true);
-            	}
+        	if(setPosition) {
+        		player.set(target);
+        		player.getCollisionStorage().setPositionChanged(true);
         	}
         }
         return false;
     }
-    
+
     private boolean checkRockCollision(Player player, int turn, int phase) {
         MoveType move = player.getMoves().getMove(turn);
         Position pos = player;

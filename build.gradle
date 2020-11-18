@@ -105,10 +105,14 @@ task deploy(type: Exec) {
     dependsOn ":server:dist"             // server jar
     workingDir "$projectDir"
     if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-        // bash must be accessible from your %PATH% environment variable
-        // e.g. append "C:\Program Files (x86)\Git\Bin\" to PATH.
-        commandLine 'cmd', '/c', 'bash deploy.bash ' + arg
-    } else {
-        commandLine 'bash', '-c','bash deploy.bash ' + arg
-    }
+	        // bash must be accessible from your %PATH% environment variable
+	        // e.g. append "C:\Program Files (x86)\Git\Bin\" to PATH.
+	    if(project.properties.arg != null){
+	        commandLine 'cmd', '/c', 'bash deploy.bash ' + arg
+	    }
+	} else {
+		if(project.properties.arg != null){
+	        commandLine 'bash', '-c','bash deploy.bash ' + arg
+	    }
+	}
 }
