@@ -100,14 +100,15 @@ task release(type: Exec) {
 }
 
 task deploy(type: Exec) {
+    //must specify program argument in run configuration e.g. -Parg=growup
     dependsOn ":client-launcher:dist"    // client jar
     dependsOn ":server:dist"             // server jar
     workingDir "$projectDir"
     if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
         // bash must be accessible from your %PATH% environment variable
         // e.g. append "C:\Program Files (x86)\Git\Bin\" to PATH.
-        commandLine 'cmd', '/c', 'bash deploy.bash'
+        commandLine 'cmd', '/c', 'bash deploy.bash ' + arg
     } else {
-        commandLine 'bash', '-c','bash deploy.bash'
+        commandLine 'bash', '-c','bash deploy.bash ' + arg
     }
 }
