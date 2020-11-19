@@ -883,8 +883,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 						}
 		            }
 	                try {
-	                	if(new String(Files.readAllBytes(Paths.get("version.txt"))) != 
-	                			IOUtils.toString(new URL(url[1]+"version.txt").openStream(),StandardCharsets.UTF_8)) {
+	                	if(!new String(Files.readAllBytes(Paths.get("version.txt"))).matches(IOUtils.toString(new URL(url[1]+"version.txt").openStream(),StandardCharsets.UTF_8)) ) {
 		                    System.out.println("Performing update; deleting digest files...");
 		                    new File("version.txt").delete();
 		                    new File("digest.txt").delete();
