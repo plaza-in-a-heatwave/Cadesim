@@ -167,6 +167,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         if(!(resolutionWidthDiction.containsKey(Gdx.graphics.getWidth()))) {
         	resolutionWidthDiction.put(Gdx.graphics.getWidth(), new int[]{640,484,328,360});
         }
+        
     }
     
     @Override

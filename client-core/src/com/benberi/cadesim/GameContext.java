@@ -31,6 +31,7 @@ import com.benberi.cadesim.util.RandomUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -564,6 +565,16 @@ public class GameContext {
         }
         else {
         	createFurtherScenes(shipId);
+            try {
+				getConnectScene();
+				if(ConnectScene.getProperty("user.config","user.volume") != null || ConnectScene.getProperty("user.config","user.volume").matches("[0-9]{3,}")){
+					getBattleScene().mainmenu.audio_slider.setValue(Float.parseFloat(ConnectScene.getProperty("user.config","user.volume")));
+					getBattleScene().setSound_volume(Float.parseFloat(ConnectScene.getProperty("user.config","user.volume")));
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             connectScene.setState(ConnectionSceneState.CREATING_MAP);
         }
 

@@ -20,9 +20,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -489,6 +491,9 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     private int DISENGAGE_backgroundY = DISENGAGE_REF_Y + 8;
     private int DISENGAGE_buttonX     = DISENGAGE_REF_X + 5+336+5 + 30;
     private int DISENGAGE_buttonY     = DISENGAGE_REF_Y + 8 + 24;
+    
+	private ImageButton disengageButton;
+	private ImageButtonStyle disengageButtonStyle;
 
     // DISENGAGE shapes
     Rectangle DISENGAGE_shape_clickingDisengage   = new Rectangle(DISENGAGE_buttonX, DISENGAGE_buttonY, 77, 16);
@@ -496,11 +501,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     // reference coords - CHAT control
     private int CHAT_REF_X              = 490;
     private int CHAT_REF_Y              = 10;
-    
-    /**
-     * state of buttons. true if pushed, false if not.
-     */
-    private boolean disengageButtonIsDown = false; // initial
 
     /**
      * Max length for a chat message
@@ -606,12 +606,26 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         
         chatStage.addActor(chatTable);
         
+        disengageButtonStyle = new ImageButtonStyle();
+        disengageButtonStyle.up = new TextureRegionDrawable(new TextureRegion(disengageUp));
+        disengageButtonStyle.down = new TextureRegionDrawable(new TextureRegion(disengageDown));
+        disengageButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(disengageDown));
+        disengageButton = new ImageButton(disengageButtonStyle);
+        
         initListeners();
+        disengageButton.setPosition(DISENGAGE_buttonX, DISENGAGE_buttonY);
+        chatStage.addActor(disengageButton);
     }
     /**
      * initialize listeners for LibGdx actors
      */
 	public void initListeners() {
+		disengageButton.addListener(new ClickListener() {
+    		@Override
+    		public void clicked(InputEvent event, float x, float y) {
+    			getContext().sendDisengageRequestPacket();
+    		}
+    	});
     	chatScroller.addListener(new InputListener() {
     		public void enter(InputEvent event, float x, float y, int pointer, Actor actor) {
     			chatStage.setScrollFocus(chatScroller);
@@ -761,15 +775,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         setDamagePercentage(0);
         setBilgePercentage(0);
     }
-    /**
-     * set up the input processor for the chat and game
-     */
-    public void setup() {
-//        inputMultiplexer = new InputMultiplexer();
-//        inputMultiplexer.addProcessor(context.getInputProcessor());
-//        inputMultiplexer.addProcessor(chatStage);
-//        Gdx.input.setInputProcessor(inputMultiplexer);
-    }
+
     /**
      * display a message in the chat
      */
@@ -899,13 +905,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     @Override
     public boolean handleClick(float x, float y, int button) {
     	startDragSlot = getSlotForPosition(x, y);
-        if ((!disengageButtonIsDown) && isClickingDisengage(x,y)) {
-            disengageButtonIsDown = true;
-            return true;
-        }
-        else {
-            return false;
-        }
+    	return false;
     }
 
     /**
@@ -940,10 +940,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 
     private boolean isPlacingRightCannons(float x, float y) {
         return isPointInRect(x,y,MOVES_shape_placingRightCannons);
-    }
-
-    private boolean isClickingDisengage(float x, float y) {
-        return isPointInRect(x,y,DISENGAGE_shape_clickingDisengage);
     }
 
     private boolean isPlacingMoves(float x, float y) {
@@ -1059,14 +1055,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         {
             selectedTooltip = -1;
         }
-
-        // if we drag off disengage,
-        // deactivate it with no penalty to the user.
-        if (disengageButtonIsDown) {
-            if (!isClickingDisengage(x, y)) {
-                disengageButtonIsDown = false;
-            }
-        }
         return false;
     }
 
@@ -1129,12 +1117,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 
             draggingPosition = null;
         } else if(!controlsLocked) { //fix adding moves
-        	// unlocked, not dragging
-            if (disengageButtonIsDown && isClickingDisengage(x, y)) {
-                getContext().sendDisengageRequestPacket();
-                disengageButtonIsDown = false;
-            }
-            else if (isTogglingAuto(x, y)) {
+            if (isTogglingAuto(x, y)) {
                 if (auto) {
                     auto = false;
                 }
@@ -1220,12 +1203,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         } else {
             // locked (dragging or not dragging)
             isDragging = false; // bugfix #80 locked controls
-
-            // allow user to complete clicks on non-bnav buttons
-            if (disengageButtonIsDown && isClickingDisengage(x, y)) {
-                getContext().sendDisengageRequestPacket();
-                disengageButtonIsDown = false;
-            }
         }
 
         // undo any scroll drag effect
@@ -1484,10 +1461,9 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
      * background for disengage button / pirates aboard
      */
     private void renderDisengage() {
-        batch.begin();
-        batch.draw(disengageBackground, DISENGAGE_backgroundX, DISENGAGE_backgroundY);
-        batch.draw((disengageButtonIsDown)?disengageDown:disengageUp, DISENGAGE_buttonX, DISENGAGE_buttonY);
-        batch.end();
+    	 batch.begin();
+         batch.draw(disengageBackground, DISENGAGE_backgroundX, DISENGAGE_backgroundY);
+         batch.end();
     }
     
     private void drawMoveHolder() {
@@ -1686,12 +1662,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         if (isBigShip) {
 	        blockingMoveSlot = 3;
 	        getContext().sendBlockingMoveSlotChanged(3);
-        }
-
-        // fix stuck buttons if they were clicked across a turn
-        // with no penalty to the user
-        if (disengageButtonIsDown) {
-            disengageButtonIsDown = false;
         }
     }
 

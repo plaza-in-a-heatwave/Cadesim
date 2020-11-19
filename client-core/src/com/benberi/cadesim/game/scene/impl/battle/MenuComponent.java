@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,6 +22,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -31,12 +34,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.scene.SceneComponent;
 import com.benberi.cadesim.game.scene.impl.battle.map.BlockadeMap;
+import com.benberi.cadesim.game.scene.impl.connect.ConnectScene;
 
 public class MenuComponent extends SceneComponent<SeaBattleScene> implements InputProcessor {
     /**
@@ -59,8 +64,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     private Texture menuDown;
     private Texture lobbyUp;
     private Texture lobbyDown;
-    private Texture mapUp;
-    private Texture mapDown;
+    private Texture settingsUp;
+    private Texture settingsDown;
     
     private BitmapFont font;
     
@@ -68,7 +73,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     private int MENU_REF_X       = 0;
     private int MENU_REF_Y       = 0;
     private int MENU_buttonX     = MENU_REF_X + (Gdx.graphics.getWidth() - 36);
-    private int MENU_buttonY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 238);
 
     private int MENU_tableX     = MENU_REF_X + (Gdx.graphics.getWidth() - 80);
     @SuppressWarnings("unused")
@@ -77,8 +81,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     private int MENU_lobbyButtonX     = MENU_REF_X + (Gdx.graphics.getWidth() - 76);
     private int MENU_lobbyButtonY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 273);
     
-    private int MENU_mapsButtonX     = MENU_REF_X + (Gdx.graphics.getWidth() - 76);
-    private int MENU_mapsButtonY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 308);
+    private int MENU_settingsButtonX     = MENU_REF_X + (Gdx.graphics.getWidth() - 76);
     
 	
     // DISENGAGE shapes
@@ -87,12 +90,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     Rectangle menuLobby_Shape;
     Rectangle menuMap_Shape;
 
-    /**
-     * state of buttons. true if pushed, false if not.
-     */
-    private boolean menuButtonIsDown = false; // initial
-	private boolean menuLobbyIsDown = false; // initial
-	private boolean menuMapsIsDown = false; // initial
     
     private JFileChooser fileChooser;
 	public Stage stage;
@@ -106,7 +103,12 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private String mapName = "None";
 
 	Texture texture;
-	
+	private ImageButton menuButton;
+	private ImageButtonStyle menuButtonStyle;
+	private ImageButton settingsButton;
+	private ImageButtonStyle settingsButtonStyle;
+	private ImageButton lobbyButton;
+	private ImageButtonStyle lobbyButtonStyle;
 	//Settings buttons (sliders)
 	public Slider audio_slider;
 	private Slider turnDuration_slider;
@@ -164,9 +166,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         dialog.getContentTable().clear();
         dialog.setVisible(false);
         audio_slider.setVisible(false);
-        menuButtonIsDown = false;
-        menuLobbyIsDown = false;
-        menuMapsIsDown = false;
         customMap = null;
         setMapBoolean(false);
         customMapButton.setDisabled(false);
@@ -192,11 +191,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         Skin sliderskin = new Skin(Gdx.files.internal("skin/uiskin.json"));
         dialog = new Dialog("Game Settings", skin, "dialog");
-        menuButton_Shape = new Rectangle(MENU_buttonX, 13, 25, 25);
-        menuTable_Shape = new Rectangle(MENU_tableX, 30, 80, 200);
-        menuLobby_Shape = new Rectangle(MENU_lobbyButtonX, 50, 70, 22);
-        menuMap_Shape = new Rectangle(MENU_mapsButtonX, 80, 70, 22);
-        
+        menuTable_Shape = new Rectangle(MENU_tableX, 0, 80, 200);
+        initImageButtonStyles();
+       
 		disengageLabel = new Label("Disengage Behavior:",skin);
 		turnLabel = new Label("Turn Duration (seconds):",skin);
 		roundLabel = new Label("Round Duration (seconds):",skin);
@@ -215,6 +212,93 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	sinkPenalty_slider.setValue((float)context.getProposedSinkPenalty());
     	turnText = new TextField("",skin);
     	turnText.setMaxLength(5);
+ 
+    	roundText = new TextField("",skin);
+    	roundText.setMaxLength(5);
+    	sinkPenaltyText = new TextField("",skin);
+    	sinkPenaltyText.setMaxLength(5);
+
+    	turnText.setText(String.valueOf(context.getProposedTurnDuration()));
+    	roundText.setText(String.valueOf(context.getProposedRoundDuration()));
+    	sinkPenaltyText.setText(String.valueOf(context.getProposedSinkPenalty()));
+    	
+    	disengageBehaviorGroup = new ButtonGroup<TextButton>();
+    	jobberQualityGroup = new ButtonGroup<TextButton>();
+    	
+    	disengageOff = new TextButton("Off",skin);
+    	disengageOff.getStyle().disabled = disengageOff.getStyle().down;
+    	disengageRealistic = new TextButton("Realistic",skin);
+    	disengageRealistic.getStyle().disabled = disengageRealistic.getStyle().down;
+    	disengageSimple = new TextButton("Simple",skin);
+    	disengageSimple.getStyle().disabled = disengageSimple.getStyle().down;
+    	basicQuality = new TextButton("Basic",skin);
+    	basicQuality.getStyle().disabled = basicQuality.getStyle().down;
+    	eliteQuality = new TextButton("Elite",skin);
+    	eliteQuality.getStyle().disabled = eliteQuality.getStyle().down;
+    	customMapButton = new TextButton("Choose map...",skin);
+    	customMapButton.getStyle().disabled = customMapButton.getStyle().down;
+    	disengageBehaviorGroup.add(disengageOff,disengageRealistic,disengageSimple);
+    	jobberQualityGroup.add(basicQuality,eliteQuality);
+    	proposeButton = new TextButton("Propose",skin);
+    	exitButton = new TextButton("Exit",skin);
+    	defaultButton = new TextButton("Reset defaults",skin);
+    	audio_slider.setSize(10, 100);
+    	audio_slider.setPosition(Gdx.graphics.getWidth() - 30, Gdx.graphics.getHeight()- 220);
+    	audio_slider.setValue(0.05f);
+    	
+    	for (TextButton button: disengageBehaviorGroup.getButtons()) {
+    		if(button.getText().toString().toLowerCase().equals(context.getProposedDisengageBehavior())) {
+    			button.setDisabled(true);
+    		}
+    	}
+    	
+    	for (TextButton button: jobberQualityGroup.getButtons()) {
+    		if(button.getText().toString().toLowerCase().equals(context.getProposedJobberQuality())) {
+    			button.setDisabled(true);
+    		}
+    	}
+    	menuButton.setPosition(MENU_buttonX, Gdx.graphics.getHeight() - 40);
+    	lobbyButton.setPosition(MENU_lobbyButtonX, Gdx.graphics.getHeight() - 75);
+    	settingsButton.setPosition(MENU_settingsButtonX, lobbyButton.getY() - 35);
+    	stage.addActor(menuButton);
+    	stage.addActor(lobbyButton);
+    	stage.addActor(settingsButton);
+    	stage.addActor(audio_slider);
+		lobbyButton.setDisabled(true);
+		settingsButton.setDisabled(true);
+		lobbyButton.setVisible(false);
+		settingsButton.setVisible(false);
+    	initListeners();
+		createDialogListeners();
+    }
+
+    public void initListeners() {
+    	menuButton.addListener(new ClickListener() {
+    		@Override
+    		public void clicked(InputEvent event, float x, float y) {
+    			menuButton.setDisabled(true);
+    			lobbyButton.setDisabled(false);
+    			settingsButton.setDisabled(false);
+    			lobbyButton.setVisible(true);
+    			settingsButton.setVisible(true);
+    			audio_slider.setDisabled(false);
+    			audio_slider.setVisible(true);
+    		}
+    	});
+    	lobbyButton.addListener(new ClickListener() {
+    		@Override
+    		public void clicked(InputEvent event, float x, float y) {
+    			lobbyButton.setDisabled(true);
+    			context.disconnect();
+    		}
+    	});
+    	settingsButton.addListener(new ClickListener() {
+    		@Override
+    		public void clicked(InputEvent event, float x, float y) {
+    			settingsButton.setDisabled(true);
+    			createDialog();
+    		}
+    	});
     	turnText.setTextFieldFilter(new TextFieldFilter() {
 			@Override
 			public boolean acceptChar(TextField textField, char c) { //filter out letters and include range
@@ -237,8 +321,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				}
 			}
     	});
-    	roundText = new TextField("",skin);
-    	roundText.setMaxLength(5);
     	roundText.setTextFieldFilter(new TextFieldFilter() { //filter out letters and include range
 			@Override
 			public boolean acceptChar(TextField textField, char c) {
@@ -261,8 +343,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				}
 			}
     	});
-    	sinkPenaltyText = new TextField("",skin);
-    	sinkPenaltyText.setMaxLength(5);
     	sinkPenaltyText.setTextFieldFilter(new TextFieldFilter() { //filter out letters and include range
 			@Override
 			public boolean acceptChar(TextField textField, char c) {
@@ -285,58 +365,35 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				}
 			}
     	});
-    	
-    	turnText.setText(String.valueOf(context.getProposedTurnDuration()));
-    	roundText.setText(String.valueOf(context.getProposedRoundDuration()));
-    	sinkPenaltyText.setText(String.valueOf(context.getProposedSinkPenalty()));
-    	
-    	disengageBehaviorGroup = new ButtonGroup<TextButton>();
-    	jobberQualityGroup = new ButtonGroup<TextButton>();
-    	
-    	disengageOff = new TextButton("Off",skin);
-    	disengageOff.getStyle().disabled = disengageOff.getStyle().down;
-    	disengageRealistic = new TextButton("Realistic",skin);
-    	disengageRealistic.getStyle().disabled = disengageRealistic.getStyle().down;
-    	disengageSimple = new TextButton("Simple",skin);
-    	disengageSimple.getStyle().disabled = disengageSimple.getStyle().down;
-    	basicQuality = new TextButton("Basic",skin);
-    	basicQuality.getStyle().disabled = basicQuality.getStyle().down;
-    	eliteQuality = new TextButton("Elite",skin);
-    	eliteQuality.getStyle().disabled = eliteQuality.getStyle().down;
-    	customMapButton = new TextButton("Choose map...",skin);
-    	customMapButton.getStyle().disabled = customMapButton.getStyle().down;
-    	disengageBehaviorGroup.add(disengageOff,disengageRealistic,disengageSimple);
-    	jobberQualityGroup.add(basicQuality,eliteQuality);
-    	for (TextButton button: disengageBehaviorGroup.getButtons()) {
-    		if(button.getText().toString().toLowerCase().equals(context.getProposedDisengageBehavior())) {
-    			button.setDisabled(true);
-    		}
-    	}
-    	
-    	for (TextButton button: jobberQualityGroup.getButtons()) {
-    		if(button.getText().toString().toLowerCase().equals(context.getProposedJobberQuality())) {
-    			button.setDisabled(true);
-    		}
-    	}
-    	
-    	proposeButton = new TextButton("Propose",skin);
-    	exitButton = new TextButton("Exit",skin);
-    	defaultButton = new TextButton("Reset defaults",skin);
-    	audio_slider.setSize(10, 100);
-    	audio_slider.setPosition(Gdx.graphics.getWidth() - 30, Gdx.graphics.getHeight()- 220);
-    	audio_slider.setValue(0.05f);
-    	stage.addActor(audio_slider);
-		createDialogListeners();
     }
-
-    @Override
-    public void create() {
-        menuUp = context.getManager().get(context.getAssetObject().menuUp);
+    
+    public void initImageButtonStyles() {
+    	menuUp = context.getManager().get(context.getAssetObject().menuUp);
         menuDown = context.getManager().get(context.getAssetObject().menuDown);
         lobbyUp = context.getManager().get(context.getAssetObject().lobbyUp);
         lobbyDown = context.getManager().get(context.getAssetObject().lobbyDown);
-        mapUp = context.getManager().get(context.getAssetObject().mapsUp);
-        mapDown = context.getManager().get(context.getAssetObject().mapsDown);
+        settingsUp = context.getManager().get(context.getAssetObject().lobbyUp);
+        settingsDown = context.getManager().get(context.getAssetObject().lobbyDown);
+        menuButtonStyle = new ImageButtonStyle();
+        menuButtonStyle.up = new TextureRegionDrawable(new TextureRegion(menuUp));
+        menuButtonStyle.down = new TextureRegionDrawable(new TextureRegion(menuDown));
+        menuButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(menuDown));
+        menuButton = new ImageButton(menuButtonStyle);
+        lobbyButtonStyle = new ImageButtonStyle();
+        lobbyButtonStyle.up = new TextureRegionDrawable(new TextureRegion(lobbyUp));
+        lobbyButtonStyle.down = new TextureRegionDrawable(new TextureRegion(lobbyDown));
+        lobbyButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(lobbyDown));
+        lobbyButton = new ImageButton(lobbyButtonStyle);
+        settingsButtonStyle = new ImageButtonStyle();
+        settingsButtonStyle.up = new TextureRegionDrawable(new TextureRegion(settingsUp));
+        settingsButtonStyle.down = new TextureRegionDrawable(new TextureRegion(settingsDown));
+        settingsButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(settingsDown));
+        settingsButton = new ImageButton(settingsButtonStyle);
+        
+    }
+    
+    @Override
+    public void create() {
         font = context.getManager().get(context.getAssetObject().menuFont);
     }
     
@@ -346,19 +403,15 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 
     @Override
     public void render() {
-        batch.begin();
-        batch.draw((menuButtonIsDown)?menuDown:menuUp, MENU_buttonX, MENU_buttonY);
-        if(menuButtonIsDown) {
-        	batch.draw((menuLobbyIsDown)?lobbyDown:lobbyUp, MENU_lobbyButtonX, MENU_lobbyButtonY);
-        	font.draw(batch,"Lobby",MENU_lobbyButtonX+25,MENU_lobbyButtonY+21);
-        	batch.draw((menuMapsIsDown)?mapDown:mapUp, MENU_mapsButtonX, MENU_mapsButtonY);
-        	font.draw(batch,"Game Settings",MENU_mapsButtonX+8,MENU_mapsButtonY+21);
-        }
-        batch.end();
-        
         stage.act();
         stage.getViewport().apply();
         stage.draw();
+        batch.begin();
+        if(menuButton.isDisabled()) {
+        	font.draw(batch,"Lobby",MENU_lobbyButtonX+25,MENU_lobbyButtonY+220);
+        	font.draw(batch,"Game Settings",MENU_settingsButtonX+8,(MENU_lobbyButtonY+220)-35);
+        }
+        batch.end();
     }
 
     @Override
@@ -457,9 +510,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         		context.sendSettingsPacket(customMap,mapBoolean, mapName);
 		    	dialog.setVisible(false);
 		    	audio_slider.setVisible(false);
-	    		menuButtonIsDown = false;
-	    		menuLobbyIsDown = false;
-	        	menuMapsIsDown = false;
 //	        	context.getControlScene().getControl().setup();
 			} 
     	});
@@ -550,6 +600,13 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	context.getBattleScene().setSound_volume((float)audio_slider.getValue());
+            	//set user config volume
+            	try {
+					ConnectScene.changeProperty("user.config", "user.volume", Float.toString((float)audio_slider.getValue()));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }});
 		selectBox.addListener(new ChangeListener(){
             @Override
@@ -723,28 +780,16 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     
     @Override
     public boolean handleClick(float x, float y, int button) {
-    	if ((!menuButtonIsDown) && isClickingMenuButton(x,y)) {
-            menuButtonIsDown = true;
-            audio_slider.setVisible(true);
-            return true;
-        }
-        else if(menuButtonIsDown && !isClickingMenuTable(x,y)){
-        	menuButtonIsDown = false;
-        	menuLobbyIsDown = false;
-        	menuMapsIsDown = false;
+    	if(menuButton.isDisabled() && !isClickingMenuTable(x,y)){
+        	menuButton.setDisabled(false);
+        	audio_slider.setDisabled(true);
+        	lobbyButton.setDisabled(true);
+        	settingsButton.setDisabled(true);
         	audio_slider.setVisible(false);
+        	lobbyButton.setVisible(false);
+        	settingsButton.setVisible(false);
         	return false;
         }
-    	else if(menuButtonIsDown && isClickingLobbyButton(x,y)) {
-    		menuLobbyIsDown = true;
-    		context.disconnect();
-    		return true;
-    	}
-    	else if(menuButtonIsDown && isClickingMapsButton(x,y)) {
-    		menuMapsIsDown = true;
-    		createDialog();
-    		return true;
-    	}
         else {
             return false;
         }
@@ -776,20 +821,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      	}
     }
 
-    public boolean isClickingMenuButton(float x, float y) {
-        return isPointInRect(x,y,menuButton_Shape);
-    }
-    
     public boolean isClickingMenuTable(float x, float y) {
         return isPointInRect(x,y,menuTable_Shape);
-    }
-    
-    private boolean isClickingLobbyButton(float x, float y) {
-        return isPointInRect(x,y,menuLobby_Shape);
-    }
-    
-    private boolean isClickingMapsButton(float x, float y) {
-        return isPointInRect(x,y,menuMap_Shape);
     }
     
     @Override
@@ -799,8 +832,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 
     @Override
     public boolean handleRelease(float x, float y, int button) {
-    	menuLobbyIsDown = false;
-    	menuMapsIsDown = false;
         return false;
     }
 
@@ -961,9 +992,5 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				getCustomMapButton().setDisabled(false);
 				break;
 		}
-	}
-
-	public boolean isMenuButtonIsDown() {
-		return menuButtonIsDown;
 	}
 }
