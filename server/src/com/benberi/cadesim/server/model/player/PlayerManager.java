@@ -443,13 +443,20 @@ public class PlayerManager {
         	for (Player p : listRegisteredPlayers()) {
                 if (p.getCollisionStorage().isOnAction()) {
                     int tile = p.getCollisionStorage().getActionTile();
-                    if (p.getCollisionStorage().isCollided(turn)) {
-                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
-                    } else {
-                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
+                    if (context.getMap().isWind(tile)) {//winds
+	                    if (p.getCollisionStorage().isCollided(turn)) {
+	                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
+	                    } else {
+	                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
+	                    }
                     }
-                    if (context.getMap().isWhirlpool(tile)) {
-                        p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
+                    else if (context.getMap().isWhirlpool(tile)){//whirls
+                    	if(!p.getCollisionStorage().isCollided(turn)) {
+                            p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
+                            p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
+                    	}else {
+                    		p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
+                    	}
                     }
                 }
                

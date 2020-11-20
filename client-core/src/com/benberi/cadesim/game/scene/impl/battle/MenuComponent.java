@@ -260,10 +260,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	menuButton.setPosition(MENU_buttonX, Gdx.graphics.getHeight() - 40);
     	lobbyButton.setPosition(MENU_lobbyButtonX, Gdx.graphics.getHeight() - 75);
     	settingsButton.setPosition(MENU_settingsButtonX, lobbyButton.getY() - 35);
-    	stage.addActor(menuButton);
-    	stage.addActor(lobbyButton);
-    	stage.addActor(settingsButton);
-    	stage.addActor(audio_slider);
+    	context.gameStage.addActor(menuButton);
+    	context.gameStage.addActor(lobbyButton);
+    	context.gameStage.addActor(settingsButton);
+    	context.gameStage.addActor(audio_slider);
 		lobbyButton.setDisabled(true);
 		settingsButton.setDisabled(true);
 		lobbyButton.setVisible(false);
@@ -290,6 +290,13 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     		public void clicked(InputEvent event, float x, float y) {
     			lobbyButton.setDisabled(true);
     			context.disconnect();
+    			menuButton.setDisabled(false);
+    			lobbyButton.setDisabled(true);
+    			settingsButton.setDisabled(true);
+    			lobbyButton.setVisible(false);
+    			settingsButton.setVisible(false);
+    			audio_slider.setDisabled(true);
+    			audio_slider.setVisible(false);
     		}
     	});
     	settingsButton.addListener(new ClickListener() {
@@ -389,6 +396,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         settingsButtonStyle.down = new TextureRegionDrawable(new TextureRegion(settingsDown));
         settingsButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(settingsDown));
         settingsButton = new ImageButton(settingsButtonStyle);
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
+    	fileChooser.setDialogTitle("Select Map File");
         
     }
     
@@ -403,9 +413,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 
     @Override
     public void render() {
-        stage.act();
-        stage.getViewport().apply();
-        stage.draw();
         batch.begin();
         if(menuButton.isDisabled()) {
         	font.draw(batch,"Lobby",MENU_lobbyButtonX+25,MENU_lobbyButtonY+220);
@@ -640,11 +647,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     
     public void selectCustomMap() {
 		int[][] tempTiles = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
-    	fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
-    	fileChooser.setDialogTitle("Select Map File");
-    	int result = fileChooser.showOpenDialog(null);
-    	if(result == JFileChooser.APPROVE_OPTION) {
+    	if(fileChooser.showOpenDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
     		File selectedFile = fileChooser.getSelectedFile();
     		if(selectedFile.length()/1024 < 5) {
     			int x = 0;
@@ -767,8 +770,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		dialog.setVisible(true);
 		fillSelectBox();
 		fillTable();
-		stage.addActor(dialog);
-		dialog.show(stage);
+		context.gameStage.addActor(dialog);
+		dialog.show(context.gameStage);
 		if(cell.getActor() instanceof Label) {
 			dialog.setSize(413, 331);
     		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);

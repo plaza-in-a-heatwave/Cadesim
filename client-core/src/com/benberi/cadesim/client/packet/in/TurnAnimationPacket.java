@@ -34,7 +34,10 @@ public class TurnAnimationPacket extends ClientPacketExecutor {
                     turn.setSunk(p.readByte() == 1);
                     int face = p.readByte();
                     if(face != 0) {
+                    	turn.setSpinCollision(true);
                     	turn.setFace(VesselFace.forId(face));
+                    }else {
+                    	turn.setSpinCollision(false);
                     }
                 }
             }

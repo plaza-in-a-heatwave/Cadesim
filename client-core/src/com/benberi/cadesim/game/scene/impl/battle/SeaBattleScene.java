@@ -3,7 +3,6 @@ package com.benberi.cadesim.game.scene.impl.battle;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -40,10 +39,7 @@ public class SeaBattleScene implements GameScene {
      * The main game context
      */
     private GameContext context;
-    /*
-     * input processor for stage
-     */
-    public InputMultiplexer inputMultiplexer;
+
     /**
      * The sprite batch renderer
      */
@@ -158,6 +154,7 @@ public class SeaBattleScene implements GameScene {
     public SeaBattleScene(GameContext context) {
         this.context = context;
         information = new GameInformation(context, this);
+        context.inputMultiplexer.addProcessor(context.gameStage);
     }
 
     public void createMap(int[][] tiles) {
@@ -176,11 +173,7 @@ public class SeaBattleScene implements GameScene {
      * set up the input processor for the chat and game
      */
     public void setup() {
-        inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(context.getInputProcessor());
-        inputMultiplexer.addProcessor(context.getControlScene().getBnavComponent().getChatStage());
-        inputMultiplexer.addProcessor(context.getBattleSceneMenu().stage);
-        Gdx.input.setInputProcessor(inputMultiplexer);
+        
     }
 
     private void recountVessels() {
@@ -346,7 +339,6 @@ public class SeaBattleScene implements GameScene {
                         else {
                         	if (turn.getLeftShoots() > 0) {
                         		isStartedShooting = true;
-	                            
 	                            vessel.performLeftShoot(turn.getLeftShoots());
 	                            turn.setLeftShoots(0);
 	                            
@@ -354,7 +346,6 @@ public class SeaBattleScene implements GameScene {
                             
                             if (turn.getRightShoots() > 0) {
                             	isStartedShooting = true;
-                            	playCannonSounds(vessel,turn.getRightShoots());
                                 vessel.performRightShoot(turn.getRightShoots());
                                 turn.setRightShoots(0);
                                 
@@ -558,7 +549,12 @@ public class SeaBattleScene implements GameScene {
 
         batch.end();
         information.render();
+        //game stage
+        context.gameStage.act();
+        context.gameStage.getViewport().apply();
+        context.gameStage.draw();
         mainmenu.render();
+        Gdx.input.setInputProcessor(context.inputMultiplexer);
     }
 
     public GameInformation getInformation() {
@@ -809,7 +805,6 @@ public class SeaBattleScene implements GameScene {
 
     @Override
     public boolean handleDrag(float sx, float sy, float x, float y) {
-
         if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
             if (sy > camera.viewportHeight) {
                 return false;
@@ -846,7 +841,6 @@ public class SeaBattleScene implements GameScene {
     
     @Override
     public boolean handleMouseMove(float x, float y) {
-    	setup();
         if (mainmenu.handleMouseMove(x, y)) {
             return true;
         }

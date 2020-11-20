@@ -38,10 +38,6 @@ import com.benberi.cadesim.game.scene.impl.control.hand.impl.BigShipHandMove;
 import com.benberi.cadesim.game.scene.impl.control.hand.impl.SmallShipHandMove;
 
 public class BattleControlComponent extends SceneComponent<ControlAreaScene> implements InputProcessor {
-    /**
-     * The context
-     */
-    private GameContext context;
     /*
      * input processor for stage
      */
@@ -531,6 +527,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     
     private boolean  draggingScroll = false; // keeps scrollbar locked until release
     private Map<Integer,int[]> resolutionWidthDiction;
+    private Skin skin;
     
     protected BattleControlComponent(GameContext context, ControlAreaScene owner, boolean big, boolean doubleShot) {
         super(context, owner);
@@ -550,7 +547,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         radioButtons = new boolean[3];
         enableRadio(1);
 
-        this.context = context;
         resolutionWidthDiction = new HashMap<Integer, int[]>();
         resolutionWidthDiction.put(800, new int[]{180,285});
         resolutionWidthDiction.put(1024, new int[]{404,600});
@@ -577,7 +573,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         initTextures();
         
         // set chat view and scroll to default positions
-        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         selectChat = new SelectBox<String>(skin);
         selectChat.setItems(new String[]{"Global", "Team"});
@@ -604,8 +600,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         chatTable.add(chatContainer).growX();
         chatTable.pack();
         
-        chatStage.addActor(chatTable);
-        
         disengageButtonStyle = new ImageButtonStyle();
         disengageButtonStyle.up = new TextureRegionDrawable(new TextureRegion(disengageUp));
         disengageButtonStyle.down = new TextureRegionDrawable(new TextureRegion(disengageDown));
@@ -614,7 +608,8 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         
         initListeners();
         disengageButton.setPosition(DISENGAGE_buttonX, DISENGAGE_buttonY);
-        chatStage.addActor(disengageButton);
+        getContext().gameStage.addActor(chatTable);
+        getContext().gameStage.addActor(disengageButton);
     }
     /**
      * initialize listeners for LibGdx actors
@@ -628,11 +623,11 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     	});
     	chatScroller.addListener(new InputListener() {
     		public void enter(InputEvent event, float x, float y, int pointer, Actor actor) {
-    			chatStage.setScrollFocus(chatScroller);
+    			getContext().gameStage.setScrollFocus(chatScroller);
     		}
     		
     		public void exit(InputEvent event, float x, float y, int pointer, Actor actor) {
-    			chatStage.setScrollFocus(null);
+    			getContext().gameStage.setScrollFocus(null);
     		}
     	});
     	textField.addListener(new InputListener() {
@@ -693,41 +688,41 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
      * initialize all textures
      */
     public void initTextures() {
-        font = context.getManager().get(context.getAssetObject().controlFont);
-        title = context.getManager().get(context.getAssetObject().title);
-        radioOn = context.getManager().get(context.getAssetObject().radioOn);
-        radioOff = context.getManager().get(context.getAssetObject().radioOff);
-        radioOnDisable = context.getManager().get(context.getAssetObject().radioOnDisable);
-        radioOffDisable = context.getManager().get(context.getAssetObject().radioOffDisable);
-        autoOn = context.getManager().get(context.getAssetObject().autoOn);
-        autoOff = context.getManager().get(context.getAssetObject().autoOff);
-        autoBackground = context.getManager().get(context.getAssetObject().autoBackground);
+        font = getContext().getManager().get(getContext().getAssetObject().controlFont);
+        title = getContext().getManager().get(getContext().getAssetObject().title);
+        radioOn = getContext().getManager().get(getContext().getAssetObject().radioOn);
+        radioOff = getContext().getManager().get(getContext().getAssetObject().radioOff);
+        radioOnDisable = getContext().getManager().get(getContext().getAssetObject().radioOnDisable);
+        radioOffDisable = getContext().getManager().get(getContext().getAssetObject().radioOffDisable);
+        autoOn = getContext().getManager().get(getContext().getAssetObject().autoOn);
+        autoOff = getContext().getManager().get(getContext().getAssetObject().autoOff);
+        autoBackground = getContext().getManager().get(getContext().getAssetObject().autoBackground);
 
-        sandTopTexture = context.getManager().get(context.getAssetObject().sandTop);
-        sandBottomTexture = context.getManager().get(context.getAssetObject().sandBottom);
+        sandTopTexture = getContext().getManager().get(getContext().getAssetObject().sandTop);
+        sandBottomTexture = getContext().getManager().get(getContext().getAssetObject().sandBottom);
         
         sandTop = new TextureRegion(sandTopTexture, 19, 43);
         sandBottom= new TextureRegion(sandBottomTexture, 19, 43);
         
-        sandTrickleTexture = context.getManager().get(context.getAssetObject().sandTrickle);
+        sandTrickleTexture = getContext().getManager().get(getContext().getAssetObject().sandTrickle);
         sandTrickle = new TextureRegion(sandTrickleTexture, 0, 0, 1, 43);
 
-        cannonSlots = context.getManager().get(context.getAssetObject().cannonSlot);
-        moves = context.getManager().get(context.getAssetObject().moves);
-        emptyMoves = context.getManager().get(context.getAssetObject().emptyMoves);
-        tooltipBackground = context.getManager().get(context.getAssetObject().toolTipBackground);
-        shiphand = context.getManager().get(context.getAssetObject().shipHand);
-        hourGlass = context.getManager().get(context.getAssetObject().hourGlass);
-        controlBackground = context.getManager().get(context.getAssetObject().controlBackground);
-        shipStatus = context.getManager().get(context.getAssetObject().shipStatus);
-        shipStatusBg = context.getManager().get(context.getAssetObject().shipStatusBg);
-        moveGetTargetTexture = context.getManager().get(context.getAssetObject().moveGetTarget);
-        cannonSelectionEmpty = context.getManager().get(context.getAssetObject().cannonSelectionEmpty);
-        cannonSelection = context.getManager().get(context.getAssetObject().cannonSelection);
+        cannonSlots = getContext().getManager().get(getContext().getAssetObject().cannonSlot);
+        moves = getContext().getManager().get(getContext().getAssetObject().moves);
+        emptyMoves = getContext().getManager().get(getContext().getAssetObject().emptyMoves);
+        tooltipBackground = getContext().getManager().get(getContext().getAssetObject().toolTipBackground);
+        shiphand = getContext().getManager().get(getContext().getAssetObject().shipHand);
+        hourGlass = getContext().getManager().get(getContext().getAssetObject().hourGlass);
+        controlBackground = getContext().getManager().get(getContext().getAssetObject().controlBackground);
+        shipStatus = getContext().getManager().get(getContext().getAssetObject().shipStatus);
+        shipStatusBg = getContext().getManager().get(getContext().getAssetObject().shipStatusBg);
+        moveGetTargetTexture = getContext().getManager().get(getContext().getAssetObject().moveGetTarget);
+        cannonSelectionEmpty = getContext().getManager().get(getContext().getAssetObject().cannonSelectionEmpty);
+        cannonSelection = getContext().getManager().get(getContext().getAssetObject().cannonSelection);
         damage = new TextureRegion(
-        		context.getManager().get(context.getAssetObject().damage));
+        		getContext().getManager().get(getContext().getAssetObject().damage));
         bilge = new TextureRegion(
-        		context.getManager().get(context.getAssetObject().bilge));
+        		getContext().getManager().get(getContext().getAssetObject().bilge));
         damage.flip(false, true);
         bilge.flip(false, true);
 
@@ -755,21 +750,21 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         moveTargetSelForce = new TextureRegion(moveGetTargetTexture, 0, 0, 36, 36);
         moveTargetSelAuto = new TextureRegion(moveGetTargetTexture, 36, 0, 36, 36);
 
-        disengageUp = context.getManager().get(context.getAssetObject().disengageUp);
-        disengageDown = context.getManager().get(context.getAssetObject().disengageDown);
-        disengageBackground = context.getManager().get(context.getAssetObject().disengageBackground);
+        disengageUp = getContext().getManager().get(getContext().getAssetObject().disengageUp);
+        disengageDown = getContext().getManager().get(getContext().getAssetObject().disengageDown);
+        disengageBackground = getContext().getManager().get(getContext().getAssetObject().disengageBackground);
         
-        chatMessagePlayer = context.getManager().get(context.getAssetObject().chatMessagePlayer);
-        chatMessageServerBroadcast = context.getManager().get(context.getAssetObject().chatMessageServerBroadcast);
-        chatMessageServerPrivate = context.getManager().get(context.getAssetObject().chatMessageServerPrivate);
+        chatMessagePlayer = getContext().getManager().get(getContext().getAssetObject().chatMessagePlayer);
+        chatMessageServerBroadcast = getContext().getManager().get(getContext().getAssetObject().chatMessageServerBroadcast);
+        chatMessageServerPrivate = getContext().getManager().get(getContext().getAssetObject().chatMessageServerPrivate);
         
         // style of the chat messages (backgrounds applied later)
         chatLabelStylePlayer = new LabelStyle(
-        		context.getManager().get(context.getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
+        		getContext().getManager().get(getContext().getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
         chatLabelStyleServerBroadcast = new LabelStyle(
-        		context.getManager().get(context.getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
+        		getContext().getManager().get(getContext().getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
         chatLabelStyleServerPrivate = new LabelStyle(
-        		context.getManager().get(context.getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
+        		getContext().getManager().get(getContext().getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
 
         // initialise
         setDamagePercentage(0);
@@ -788,7 +783,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         // is it broadcast, private, regular?
         TextureRegion tr;
         Label.LabelStyle ls = new LabelStyle(
-        		context.getManager().get(context.getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
+        		getContext().getManager().get(getContext().getAssetObject().chatMessageFont),new Color(0f,0f,0f,1f));
         chat1 = new Label(message, ls);
         // background width will vary depending on the width of the label
         chat1.setWrap(true);
@@ -850,7 +845,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         	if(message.toLowerCase().matches("/clear")) {
         		clearChat();
         	}else {
-        		context.sendPostMessagePacket(message,selectChat.getSelected().toLowerCase());	
+        		getContext().sendPostMessagePacket(message,selectChat.getSelected().toLowerCase());	
         	}
         }
         getTextField().setCursorPosition(0);
@@ -883,9 +878,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     public void render() {
         renderMoveControl();
         renderDisengage();
-        chatStage.act();
-        chatStage.getViewport().apply();
-        chatStage.draw();
     }
     
     public void reset() {
@@ -1013,7 +1005,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 
     @Override
     public boolean handleDrag(float x, float y, float ix, float iy) {
-        boolean controlsLocked = context.getBattleScene().getInformation().getIsBreak() || isLockedDuringAnimate();
+        boolean controlsLocked = getContext().getBattleScene().getInformation().getIsBreak() || isLockedDuringAnimate();
         if (!isDragging && !controlsLocked) {
             if (startDragSlot != -1) { // cant start dragging from an invalid region
                 switch (startDragSlot) {
@@ -1060,7 +1052,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 
     @Override
     public boolean handleRelease(float x, float y, int button) {
-        boolean controlsLocked = context.getBattleScene().getInformation().getIsBreak() || isLockedDuringAnimate();
+        boolean controlsLocked = getContext().getBattleScene().getInformation().getIsBreak() || isLockedDuringAnimate();
 
         if (isDragging && (!controlsLocked)) {
             isDragging = false;

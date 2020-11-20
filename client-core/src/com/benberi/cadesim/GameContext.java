@@ -2,8 +2,11 @@ package com.benberi.cadesim;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.benberi.cadesim.client.ClientConnectionCallback;
 import com.benberi.cadesim.client.ClientConnectionTask;
 import com.benberi.cadesim.client.codec.util.Packet;
@@ -42,7 +45,7 @@ import java.util.concurrent.Executors;
 public class GameContext {
 
     private Channel serverChannel;
-
+    public InputMultiplexer inputMultiplexer;
     public boolean clear;
     public boolean isInLobby = true;
 
@@ -296,12 +299,15 @@ public class GameContext {
         this.lagTestMode = (Constants.ENABLE_LAG_TEST_MODE && lagTestMode);
     }
 
+    public Stage gameStage;
     public GameContext(BlockadeSimulator main) {
         this.tools = new GameToolsContainer();
 
         entities = new EntityManager(this);
         // init client
         this.packets = new ClientPacketHandler(this);
+        inputMultiplexer = new InputMultiplexer();
+        gameStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     }
 
     /**
@@ -381,6 +387,7 @@ public class GameContext {
     public void createFurtherScenes(int shipId) {
     	ControlAreaScene.shipId = shipId;
     	this.input = new GameInputProcessor(this);
+        inputMultiplexer.addProcessor(this.input);
         this.controlArea = new ControlAreaScene(this);
         controlArea.create();
         this.seaBattleScene = new SeaBattleScene(this);
@@ -566,7 +573,6 @@ public class GameContext {
         else {
         	createFurtherScenes(shipId);
             try {
-				getConnectScene();
 				if(ConnectScene.getProperty("user.config","user.volume") != null || ConnectScene.getProperty("user.config","user.volume").matches("[0-9]{3,}")){
 					getBattleScene().mainmenu.audio_slider.setValue(Float.parseFloat(ConnectScene.getProperty("user.config","user.volume")));
 					getBattleScene().setSound_volume(Float.parseFloat(ConnectScene.getProperty("user.config","user.volume")));
