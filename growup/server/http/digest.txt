@@ -1,8 +1,8 @@
 getdown.txt = c84c9c740c407672227ee6eaf7273e10
-cadesim-server.jar = d45b731e3f7c28bbf3619db20b979dda
+cadesim-server.jar = ff0020c4e1e0e1cb0958239349fecf2e
 getdown-bg.png = 0f5b12621577c1a448655ad559358696
 growup.png = b01419759d678af8ab0696ab9495ecb6
 getdown.jar = f8e8a577bb648030a882b35ddbc70019
 stop_servers.py = 191e2c47f9801e40ec2d6611bd52959b
 restart_servers.py = 1500f8cd298d029323890f9465051b3e
-digest.txt = 3783fcab9a10067066c17619c49dd06a
+digest.txt = d61be21d353af40b503d04bb4653c580
