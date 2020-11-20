@@ -413,9 +413,6 @@ public class PlayerManager {
                     }
 
                     int tile = context.getMap().getTile(player.getX(), player.getY());
-                    if(phase == 0) {
-                    	player.getAnimationStructure().getTurn(turn).setFace(player.getFace());
-                    }
   
                     if (player.getCollisionStorage().isOnAction()) {
                         tile = player.getCollisionStorage().getActionTile();
@@ -446,20 +443,13 @@ public class PlayerManager {
         	for (Player p : listRegisteredPlayers()) {
                 if (p.getCollisionStorage().isOnAction()) {
                     int tile = p.getCollisionStorage().getActionTile();
-                    if (!context.getMap().isWhirlpool(tile)) {//winds
-	                    if (p.getCollisionStorage().isCollided(turn)) {
-	                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
-	                    } else {
-	                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
-	                    }
+                    if (p.getCollisionStorage().isCollided(turn)) {
+                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
+                    } else {
+                        p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
                     }
-                    else if (context.getMap().isWhirlpool(tile)){//whirls
-                    	if(!p.getCollisionStorage().isCollided(turn)) {
-                            p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
-                            p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getSubAnimation(tile));
-                    	}else {
-                    		p.getAnimationStructure().getTurn(turn).setSubAnimation(VesselMovementAnimation.getBumpAnimationForAction(tile));
-                    	}
+                    if (context.getMap().isWhirlpool(tile)) {
+                        p.setFace(context.getMap().getNextActionTileFace(p.getFace()));
                     }
                 }
                

@@ -354,41 +354,33 @@ public class CollisionCalculator {
                 }
             }
             if(checkActionCollision(claimed, next, turn, phase, false)) {
-            	collide(player, claimed, turn, phase);
             	return true;
             }
-        }
-        List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
-        if (collided.size() > 0) {
-        	collide(player, collided.get(0), turn, phase); //get correct damage instead itself
-        	int playerTile = context.getMap().getTile(player.getX(), player.getY());
-            for (Player p : collided) {
-            	int tile = context.getMap().getTile(p.getX(), p.getY());
-            	//bug: face isn't set each turn; p may not always change face?
-            	if(context.getMap().isWhirlpool(tile)) {
-            		if(context.getMap().isWind(playerTile)) {
-            			collide(p, player, turn, phase);
+        }else {
+        	List<Player> collided = getPlayersTryingToClaimByAction(player, target, turn, phase);
+            if (collided.size() > 0) {
+            	collide(player, collided.get(0), turn, phase); //get correct damage instead itself
+            	int playerTile = context.getMap().getTile(player.getX(), player.getY());
+                for (Player p : collided) {
+                	if(p == player) {
+                		continue;
+                	}
+                	int tile = context.getMap().getTile(p.getX(), p.getY());
+                	if(context.getMap().isWhirlpool(tile) && context.getMap().isWind(playerTile)) {
                 		if(phase == 0) {
     	            		p.setFace(p.getFace().getNext());
     	                	p.getAnimationStructure().getTurn(turn).setFace(p.getFace());
     	                	p.getAnimationStructure().getTurn(turn).setSpinCollision(true);
-    	            		player.getAnimationStructure().getTurn(turn).setFace(p.getFace());
-    	                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
                 		}
-            		}else {
-            			collide(p, player, turn, phase);
-            		}
-            	}else {
+                	}
                 	collide(p, player, turn, phase);
-            	}
+                }
+                return true;
             }
-            return true;
         }
-        if(!player.getCollisionStorage().isCollided(turn)) {
-            if (setPosition) {
-                player.set(target);
-                player.getCollisionStorage().setPositionChanged(true);
-            }
+        if (setPosition) {
+            player.set(target);
+            player.getCollisionStorage().setPositionChanged(true);
         }
         return false;
     }

@@ -32,8 +32,10 @@ public class TurnAnimationPacket extends ClientPacketExecutor {
                     turn.setLeftShoots(p.readByte());
                     turn.setRightShoots(p.readByte());
                     turn.setSunk(p.readByte() == 1);
-                    turn.setSpinCollision(p.readByte() == 1);
-                    turn.setFace(VesselFace.forId(p.readByte()));
+                    int face = p.readByte();
+                    if(face != 0) {
+                    	turn.setFace(VesselFace.forId(face));
+                    }
                 }
             }
             else {
