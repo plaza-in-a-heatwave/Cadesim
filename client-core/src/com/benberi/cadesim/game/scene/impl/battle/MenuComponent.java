@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
@@ -25,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -129,9 +131,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private TextButton proposeButton ;
 	private TextButton exitButton;
 	private TextButton defaultButton;
-	
+	private ScrollPane dialogScroller;
 	private Table table;
 	private Table sliderTable;
+	private Table mapButtonTable;
 	private Table disengageTable;
 	private Table qualityTable;
 	private Table mapTable;
@@ -149,6 +152,12 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private int turnMax = 60;
 	private int roundMax = 7200;
 	private int sinkPenaltyMax = 10;
+	
+	private int DIALOG_WIDTH = 550;
+	private int DIALOG_HEIGHT = 575;
+	
+	private int DIALOG_WIDTH_1 = 523;
+	private int DIALOG_HEIGHT_1 = 331;
 	
 	private ButtonGroup<TextButton> disengageBehaviorGroup;
 	private ButtonGroup<TextButton> jobberQualityGroup;
@@ -517,7 +526,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         		context.sendSettingsPacket(customMap,mapBoolean, mapName);
 		    	dialog.setVisible(false);
 		    	audio_slider.setVisible(false);
-//	        	context.getControlScene().getControl().setup();
 			} 
     	});
     	
@@ -627,7 +635,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	                	setMapPreview(pixmap);
                 	}else {
                 		clearMapPreview();
-                	}	
+                	}
+                	if(dialogScroller != null) {
+                		dialogScroller.layout();	
+                	}
             	}catch(Exception e) {
             		e.printStackTrace();
             	}
@@ -643,6 +654,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     			selectCustomMap();
 			}
 		});
+		
     }
     
     public void selectCustomMap() {
@@ -680,8 +692,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      */
     public void clearMapPreview() {
     	if(dialog != null && cell != null && previewLabel != null) {
-            dialog.setSize(413, 331);
-    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+            dialog.setSize(DIALOG_WIDTH_1, DIALOG_HEIGHT_1);
+    		dialog.setPosition(Gdx.graphics.getWidth()/2-250, Gdx.graphics.getHeight()/2 - 100);
     		cell.setActor(previewLabel);	
     	}
     }
@@ -694,8 +706,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     		Texture textureMap = new Texture(pixmap);
         	Image map = new Image(textureMap);
         	cell.setActor(map);
-        	dialog.setSize(650, 575);
-        	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+        	dialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+        	dialog.setPosition(Gdx.graphics.getWidth()/2-275, Gdx.graphics.getHeight()/2 - 280);
     	}
     }
     
@@ -703,42 +715,60 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      * Fill tables in the given popup dialog (game setings)
      */
     public void fillTable() {
+    	skin = new Skin(Gdx.files.internal("uiskin.json"));
+    	
 		table = new Table();
+		
 		sliderTable = new Table();
 		disengageTable = new Table();
 		qualityTable = new Table();
 		mapTable = new Table();
+		mapButtonTable = new Table();
 		selectionTable = new Table();
+		
 		tableContainer = new Container<Table>();
 		tableContainer.setActor(table);
+		dialogScroller = new ScrollPane(tableContainer,skin);
+		dialogScroller.addListener(new InputListener() {
+    		public void enter(InputEvent event, float x, float y, int pointer, Actor actor) {
+    			getContext().gameStage.setScrollFocus(dialogScroller);
+    		}
+    		
+    		public void exit(InputEvent event, float x, float y, int pointer, Actor actor) {
+    			getContext().gameStage.setScrollFocus(null);
+    			getContext().gameStage.setScrollFocus(selectBox);
+    		}
+    	});
+		dialogScroller.setScrollingDisabled(true, false);
+		dialogScroller.setFadeScrollBars(false);
 		table.add(sliderTable).pad(2.0f).row();
 		table.add(disengageTable).pad(2.0f).row();
 		table.add(qualityTable).pad(2.0f).row();
 		table.add(mapTable).pad(2.0f).row();
-		table.add(selectionTable).pad(2.0f).row();
+		table.add(mapButtonTable).pad(2.0f).row();
 		//
-		sliderTable.add(turnLabel);
+		sliderTable.add(turnLabel).padLeft(50.0f).padRight(5.0f);
 		sliderTable.add(getTurnSlider());
-		sliderTable.add(turnText).width(60).pad(5.0f).row();
-		sliderTable.add(roundLabel);
+		sliderTable.add(turnText).expandX().padRight(50.0f).row();
+		sliderTable.add(roundLabel).padLeft(50.0f).padRight(5.0f);
 		sliderTable.add(getRoundSlider());
-		sliderTable.add(roundText).width(60).pad(5.0f).row();
-		sliderTable.add(sinkLabel);
+		sliderTable.add(roundText).expandX().pad(5.0f).padRight(50.0f).row();
+		sliderTable.add(sinkLabel).padLeft(50.0f).padRight(5.0f);
 		sliderTable.add(getSinkPenaltySlider());
-		sliderTable.add(sinkPenaltyText).width(60).pad(5.0f).row();
+		sliderTable.add(sinkPenaltyText).expandX().pad(5.0f).padRight(50.0f).row();
 		//
-		disengageTable.add(disengageLabel).pad(5.0f);
+		disengageTable.add(disengageLabel).pad(5.0f).padRight(5.0f);
 		disengageTable.add(getDisengageOffButton()).pad(5.0f);
 		disengageTable.add(getDisengageRealisticButton()).pad(5.0f);
 		disengageTable.add(getDisengageSimpleButton()).pad(5.0f).row();
 		//
-		qualityTable.add(jobberLabel).pad(5.0f);
+		qualityTable.add(jobberLabel).pad(5.0f).padRight(5.0f);
 		qualityTable.add(getBasicQualityButton()).pad(5.0f);
 		qualityTable.add(getEliteQualityButton()).pad(5.0f).row();
-		cell = mapTable.add().colspan(3);
+		cell = mapTable.add().colspan(3).padLeft(100.0f).padRight(100.0f);;
 		mapTable.add().row();
-		mapTable.add(selectBox).colspan(1);
-		mapTable.add(customMapButton).colspan(2);
+		mapButtonTable.add(selectBox).pad(5.0f);
+		mapButtonTable.add(customMapButton);
 		selectionTable.add(proposeButton);
 		selectionTable.add(exitButton);
 		selectionTable.add(defaultButton);
@@ -748,14 +778,15 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	        	Texture textureMap = new Texture(pixmap);
 	        	Image map = new Image(textureMap);
 	        	cell.setActor(map);
-	        	dialog.setSize(650, 575);
-	        	dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+	        	dialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+	        	dialog.setPosition(Gdx.graphics.getWidth()/2-250, Gdx.graphics.getHeight()/2 - 280);
 	    	}else {
-	    		dialog.setSize(413, 331);
-	    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+	    		dialog.setSize(DIALOG_WIDTH_1, DIALOG_HEIGHT_1);
+	    		dialog.setPosition(Gdx.graphics.getWidth()/2-250, Gdx.graphics.getHeight()/2 - 100);
 	    		cell.setActor(previewLabel);
 	    	}
-			dialog.getContentTable().add(tableContainer).row();
+			dialog.getContentTable().add(dialogScroller).row();
+			dialog.getContentTable().add(selectionTable).row();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -770,15 +801,17 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		dialog.setVisible(true);
 		fillSelectBox();
 		fillTable();
+		dialog.pack();
 		context.gameStage.addActor(dialog);
 		dialog.show(context.gameStage);
 		if(cell.getActor() instanceof Label) {
-			dialog.setSize(413, 331);
-    		dialog.setPosition(Gdx.graphics.getWidth()/2-200, Gdx.graphics.getHeight()/2 - 100);
+			dialog.setSize(DIALOG_WIDTH_1, DIALOG_HEIGHT_1);
+    		dialog.setPosition(Gdx.graphics.getWidth()/2-250, Gdx.graphics.getHeight()/2 - 100);
 		}else {
-			dialog.setSize(650, 575);
-			dialog.setPosition(Gdx.graphics.getWidth()/2-300, Gdx.graphics.getHeight()/2 - 280);
+			dialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+			dialog.setPosition(Gdx.graphics.getWidth()/2-250, Gdx.graphics.getHeight()/2 - 280);
 		}
+		dialogScroller.layout();
     }
     
     @Override

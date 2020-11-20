@@ -27,7 +27,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.math.Vector2;
 import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
@@ -204,10 +203,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
      */
     int absheight = Gdx.graphics.getHeight(); // absolute height
     
-    /**
-     * Stage for the chatContainer
-     */
-    private Stage chatStage;
     
     private ScrollPane chatScroller;
     
@@ -569,7 +564,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
         // stage for chatContainer
-        chatStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         initTextures();
         
         // set chat view and scroll to default positions
@@ -1735,10 +1729,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     
     public TextField getTextField() {
 		return textField;
-	}
-    
-	public Stage getChatStage() {
-		return chatStage;
 	}
 
 	@Override
