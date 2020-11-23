@@ -175,6 +175,8 @@ public class MapEditorMapScene implements GameScene {
         flag3Disabled = new Flag(context,3,true);
         //initialize currentTile
         setCurrentTile(cell);
+    	fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
         
         
     }
@@ -240,10 +242,7 @@ public class MapEditorMapScene implements GameScene {
      * Save current map
      */
     public void saveMap() {
-    	fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
-    	int result = fileChooser.showSaveDialog(null);
-    	if(result == JFileChooser.APPROVE_OPTION) {
+    	if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
     		File selectedFile = fileChooser.getSelectedFile();
     		Gdx.graphics.setTitle("MapEditor - current map: " + selectedFile.getName());
     		if(!selectedFile.getAbsolutePath().endsWith(".txt") ) {
@@ -323,11 +322,8 @@ public class MapEditorMapScene implements GameScene {
      * Load selected map
      */
     public void loadMap() {
-    	fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
     	fileChooser.setDialogTitle("Select Map File");
-    	int result = fileChooser.showOpenDialog(null);
-    	if(result == JFileChooser.APPROVE_OPTION) {
+    	if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
     		int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
     		File selectedFile = fileChooser.getSelectedFile();
     		int x = 0;

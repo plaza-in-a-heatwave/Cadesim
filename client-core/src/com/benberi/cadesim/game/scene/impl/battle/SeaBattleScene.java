@@ -822,20 +822,22 @@ public class SeaBattleScene implements GameScene {
     }
 
     @Override
-    public boolean handleClick(float x, float y, int button) {  
-        if (mainmenu.handleClick(x, y, button)) {
-            return true;
-        }
-        if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
-            if (y < camera.viewportHeight) {
-                // handle camera not following vessel
-                cameraFollowsVessel = false;
-
-                this.canDragMap = true;
+    public boolean handleClick(float x, float y, int button) {
+    	if(!mainmenu.isClickingMenuButton(x, y)) {//keep from moving when menu button clicked
+            if (mainmenu.handleClick(x, y, button)) {
                 return true;
             }
-            this.canDragMap = false;	
-        }
+            if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
+                if (y < camera.viewportHeight) {
+                    // handle camera not following vessel
+                    cameraFollowsVessel = false;
+
+                    this.canDragMap = true;
+                    return true;
+                }
+                this.canDragMap = false;	
+            }
+    	}
         return false;
     }
     
@@ -849,30 +851,32 @@ public class SeaBattleScene implements GameScene {
 
     @Override
     public boolean handleClickRelease(float x, float y, int button) {
-        if (mainmenu.handleRelease(x, y, button)) {
-            return true;
-        }
-        if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
-        	if (y < camera.viewportHeight) {
-                // handle camera following/not following vessel
-                if (button == Input.Buttons.RIGHT) {
-                    cameraFollowsVessel = false;
-                } else {
-                    this.cameraFollowsVessel = true;
-                    try {
-                        Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
-                        camera.translate(
-                                getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
-                                getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
-                        );
-                    }catch(NullPointerException e){
-                        //TO-DO -fix issue with null pointer
-                    }
-                }
-                return true;
-            }
-            this.canDragMap = false;	
-        }
+    	if(!mainmenu.isClickingMenuButton(x, y)) {//keep from moving when menu button clicked
+	        if (mainmenu.handleRelease(x, y, button)) {
+	            return true;
+	        }
+	        if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
+	        	if (y < camera.viewportHeight) {
+	                // handle camera following/not following vessel
+	                if (button == Input.Buttons.RIGHT) {
+	                    cameraFollowsVessel = false;
+	                } else {
+	                    this.cameraFollowsVessel = true;
+	                    try {
+	                        Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
+	                        camera.translate(
+	                                getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x,
+	                                getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y
+	                        );
+	                    }catch(NullPointerException e){
+	                        //TO-DO -fix issue with null pointer
+	                    }
+	                }
+	                return true;
+	            }
+	            this.canDragMap = false;	
+	        }
+    	}
         return false;
     }
 

@@ -201,6 +201,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         Skin sliderskin = new Skin(Gdx.files.internal("skin/uiskin.json"));
         dialog = new Dialog("Game Settings", skin, "dialog");
         menuTable_Shape = new Rectangle(MENU_tableX, 0, 80, 200);
+        menuButton_Shape = new Rectangle(MENU_buttonX, 13, 25, 25);
         initImageButtonStyles();
        
 		disengageLabel = new Label("Disengage Behavior:",skin);
@@ -654,6 +655,15 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     			selectCustomMap();
 			}
 		});
+		selectBox.getScrollPane().addListener(new InputListener() {
+    		public void enter(InputEvent event, float x, float y, int pointer, Actor actor) {
+    			getContext().gameStage.setScrollFocus(selectBox.getScrollPane());
+    		}
+    		
+    		public void exit(InputEvent event, float x, float y, int pointer, Actor actor) {
+    			getContext().gameStage.setScrollFocus(dialogScroller);
+    		}
+    	});
 		
     }
     
@@ -736,7 +746,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     		
     		public void exit(InputEvent event, float x, float y, int pointer, Actor actor) {
     			getContext().gameStage.setScrollFocus(null);
-    			getContext().gameStage.setScrollFocus(selectBox);
     		}
     	});
 		dialogScroller.setScrollingDisabled(true, false);
@@ -859,6 +868,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 
     public boolean isClickingMenuTable(float x, float y) {
         return isPointInRect(x,y,menuTable_Shape);
+    }
+    
+    public boolean isClickingMenuButton(float x, float y) {
+        return isPointInRect(x,y,menuButton_Shape);
     }
     
     @Override
