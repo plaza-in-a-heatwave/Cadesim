@@ -130,11 +130,18 @@ public class PlayerManager {
 	 */
 	private void resetTemporarySettings()
 	{
-		setRespawnDelay(ServerConfiguration.getInitialRespawnDelay());
-		setTurnDuration(ServerConfiguration.getInitialTurnDuration());
-		setRoundDuration(ServerConfiguration.getInitialRoundDuration());
-		setDisengageBehavior(ServerConfiguration.getInitialDisengageBehavior());
-		setJobbersQuality(ServerConfiguration.getInitialJobbersQualityAsString());
+		//making sure to reset the proposed settings for login purposes
+		ServerConfiguration.setTurnSetting(ServerConfiguration.getDefaultTurnSetting());
+		ServerConfiguration.setRoundSetting(ServerConfiguration.getDefaultRoundSetting());
+		ServerConfiguration.setRespawnSetting(ServerConfiguration.getDefaultRespawnSetting());
+		ServerConfiguration.setDisengageSetting(ServerConfiguration.getDefaultDisengageSetting());
+		ServerConfiguration.setJobberSetting(ServerConfiguration.getDefaultJobberSetting());
+		
+		setTurnDuration(ServerConfiguration.getDefaultTurnSetting());
+		setRoundDuration(ServerConfiguration.getDefaultRoundSetting());
+		setRespawnDelay(ServerConfiguration.getDefaultRespawnSetting());
+		setDisengageBehavior(ServerConfiguration.getDefaultDisengageSetting());
+		setJobbersQuality(ServerConfiguration.getDefaultJobberSetting());
 	}
 	
     private void setPersistTemporarySettings(boolean value)
@@ -1321,8 +1328,8 @@ public class PlayerManager {
 	            );
 
 	            serverBroadcastMessage(
-	            	"The turn duration was changed to " + (getTurnDuration() / 10) +
-	            	". It will revert back to " + (ServerConfiguration.getTurnDuration() / 10) +
+	            	"The turn duration was changed to " + (ServerConfiguration.getTurnSetting() / 10) +
+	            	". It will revert back to " + (ServerConfiguration.getDefaultTurnSetting() / 10) +
 	            	" when the round times out, or when players vote restart."
 	            );
 	            
@@ -1444,17 +1451,16 @@ public class PlayerManager {
 			case FOR:
 				setPersistTemporarySettings(true);
 				context.getTimeMachine().stop();
-				setTurnDuration(ServerConfiguration.getProposedTurnDuration() * 10);
-				setRoundDuration(ServerConfiguration.getProposedRoundDuration() * 10);
-				setRespawnDelay(ServerConfiguration.getProposedRespawnDelay());
-				setDisengageBehavior(ServerConfiguration.getProposedDisengageBehavior());
-				setJobbersQuality(ServerConfiguration.getProposedJobbersQualityAsString());
-				
-				if(!ServerConfiguration.isCustomMap()) {
+				setTurnDuration(ServerConfiguration.getTurnSetting());
+				setRoundDuration(ServerConfiguration.getRoundSetting());
+				setRespawnDelay(ServerConfiguration.getRespawnSetting());
+				setDisengageBehavior(ServerConfiguration.getDisengageSetting());
+				setJobbersQuality(ServerConfiguration.getJobberSetting());				
+				if(!ServerConfiguration.isCustomMap() || ServerConfiguration.getMapSetting() == null) { //check if customMap is false
 					String match=null;
 	    		    for (String s : ServerConfiguration.getAvailableMaps()) {
 	    		    	//match the entire string instead of start
-	    		        if (s.toLowerCase().matches(ServerConfiguration.getProposedMapName().toLowerCase() + ServerConfiguration.getMapFilter())) {
+	    		        if (s.toLowerCase().matches(ServerConfiguration.getMapNameSetting().toLowerCase() + ServerConfiguration.getMapFilter())) {
 	    		            match = s;
 	    		            break;
 	    		        }

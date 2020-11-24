@@ -1,6 +1,4 @@
 package com.benberi.cadesim.server.model.player;
-import com.benberi.cadesim.server.config.ServerConfiguration;
-
 import com.benberi.cadesim.server.codec.packet.IncomingPacket;
 import com.benberi.cadesim.server.codec.packet.out.OutgoingPacket;
 import com.benberi.cadesim.server.config.Constants;
@@ -166,7 +164,6 @@ public class PlayerPacketManager {
      */
     public void sendTime() {
         BlockadeTimeMachine tm = player.getContext().getTimeMachine();
-        PlayerManager pm = player.getContext().getPlayerManager();
         int gameTime = tm.getRoundTime();
         int turnTime = tm.getTurnTime();
         SendTimePacket packet = new SendTimePacket();
@@ -175,8 +172,6 @@ public class PlayerPacketManager {
         packet.setTurnTime((turnTime>0)?turnTime:0);
         packet.setTimeUntilBreak(tm.getTimeUntilBreak() / 10);
         packet.setBreakTime(tm.getBreakTime() / 10);
-        packet.setTurnDuration(pm.getTurnDuration() / 10);
-        packet.setRoundDuration(pm.getRoundDuration() / 10);
         packet.setCounter(player.getContext().getPingCounter());
 
         player.sendPacket(packet);
@@ -222,11 +217,8 @@ public class PlayerPacketManager {
         
         // the actual response
         login.setResponse(responseCode);
-        
         // and any constants client needs to know in advance
         // descale constants before sending
-        login.setTurnDuration(ServerConfiguration.getTurnDuration()   / 10);
-        login.setRoundDuration(ServerConfiguration.getRoundDuration() / 10);
         player.sendPacket(login);
     }
 

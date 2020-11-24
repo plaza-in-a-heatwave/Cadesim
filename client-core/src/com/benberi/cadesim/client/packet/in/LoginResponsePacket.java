@@ -1,5 +1,9 @@
 package com.benberi.cadesim.client.packet.in;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
@@ -17,29 +21,26 @@ public class LoginResponsePacket extends ClientPacketExecutor {
         super(ctx);
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void execute(Packet p) {
         int response = p.readByte();
-        int turnDuration = p.readShort();
-        int roundDuration = p.readShort();
-        int sinkPenalty = p.readShort();
-        String disengageBehavior = p.readByteString();
-        String jobberQuality = p.readByteString();
-        getContext().setTurnDuration(turnDuration);
-        getContext().setRoundDuration(roundDuration);
-        
-        getContext().setDefaultTurnDuration(turnDuration);
-        getContext().setDefaultRoundDuration(roundDuration);
-        getContext().setDefaultSinkPenalty(sinkPenalty);
-        getContext().setDefaultDisengageBehavior(disengageBehavior);
-        getContext().setDefaultJobberQuality(jobberQuality);
-        
-        getContext().setProposedTurnDuration(turnDuration);
-        getContext().setProposedRoundDuration(roundDuration);
-        getContext().setProposedSinkPenalty(sinkPenalty);
-        getContext().setProposedDisengageBehavior(disengageBehavior);
-        getContext().setProposedJobberQuality(jobberQuality);
         getContext().handleLoginResponse(response);
+        int length = p.readInt();
+        ObjectInputStream ois;
+		try {
+			ois = new ObjectInputStream(new ByteArrayInputStream(p.readBytes(length)));
+            try {
+            	getContext().getGameSettings().clear();
+            	getContext().getGameSettings().addAll((ArrayList<Object>) ois.readObject());
+            } catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+                ois.close();
+            }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
     @Override

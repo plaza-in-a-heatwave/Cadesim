@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.util.Utils;
@@ -24,26 +25,16 @@ public class ServerConfiguration {
     private static int port = 4970;
     private static volatile int islandId = 0;
     private static volatile boolean isSettingsChanged = false;
-    private static volatile int initialTurnDuration  = 300;        // "deciseconds"
-    private static volatile int initialRoundDuration = 18000;      // "deciseconds"
-    private static volatile int initialRespawnDelay  = 1;          // turns
-    private static volatile int turnDuration  = getInitialTurnDuration();        // "deciseconds"
-    private static volatile int roundDuration = getInitialRoundDuration();       // "deciseconds"
-    private static volatile int respawnDelay  = getInitialRespawnDelay();          // turns
-    private static volatile int proposedTurnDuration  = getInitialTurnDuration()/10;        // "deciseconds"
-    private static volatile int proposedRoundDuration = getInitialRoundDuration()/10;     // "deciseconds"
-    private static volatile int proposedRespawnDelay  = getInitialRespawnDelay();       // turns
+    private static volatile int turnDuration  = 300;        // "deciseconds"
+    private static volatile int roundDuration = 18000;       // "deciseconds"
+    private static volatile int respawnDelay  = 1;          // turns
     private static int mapRotationPeriod = 5;      // turns
     private static String mapName = "default.map";
     private static String proposedMapName = "default.map";
     private static String mapFilter = ".txt";
-	private static String initialDisengageBehavior = "simple";
-	private static String disengageBehavior = getInitialDisengageBehavior();
-	private static String proposedDisengageBehavior = getInitialDisengageBehavior();
+	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
-	private static JobbersQuality initialJobbersQuality = JobbersQuality.ELITE;
-	private static JobbersQuality jobbersQuality = getInitialJobbersQuality();
-	private static JobbersQuality proposedJobbersQuality = getInitialJobbersQuality();
+	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
 	private static String authCode = ""; // by default no auth code
@@ -57,6 +48,9 @@ public class ServerConfiguration {
     private static boolean customMap = false;
     private static boolean checkForUpdatesOnStartup = false;
 
+    private static ArrayList<Object> gameSettings = new ArrayList<Object>(Arrays.asList(turnDuration,
+    		roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(), isCustomMap(), mapName, null,
+    		turnDuration,roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString()));
     // uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
@@ -153,53 +147,6 @@ public class ServerConfiguration {
     	ServerConfiguration.respawnDelay = respawnDelay;
     }
     
-    public static int getInitialRoundDuration() {
-		return ServerConfiguration.initialRoundDuration;
-	}
-
-    public static int getInitialRespawnDelay() {
-    	return ServerConfiguration.initialRespawnDelay;
-    }
-
-    public static int getInitialTurnDuration() {
-    	return ServerConfiguration.initialTurnDuration;
-    }
-    
-    public static void setInitialRoundDuration(int value) {
-		ServerConfiguration.initialRoundDuration = value;
-	}
-
-    public static void setInitialRespawnDelay(int value) {
-    	ServerConfiguration.initialRespawnDelay = value;
-    }
-
-    public static void setInitialTurnDuration(int value) {
-    	ServerConfiguration.initialTurnDuration = value;
-    }
-    
-    public static int getProposedTurnDuration() {
-    	return ServerConfiguration.proposedTurnDuration;
-    }
-
-    public static void setProposedTurnDuration(int turnDurationInDeciseconds) {
-    	ServerConfiguration.proposedTurnDuration = turnDurationInDeciseconds;
-    }
-
-    public static int getProposedRoundDuration() {
-		return ServerConfiguration.proposedRoundDuration;
-	}
-
-	public static void setProposedRoundDuration(int roundDurationInDeciseconds) {
-		ServerConfiguration.proposedRoundDuration = roundDurationInDeciseconds;
-	}
-
-    public static int getProposedRespawnDelay() {
-    	return ServerConfiguration.proposedRespawnDelay;
-    }
-
-    public static void setProposedRespawnDelay(int respawnDelay) {
-    	ServerConfiguration.proposedRespawnDelay = respawnDelay;
-    }
     /**
 	 * gets a printable config report.
 	 * Note that the turnDuration/roundDuration are returned
@@ -212,14 +159,14 @@ public class ServerConfiguration {
                 "    Player limit:" + getPlayerLimit() + ",\n" +
                 "    Map Name:" + getMapName() + ",\n" +
                 "    Port:" + getPort() + ",\n" +
-                "    Turn duration:" + getProposedTurnDuration() + "s,\n" +
-                "    Round duration:" + getProposedRoundDuration() + "s,\n" +
-                "    Sink delay:" + getProposedRespawnDelay() + " turns,\n" +
+                "    Turn duration:" + ServerConfiguration.getTurnSetting()/10 + "s,\n" +
+                "    Round duration:" + ServerConfiguration.getRoundSetting()/10 + "s,\n" +
+                "    Sink delay:" + ServerConfiguration.getRespawnSetting() + " turns,\n" +
                 "    Map rotation period:" + ((getMapRotationPeriod()== -1)?"[rotation off] -1":getMapRotationPeriod() + " turns") + ",\n" +
-                "    Disengage behavior:" + getProposedDisengageBehavior() + ",\n" +
+                "    Disengage behavior:" + ServerConfiguration.getDisengageSetting() + ",\n" +
                 "    Vote majority percentage: " +
                 (isVotingEnabled()?("[voting on] " + getVotingMajority() + "%"):"[voting off]") + ",\n" +
-                "    Jobbers quality: " + getProposedJobbersQualityAsString() + ",\n" +
+                "    Jobbers quality: " + ServerConfiguration.getJobberSetting() + ",\n" +
                 "    Team names: " + getAttackerName() + "," + getDefenderName() + ",\n" +
                 "    Auth code: \"" + getAuthCode() + "\"" + ",\n" +
                 "    Run continuous: " + getRunContinuousMode() + ",\n" +
@@ -305,19 +252,6 @@ public class ServerConfiguration {
 	public static String getRandomMapName() {
         return ServerConfiguration.mapList.get(Utils.randInt(0, mapList.size()-1));
     }
-	
-	public static String getInitialDisengageBehavior() {
-		return ServerConfiguration.initialDisengageBehavior ;
-	}
-
-	public static String getInitialJobbersQualityAsString() {
-		return ServerConfiguration.initialJobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
-	}
-	
-	public static JobbersQuality getInitialJobbersQuality() {
-		
-		return ServerConfiguration.initialJobbersQuality;
-	}
 
 	public static String getDisengageBehavior() {
 		return ServerConfiguration.disengageBehavior ;
@@ -325,14 +259,6 @@ public class ServerConfiguration {
 
 	public static void setDisengageBehavior(String disengageBehavior) {
 		ServerConfiguration.disengageBehavior = disengageBehavior;
-	}
-	
-	public static String getProposedDisengageBehavior() {
-		return ServerConfiguration.proposedDisengageBehavior ;
-	}
-
-	public static void setProposedDisengageBehavior(String disengageBehavior) {
-		ServerConfiguration.proposedDisengageBehavior = disengageBehavior;
 	}
 
 	public static void setVotingMajority(int votingMajority)
@@ -375,32 +301,6 @@ public class ServerConfiguration {
 
 	public static String getJobbersQualityAsString() {
 		return ServerConfiguration.jobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
-	}
-
-	public static void setProposedJobbersQuality(String value) throws java.lang.IllegalArgumentException
-	{
-		if (value.toLowerCase().equals("elite"))
-		{
-			ServerConfiguration.proposedJobbersQuality = JobbersQuality.ELITE;
-		}
-		else if (value.toLowerCase().equals("basic"))
-		{
-			ServerConfiguration.proposedJobbersQuality = JobbersQuality.BASIC;
-		}
-		else
-		{
-			throw new java.lang.IllegalArgumentException("jobbersQuality was unexpectedly \"" + value + "\"");
-		}
-		
-	}
-
-	public static JobbersQuality getProposedJobbersQuality() {
-		
-		return ServerConfiguration.proposedJobbersQuality;
-	}
-
-	public static String getProposedJobbersQualityAsString() {
-		return ServerConfiguration.proposedJobbersQuality.equals(JobbersQuality.ELITE)?"elite":"basic";
 	}
 	
 	public static void setDefenderName(String string) {
@@ -485,5 +385,101 @@ public class ServerConfiguration {
 	public static void setSettingsChanged(boolean changed) {
 		ServerConfiguration.isSettingsChanged = changed;
 		
+	}
+
+	public static ArrayList<Object> getGameSettings() {
+		return gameSettings;
+	}
+	
+	public static int getTurnSetting() {
+		return (int)ServerConfiguration.gameSettings.get(0);
+	}
+	
+	public static void setTurnSetting(int value) {
+		ServerConfiguration.gameSettings.set(0, value);
+	}
+	
+	public static int getRoundSetting() {
+		return (int)ServerConfiguration.gameSettings.get(1);
+	}
+	
+	public static void setRoundSetting(int value) {
+		ServerConfiguration.gameSettings.set(1, value);
+	}
+	
+	public static int getRespawnSetting() {
+		return (int)ServerConfiguration.gameSettings.get(2);
+	}
+	
+	public static void setRespawnSetting(int value) {
+		ServerConfiguration.gameSettings.set(2, value);
+	}
+	
+	public static String getDisengageSetting() {
+		return (String)ServerConfiguration.gameSettings.get(3);
+	}
+	
+	public static void setDisengageSetting(String value) {
+		ServerConfiguration.gameSettings.set(3, value);
+	}
+	
+	public static String getJobberSetting() {
+		return (String)ServerConfiguration.gameSettings.get(4);
+	}
+	
+	public static  void setJobberSetting(String value) {
+		ServerConfiguration.gameSettings.set(4, value);
+	}
+	
+	public static boolean getCustomMapSetting() {
+		return (boolean)ServerConfiguration.gameSettings.get(5);
+	}
+	
+	public static void setCustomMapSetting(boolean b) {
+		ServerConfiguration.gameSettings.set(5, b);
+	}
+	
+	public static String getMapNameSetting() {
+		return (String)ServerConfiguration.gameSettings.get(6);
+	}
+	
+	public static void setMapNameSetting(String value) {
+		ServerConfiguration.gameSettings.set(6, value);
+	}
+	
+	public static int[][] getMapSetting() {
+		return (int[][])ServerConfiguration.gameSettings.get(7);
+	}
+	
+	public static void setMapSetting(int[][] value) {
+		ServerConfiguration.gameSettings.set(7, value);
+	}
+	
+	public static int getDefaultTurnSetting() {
+		return (int)ServerConfiguration.gameSettings.get(8);
+	}
+	
+	public static void setDefaultTurnSetting(int value) {
+		ServerConfiguration.gameSettings.set(8,value);
+	}
+	
+	public static int getDefaultRoundSetting() {
+		return (int)ServerConfiguration.gameSettings.get(9);
+	}
+	
+	public static void setDefaultRoundSetting(int value) {
+		ServerConfiguration.gameSettings.set(9,value);
+	}
+	
+	public static int getDefaultRespawnSetting() {
+		return (int)ServerConfiguration.gameSettings.get(10);
+	}
+	
+	public static String getDefaultDisengageSetting() {
+		return (String)ServerConfiguration.gameSettings.get(11);
+	}
+	
+	public static String getDefaultJobberSetting() {
+		return (String)ServerConfiguration.gameSettings.get(12);
 	}
 }

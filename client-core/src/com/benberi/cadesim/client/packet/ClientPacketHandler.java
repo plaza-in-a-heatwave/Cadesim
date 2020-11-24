@@ -125,7 +125,7 @@ public class ClientPacketHandler {
         packets.put(IncomingPackets.SET_TEAM_NAMES,      new SetTeamNamesPacket(context));
         packets.put(IncomingPackets.RECEIVE_MESSAGE,     new ReceiveMessagePacket(context));
         packets.put(IncomingPackets.LIST_ALL_MAPS,       new ListAllMapsPacket(context));
-        packets.put(IncomingPackets.GAME_SETTINGS,       new SendGameSettings(context));
+        packets.put(IncomingPackets.GAME_SETTINGS,       new ReceiveGameSettings(context));
     }
     
     public void clearPackets() {

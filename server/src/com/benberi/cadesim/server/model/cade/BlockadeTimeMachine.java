@@ -9,8 +9,9 @@ public class BlockadeTimeMachine {
     /**
      * Round time and turn time
      */
-    private int roundTime = ServerConfiguration.getRoundDuration();
-    private int turnTime = ServerConfiguration.getTurnDuration();
+    private int roundTime = ServerConfiguration.getRoundSetting();
+    private int turnTime = ServerConfiguration.getTurnSetting();
+    
 
     /*
      * Break duration and break interval

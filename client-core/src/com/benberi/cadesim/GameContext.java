@@ -60,121 +60,16 @@ public class GameContext {
      * Constants to be populated by the server
      */
     private int turnDuration;
-    private int roundDuration;
-    private int proposedTurnDuration;
-    private int proposedRoundDuration;
-    private int proposedSinkPenalty;
-    private String proposedDisengageBehavior;
-    private String proposedJobberQuality;
-    private String proposedMapName;
     
-    private int defaultTurnDuration;
-    private int defaultRoundDuration;
-    private int defaultSinkPenalty;
-    private String defaultDisengageBehavior;
-    private String defaultJobberQuality;
-
     public int getTurnDuration() {
-    	return this.turnDuration;
+    	return turnDuration;
     }
-
-	public void setTurnDuration(int turnDuration) {
-    	this.turnDuration = turnDuration;
-    }
-
-    public int getRoundDuration() {
-		return roundDuration;
-	}
-
-	public void setRoundDuration(int roundDuration) {
-		this.roundDuration = roundDuration;
-	}
-	//Separate turn/round duration variables because they updated every second
-    public int getProposedTurnDuration() {
-    	return this.proposedTurnDuration;
-    }
-
-	public void setProposedTurnDuration(int turnDuration) {
-    	this.proposedTurnDuration = turnDuration;
-    }
-
-    public int getProposedRoundDuration() {
-		return proposedRoundDuration;
-	}
-
-	public void setProposedRoundDuration(int roundDuration) {
-		this.proposedRoundDuration = roundDuration;
-	}
-    public int getProposedSinkPenalty() {
-    	return this.proposedSinkPenalty;
-    }
-
-	public void setProposedSinkPenalty(int sinkPenalty) {
-    	this.proposedSinkPenalty = sinkPenalty;
+    
+    public void setTurnDuration(int value) {
+    	turnDuration = value;
     }
 	
-    public String getProposedDisengageBehavior() {
-    	return this.proposedDisengageBehavior;
-    }
-
-	public void setProposedDisengageBehavior(String disengageBehavior) {
-    	this.proposedDisengageBehavior = disengageBehavior;
-    }
-	
-    public String getProposedJobberQuality() {
-    	return this.proposedJobberQuality;
-    }
-
-	public void setProposedJobberQuality(String jobberQuality) {
-    	this.proposedJobberQuality = jobberQuality;
-    }
-	
-    public String getProposedMapName() {
-    	return this.proposedMapName;
-    }
-
-	public void setProposedMapName(String mapName) {
-    	this.proposedMapName = mapName;
-    }
-	
-    public int getDefaultTurnDuration() {
-    	return this.defaultTurnDuration;
-    }
-
-	public void setDefaultTurnDuration(int turnDuration) {
-    	this.defaultTurnDuration = turnDuration;
-    }
-
-    public int getDefaultRoundDuration() {
-		return defaultRoundDuration;
-	}
-
-	public void setDefaultRoundDuration(int roundDuration) {
-		this.defaultRoundDuration = roundDuration;
-	}
-    public int getDefaultSinkPenalty() {
-    	return this.defaultSinkPenalty;
-    }
-
-	public void setDefaultSinkPenalty(int sinkPenalty) {
-    	this.defaultSinkPenalty = sinkPenalty;
-    }
-	
-    public String getDefaultDisengageBehavior() {
-    	return this.defaultDisengageBehavior;
-    }
-
-	public void setDefaultDisengageBehavior(String disengageBehavior) {
-    	this.defaultDisengageBehavior = disengageBehavior;
-    }
-	
-    public String getDefaultJobberQuality() {
-    	return this.defaultJobberQuality;
-    }
-
-	public void setDefaultJobberQuality(String jobberQuality) {
-    	this.defaultJobberQuality = jobberQuality;
-    }
+	private ArrayList<Object> gameSettings = new ArrayList<Object>();
 
     private SceneAssetManager assetManager;
 
@@ -675,23 +570,10 @@ public class GameContext {
     	sendPacket(packet);
     }
     
-    public void sendSettingsPacket(int[][] map, Boolean customMap, String mapName) {
+    public void sendSettingsPacket() {
     	SendSettingsPacket packet = new SendSettingsPacket();
-    	packet.setProposedTurnDuration(getProposedTurnDuration());
-    	packet.setProposedRoundDuration(getProposedRoundDuration());
-    	packet.setProposedSinkPenalty(getProposedSinkPenalty());
-    	packet.setProposedDisengageBehavior(getProposedDisengageBehavior());
-    	packet.setProposedJobberQuality(getProposedJobberQuality());
-    	if(!customMap && map == null) {
-        	packet.setCustomMap(false);
-        	packet.setProposedMapName(getProposedMapName());
-    	}else {
-    		packet.setCustomMapName(mapName);
-    		packet.setCustomMap(true);
-    		packet.setCustomMapArray(map);
-    	}
+    	packet.setSettings(getGameSettings());
     	sendPacket(packet);
-    	packet.setCustomMap(false); //make sure to reset
     }
 
     /*
@@ -782,5 +664,93 @@ public class GameContext {
 
 	public void setIslandId(int islandId) {
 		this.islandId = islandId;
+	}
+
+	public ArrayList<Object> getGameSettings() {
+		return gameSettings;
+	}
+	
+	public int getTurnSetting() {
+		return ((int)gameSettings.get(0)/10);
+	}
+	
+	public void setTurnSetting(int value) {
+		gameSettings.set(0, value);
+	}
+	
+	public int getRoundSetting() {
+		return ((int)gameSettings.get(1)/10);
+	}
+	
+	public void setRoundSetting(int value) {
+		gameSettings.set(1, value);
+	}
+	
+	public int getRespawnSetting() {
+		return (int)gameSettings.get(2);
+	}
+	
+	public void setRespawnSetting(int value) {
+		gameSettings.set(2, value);
+	}
+	
+	public String getDisengageSetting() {
+		return (String)gameSettings.get(3);
+	}
+	
+	public void setDisengageSetting(String value) {
+		gameSettings.set(3, value);
+	}
+	
+	public String getJobberSetting() {
+		return (String)gameSettings.get(4);
+	}
+	
+	public void setJobberSetting(String value) {
+		gameSettings.set(4, value);
+	}
+	
+	public boolean getCustomMapSetting() {
+		return (boolean)gameSettings.get(5);
+	}
+	
+	public void setCustomMapSetting(boolean b) {
+		gameSettings.set(5, b);
+	}
+	
+	public String getMapNameSetting() {
+		return (String)gameSettings.get(6);
+	}
+	
+	public void setMapNameSetting(String value) {
+		gameSettings.set(6, value);
+	}
+	
+	public int[][] getMapSetting() {
+		return (int[][])gameSettings.get(7);
+	}
+	
+	public void setMapSetting(int[][] value) {
+		gameSettings.set(7, value);
+	}
+	
+	public int getDefaultTurnSetting() {
+		return ((int)gameSettings.get(8)/10);
+	}
+	
+	public int getDefaultRoundSetting() {
+		return ((int)gameSettings.get(9)/10);
+	}
+	
+	public int getDefaultRespawnSetting() {
+		return (int)gameSettings.get(10);
+	}
+	
+	public String getDefaultDisengageSetting() {
+		return (String)gameSettings.get(11);
+	}
+	
+	public String getDefaultJobberSetting() {
+		return (String)gameSettings.get(12);
 	}
 }

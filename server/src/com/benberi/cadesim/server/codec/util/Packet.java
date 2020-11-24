@@ -73,6 +73,13 @@ public class Packet {
     public byte readByte() {
         return this.dataBuffer.readByte();
     }
+    
+    public byte[] readBytes(int length) {
+        byte[] bytes = new byte[length];
+        this.dataBuffer.readBytes(bytes);
+
+        return bytes;
+    }
 
     public void writeByteString(String s) {
         byte[] strData = s.getBytes();

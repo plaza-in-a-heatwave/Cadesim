@@ -15,9 +15,6 @@ public class SendTimePacket extends OutgoingPacket {
     private int timeUntilBreak; // current time position until next break
     private int breakTime;      // current time position within a break
 
-	private int turnDuration; // how long a turn lasts
-	private int roundDuration;// how long a round lasts
-
 	private int counter;      // a rolling byte counter to keep track of how lagged the player is
 
 
@@ -54,14 +51,6 @@ public class SendTimePacket extends OutgoingPacket {
         this.breakTime= value;
     }
 
-    public void setTurnDuration(int turnDuration) {
-    	this.turnDuration = turnDuration;
-    }
-
-    public void setRoundDuration(int roundDuration) {
-    	this.roundDuration = roundDuration;
-    }
-
     @Override
     public void encode() {
         setPacketLengthType(PacketLength.BYTE);
@@ -69,8 +58,6 @@ public class SendTimePacket extends OutgoingPacket {
         writeInt(turnTime);
         writeInt(timeUntilBreak);
         writeInt(breakTime);
-        writeInt(turnDuration);
-        writeInt(roundDuration);
         writeByte(counter);
         setLength(getBuffer().readableBytes());
     }

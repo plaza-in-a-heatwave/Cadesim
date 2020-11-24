@@ -1,5 +1,8 @@
 package com.benberi.cadesim.server.codec.packet.out.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.util.PacketLength;
 import com.benberi.cadesim.server.config.ServerConfiguration;
@@ -19,12 +22,6 @@ public class LoginResponsePacket extends OutgoingPacket {
      */
     private int response = SUCCESS;
     
-    /**
-     * Any constants we need to make the client aware of
-     */
-    private int roundDuration;
-    private int turnDuration;
-
     public LoginResponsePacket() {
         super(OutGoingPackets.LOGIN_RESPONSE);
     }
@@ -33,23 +30,26 @@ public class LoginResponsePacket extends OutgoingPacket {
         this.response = response;
     }
     
-    public void setTurnDuration(int turnDuration) {
-    	this.turnDuration = turnDuration;
-    }
-    
-    public void setRoundDuration(int roundDuration) {
-    	this.roundDuration = roundDuration;
-    }
-
     @Override
     public void encode() {
-        setPacketLengthType(PacketLength.BYTE);
+        setPacketLengthType(PacketLength.MEDIUM);
         writeByte(response);
-        writeShort(turnDuration);   // 2-byte
-        writeShort(roundDuration);  // 2-byte
-        writeShort(ServerConfiguration.getRespawnDelay());
-        writeByteString(ServerConfiguration.getDisengageBehavior());
-        writeByteString(ServerConfiguration.getJobbersQualityAsString());
-        setLength(getBuffer().readableBytes()); // byte + (2 * short)
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try { 
+            ObjectOutputStream ooStream = new ObjectOutputStream(baos);
+            ooStream.writeObject(ServerConfiguration.getGameSettings());
+            ooStream.close();
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                baos.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        writeInt(baos.toByteArray().length);
+        writeBytes(baos.toByteArray());
+        setLength(getBuffer().readableBytes());
     }
 }

@@ -31,7 +31,6 @@ public class SendMapListPacket extends OutgoingPacket{
             	writeBytes(fileContent); 
             } catch (IOException e) {
             	writeInt(0);
-            	System.out.println("Screenshot not found.");
             }
         }
         setLength(getBuffer().readableBytes());

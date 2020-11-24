@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
@@ -573,7 +572,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         selectChat.setItems(new String[]{"Global", "Team"});
         sendMessageButton = new TextButton("Send",skin);
         textField = new TextField("",skin);
-        
         chatTable = new Table();
         chatTable.padLeft(CHAT_REF_X).padBottom(CHAT_REF_Y);
         //message section
@@ -856,15 +854,14 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 
     @Override
     public void update() {
-        int turnDuration = getContext().getTurnDuration();
-
+        int turnDuration = getContext().getTurnDuration(); // getTurnSetting() causes a render bug when setTimePacket is sent
         double ratio = (double) 43 / (double) turnDuration;
 
-        sandTop.setRegionY(43 - (int) Math.round(time * ratio));
+        sandTop.setRegionY(43 - ((int) Math.round(time * ratio)));
         sandTop.setRegionHeight((int) Math.round(time * ratio));
 
         ratio =  (double) 43 / (double) turnDuration;
-        sandBottom.setRegionY(43 - (int) Math.round((turnDuration - time) * ratio));
+        sandBottom.setRegionY(43 - ((int) Math.round((turnDuration - time) * ratio)));
         sandBottom.setRegionHeight((int) Math.round((turnDuration - time) * ratio));
     }
 
@@ -1313,7 +1310,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         if (sandX > 8) {
             sandX = 0;
         }
-
         sandTrickle.setRegionX(sandX);
         sandTrickle.setRegionWidth(1);
     }

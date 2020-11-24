@@ -409,8 +409,8 @@ public class GameServerBootstrap {
                     System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
                 }
                 // reduce turn duration to 0.1s. (TODO #71 possibly could be 0s with tweaks to time machine)
-                ServerConfiguration.setInitialTurnDuration(1); // 0.1s
-                ServerConfiguration.setInitialRoundDuration(315360000); // 1 year to be safe
+                ServerConfiguration.setDefaultTurnSetting(1); // 0.1s
+                ServerConfiguration.setDefaultRoundSetting(315360000); // 1 year to be safe
             }
 
             // check co-dependent arguments e.g. turn/round time

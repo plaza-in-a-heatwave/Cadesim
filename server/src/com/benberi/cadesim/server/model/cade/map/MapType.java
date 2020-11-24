@@ -1,6 +1,5 @@
 package com.benberi.cadesim.server.model.cade.map;
 
-import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
@@ -67,18 +66,20 @@ public enum MapType {
                 }
             }
         }else {
-        	for(int i = 0; i < ServerContext.getMapArray().length; i++) {
-                for (int j = 0; j < ServerContext.getMapArray()[i].length; j++) {
-                    if (isFlag(ServerContext.getMapArray()[i][j])) {
-                        Flag flag = new Flag(FlagSize.forTile(ServerContext.getMapArray()[i][j]));
-                        flag.set(i, j);
-                        bmap.addFlag(flag);
-                        ServerContext.getMapArray()[i][j] = 0;
+        	if(ServerConfiguration.getMapSetting() != null) {
+            	for(int i = 0; i < ServerConfiguration.getMapSetting().length; i++) {
+                    for (int j = 0; j < ServerConfiguration.getMapSetting()[i].length; j++) {
+                        if (isFlag(ServerConfiguration.getMapSetting()[i][j])) {
+                            Flag flag = new Flag(FlagSize.forTile(ServerConfiguration.getMapSetting()[i][j]));
+                            flag.set(i, j);
+                            bmap.addFlag(flag);
+                            ServerConfiguration.getMapSetting()[i][j] = 0;
+                        }
                     }
-                }
-            }
+                }	
+        	}
         }
-        return ServerConfiguration.isCustomMap() ? ServerContext.getMapArray() : finalMap;
+        return ServerConfiguration.isCustomMap()? (ServerConfiguration.getMapSetting() != null ? ServerConfiguration.getMapSetting() : finalMap ): finalMap;
     }
 
     private boolean isFlag(int tile) {

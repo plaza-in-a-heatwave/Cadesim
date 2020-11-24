@@ -1,5 +1,8 @@
 package com.benberi.cadesim.server.codec.packet.out.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import com.benberi.cadesim.server.codec.OutGoingPackets;
 import com.benberi.cadesim.server.codec.util.PacketLength;
 import com.benberi.cadesim.server.config.ServerConfiguration;
@@ -16,12 +19,22 @@ public class SendGameSettings extends OutgoingPacket {
 
     public void encode() {
         setPacketLengthType(PacketLength.MEDIUM);
-        writeInt(ServerConfiguration.getProposedTurnDuration());   // 2-byte
-        writeInt(ServerConfiguration.getProposedRoundDuration());  // 2-byte
-        writeInt(ServerConfiguration.getProposedRespawnDelay());
-	    writeByteString(ServerConfiguration.getProposedDisengageBehavior());
-	    writeByteString(ServerConfiguration.getProposedJobbersQualityAsString());
-	    writeInt(ServerConfiguration.isCustomMap()? 1 : 0);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try { 
+            ObjectOutputStream ooStream = new ObjectOutputStream(baos);
+            ooStream.writeObject(ServerConfiguration.getGameSettings());
+            ooStream.close();
+        } catch(IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                baos.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        writeInt(baos.size());
+        writeBytes(baos.toByteArray());
         setLength(getBuffer().readableBytes());
     }
 }
