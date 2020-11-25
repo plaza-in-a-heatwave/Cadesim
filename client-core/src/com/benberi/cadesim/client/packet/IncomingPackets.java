@@ -27,4 +27,5 @@ public class IncomingPackets {
     public static final int  RECEIVE_MESSAGE     = 19;
     public static final int  LIST_ALL_MAPS       = 20;
     public static final int  GAME_SETTINGS       = 21;
+    public static final int  SET_TEAM            = 22;
 }

@@ -271,7 +271,7 @@ public class PlayerManager {
             lastTimeSend = now;
             sendTime();
         }
-        
+
         // do admin - every n seconds
         if (now - lastAdminCheck >= Constants.SERVER_ADMIN_INTERVAL_MILLIS)
         {
@@ -1057,6 +1057,15 @@ public class PlayerManager {
             player.getPackets().sendTime();
         }
     }
+    
+    /**
+     * Sends and updates the time of the game, turn for all players
+     */
+    private void sendTeam() {
+        for (Player player : listRegisteredPlayers()) {
+            player.getPackets().sendTeam(player.getName(), player.getTeam().getID());
+        }
+    }
 
     public void sendAfterTurn() {
         // deal with sunk/unspawned ships first
@@ -1589,6 +1598,17 @@ public class PlayerManager {
 		"    disengage-behavior (off|realistic|simple)\n";
     }
 
+    public void setTeam(Player pl, int value) {
+    	if(value == 0) {
+    		pl.setTeam(Team.ATTACKER);
+    	}else {
+    		pl.setTeam(Team.DEFENDER);
+    	}
+        for (Player player : listRegisteredPlayers()) {
+            player.getPackets().sendTeam(player.getName(), player.getTeam().getID());
+        }
+    }
+    
     public void handleMessage(Player pl, String message)
     {
     	// log here (always)

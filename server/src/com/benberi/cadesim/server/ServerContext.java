@@ -55,6 +55,7 @@ public class ServerContext {
     public final static boolean LOG_MODE_INSTANCE = true;  // cheap enum for logMode lol
     public final static boolean LOG_MODE_UNIFIED  = false;
     private static boolean logMode = LOG_MODE_UNIFIED;
+    private static boolean teamChange = false;
 
     private ServerPacketManager packets;
 
@@ -228,5 +229,11 @@ public class ServerContext {
 	}
 	public static void setCustomMapName(String name) {
 		ServerContext.customMapName = name;
+	}
+	public static boolean isTeamChange() {
+		return teamChange;
+	}
+	public static void setTeamChange(boolean teamChange) {
+		ServerContext.teamChange = teamChange;
 	}
 }

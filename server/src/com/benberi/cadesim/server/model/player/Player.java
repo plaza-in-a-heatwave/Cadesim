@@ -390,6 +390,7 @@ public class Player extends Position {
     public Team getTeam() {
         return this.team;
     }
+    
 
     /**
      * Sets the player registered
@@ -404,7 +405,7 @@ public class Player extends Position {
      */
     public void register(String name, int ship, int team, int[] customPosition, VesselFace customFace, float customDamage, boolean shouldSpawnFullCannons) {
         this.name = name;
-        this.team = Team.forId(team);
+        this.setTeam(Team.forId(team));
         this.vessel = Vessel.createVesselByType(this, ship);
         this.isRegistered = true;
 
@@ -940,4 +941,8 @@ public class Player extends Position {
     public String getChatChannel() {
         return this.chatChannel;
     }
+
+	public void setTeam(Team team) {
+		this.team = team;
+	}
 }

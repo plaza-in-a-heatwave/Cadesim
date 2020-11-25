@@ -105,4 +105,8 @@ public class OutGoingPackets {
      * delivers settings to client
      */
     public static final int GAME_SETTINGS = 21;
+    /**
+     * sets team
+     */
+    public static final int SET_TEAM = 22;
 }

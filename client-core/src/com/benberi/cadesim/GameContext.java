@@ -143,6 +143,15 @@ public class GameContext {
 
     private ConnectScene connectScene;
     public Team myTeam;
+    
+    public void setTeam(int value) {
+    	if(value == 0) {
+    		this.myTeam = Team.ATTACKER;
+    	}else {
+    		this.myTeam = Team.DEFENDER;
+    	}
+    }
+    
     public ChannelPipeline pipeline;
 
 	private boolean clientDisconnected;
@@ -576,6 +585,11 @@ public class GameContext {
     	sendPacket(packet);
     }
 
+    public void sendTeamPacket(int teamID) {
+    	SetTeamPacket packet = new SetTeamPacket();
+    	packet.setTeam(teamID);
+    	sendPacket(packet);
+    }
     /*
      * When the client (or user) decides to disconnect
      */
@@ -585,6 +599,8 @@ public class GameContext {
         setIsInLobby(true);
         getServerChannel().disconnect();
 		getConnectScene().setState(ConnectionSceneState.DEFAULT);
+		gameStage.clear();
+		inputMultiplexer.clear();
 		connectScene.setPopup("Returning to Lobby...", false);
 		Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
 		System.out.println("Client disconnected.");

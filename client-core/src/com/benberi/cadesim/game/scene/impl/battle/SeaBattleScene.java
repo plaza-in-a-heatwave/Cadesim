@@ -229,6 +229,8 @@ public class SeaBattleScene implements GameScene {
 	}
     @Override
     public void update(){
+		context.getBattleSceneMenu().fillTeamList();
+		
         // update the camera
         camera.update();
         //keep user from scrolling to far to black screens
@@ -339,6 +341,7 @@ public class SeaBattleScene implements GameScene {
                         else {
                         	if (turn.getLeftShoots() > 0) {
                         		isStartedShooting = true;
+                        		playCannonSounds(vessel, turn.getLeftShoots());
 	                            vessel.performLeftShoot(turn.getLeftShoots());
 	                            turn.setLeftShoots(0);
 	                            
@@ -346,6 +349,7 @@ public class SeaBattleScene implements GameScene {
                             
                             if (turn.getRightShoots() > 0) {
                             	isStartedShooting = true;
+                            	playCannonSounds(vessel, turn.getRightShoots());
                                 vessel.performRightShoot(turn.getRightShoots());
                                 turn.setRightShoots(0);
                                 

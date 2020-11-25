@@ -201,10 +201,8 @@ public class SceneAssetManager {
     
     private final static String MENUUP = "ui/settings.png";
     private final static String MENUDOWN = "ui/settings-disabled.png";
-    private final static String LOBBYUP = "ui/menu_button.png";
-    private final static String LOBBYDOWN = "ui/menu_button-disabled.png";
-    private final static String MAPSUP = "ui/menu_button.png";
-    private final static String MAPSDOWN = "ui/menu_button-disabled.png";
+    private final static String BUTTONUP = "ui/menu_button.png";
+    private final static String BUTTONDOWN = "ui/menu_button-disabled.png";
     
     private final static String DISENGAGEUP = "ui/disengage.png";
     private final static String DISENGAGEDOWN = "ui/disengagePressed.png";
@@ -358,10 +356,8 @@ public class SceneAssetManager {
     
     public AssetDescriptor<Texture> menuUp = new AssetDescriptor<Texture>(MENUUP, Texture.class);
     public AssetDescriptor<Texture> menuDown = new AssetDescriptor<Texture>(MENUDOWN, Texture.class);
-    public AssetDescriptor<Texture> lobbyUp = new AssetDescriptor<Texture>(LOBBYUP, Texture.class);
-    public AssetDescriptor<Texture> lobbyDown = new AssetDescriptor<Texture>(LOBBYDOWN, Texture.class);
-    public AssetDescriptor<Texture> mapsUp = new AssetDescriptor<Texture>(MAPSUP, Texture.class);
-    public AssetDescriptor<Texture> mapsDown = new AssetDescriptor<Texture>(MAPSDOWN, Texture.class);
+    public AssetDescriptor<Texture> buttonUp = new AssetDescriptor<Texture>(BUTTONUP, Texture.class);
+    public AssetDescriptor<Texture> buttonDown = new AssetDescriptor<Texture>(BUTTONDOWN, Texture.class);
     
     public AssetDescriptor<Texture> disengageUp = new AssetDescriptor<Texture>(DISENGAGEUP, Texture.class);
     public AssetDescriptor<Texture> disengageDown = new AssetDescriptor<Texture>(DISENGAGEDOWN, Texture.class);
@@ -470,10 +466,8 @@ public class SceneAssetManager {
     	manager.load(flagTexture_disabled);
     	manager.load(menuUp);
     	manager.load(menuDown);
-    	manager.load(lobbyUp);
-    	manager.load(lobbyDown);
-    	manager.load(mapsUp);
-    	manager.load(mapsDown);
+    	manager.load(buttonUp);
+    	manager.load(buttonDown);
     	manager.load(battleSelection);	
     }
     

@@ -176,6 +176,13 @@ public class PlayerPacketManager {
 
         player.sendPacket(packet);
     }
+    
+    public void sendTeam(String pl, int value) {
+        SetTeamPacket packet = new SetTeamPacket();
+        packet.setName(pl);
+        packet.setTeam(value);
+        player.sendPacket(packet);
+    }
 
     /**
      * Sends another player
