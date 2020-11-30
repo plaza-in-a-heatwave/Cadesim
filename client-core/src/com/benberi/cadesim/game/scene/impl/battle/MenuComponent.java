@@ -367,7 +367,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		//init settings
 		settingsDialog.setMovable(true);
 		settingsDialog.setResizable(true);
-		settingsDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+		resizeSettingsDialog();
     }
 	/*
 	 * Fill list with proper teams
@@ -713,6 +713,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
                 	if(settingsScroller != null) {
                 		settingsScroller.layout();	
                 	}
+                	resizeSettingsDialog();
             	}catch(Exception e) {
             		e.printStackTrace();
             	}
@@ -902,17 +903,17 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     public void setMapPreview(Pixmap pixmap) {
     	if(settingsDialog != null && cell != null) {
         	cell.setActor(new Image(new Texture(pixmap)));
+        	resizeSettingsDialog();
     	}
     }
     
     public void resizeSettingsDialog() {
-    	if(selectBox.getSelectedIndex() != -1) {
-        	settingsDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-        	settingsDialog.setPosition(Gdx.graphics.getWidth()/2 - (settingsDialog.getWidth()/2), Gdx.graphics.getHeight()/2 - (settingsDialog.getHeight()/4));
-    	}else {
+    	if(cell.getActor() instanceof Label || cell.getActor() == null) {
     		settingsDialog.setSize(DIALOG_WIDTH_1, DIALOG_HEIGHT_1);
-    		settingsDialog.setPosition(Gdx.graphics.getWidth()/2 - (settingsDialog.getWidth()/2), Gdx.graphics.getHeight()/2 - (settingsDialog.getHeight()/4));	
+    	}else {
+    		settingsDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
     	}
+    	settingsDialog.setPosition(Gdx.graphics.getWidth()/2 - (settingsDialog.getWidth()/2), Gdx.graphics.getHeight()/2 - (settingsDialog.getHeight()/4));	
     }
     /*
      * Create the actual popup dialog
@@ -936,7 +937,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     			button.setDisabled(true);
     		}
     	}
-    	settingsDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
 		settingsDialog.show(context.gameStage);
 		settingsDialog.setVisible(true);
 		if(selectBox.getSelectedIndex() != -1) {
@@ -949,7 +949,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		}
 		settingsDialog.pack();
 		settingsScroller.layout();
-		
+		resizeSettingsDialog();
     }
     
     @Override
