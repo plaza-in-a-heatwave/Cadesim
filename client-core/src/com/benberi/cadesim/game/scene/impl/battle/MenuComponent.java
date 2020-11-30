@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -26,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -41,6 +43,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
+import com.benberi.cadesim.game.cade.Team;
+import com.benberi.cadesim.game.entity.vessel.Vessel;
 import com.benberi.cadesim.game.scene.SceneComponent;
 import com.benberi.cadesim.game.scene.impl.battle.map.BlockadeMap;
 import com.benberi.cadesim.game.scene.impl.connect.ConnectScene;
@@ -64,10 +68,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
      */
     private Texture menuUp;
     private Texture menuDown;
-    private Texture lobbyUp;
-    private Texture lobbyDown;
-    private Texture settingsUp;
-    private Texture settingsDown;
+    private Texture buttonUp;
+    private Texture buttonDown;
     
     private BitmapFont font;
     
@@ -75,7 +77,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     private int MENU_REF_X       = 0;
     private int MENU_REF_Y       = 0;
     private int MENU_buttonX     = MENU_REF_X + (Gdx.graphics.getWidth() - 36);
-
+    private int TEAM_tableX;
+    private int TEAM_tableY;
     private int MENU_tableX     = MENU_REF_X + (Gdx.graphics.getWidth() - 80);
     @SuppressWarnings("unused")
 	private int MENU_tableY     = MENU_REF_Y + (Gdx.graphics.getHeight() - 321);
@@ -89,6 +92,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     // DISENGAGE shapes
     Rectangle menuButton_Shape;
     Rectangle menuTable_Shape;
+    Rectangle teamTable_Shape;
     Rectangle menuLobby_Shape;
     Rectangle menuMap_Shape;
 
@@ -108,9 +112,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private ImageButton menuButton;
 	private ImageButtonStyle menuButtonStyle;
 	private ImageButton settingsButton;
-	private ImageButtonStyle settingsButtonStyle;
+	private ImageButtonStyle buttonStyle;
 	private ImageButton lobbyButton;
-	private ImageButtonStyle lobbyButtonStyle;
+	private ImageButton teamButton;
 	//Settings buttons (sliders)
 	public Slider audio_slider;
 	private Slider turnDuration_slider;
@@ -131,9 +135,16 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private TextButton proposeButton ;
 	private TextButton exitButton;
 	private TextButton defaultButton;
+	private TextButton attackerTeamButton;
+	private TextButton defenderTeamButton;
 	private ScrollPane settingsScroller;
+	private ScrollPane defenderScroller;
+	private ScrollPane attackerScroller;
 	private Table table;
 	private Table sliderTable;
+	public Table teamTable;
+	private Table listTables;
+	private Table teamButtonTable;
 	private Table mapButtonTable;
 	private Table disengageTable;
 	private Table qualityTable;
@@ -147,6 +158,10 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private Label sinkLabel;
 	private Label jobberLabel;
 	private Label previewLabel;
+	private List<String> defenderList;
+	private String[] defenderNames;
+	private List<String> attackerList;
+	private String[] attackerNames;
 	
 	private float audioMax = 0.25f;
 	private int turnMax = 60;
@@ -193,7 +208,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         Skin sliderskin = new Skin(Gdx.files.internal("skin/uiskin.json"));
         settingsDialog = new Dialog("Game Settings", skin, "dialog");
-        menuTable_Shape = new Rectangle(MENU_tableX, 0, 80, 200);
+        menuTable_Shape = new Rectangle(MENU_tableX, 0, 80, 400);
         menuButton_Shape = new Rectangle(MENU_buttonX, 13, 25, 25);
         initImageButtonStyles();
        
@@ -210,7 +225,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	turnDuration_slider = new Slider(5.0f, (float)turnMax, 5.0f, false, skin);
     	roundDuration_slider = new Slider(30.0f, (float)roundMax, 5.0f, false, skin);
     	sinkPenalty_slider = new Slider(0.0f, (float)respawnPenaltyMax, 1.0f, false, skin);
-
+    	
     	turnText = new TextField("",skin);
     	turnText.setMaxLength(5);
  
@@ -240,24 +255,62 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	proposeButton = new TextButton("Propose",skin);
     	exitButton = new TextButton("Exit",skin);
     	defaultButton = new TextButton("Reset defaults",skin);
+    	menuButton.setPosition(Gdx.graphics.getWidth() - 36, Gdx.graphics.getHeight() - 40);
+    	lobbyButton.setPosition(Gdx.graphics.getWidth() - 76, Gdx.graphics.getHeight() - 75);
+    	settingsButton.setPosition(Gdx.graphics.getWidth() - 76, lobbyButton.getY() - 35);
+    	teamButton.setPosition(Gdx.graphics.getWidth() - 76, settingsButton.getY() - 35);
     	audio_slider.setSize(10, 100);
-    	audio_slider.setPosition(Gdx.graphics.getWidth() - 30, Gdx.graphics.getHeight()- 220);
+    	audio_slider.setPosition(Gdx.graphics.getWidth()-30, teamButton.getY() - 110);
     	audio_slider.setValue(0.05f);
-    	menuButton.setPosition(MENU_buttonX, Gdx.graphics.getHeight() - 40);
-    	lobbyButton.setPosition(MENU_lobbyButtonX, Gdx.graphics.getHeight() - 75);
-    	settingsButton.setPosition(MENU_settingsButtonX, lobbyButton.getY() - 35);
     	context.gameStage.addActor(menuButton);
     	context.gameStage.addActor(lobbyButton);
     	context.gameStage.addActor(settingsButton);
-    	context.gameStage.addActor(audio_slider);
+    	context.gameStage.addActor(teamButton);
+    	context.gameStage.addActor(audio_slider);	
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
     	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
     	fileChooser.setDialogTitle("Select Map File");
     	createDialog();
+    	createTeams();
 		hideMenu();
     	initListeners();
     }
+    
+    public void createTeams() {
+    	teamTable = new Table();
+    	listTables = new Table();
+    	teamButtonTable = new Table();
+    	
+    	attackerTeamButton = new TextButton("Attacker",skin);
+    	defenderTeamButton = new TextButton("Defender",skin);
+    	
+    	attackerList = new List<String>(skin);
+    	defenderList = new List<String>(skin);
+    	attackerScroller = new ScrollPane(attackerList,skin);
+    	defenderScroller = new ScrollPane(defenderList,skin);
 
+    	attackerNames = new String[] {""};
+    	defenderNames = new String[] {""};
+    	
+    	attackerList.getItems().addAll(attackerNames);
+    	defenderList.getItems().addAll(defenderNames);
+    	
+    	teamButtonTable.add(attackerTeamButton).padRight(10.0f);
+    	teamButtonTable.add(defenderTeamButton);
+    	listTables.add(attackerScroller).width(150).height(200).padRight(10.0f);
+    	listTables.add(defenderScroller).width(150).height(200);
+    	teamTable.add(teamButtonTable).row();
+    	teamTable.add(listTables);
+    	teamTable.setPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+    	context.gameStage.addActor(teamTable);
+    	teamTable.setVisible(false);
+        TEAM_tableX     = MENU_REF_X + (Gdx.graphics.getWidth()/2 - 160);
+        TEAM_tableY     = MENU_REF_Y + (Gdx.graphics.getHeight()/2 - 125);
+        teamTable_Shape = new Rectangle(TEAM_tableX, TEAM_tableY, 350, 250);
+    }
+	/*
+	 * Create settings dialog
+	 */
     public void createDialog() {
 		table = new Table();
 		sliderTable = new Table();
@@ -268,17 +321,19 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		selectionTable = new Table();
 		
 		tableContainer = new Container<Table>();
+    	tableContainer.setActor(table);
 		settingsScroller = new ScrollPane(tableContainer,skin);
-
-		tableContainer.setActor(table);
-
+    	
 		settingsScroller.setScrollingDisabled(true, false);
 		settingsScroller.setFadeScrollBars(false);
+		
+    	//settings table
 		table.add(sliderTable).pad(2.0f).row();
 		table.add(disengageTable).pad(2.0f).row();
 		table.add(qualityTable).pad(2.0f).row();
 		table.add(mapTable).pad(2.0f).row();
 		table.add(mapButtonTable).pad(2.0f).row();
+		
 		//
 		sliderTable.add(turnLabel).padLeft(50.0f).padRight(5.0f);
 		sliderTable.add(getTurnSlider());
@@ -302,6 +357,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		mapTable.add().row();
 		mapButtonTable.add(selectBox).pad(5.0f);
 		mapButtonTable.add(customMapButton);
+		//buttons
 		selectionTable.add(proposeButton);
 		selectionTable.add(exitButton);
 		selectionTable.add(defaultButton);
@@ -314,9 +370,64 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		settingsDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
     }
 	/*
+	 * Fill list with proper teams
+	 */
+    public void fillTeamList() {
+	    	attackerList.getItems().clear();
+	    	defenderList.getItems().clear();
+			ArrayList<Vessel> attacker = new ArrayList<Vessel>();
+			ArrayList<Vessel> defender = new ArrayList<Vessel>();
+			for(Vessel vessel : getContext().getEntities().listVesselEntities()) {
+	    		if(vessel.getTeam() == Team.ATTACKER) {
+	    			attacker.add(vessel);
+	    		}else {
+	    			defender.add(vessel);
+	    		}
+			}
+	    	attackerNames = new String[attacker.size()];
+	    	defenderNames = new String[defender.size()];
+	    	int i = 0;
+	    	for(Vessel vessel : attacker) {
+	    		if(vessel.getTeam() == Team.ATTACKER) {
+	    			attackerNames[i] = vessel.getName();
+	    		}
+	    		i++;
+	    	}
+	    	int j = 0;
+	    	for(Vessel vessel : defender) {
+	    		if(vessel.getTeam() == Team.DEFENDER) {
+	    			defenderNames[j] = vessel.getName();
+	    		}
+	    		j++;
+	    	}
+	    	attackerList.getItems().addAll(attackerNames);
+	    	defenderList.getItems().addAll(defenderNames);
+    }
+	/*
 	 * Initialize listeners for actors of stage
 	 */
     public void initListeners() {
+    	teamButton.addListener(new ClickListener() {
+    		@Override
+    		public void clicked(InputEvent event, float x, float y) {
+    			if(!teamButton.isDisabled()) {
+        			teamButton.setDisabled(true);
+        			teamTable.setVisible(true);	
+    			}
+    		}
+    	});
+    	attackerTeamButton.addListener(new ClickListener() {
+    		@Override
+    		public void clicked(InputEvent event, float x, float y) {
+    			context.sendTeamPacket(Team.ATTACKER.getID());
+    		}
+    	});
+    	defenderTeamButton.addListener(new ClickListener() {
+    		@Override
+    		public void clicked(InputEvent event, float x, float y) {
+    			context.sendTeamPacket(Team.DEFENDER.getID());
+    		}
+    	});
     	menuButton.addListener(new ClickListener() {
     		@Override
     		public void clicked(InputEvent event, float x, float y) {
@@ -347,25 +458,20 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     public void initImageButtonStyles() {
     	menuUp = context.getManager().get(context.getAssetObject().menuUp);
         menuDown = context.getManager().get(context.getAssetObject().menuDown);
-        lobbyUp = context.getManager().get(context.getAssetObject().lobbyUp);
-        lobbyDown = context.getManager().get(context.getAssetObject().lobbyDown);
-        settingsUp = context.getManager().get(context.getAssetObject().lobbyUp);
-        settingsDown = context.getManager().get(context.getAssetObject().lobbyDown);
+        buttonUp = context.getManager().get(context.getAssetObject().buttonUp);
+        buttonDown = context.getManager().get(context.getAssetObject().buttonDown);
         menuButtonStyle = new ImageButtonStyle();
         menuButtonStyle.up = new TextureRegionDrawable(new TextureRegion(menuUp));
         menuButtonStyle.down = new TextureRegionDrawable(new TextureRegion(menuDown));
         menuButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(menuDown));
         menuButton = new ImageButton(menuButtonStyle);
-        lobbyButtonStyle = new ImageButtonStyle();
-        lobbyButtonStyle.up = new TextureRegionDrawable(new TextureRegion(lobbyUp));
-        lobbyButtonStyle.down = new TextureRegionDrawable(new TextureRegion(lobbyDown));
-        lobbyButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(lobbyDown));
-        lobbyButton = new ImageButton(lobbyButtonStyle);
-        settingsButtonStyle = new ImageButtonStyle();
-        settingsButtonStyle.up = new TextureRegionDrawable(new TextureRegion(settingsUp));
-        settingsButtonStyle.down = new TextureRegionDrawable(new TextureRegion(settingsDown));
-        settingsButtonStyle.disabled = new TextureRegionDrawable(new TextureRegion(settingsDown));
-        settingsButton = new ImageButton(settingsButtonStyle);
+        buttonStyle = new ImageButtonStyle();
+        buttonStyle.up = new TextureRegionDrawable(new TextureRegion(buttonUp));
+        buttonStyle.down = new TextureRegionDrawable(new TextureRegion(buttonDown));
+        buttonStyle.disabled = new TextureRegionDrawable(new TextureRegion(buttonDown));
+        lobbyButton = new ImageButton(buttonStyle);
+        settingsButton = new ImageButton(buttonStyle);
+        teamButton = new ImageButton(buttonStyle);
     }
     
     @Override
@@ -384,6 +490,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
         	//overlay buttons with text
         	font.draw(batch,"Lobby",MENU_lobbyButtonX+25,MENU_lobbyButtonY+220);
         	font.draw(batch,"Game Settings",MENU_settingsButtonX+8,(MENU_lobbyButtonY+220)-35);
+        	font.draw(batch,"Select Team",MENU_settingsButtonX+13,(MENU_lobbyButtonY+220)-70);
         }
         batch.end();
     }
@@ -764,8 +871,15 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		settingsButton.setDisabled(false);
 		lobbyButton.setVisible(true);
 		settingsButton.setVisible(true);
+		teamButton.setVisible(true);
 		audio_slider.setDisabled(false);
 		audio_slider.setVisible(true);
+		//only allow user to change team in safe zone
+		if(getContext().myVesselY < 3 || getContext().myVesselY > 32) {
+			teamButton.setDisabled(false);
+		}else {
+			teamButton.setDisabled(true);
+		}
     }
     
     /*
@@ -776,9 +890,11 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	audio_slider.setDisabled(true);
     	lobbyButton.setDisabled(true);
     	settingsButton.setDisabled(true);
+    	teamButton.setDisabled(false);
     	audio_slider.setVisible(false);
     	lobbyButton.setVisible(false);
     	settingsButton.setVisible(false);
+    	teamButton.setVisible(false);
     }
     /*
      * Sets map preview to selected map screenshot 
@@ -838,8 +954,13 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     
     @Override
     public boolean handleClick(float x, float y, int button) {
-    	if(menuButton.isDisabled() && !isClickingMenuTable(x,y)){
-    		hideMenu();
+    	if(menuButton.isDisabled()){
+    		if(!teamTable.isVisible() && !isClickingMenuTable(x,y)) {
+    			hideMenu();	
+    		}else if(menuButton.isDisabled() && !isClickingTeamTable(x,y)) {
+    			teamTable.setVisible(false);
+    			hideMenu();	
+    		}
         	return false;
         }
         else {
@@ -906,6 +1027,13 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	 */
     public boolean isClickingMenuButton(float x, float y) {
         return isPointInRect(x,y,menuButton_Shape);
+    }
+    
+	/*
+	 * Is clicking teams area
+	 */
+    public boolean isClickingTeamTable(float x, float y) {
+        return isPointInRect(x,y,teamTable_Shape);
     }
     
     @Override

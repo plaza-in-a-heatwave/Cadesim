@@ -7,6 +7,7 @@ import com.benberi.cadesim.server.model.cade.BlockadeTimeMachine;
 import com.benberi.cadesim.server.model.player.move.MoveTokensHandler;
 import com.benberi.cadesim.server.model.player.move.MoveType;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -174,6 +175,12 @@ public class PlayerPacketManager {
         packet.setBreakTime(tm.getBreakTime() / 10);
         packet.setCounter(player.getContext().getPingCounter());
 
+        player.sendPacket(packet);
+    }
+    
+    public void sendTeam(HashMap<String,Integer> teams_info) {
+        SetTeamPacket packet = new SetTeamPacket();
+        packet.setTeamInfo(teams_info);
         player.sendPacket(packet);
     }
 

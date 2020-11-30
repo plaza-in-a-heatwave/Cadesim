@@ -23,6 +23,7 @@ import io.netty.channel.Channel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -271,7 +272,7 @@ public class PlayerManager {
             lastTimeSend = now;
             sendTime();
         }
-        
+
         // do admin - every n seconds
         if (now - lastAdminCheck >= Constants.SERVER_ADMIN_INTERVAL_MILLIS)
         {
@@ -1589,6 +1590,26 @@ public class PlayerManager {
 		"    disengage-behavior (off|realistic|simple)\n";
     }
 
+    public void setTeam(Player pl, int value) {
+    	if(value == 0) {
+    		pl.setTeam(Team.ATTACKER);
+    	}else {
+    		pl.setTeam(Team.DEFENDER);
+    	}
+    	
+    	sendTeamInfo();
+    }
+    
+    public void sendTeamInfo() {
+    	HashMap<String,Integer> teams = new HashMap<String,Integer>();
+        for (Player player : listRegisteredPlayers()) {
+        	teams.put(player.getName(), player.getTeam().getID());
+        }
+        for (Player player : listRegisteredPlayers()) {
+            player.getPackets().sendTeam(teams);	
+        }
+    }
+    
     public void handleMessage(Player pl, String message)
     {
     	// log here (always)

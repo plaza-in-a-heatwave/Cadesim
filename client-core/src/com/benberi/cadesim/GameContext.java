@@ -105,6 +105,7 @@ public class GameContext {
     private EntityManager entities;
 
     public String myVessel;
+    public int myVesselY;
     
     public int myVesselType;
 
@@ -143,6 +144,15 @@ public class GameContext {
 
     private ConnectScene connectScene;
     public Team myTeam;
+    
+    public void setTeam(int value) {
+    	if(value == 0) {
+    		this.myTeam = Team.ATTACKER;
+    	}else {
+    		this.myTeam = Team.DEFENDER;
+    	}
+    }
+    
     public ChannelPipeline pipeline;
 
 	private boolean clientDisconnected;
@@ -283,10 +293,10 @@ public class GameContext {
     	ControlAreaScene.shipId = shipId;
     	this.input = new GameInputProcessor(this);
         inputMultiplexer.addProcessor(this.input);
-        this.controlArea = new ControlAreaScene(this);
-        controlArea.create();
         this.seaBattleScene = new SeaBattleScene(this);
         seaBattleScene.create();
+        this.controlArea = new ControlAreaScene(this);
+        controlArea.create();
         //fix crash on server disconnect after dispose has been called
 		if(scenes.size() == 0) {
 	        scenes.add(controlArea);
@@ -576,6 +586,11 @@ public class GameContext {
     	sendPacket(packet);
     }
 
+    public void sendTeamPacket(int teamID) {
+    	SetTeamPacket packet = new SetTeamPacket();
+    	packet.setTeam(teamID);
+    	sendPacket(packet);
+    }
     /*
      * When the client (or user) decides to disconnect
      */
@@ -585,6 +600,8 @@ public class GameContext {
         setIsInLobby(true);
         getServerChannel().disconnect();
 		getConnectScene().setState(ConnectionSceneState.DEFAULT);
+		gameStage.clear();
+		inputMultiplexer.clear();
 		connectScene.setPopup("Returning to Lobby...", false);
 		Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
 		System.out.println("Client disconnected.");

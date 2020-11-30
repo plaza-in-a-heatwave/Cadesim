@@ -229,6 +229,10 @@ public class SeaBattleScene implements GameScene {
 	}
     @Override
     public void update(){
+    	if(context.getBattleSceneMenu().teamTable.isVisible()) {
+    		context.getBattleSceneMenu().fillTeamList();
+    	}
+		
         // update the camera
         camera.update();
         //keep user from scrolling to far to black screens
@@ -339,6 +343,7 @@ public class SeaBattleScene implements GameScene {
                         else {
                         	if (turn.getLeftShoots() > 0) {
                         		isStartedShooting = true;
+                        		playCannonSounds(vessel, turn.getLeftShoots());
 	                            vessel.performLeftShoot(turn.getLeftShoots());
 	                            turn.setLeftShoots(0);
 	                            
@@ -346,6 +351,7 @@ public class SeaBattleScene implements GameScene {
                             
                             if (turn.getRightShoots() > 0) {
                             	isStartedShooting = true;
+                            	playCannonSounds(vessel, turn.getRightShoots());
                                 vessel.performRightShoot(turn.getRightShoots());
                                 turn.setRightShoots(0);
                                 
@@ -827,7 +833,7 @@ public class SeaBattleScene implements GameScene {
             if (mainmenu.handleClick(x, y, button)) {
                 return true;
             }
-            if (y < camera.viewportHeight) {
+            if (y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
                 // handle camera not following vessel
                 cameraFollowsVessel = false;
 
@@ -849,11 +855,11 @@ public class SeaBattleScene implements GameScene {
 
     @Override
     public boolean handleClickRelease(float x, float y, int button) {
-    	if(!mainmenu.isClickingMenuButton(x, y) && !mainmenu.isClickingMenuTable(x, y) && !mainmenu.isSettingsDialogOpen()) {//keep from moving when menu button clicked
+    	if(!mainmenu.isClickingMenuButton(x, y) && !mainmenu.isClickingMenuTable(x, y) && !mainmenu.isSettingsDialogOpen() ) {//keep from moving when menu button clicked
 	        if (mainmenu.handleRelease(x, y, button)) {
 	            return true;
 	        }
-        	if (y < camera.viewportHeight) {
+        	if (y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
                 // handle camera following/not following vessel
                 if (button == Input.Buttons.RIGHT) {
                     cameraFollowsVessel = false;

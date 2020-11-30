@@ -87,7 +87,6 @@ public class ConnectScene implements GameScene, InputProcessor {
      */
     public Stage stage;
     public Stage stage_dialog;
-    public Stage stage_maps;
 
     private TextField name;
     private TextField address;
@@ -148,6 +147,9 @@ public class ConnectScene implements GameScene, InputProcessor {
     private int indexResolution;
     private Random random = new Random();
     
+    TextField.TextFieldStyle style;
+    SelectBox.SelectBoxStyle selectBoxStyle;
+    
     private Map<Integer,int[]> resolutionWidthDiction;
     
     public ConnectScene(GameContext ctx) {
@@ -176,311 +178,66 @@ public class ConnectScene implements GameScene, InputProcessor {
     	room_names.clear();
     	server_codes.clear();
     	greetings.clear();
-        Properties prop = new Properties();
-        String fileName = "user.config";
-        InputStream is = null;
-        try {
-            is = new FileInputStream(fileName);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            prop.load(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // fonts
-        font = context.getManager().get(context.getAssetObject().regularFont);
-        notesFont = context.getManager().get(context.getAssetObject().notesFont);
-        titleFont = context.getManager().get(context.getAssetObject().titleFont);
-        
-        // greetings
-        greetings.add("It simulates blockades!");
-        greetings.add("No ships were harmed, honest");
-        greetings.add("Hot Pirate On Pirate Blockading Action");
-        greetings.add("Job for Keep The Peace!");
-        greetings.add("I am a sloop, I do not move!");
-        greetings.add("Cyclist Edition");
-        greetings.add("Home grown!");
-        greetings.add("Blub");
-        greetings.add("You sunk my battleship!");
-        greetings.add("You'll never guess what happened next...");
-        greetings.add("Inconceivable!");
-        greetings.add("Every day I'm Simulatin'");
-        greetings.add("Matured in oak casks for 24 months");
-        greetings.add("Probably SFW");
-        greetings.add("Sea monsters are always Kraken jokes");
-        greetings.add("Without a shadow of a Trout");
-        greetings.add("Just for the Halibut");
-        greetings.add("Placing Moves, not Moving Plaice");
-        greetings.add("Went to fish frowning comp. Had to Gurnard");
-        greetings.add("Just Mullet over");
-        greetings.add("Don't tell him, Pike!");
-        greetings.add("Tales of Herring Do");
-        greetings.add("Needlefish? Get all fish!");
-        greetings.add("It's... It's... Eely good");
-        greetings.add("Bream me up, Scotty!");
-        greetings.add("Living the Bream");
-        greetings.add("micro/nano Blockade SIMs available!");
-        greetings.add("Written by pirates, for pirates");
-        greetings.add("Precariously Perched!");
-        greetings.add("Hake it out, Hake it out, ooh whoa");
-        greetings.add("It's Turbot-charged!");
-        greetings.add("Albatross!");
-        greetings.add("You're in for a shark!");
-        greetings.add("We Booched It!");
-        chosenGreeting = greetings.get(prng.nextInt(greetings.size()));
-        
+    	
         batch = new SpriteBatch();
-        background = context.getManager().get(context.getAssetObject().background);
-        smallBackground = context.getManager().get(context.getAssetObject().smallBackground);
-        textfieldTexture = context.getManager().get(context.getAssetObject().textfieldTexture);
-
-        loginButtonStyle = new ImageButtonStyle();
-        loginButtonUp = context.getManager().get(context.getAssetObject().loginButton);
-        loginDrawable = new TextureRegionDrawable(new TextureRegion(loginButtonUp));
-        loginButtonDown = context.getManager().get(context.getAssetObject().loginButtonDown);
-        loginDisabledDrawable = new TextureRegionDrawable(new TextureRegion(loginButtonDown));
-        
-        loginButtonStyle = new ImageButtonStyle();
-        loginButtonStyle.imageUp = loginDrawable;
-        loginButtonStyle.imageDown = loginDisabledDrawable;
-        loginButtonStyle.imageChecked = loginDrawable;
-        loginButtonStyle.imageOver = loginDisabledDrawable;
-        //login button
-        buttonConn = new ImageButton(loginButtonStyle); //Set the button up
-        buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
-            public void clicked(InputEvent event, float x, float y){
-                try {
-                    performUpdateCheck();
-                    buttonConn.toggle();
-                } catch (UnknownHostException e) {
-                    return;
-                }
-            }});
-        buttonConn.setPosition(Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] + 5, 290);
-      //login button
-        mapEditorButtonStyle = new ImageButtonStyle();
-        mapEditorButtonUp = context.getManager().get(context.getAssetObject().mapEditorButtonUp);
-        mapEditorButtonDown = context.getManager().get(context.getAssetObject().mapEditorButtonDown);
-        mapEditorDrawable = new TextureRegionDrawable(new TextureRegion(mapEditorButtonUp));
-        mapEditorDisabledDrawable = new TextureRegionDrawable(new TextureRegion(mapEditorButtonDown));
-        mapEditorButtonStyle.imageUp = mapEditorDrawable;
-        mapEditorButtonStyle.imageDown = mapEditorDisabledDrawable;
-        mapEditorButtonStyle.imageOver = mapEditorDisabledDrawable;
-        buttonMapEditor = new ImageButton(mapEditorButtonStyle); //Set the button up
-        buttonMapEditor.addListener(new ClickListener() {//runs update if there is one before logging in 
-            public void clicked(InputEvent event, float x, float y){
-            	context.createMapEditorScene();
-            	context.setStartedMapEditor(true);
-            }
-        });
-        buttonMapEditor.setPosition(Gdx.graphics.getWidth() - 70, Gdx.graphics.getHeight() - 50);
         renderer = new ShapeRenderer();
+        loginButtonStyle = new ImageButtonStyle();
+        mapEditorButtonStyle = new ImageButtonStyle();
 
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         setup();
         //resolution extras
-        oldResolution = ResolutionTypeLabel.restypeToRes(Integer.parseInt(prop.getProperty("user.last_resolution")));
         stage_dialog = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         //styles
-        TextField.TextFieldStyle style = new TextField.TextFieldStyle();
-        style.font = font;
+        style = new TextField.TextFieldStyle();
         style.fontColor = new Color(0.16f, 0.16f, 0.16f, 1);
-        style.cursor = new Image(
-        		context.getManager().get(context.getAssetObject().cursor)).getDrawable();
-        style.selection = new Image(
-        		context.getManager().get(context.getAssetObject().selection)).getDrawable();
-        if(prop.getProperty("user.username") == null) {
-        	name = new TextField("User"+Integer.toString(random.nextInt(9999)), style);
-        }else {
-        	name = new TextField( prop.getProperty("user.username"), style);	
-        }
-        name.setSize(120, 49);
-        name.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] - 10), MAIN_GROUP_OFFSET_Y + 325);
-        
-        address = new TextField( prop.getProperty("user.last_address"), style);
-        address.setSize(120, 49);
-        address.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[1] - 10), MAIN_GROUP_OFFSET_Y + 325);
-        
-        code = new TextField(Constants.SERVER_CODE, style);
-        code.setPasswordCharacter('*');
-        code.setPasswordMode(true);
-        code.setSize(120, 49);
-        code.setPosition(Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[2] - 10), MAIN_GROUP_OFFSET_Y + 325);
-        
-        SelectBox.SelectBoxStyle selectBoxStyle = new SelectBox.SelectBoxStyle();
-        selectBoxStyle.background = new Image(
-        		context.getManager().get(context.getAssetObject().selectBoxBackground)).getDrawable();
-        selectBoxStyle.font = font;
+        selectBoxStyle = new SelectBox.SelectBoxStyle();
         selectBoxStyle.fontColor = new Color(1,1,1, 1);
         selectBoxStyle.listStyle = new List.ListStyle();
-        selectBoxStyle.listStyle.selection = new Image(
-        		context.getManager().get(context.getAssetObject().selectBoxListSelection)).getDrawable();
+        selectBoxStyle.scrollStyle = new ScrollPane.ScrollPaneStyle();
+        
+    	initTextures();
+    	initGreetings();
+    	
+        loginButtonStyle.imageUp = loginDrawable;
+        loginButtonStyle.imageDown = loginDisabledDrawable;
+        loginButtonStyle.imageChecked = loginDrawable;
+        loginButtonStyle.imageOver = loginDisabledDrawable;
+        
+        mapEditorButtonStyle.imageUp = mapEditorDrawable;
+        mapEditorButtonStyle.imageDown = mapEditorDisabledDrawable;
+        mapEditorButtonStyle.imageOver = mapEditorDisabledDrawable;
+        
+        //login button
+        buttonConn = new ImageButton(loginButtonStyle); //Set the button up
+        buttonMapEditor = new ImageButton(mapEditorButtonStyle); //Set the button up
+        
+        style.font = font;
+        selectBoxStyle.font = font;
         selectBoxStyle.listStyle.selection.setLeftWidth(5);
         selectBoxStyle.listStyle.font = font;
-        selectBoxStyle.listStyle.background = new Image(
-        		context.getManager().get(context.getAssetObject().selectBoxListBackground)).getDrawable();
-        selectBoxStyle.scrollStyle = new ScrollPane.ScrollPaneStyle();
         selectBoxStyle.background.setLeftWidth(10);
-
+   
         teamType = new SelectBox<>(selectBoxStyle);
         teamType.setSize(150, 44);
-        teamType.setPosition(Gdx.graphics.getWidth() - 160, 105);
         
         resolutionType = new SelectBox<>(selectBoxStyle);
         resolutionType.setSize(150, 44);
-        resolutionType.setPosition(Gdx.graphics.getWidth() - 160, 155);
 
         shipType = new SelectBox<>(selectBoxStyle);
         shipType.setSize(150, 44);
-        shipType.setPosition(Gdx.graphics.getWidth() - 160, 5);
         
         roomLabel = new SelectBox<RoomNumberLabel>(selectBoxStyle);
         roomLabel.setSize(150.0f, 44.0f);
-        roomLabel.setPosition(Gdx.graphics.getWidth() - 160, 55);
-
-        baghlah = context.getManager().get(context.getAssetObject().baghlah);
-        blackship = context.getManager().get(context.getAssetObject().blackshipSkin);
-        dhow = context.getManager().get(context.getAssetObject().dhowSkin);
-        fanchuan = context.getManager().get(context.getAssetObject().fanchuanSkin);
-        grandfrig = context.getManager().get(context.getAssetObject().grandfrigSkin);
-        junk = context.getManager().get(context.getAssetObject().junkSkin);
-        lgsloop = context.getManager().get(context.getAssetObject().lgsloopSkin);
-        longship = context.getManager().get(context.getAssetObject().longshipSkin);
-        merchbrig = context.getManager().get(context.getAssetObject().merchbrigSkin);
-        merchgal = context.getManager().get(context.getAssetObject().merchgalSkin);
-        smsloop = context.getManager().get(context.getAssetObject().smsloopSkin);
-        warbrig = context.getManager().get(context.getAssetObject().warbrigSkin);
-        warfrig = context.getManager().get(context.getAssetObject().warfrigSkin);
-        wargal = context.getManager().get(context.getAssetObject().wargalSkin);
-        xebec = context.getManager().get(context.getAssetObject().xebecSkin);
-
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
-        labelStyle.font = font;
-        labelStyle.fontColor = new Color(0.16f, 0.16f, 0.16f, 1);
-
-        int numLabels = Vessel.VESSEL_TYPES.size() - (Constants.ENABLE_CHOOSE_BLACKSHIP?0:1);
-        ShipTypeLabel[] blob = new ShipTypeLabel[numLabels];
-        blob[0]  = new ShipTypeLabel(smsloop,   Vessel.getIdFromName("smsloop"),   "Sloop",       labelStyle); 
-        blob[1]  = new ShipTypeLabel(lgsloop,   Vessel.getIdFromName("lgsloop"),   "Cutter",      labelStyle); 
-        blob[2]  = new ShipTypeLabel(dhow,      Vessel.getIdFromName("dhow"),      "Dhow",        labelStyle); 
-        blob[3]  = new ShipTypeLabel(fanchuan,  Vessel.getIdFromName("fanchuan"),  "Fanchuan",    labelStyle); 
-        blob[4]  = new ShipTypeLabel(longship,  Vessel.getIdFromName("longship"),  "Longship",    labelStyle); 
-        blob[5]  = new ShipTypeLabel(junk,      Vessel.getIdFromName("junk"),      "Junk",        labelStyle); 
-        blob[6]  = new ShipTypeLabel(baghlah,   Vessel.getIdFromName("baghlah"),   "Baghlah",     labelStyle); 
-        blob[7]  = new ShipTypeLabel(merchbrig, Vessel.getIdFromName("merchbrig"), "MB",          labelStyle); 
-        blob[8]  = new ShipTypeLabel(warbrig,   Vessel.getIdFromName("warbrig"),   "War Brig",    labelStyle); 
-        blob[9]  = new ShipTypeLabel(xebec,     Vessel.getIdFromName("xebec"),     "Xebec",       labelStyle); 
-        blob[10] = new ShipTypeLabel(merchgal,  Vessel.getIdFromName("merchgal"),  "MG",          labelStyle); 
-        blob[11] = new ShipTypeLabel(warfrig,   Vessel.getIdFromName("warfrig"),   "War Frig",    labelStyle); 
-        blob[12] = new ShipTypeLabel(wargal,    Vessel.getIdFromName("wargal"),    "War Galleon", labelStyle); 
-        blob[13] = new ShipTypeLabel(grandfrig, Vessel.getIdFromName("grandfrig"), "Grand Frig",  labelStyle);
-        if (Constants.ENABLE_CHOOSE_BLACKSHIP)
-        {
-        	blob[numLabels-1] = new ShipTypeLabel(blackship, Vessel.getIdFromName("blackship"), "Black Ship",  labelStyle);
-        }
-
-        shipType.setItems(blob);
-
-        ResolutionTypeLabel[] blob3 = new ResolutionTypeLabel[ResolutionTypeLabel.RES_LIST.length];
-        for (int i=0; i<ResolutionTypeLabel.RES_LIST.length; i++)
-        {
-        	blob3[i] = new ResolutionTypeLabel(i, ResolutionTypeLabel.RES_LIST[i], labelStyle);
-        }
-        resolutionType.setItems(blob3);
-
-        TeamTypeLabel[] blob2 = new TeamTypeLabel[2];
-        blob2[0] = new TeamTypeLabel("Defender", labelStyle, TeamTypeLabel.DEFENDER);
-        blob2[1] = new TeamTypeLabel("Attacker", labelStyle, TeamTypeLabel.ATTACKER);
+    
+    	fillSelectBoxes();
+    	initProperties();
+    	setupDialog();
+        initListeners();
+        setActorPositions(Gdx.graphics.getWidth());
         
-        teamType.setItems(blob2);
-        /*
-         * Parse server code/port data for rooms
-         */
-        try {
-        	if(ConnectScene.getProperty("user.config", "user.room_locations") == null) {
-        		
-        	}else {
-        		room_info = ConnectScene.getProperty("user.config", "user.room_locations");
-        	}
-			//Split info for each room (Port:Server Code)
-			String[] rooms = room_info.split(",");
-			for (int i = 0; i < rooms.length; i++) {
-				String[] temp_room_info = rooms[i].split(":");
-				for (int j = 0; j < temp_room_info.length;j++)
-				{
-					if (j % 2 == 0) {
-						port_numbers.add(temp_room_info[j]);
-					}
-					else {
-						String[] print = temp_room_info[j].split(";");
-						server_codes.add(print[0]);
-						room_names.add(print[1]);
-					}
-				}
-			}
-		} catch (IOException e) {
-			System.out.println("Check format");
-			e.printStackTrace();
-		}
-        RoomNumberLabel[] blob_room = new RoomNumberLabel[port_numbers.size()];
-        for (int i = 0; i < port_numbers.size(); ++i) {
-        	blob_room[i] = new RoomNumberLabel((CharSequence)room_names.get(i), labelStyle, 0);
-        }
-        roomLabel.setItems(blob_room);
+        getServerCode(); // initialize server code with currently selected room
         
-        // set previous values/defaults from config file
-        try 
-        {
-        	if(prop.getProperty("user.last_ship") == null || !(prop.getProperty("user.last_ship").matches("[0-9]+"))) {
-        		shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
-        	}else {
-        		shipType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_ship")));
-        	}
-        }
-        catch(IndexOutOfBoundsException e) {
-        	shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
-        }
-        try 
-        {
-        	if(prop.getProperty("user.last_resolution") == null) {
-        		resolutionType.setSelectedIndex(0);
-        	}else {
-        		resolutionType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_resolution")));
-        	}
-        }
-        catch(IndexOutOfBoundsException e) {
-        	resolutionType.setSelectedIndex(0);
-        }
-        
-        try
-        {
-        	if(prop.getProperty("user.last_team") == null || 
-        			!(prop.getProperty("user.last_team").matches("[0-9]+"))) {
-        		teamType.setSelectedIndex(0);
-        	}else {
-        		teamType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_team")));
-        	}
-        }
-        catch(IndexOutOfBoundsException e)
-        {
-        	teamType.setSelectedIndex(0);
-        }
-        try {
-        	if(prop.getProperty("user.last_room_index") == null || 
-        			!(prop.getProperty("user.last_room_index").matches("[0-9]+"))) {
-        		roomLabel.setSelectedIndex(0);
-        	}else {
-        		roomLabel.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_room_index")));
-        	}
-        }
-        catch (IndexOutOfBoundsException e) {
-            roomLabel.setSelectedIndex(0);
-        }
-
         stage.addActor(name);
         stage.addActor(address);
         stage.addActor(code);
@@ -490,93 +247,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         stage.addActor(roomLabel);
         stage.addActor(buttonConn);
         stage.addActor(buttonMapEditor); // comment to toggle
-        //resolution dialog 
-        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
-		dialog = new Dialog("Resolution", skin, "dialog") {
-			protected void result(Object object)
-            {
-				//if 'No' is pushed
-				if (object.equals(2L))
-			    {
-					dialog.setVisible(false);
-					revertResolution();
-			    } else if(object.equals(1L)){
-			    	dialog.setVisible(false);
-			    	Gdx.input.setInputProcessor(stage);
-			    }
-            }
-		};
-		//show specific text in resolution dialog
-		if(resolution != null) {
-			String text = String.format("Selected screen resolution - %s", 
-					ResolutionTypeLabel.resToString(resolution));
-			dialog.text(text
-					+ "\n(Changes will revert in 15 seconds)"
-					+ "\n\nWould you like to accept the changes?");
-			dialog.button("Yes", 1L);
-			dialog.button("No", 2L);
-			stage_dialog.addActor(dialog);
-			dialog.show(stage_dialog);
-		}
-		dialog.setVisible(false);
-        getServerCode(); // initialize server code with currently selected room
-        
-        name.addListener(new ChangeListener(){
-            @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                setOld_Name(name.getText());
-            }
-        });
-        roomLabel.addListener(new ChangeListener(){
-
-            @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
-                try {
-                    getServerCode();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        
-        //use click listener to get previous item selected in selectbox for resolutions
-        resolutionType.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		oldResolution = ResolutionTypeLabel.restypeToRes(resolutionType.getSelectedIndex());
-        		indexResolution = resolutionType.getSelectedIndex();
-        	}
-        });
-      
-        resolutionType.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                // if graphics state not what it was, reload graphics
-                try {
-                    String last_res = getProperty("user.config", "user.last_resolution");
-                    if (Integer.parseInt(last_res) != resolutionType.getSelectedIndex() || indexResolution != resolutionType.getSelectedIndex()) {
-                        resolution = ResolutionTypeLabel.restypeToRes(resolutionType.getSelectedIndex());
-
-                        // save for next time
-                        changeProperty("user.config", "user.width", resolution[0]);
-                        changeProperty("user.config", "user.height", resolution[1]);
-                        changeProperty("user.config", "user.last_resolution", Integer.toString(resolutionType.getSelectedIndex()));
-                        changeProperty("user.config", "user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
-                        changeProperty("user.config", "user.last_team", Integer.toString(teamType.getSelectedIndex()));
-                        
-                        Gdx.graphics.setWindowedMode(Integer.parseInt(resolution[0]), Integer.parseInt(resolution[1]));
-                        create();
-                        dialog.setVisible(true);
-                        
-                        Gdx.input.setInputProcessor(stage_dialog);
-                        popupTimestamp = System.currentTimeMillis();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-         });
     }
     //gets server code for the specific selected room
     public void getServerCode() {
@@ -594,6 +264,8 @@ public class ConnectScene implements GameScene, InputProcessor {
 
     @Override
     public void render() {
+    	batch.setTransformMatrix(stage.getCamera().view);
+    	batch.setProjectionMatrix(stage.getCamera().projection);
         if(dialog.isVisible()) {
         	if((System.currentTimeMillis() - popupTimestamp) >= 15000) {
         		dialog.setVisible(false);
@@ -609,7 +281,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         }
         if (state == ConnectionSceneState.DEFAULT) {
         	titleFont.draw(batch, "Blockade Simulator", Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0], MAIN_GROUP_OFFSET_Y + 450);
-        	notesFont.draw(batch, chosenGreeting,       Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] -431), MAIN_GROUP_OFFSET_Y + 429);
+        	notesFont.draw(batch, chosenGreeting,       Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] -431), MAIN_GROUP_OFFSET_Y + 429);        		
 			notesFont.draw(batch, "Version " + Constants.VERSION + " by Cyclist & Fatigue, based on the Cadesim by Benberi", 15, 75);
         	notesFont.draw(batch, "Inspired by the original Dachimpy Cadesim", 15, 50);
         	notesFont.draw(batch, "Found a bug? Let us know!", 15, 25);
@@ -730,7 +402,400 @@ public class ConnectScene implements GameScene, InputProcessor {
             batch.end();
         }
     }
+    
+	/*
+	 * Initialize resolution dialog
+	 */
+    public void setupDialog() {
+        //resolution dialog 
+        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+		dialog = new Dialog("Resolution", skin, "dialog") {
+			protected void result(Object object)
+            {
+				//if 'No' is pushed
+				if (object.equals(2L))
+			    {
+					dialog.setVisible(false);
+					revertResolution();
+			    } else if(object.equals(1L)){
+			    	dialog.setVisible(false);
+                    // save for next time
+                    try {
+						changeProperty("user.config", "user.width", resolution[0]);
+	                    changeProperty("user.config", "user.height", resolution[1]);
+	                    changeProperty("user.config", "user.last_resolution", Integer.toString(resolutionType.getSelectedIndex()));
+	                    changeProperty("user.config", "user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
+	                    changeProperty("user.config", "user.last_team", Integer.toString(teamType.getSelectedIndex()));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			        context.gameStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+			    	Gdx.input.setInputProcessor(stage);
+			    }
+            }
+		};
+		//show specific text in resolution dialog
+		if(resolution != null) {
+			String text = String.format("Selected screen resolution - %s", 
+					ResolutionTypeLabel.resToString(resolution));
+			dialog.text(text
+					+ "\n(Changes will revert in 15 seconds)"
+					+ "\n\nWould you like to accept the changes?");
+			dialog.button("Yes", 1L);
+			dialog.button("No", 2L);
+			dialog.show(stage_dialog);
+		}
+		dialog.setVisible(false);
+    }
+    
+	/*
+	 * Greeting list for startup screen
+	 */
+    public void initGreetings() {
+        // greetings
+        greetings.add("It simulates blockades!");
+        greetings.add("No ships were harmed, honest");
+        greetings.add("Hot Pirate On Pirate Blockading Action");
+        greetings.add("Job for Keep The Peace!");
+        greetings.add("I am a sloop, I do not move!");
+        greetings.add("Cyclist Edition");
+        greetings.add("Home grown!");
+        greetings.add("Blub");
+        greetings.add("You sunk my battleship!");
+        greetings.add("You'll never guess what happened next...");
+        greetings.add("Inconceivable!");
+        greetings.add("Every day I'm Simulatin'");
+        greetings.add("Matured in oak casks for 24 months");
+        greetings.add("Probably SFW");
+        greetings.add("Sea monsters are always Kraken jokes");
+        greetings.add("Without a shadow of a Trout");
+        greetings.add("Just for the Halibut");
+        greetings.add("Placing Moves, not Moving Plaice");
+        greetings.add("Went to fish frowning comp. Had to Gurnard");
+        greetings.add("Just Mullet over");
+        greetings.add("Don't tell him, Pike!");
+        greetings.add("Tales of Herring Do");
+        greetings.add("Needlefish? Get all fish!");
+        greetings.add("It's... It's... Eely good");
+        greetings.add("Bream me up, Scotty!");
+        greetings.add("Living the Bream");
+        greetings.add("micro/nano Blockade SIMs available!");
+        greetings.add("Written by pirates, for pirates");
+        greetings.add("Precariously Perched!");
+        greetings.add("Hake it out, Hake it out, ooh whoa");
+        greetings.add("It's Turbot-charged!");
+        greetings.add("Albatross!");
+        greetings.add("You're in for a shark!");
+        greetings.add("We Booched It!");
+        chosenGreeting = greetings.get(prng.nextInt(greetings.size()));
+    }
+    
+	/*
+	 * Initialize textures for connect scene
+	 */
+    public void initTextures() {
+        // fonts
+        font = context.getManager().get(context.getAssetObject().regularFont);
+        notesFont = context.getManager().get(context.getAssetObject().notesFont);
+        titleFont = context.getManager().get(context.getAssetObject().titleFont);
+        background = context.getManager().get(context.getAssetObject().background);
+        smallBackground = context.getManager().get(context.getAssetObject().smallBackground);
+        textfieldTexture = context.getManager().get(context.getAssetObject().textfieldTexture);
 
+        loginButtonUp = context.getManager().get(context.getAssetObject().loginButton);
+        loginDrawable = new TextureRegionDrawable(new TextureRegion(loginButtonUp));
+        loginButtonDown = context.getManager().get(context.getAssetObject().loginButtonDown);
+        loginDisabledDrawable = new TextureRegionDrawable(new TextureRegion(loginButtonDown));
+        
+        mapEditorButtonUp = context.getManager().get(context.getAssetObject().mapEditorButtonUp);
+        mapEditorButtonDown = context.getManager().get(context.getAssetObject().mapEditorButtonDown);
+        mapEditorDrawable = new TextureRegionDrawable(new TextureRegion(mapEditorButtonUp));
+        mapEditorDisabledDrawable = new TextureRegionDrawable(new TextureRegion(mapEditorButtonDown));
+        style.cursor = new Image(
+        		context.getManager().get(context.getAssetObject().cursor)).getDrawable();
+        style.selection = new Image(
+        		context.getManager().get(context.getAssetObject().selection)).getDrawable();
+
+        baghlah = context.getManager().get(context.getAssetObject().baghlah);
+        blackship = context.getManager().get(context.getAssetObject().blackshipSkin);
+        dhow = context.getManager().get(context.getAssetObject().dhowSkin);
+        fanchuan = context.getManager().get(context.getAssetObject().fanchuanSkin);
+        grandfrig = context.getManager().get(context.getAssetObject().grandfrigSkin);
+        junk = context.getManager().get(context.getAssetObject().junkSkin);
+        lgsloop = context.getManager().get(context.getAssetObject().lgsloopSkin);
+        longship = context.getManager().get(context.getAssetObject().longshipSkin);
+        merchbrig = context.getManager().get(context.getAssetObject().merchbrigSkin);
+        merchgal = context.getManager().get(context.getAssetObject().merchgalSkin);
+        smsloop = context.getManager().get(context.getAssetObject().smsloopSkin);
+        warbrig = context.getManager().get(context.getAssetObject().warbrigSkin);
+        warfrig = context.getManager().get(context.getAssetObject().warfrigSkin);
+        wargal = context.getManager().get(context.getAssetObject().wargalSkin);
+        xebec = context.getManager().get(context.getAssetObject().xebecSkin);
+        
+        selectBoxStyle.background = new Image(
+        		context.getManager().get(context.getAssetObject().selectBoxBackground)).getDrawable();
+        selectBoxStyle.listStyle.selection = new Image(
+        		context.getManager().get(context.getAssetObject().selectBoxListSelection)).getDrawable();
+        selectBoxStyle.listStyle.background = new Image(
+        		context.getManager().get(context.getAssetObject().selectBoxListBackground)).getDrawable();
+    }
+    
+	/*
+	 * fill selectboxes with appropriate information
+	 */
+    public void fillSelectBoxes() {
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = font;
+        labelStyle.fontColor = new Color(0.16f, 0.16f, 0.16f, 1);
+        int numLabels = Vessel.VESSEL_TYPES.size() - (Constants.ENABLE_CHOOSE_BLACKSHIP?0:1);
+        ShipTypeLabel[] blob = new ShipTypeLabel[numLabels];
+        blob[0]  = new ShipTypeLabel(smsloop,   Vessel.getIdFromName("smsloop"),   "Sloop",       labelStyle); 
+        blob[1]  = new ShipTypeLabel(lgsloop,   Vessel.getIdFromName("lgsloop"),   "Cutter",      labelStyle); 
+        blob[2]  = new ShipTypeLabel(dhow,      Vessel.getIdFromName("dhow"),      "Dhow",        labelStyle); 
+        blob[3]  = new ShipTypeLabel(fanchuan,  Vessel.getIdFromName("fanchuan"),  "Fanchuan",    labelStyle); 
+        blob[4]  = new ShipTypeLabel(longship,  Vessel.getIdFromName("longship"),  "Longship",    labelStyle); 
+        blob[5]  = new ShipTypeLabel(junk,      Vessel.getIdFromName("junk"),      "Junk",        labelStyle); 
+        blob[6]  = new ShipTypeLabel(baghlah,   Vessel.getIdFromName("baghlah"),   "Baghlah",     labelStyle); 
+        blob[7]  = new ShipTypeLabel(merchbrig, Vessel.getIdFromName("merchbrig"), "MB",          labelStyle); 
+        blob[8]  = new ShipTypeLabel(warbrig,   Vessel.getIdFromName("warbrig"),   "War Brig",    labelStyle); 
+        blob[9]  = new ShipTypeLabel(xebec,     Vessel.getIdFromName("xebec"),     "Xebec",       labelStyle); 
+        blob[10] = new ShipTypeLabel(merchgal,  Vessel.getIdFromName("merchgal"),  "MG",          labelStyle); 
+        blob[11] = new ShipTypeLabel(warfrig,   Vessel.getIdFromName("warfrig"),   "War Frig",    labelStyle); 
+        blob[12] = new ShipTypeLabel(wargal,    Vessel.getIdFromName("wargal"),    "War Galleon", labelStyle); 
+        blob[13] = new ShipTypeLabel(grandfrig, Vessel.getIdFromName("grandfrig"), "Grand Frig",  labelStyle);
+        if (Constants.ENABLE_CHOOSE_BLACKSHIP)
+        {
+        	blob[numLabels-1] = new ShipTypeLabel(blackship, Vessel.getIdFromName("blackship"), "Black Ship",  labelStyle);
+        }
+
+        shipType.setItems(blob);
+
+        ResolutionTypeLabel[] blob3 = new ResolutionTypeLabel[ResolutionTypeLabel.RES_LIST.length];
+        for (int i=0; i<ResolutionTypeLabel.RES_LIST.length; i++)
+        {
+        	blob3[i] = new ResolutionTypeLabel(i, ResolutionTypeLabel.RES_LIST[i], labelStyle);
+        }
+        resolutionType.setItems(blob3);
+
+        TeamTypeLabel[] blob2 = new TeamTypeLabel[2];
+        blob2[0] = new TeamTypeLabel("Defender", labelStyle, TeamTypeLabel.DEFENDER);
+        blob2[1] = new TeamTypeLabel("Attacker", labelStyle, TeamTypeLabel.ATTACKER);
+        
+        teamType.setItems(blob2);
+        
+        /*
+         * Parse server code/port data for rooms
+         */
+        try {
+        	if(ConnectScene.getProperty("user.config", "user.room_locations") == null) {
+        		
+        	}else {
+        		room_info = ConnectScene.getProperty("user.config", "user.room_locations");
+        	}
+			//Split info for each room (Port:Server Code)
+			String[] rooms = room_info.split(",");
+			for (int i = 0; i < rooms.length; i++) {
+				String[] temp_room_info = rooms[i].split(":");
+				for (int j = 0; j < temp_room_info.length;j++)
+				{
+					if (j % 2 == 0) {
+						port_numbers.add(temp_room_info[j]);
+					}
+					else {
+						String[] print = temp_room_info[j].split(";");
+						server_codes.add(print[0]);
+						room_names.add(print[1]);
+					}
+				}
+			}
+		} catch (IOException e) {
+			System.out.println("Check format");
+			e.printStackTrace();
+		}
+        
+        RoomNumberLabel[] blob_room = new RoomNumberLabel[port_numbers.size()];
+        for (int i = 0; i < port_numbers.size(); ++i) {
+        	blob_room[i] = new RoomNumberLabel((CharSequence)room_names.get(i), labelStyle, 0);
+        }
+        roomLabel.setItems(blob_room);
+    }
+    
+	/*
+	 * Initialize properties such as team info/resolution, etc.
+	 */
+    public void initProperties() {
+        String fileName = "user.config";
+        InputStream is = null;
+        try {
+            is = new FileInputStream(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Properties prop = new Properties();
+        try {
+            prop.load(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        
+        oldResolution = ResolutionTypeLabel.restypeToRes(Integer.parseInt(prop.getProperty("user.last_resolution")));
+        
+        if(prop.getProperty("user.username") == null) {
+        	name = new TextField("User"+Integer.toString(random.nextInt(9999)), style);
+        }else {
+        	name = new TextField( prop.getProperty("user.username"), style);	
+        }
+        address = new TextField( prop.getProperty("user.last_address"), style);
+        
+        
+        // set previous values/defaults from config file
+        try 
+        {
+        	if(prop.getProperty("user.last_ship") == null || !(prop.getProperty("user.last_ship").matches("[0-9]+"))) {
+        		shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
+        	}else {
+        		shipType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_ship")));
+        	}
+        }
+        catch(IndexOutOfBoundsException e) {
+        	shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
+        }
+        try 
+        {
+        	if(prop.getProperty("user.last_resolution") == null) {
+        		resolutionType.setSelectedIndex(0);
+        	}else {
+        		resolutionType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_resolution")));
+        	}
+        }
+        catch(IndexOutOfBoundsException e) {
+        	resolutionType.setSelectedIndex(0);
+        }
+        
+        try
+        {
+        	if(prop.getProperty("user.last_team") == null || 
+        			!(prop.getProperty("user.last_team").matches("[0-9]+"))) {
+        		teamType.setSelectedIndex(0);
+        	}else {
+        		teamType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_team")));
+        	}
+        }
+        catch(IndexOutOfBoundsException e)
+        {
+        	teamType.setSelectedIndex(0);
+        }
+        try {
+        	if(prop.getProperty("user.last_room_index") == null || 
+        			!(prop.getProperty("user.last_room_index").matches("[0-9]+"))) {
+        		roomLabel.setSelectedIndex(0);
+        	}else {
+        		roomLabel.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_room_index")));
+        	}
+        }
+        catch (IndexOutOfBoundsException e) {
+            roomLabel.setSelectedIndex(0);
+        }
+        
+        code = new TextField(Constants.SERVER_CODE, style);
+        code.setPasswordCharacter('*');
+        code.setPasswordMode(true);
+        
+        name.setSize(120, 49);
+        address.setSize(120, 49);
+        code.setSize(120, 49);
+    }
+    
+	/*
+	 * Initialize listeners for actors of stage
+	 */
+    public void initListeners() {
+        buttonMapEditor.addListener(new ClickListener() {//runs update if there is one before logging in 
+            public void clicked(InputEvent event, float x, float y){
+            	context.createMapEditorScene();
+            	context.setStartedMapEditor(true);
+            }
+        });
+        
+        buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
+            public void clicked(InputEvent event, float x, float y){
+                try {
+                    performUpdateCheck();
+                    buttonConn.toggle();
+                } catch (UnknownHostException e) {
+                    return;
+                }
+            }});
+        name.addListener(new ChangeListener(){
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                setOld_Name(name.getText());
+            }
+        });
+        roomLabel.addListener(new ChangeListener(){
+
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                try {
+                    getServerCode();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        
+        //use click listener to get previous item selected in selectbox for resolutions
+        resolutionType.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		oldResolution = ResolutionTypeLabel.restypeToRes(resolutionType.getSelectedIndex());
+        		indexResolution = resolutionType.getSelectedIndex();
+        	}
+        });
+      
+        resolutionType.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                // if graphics state not what it was, reload graphics
+                try {
+                    changeProperty("user.config", "user.last_resolution", Integer.toString(resolutionType.getSelectedIndex()));
+                    resolution = ResolutionTypeLabel.restypeToRes(resolutionType.getSelectedIndex());
+                    resize(Integer.parseInt(resolution[0]), Integer.parseInt(resolution[1]));
+                    dialog.setVisible(true);
+                    Gdx.input.setInputProcessor(stage_dialog);
+                    popupTimestamp = System.currentTimeMillis();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+         });
+    }
+    
+	/*
+	 * wrapper method to set size of window
+	 */
+    public void resize(int width, int height) {
+        Gdx.graphics.setWindowedMode(width, height);
+        create();
+    }
+
+	/*
+	 * Set position of actors in stage
+	 */
+    public void setActorPositions(int width) {
+        buttonConn.setPosition(width - resolutionWidthDiction.get(width)[0] + 5, 290);
+        buttonMapEditor.setPosition(width - 70, Gdx.graphics.getHeight() - 50);
+        name.setPosition(width - (resolutionWidthDiction.get(width)[0] - 10), MAIN_GROUP_OFFSET_Y + 325);
+        address.setPosition(width - (resolutionWidthDiction.get(width)[1] - 10), MAIN_GROUP_OFFSET_Y + 325);
+        code.setPosition(width - (resolutionWidthDiction.get(width)[2] - 10), MAIN_GROUP_OFFSET_Y + 325);
+        teamType.setPosition(width - 160, 105);
+        resolutionType.setPosition(width - 160, 155);
+        shipType.setPosition(width - 160, 5);
+        roomLabel.setPosition(width - 160, 55);
+    }
 
     public void setPopup(String message, boolean allowPopupClose) {
         popup = true;
@@ -1008,8 +1073,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     public void revertResolution() {
     	resolutionType.setSelectedIndex(indexResolution);
     	System.out.println("Reverting resolution to previous settings.");
-		Gdx.graphics.setWindowedMode(Integer.parseInt(oldResolution[0]), Integer.parseInt(oldResolution[1]));
-		create();
+		resize(Integer.parseInt(oldResolution[0]), Integer.parseInt(oldResolution[1]));
     }
 
     public boolean hasPopup() {

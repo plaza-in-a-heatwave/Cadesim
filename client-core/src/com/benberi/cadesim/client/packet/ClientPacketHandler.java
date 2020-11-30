@@ -126,6 +126,7 @@ public class ClientPacketHandler {
         packets.put(IncomingPackets.RECEIVE_MESSAGE,     new ReceiveMessagePacket(context));
         packets.put(IncomingPackets.LIST_ALL_MAPS,       new ListAllMapsPacket(context));
         packets.put(IncomingPackets.GAME_SETTINGS,       new ReceiveGameSettings(context));
+        packets.put(IncomingPackets.SET_TEAM,            new ReceiveTeamPacket(context));
     }
     
     public void clearPackets() {
