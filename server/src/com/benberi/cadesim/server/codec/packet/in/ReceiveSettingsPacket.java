@@ -25,14 +25,12 @@ public class ReceiveSettingsPacket extends ServerPacketExecutor {
     @SuppressWarnings("unchecked")
 	@Override
     public void execute(Player pl, Packet p) {
-    	System.out.println("Receive");
         int length = p.readInt();
         ObjectInputStream ois;
 		try {
 			ois = new ObjectInputStream(new ByteArrayInputStream(p.readBytes(length)));
             try {
             	ServerConfiguration.getGameSettings().clear();
-            	
             	ServerConfiguration.getGameSettings().addAll((ArrayList<Object>) ois.readObject());
             	ServerConfiguration.setCustomMap(ServerConfiguration.getCustomMapSetting());
             	ServerContext.setCustomMapName(ServerConfiguration.getMapNameSetting());
