@@ -105,6 +105,7 @@ public class GameContext {
     private EntityManager entities;
 
     public String myVessel;
+    public int myVesselY;
     
     public int myVesselType;
 
@@ -292,10 +293,10 @@ public class GameContext {
     	ControlAreaScene.shipId = shipId;
     	this.input = new GameInputProcessor(this);
         inputMultiplexer.addProcessor(this.input);
-        this.controlArea = new ControlAreaScene(this);
-        controlArea.create();
         this.seaBattleScene = new SeaBattleScene(this);
         seaBattleScene.create();
+        this.controlArea = new ControlAreaScene(this);
+        controlArea.create();
         //fix crash on server disconnect after dispose has been called
 		if(scenes.size() == 0) {
 	        scenes.add(controlArea);

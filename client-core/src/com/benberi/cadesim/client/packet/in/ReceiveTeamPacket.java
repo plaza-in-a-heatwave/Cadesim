@@ -1,5 +1,11 @@
 package com.benberi.cadesim.client.packet.in;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.badlogic.gdx.Gdx;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
@@ -16,24 +22,41 @@ public class ReceiveTeamPacket extends ClientPacketExecutor {
 	@Override
     public void execute(Packet p) {
 		//why is teams not setting correctly from server?
-		while(p.getBuffer().readableBytes() > 0) {
-			String name = p.readByteString();
-			int teamID = p.readByte();
-    		for(Vessel vessel : getContext().getEntities().listVesselEntities()) {
-				if(getContext().myVessel.matches(name) && vessel.getName().matches(name)) {
-					vessel.setTeam(Team.forId(teamID));
-					getContext().setTeam(teamID); //needed to set clients team
-    				Gdx.graphics.setTitle("CadeSim: " + getContext().myVessel + " (" + vessel.getTeam().toString() + ")");
-				}
-    		}
-    		
-    		for(Vessel vessel : getContext().getEntities().listVesselEntities()) {
-    			vessel.setDefaultTexture();	
-    		}
-    		for(Vessel vessel : getContext().getEntities().listVesselEntities()) {
-    			System.out.println(vessel.getName()+":"+vessel.getTeam());
-    		}	
+        int length = p.readInt();
+        ObjectInputStream ois;
+		try {
+			ois = new ObjectInputStream(new ByteArrayInputStream(p.readBytes(length)));
+            try {
+            	@SuppressWarnings("unchecked")
+				HashMap<String,Integer> team_info = (HashMap<String, Integer>) ois.readObject();
+        		for(Vessel vessel : getContext().getEntities().listVesselEntities()) {
+     		       for (Map.Entry<String,Integer> player : team_info.entrySet()) {
+     		    	   String playerName = (String)player.getKey();
+     		    	   int playerTeam = (int)player.getValue();
+     		    	   if(vessel.getName().matches(getContext().myVessel) && playerName.matches(getContext().myVessel)) {
+     		    		   getContext().setTeam(playerTeam);
+     		    		   vessel.setTeam(Team.forId(playerTeam));
+     		    		  Gdx.graphics.setTitle("CadeSim: " + getContext().myVessel + " (" + getContext().myTeam.toString() + ")");
+     		    	   }else if(playerName.matches(vessel.getName())){
+     		    		   vessel.setTeam(Team.forId(playerTeam));	   
+     		    	   }
+     		       }
+        		}
+     		
+            } catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+                ois.close();
+            }
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		
+		for(Vessel vessel : getContext().getEntities().listVesselEntities()) {
+	    	   vessel.setDefaultTexture();
+		}
+		
+		getContext().getBattleScene().getInformation().setTeamColors();
     }
 
     @Override

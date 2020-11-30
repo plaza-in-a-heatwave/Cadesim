@@ -76,7 +76,11 @@ public class GameInformation extends SceneComponent {
         timeFont = context.getManager().get(context.getAssetObject().fontTime);
         breakInfoFont = context.getManager().get(context.getAssetObject().fontBreak);
         areDefender = context.myTeam.name().equals(Team.DEFENDER.toString());
+        setTeamColors();
+    }
 
+    public void setTeamColors() {
+    	areDefender = context.myTeam.name().equals(Team.DEFENDER.toString());
         if (areDefender) {
         	fontTeamDefender.setColor(new Color(100 / 255f, 182 / 255f, 232 / 255f, 1));
         	fontTeamAttacker.setColor(new Color(203 / 255f, 42 / 255f, 25 / 255f, 1));
@@ -92,7 +96,7 @@ public class GameInformation extends SceneComponent {
         	fontPointsAttacker.setColor(new Color(100 / 255f, 182 / 255f, 232 / 255f, 1));
         }
     }
-
+    
     public void setTime(int time) {
         this.time = time;
     }

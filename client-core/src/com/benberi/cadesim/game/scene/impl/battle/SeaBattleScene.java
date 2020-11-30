@@ -229,7 +229,9 @@ public class SeaBattleScene implements GameScene {
 	}
     @Override
     public void update(){
-		context.getBattleSceneMenu().fillTeamList();
+    	if(context.getBattleSceneMenu().teamTable.isVisible()) {
+    		context.getBattleSceneMenu().fillTeamList();
+    	}
 		
         // update the camera
         camera.update();
@@ -831,7 +833,7 @@ public class SeaBattleScene implements GameScene {
             if (mainmenu.handleClick(x, y, button)) {
                 return true;
             }
-            if (y < camera.viewportHeight) {
+            if (y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
                 // handle camera not following vessel
                 cameraFollowsVessel = false;
 
@@ -853,11 +855,11 @@ public class SeaBattleScene implements GameScene {
 
     @Override
     public boolean handleClickRelease(float x, float y, int button) {
-    	if(!mainmenu.isClickingMenuButton(x, y) && !mainmenu.isClickingMenuTable(x, y) && !mainmenu.isSettingsDialogOpen()) {//keep from moving when menu button clicked
+    	if(!mainmenu.isClickingMenuButton(x, y) && !mainmenu.isClickingMenuTable(x, y) && !mainmenu.isSettingsDialogOpen() ) {//keep from moving when menu button clicked
 	        if (mainmenu.handleRelease(x, y, button)) {
 	            return true;
 	        }
-        	if (y < camera.viewportHeight) {
+        	if (y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
                 // handle camera following/not following vessel
                 if (button == Input.Buttons.RIGHT) {
                     cameraFollowsVessel = false;

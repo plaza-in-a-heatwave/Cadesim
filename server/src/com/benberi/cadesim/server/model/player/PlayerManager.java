@@ -23,6 +23,7 @@ import io.netty.channel.Channel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -1057,15 +1058,6 @@ public class PlayerManager {
             player.getPackets().sendTime();
         }
     }
-    
-    /**
-     * Sends and updates the time of the game, turn for all players
-     */
-    private void sendTeam() {
-        for (Player player : listRegisteredPlayers()) {
-            player.getPackets().sendTeam(player.getName(), player.getTeam().getID());
-        }
-    }
 
     public void sendAfterTurn() {
         // deal with sunk/unspawned ships first
@@ -1604,8 +1596,17 @@ public class PlayerManager {
     	}else {
     		pl.setTeam(Team.DEFENDER);
     	}
+    	
+    	sendTeamInfo();
+    }
+    
+    public void sendTeamInfo() {
+    	HashMap<String,Integer> teams = new HashMap<String,Integer>();
         for (Player player : listRegisteredPlayers()) {
-            player.getPackets().sendTeam(player.getName(), player.getTeam().getID());
+        	teams.put(player.getName(), player.getTeam().getID());
+        }
+        for (Player player : listRegisteredPlayers()) {
+            player.getPackets().sendTeam(teams);	
         }
     }
     
