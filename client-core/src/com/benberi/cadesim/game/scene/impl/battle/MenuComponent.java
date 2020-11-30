@@ -295,8 +295,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	attackerList.getItems().addAll(attackerNames);
     	defenderList.getItems().addAll(defenderNames);
     	
-    	teamButtonTable.add(attackerTeamButton).padRight(10.0f);
-    	teamButtonTable.add(defenderTeamButton);
+    	teamButtonTable.add(attackerTeamButton).padBottom(2.0f).padLeft(8f).padRight(10.0f);
+    	teamButtonTable.add(defenderTeamButton).padBottom(2.0f);
     	listTables.add(attackerScroller).width(150).height(200).padRight(10.0f);
     	listTables.add(defenderScroller).width(150).height(200);
     	teamTable.add(teamButtonTable).row();
@@ -400,8 +400,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	    		}
 	    		j++;
 	    	}
-	    	attackerList.getItems().addAll(attackerNames);
-	    	defenderList.getItems().addAll(defenderNames);
+	    	attackerList.setItems(attackerNames);
+	    	defenderList.setItems(defenderNames);
     }
 	/*
 	 * Initialize listeners for actors of stage
