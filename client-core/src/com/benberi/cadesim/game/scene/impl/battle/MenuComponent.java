@@ -292,8 +292,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	attackerNames = new String[] {""};
     	defenderNames = new String[] {""};
     	
-    	attackerList.getItems().addAll(attackerNames);
-    	defenderList.getItems().addAll(defenderNames);
+    	attackerList.setItems(attackerNames);
+    	defenderList.setItems(defenderNames);
     	
     	teamButtonTable.add(attackerTeamButton).padBottom(2.0f).padLeft(8f).padRight(10.0f);
     	teamButtonTable.add(defenderTeamButton).padBottom(2.0f);
@@ -389,14 +389,14 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	    	int i = 0;
 	    	for(Vessel vessel : attacker) {
 	    		if(vessel.getTeam() == Team.ATTACKER) {
-	    			attackerNames[i] = vessel.getName();
+	    			attackerNames[i] = " " + vessel.getName();
 	    		}
 	    		i++;
 	    	}
 	    	int j = 0;
 	    	for(Vessel vessel : defender) {
 	    		if(vessel.getTeam() == Team.DEFENDER) {
-	    			defenderNames[j] = vessel.getName();
+	    			defenderNames[j] = " " + vessel.getName();
 	    		}
 	    		j++;
 	    	}
