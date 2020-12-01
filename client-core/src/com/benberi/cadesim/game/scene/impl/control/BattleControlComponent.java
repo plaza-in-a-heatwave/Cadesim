@@ -577,18 +577,18 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         //message section
         chatMessages = new Table();
         chatMessages.align(Align.top);
-        chatMessages.padTop(5).defaults().expandX().space(0);
+        chatMessages.padTop(5).defaults().expandX().space(1);
         
         chatScroller = new ScrollPane(chatMessages,skin);
         chatScroller.setScrollingDisabled(true, false);
         chatScroller.setFadeScrollBars(false);
         //user interaction section
         chatContainer = new Table(); //holds the
-        chatContainer.add(selectChat).padRight(5f);
-        chatContainer.add(textField).width(resolutionWidthDiction.get(Gdx.graphics.getWidth())[0]).padRight(5f);
-        chatContainer.add(sendMessageButton).padRight(5f);
+        chatContainer.add(selectChat).padRight(1f);
+        chatContainer.add(textField).width(resolutionWidthDiction.get(Gdx.graphics.getWidth())[0]).padRight(1f);
+        chatContainer.add(sendMessageButton).padRight(1f);
         //add subtables to main table
-        chatTable.add(chatScroller).growX().height(135).padRight(5f).padBottom(3f).row();
+        chatTable.add(chatScroller).growX().height(135).padRight(1f).padBottom(3f).row();
         chatTable.add(chatContainer).growX();
         chatTable.pack();
         
@@ -783,13 +783,13 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         {
         	// use whole thing
         	tr = new TextureRegion(messageTexture, 0, 0, 282, 24);
-        	chatMessages.add(chat1).width(resolutionWidthDiction.get(Gdx.graphics.getWidth())[1]).align(Align.left);
+        	chatMessages.add(chat1).width(resolutionWidthDiction.get(Gdx.graphics.getWidth())[1]).align(Align.left).padRight(10f);
         }
         else
         {
         	// use width plus some constant (10 padding either side of inside lines)
         	tr = new TextureRegion(messageTexture, 0, 0, (int)chat1.getWidth() + 10, 24);
-        	chatMessages.add(chat1).width(chat1.getWidth() + 10).align(Align.left);
+        	chatMessages.add(chat1).width(chat1.getWidth() + 10).align(Align.left).padRight(10f);
         }
         
     	
@@ -807,6 +807,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
             chatMessages.getCells().removeValue(cell, true); // rm lingering physical presence
             chatMessages.invalidate();
         }
+        chatMessages.padLeft(20f);
         chatScroller.layout();
         chatScroller.scrollTo(0, 0, 0, 0);
     }
@@ -1488,7 +1489,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
             if (isDoubleShot)
             {
                 batch.draw((right[0])?cannonRight:emptyCannonRight, MOVES_cannonRightSlotSmallX, cH); // right
-                batch.draw((right[0] && right[1])?cannonRight:emptyCannonRight, MOVES_cannonRightSlotBigX, cH); // right
+                batch.draw((right[0] && right[1])?cannonRight:emptyCannonRight, MOVES_cannonRightSlotBigX, cH); // right        
             }
             else
             {
@@ -1503,16 +1504,15 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
             else
             {
                 if (move.getMove() != MoveType.NONE) {
-                    Color color = batch.getColor();
                     if (move.isMoveTemp()) {
                         batch.setColor(0.5F, 0.5F, 0.5F, 1F);
                     }
                     else {
-                        batch.setColor(color.r, color.g, color.b, 1f);
+                    	batch.setColor(Color.WHITE);
                     }
 
                     batch.draw(getTextureForMove(move.getMove()), MOVES_moveSlotX, mH);
-                    batch.setColor(color.r, color.g, color.b, 1f);
+                    batch.setColor(Color.WHITE);
                 }
             }
         }
@@ -1766,7 +1766,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
     }
 
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
     	return false;
     }
 

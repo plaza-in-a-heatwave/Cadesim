@@ -5,8 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.benberi.cadesim.BlockadeSimulator;
 import com.benberi.cadesim.Constants;
 
@@ -31,16 +32,16 @@ public class DesktopLauncher {
 			}
 		}
 
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		BlockadeSimulator cadesim = new BlockadeSimulator();
-		config.resizable = false;
+		
 		if(prop.getProperty("user.width") == null || !(prop.getProperty("user.width").matches("[0-9]{3,}")) ||
 				prop.getProperty("user.height") == null || !(prop.getProperty("user.height").matches("[0-9]{3,}")) ||
 				prop.getProperty("user.last_resolution") == null || !(prop.getProperty("user.last_resolution").matches("[0-9]+"))) {
 			int width = 800;
 			int height = 600;
-			config.width = width;
-			config.height = height;
+			config.setResizable(false);
+			config.setWindowedMode(width, height);
 			try {
 				changeProperty("user.config","user.last_resolution", "0");
 				changeProperty("user.config","user.width", Integer.toString(width));
@@ -49,13 +50,12 @@ public class DesktopLauncher {
 				e.printStackTrace();
 			}
 		}else {
-			config.width = Integer.parseInt(prop.getProperty("user.width"));
-			config.height = Integer.parseInt(prop.getProperty("user.height"));
+			config.setWindowedMode(Integer.parseInt(prop.getProperty("user.width")), Integer.parseInt(prop.getProperty("user.height")));		
 		}
-		//config.backgroundFPS = 20;    // bugfix high CPU
-		config.vSyncEnabled = false; // "
-		config.title = "CadeSim: v" + Constants.VERSION;
-		new LwjglApplication(cadesim, config);
+		config.setTitle("CadeSim: v" + Constants.VERSION);
+		config.useVsync(true);
+		config.setForegroundFPS(60);
+		new Lwjgl3Application(cadesim, config);
 	}
 	
     public static void changeProperty(String filename, String key, String value) throws IOException {

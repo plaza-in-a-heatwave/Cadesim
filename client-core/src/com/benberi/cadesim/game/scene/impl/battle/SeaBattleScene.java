@@ -413,7 +413,6 @@ public class SeaBattleScene implements GameScene {
                     // calculate step based on progress towards target (0 -> 1)
                     // float step = 1 - (ship.getEndPoint().dst(ship.getLinearVector()) / ship.getDistanceToEndPoint());
 
-
                    // float velocityTurns = (0.011f * Gdx.graphics.getDeltaTime()) * 100; //Gdx.graphics.getDeltaTime();
                     float velocityTurns = (1.25f * Gdx.graphics.getDeltaTime()); //Gdx.graphics.getDeltaTime();
                     float velocityForward = (1.8f * Gdx.graphics.getDeltaTime());
@@ -802,6 +801,7 @@ public class SeaBattleScene implements GameScene {
 
     @Override
     public void dispose() {
+    	
         currentPhase = MovePhase.MOVE_TOKEN;
         currentSlot = -1;
         information.dispose();

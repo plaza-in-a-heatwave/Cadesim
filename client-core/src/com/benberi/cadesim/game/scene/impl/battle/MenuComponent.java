@@ -39,6 +39,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
@@ -389,19 +390,21 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	    	int i = 0;
 	    	for(Vessel vessel : attacker) {
 	    		if(vessel.getTeam() == Team.ATTACKER) {
-	    			attackerNames[i] = " " + vessel.getName();
+	    			attackerNames[i] = vessel.getName();
 	    		}
 	    		i++;
 	    	}
 	    	int j = 0;
 	    	for(Vessel vessel : defender) {
 	    		if(vessel.getTeam() == Team.DEFENDER) {
-	    			defenderNames[j] = " " + vessel.getName();
+	    			defenderNames[j] = vessel.getName();
 	    		}
 	    		j++;
 	    	}
 	    	attackerList.setItems(attackerNames);
 	    	defenderList.setItems(defenderNames);
+	    	attackerList.setAlignment(Align.center);
+	    	defenderList.setAlignment(Align.center);
     }
 	/*
 	 * Initialize listeners for actors of stage
@@ -1067,7 +1070,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	}
 
 	@Override
-	public boolean scrolled(int arg0) {
+	public boolean scrolled(float amountX, float amountY) {
 		return false;
 	}
 

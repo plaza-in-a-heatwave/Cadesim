@@ -91,16 +91,15 @@ public class GameInputProcessor implements InputProcessor {
         return false;
     }
 
-    @Override
-    public boolean scrolled(int amount) {
-    	// TODO this is garbage - but I can't pass the scroll any other way.
+	@Override
+	public boolean scrolled(float amountX, float amountY) {
     	if(context.getScenes().get(0) instanceof ControlAreaScene){
-            context.getControlScene().getBnavComponent().scrolled(amount);
+            context.getControlScene().getBnavComponent().scrolled(amountX,amountY);
     	}
     	
     	if(context.getScenes().get(0) instanceof MapEditorMapScene) {
-    		context.getMapEditor().scrolled(amount);
+    		context.getMapEditor().scrolled(amountX,amountY);
     	}
-        return false;
-    }
+		return false;
+	}
 }

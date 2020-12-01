@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.benberi.cadesim.game.scene.GameScene;
 
-public class BlockadeSimulator extends ApplicationAdapter {
+public class BlockadeSimulator extends ApplicationAdapter{
 
 	/**
 	 * The game context
@@ -54,5 +54,7 @@ public class BlockadeSimulator extends ApplicationAdapter {
 	
 	@Override
 	public void dispose () {
+		Gdx.app.exit();
+		System.exit(-1);
 	}
 }
