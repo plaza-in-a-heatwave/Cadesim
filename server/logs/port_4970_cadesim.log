@@ -1,0 +1,127 @@
+[2020-12-02T22:36:58.812Z]: Welcome to Cadesim server (version 1.9.93).
+[2020-12-02T22:36:58.932Z]: Using config: 
+[
+    Cadesim server version:1.9.93,
+    Player limit:5,
+    Map Name:Loggerhead_XXIX_Round_5.txt,
+    Port:4970,
+    Turn duration:30s,
+    Round duration:1800s,
+    Sink delay:1 turns,
+    Map rotation period:5 turns,
+    Disengage behavior:simple,
+    Vote majority percentage: [voting on] 75%,
+    Jobbers quality: elite,
+    Team names: attacker,defender,
+    Auth code: "",
+    Run continuous: true,
+    Multiclient permitted: true,
+    Breaks duration/interval: -1:-1,
+    Update scheduled for: not set,
+    Server time is: 2020-12-02T16:36:58.929-06:00[America/Chicago]]
+[2020-12-02T22:36:58.933Z]: Starting up the host server....
+[2020-12-02T22:36:59.167Z]: Starting up the game service....
+[2020-12-02T22:36:59.172Z]: Game Server loaded successfully in 2428 ms.
+[2020-12-02T22:36:59.188Z]: Placing/clobbering instance file: .CADESIM_INSTANCE_1B2M2Y8AsgTpgAmY7PhCfgee
+[2020-12-02T22:37:00.736Z]: Cadesim shut down successfully. Doei!
+[2020-12-02T22:38:46.476Z]: Welcome to Cadesim server (version 1.9.93).
+[2020-12-02T22:38:46.602Z]: Using config: 
+[
+    Cadesim server version:1.9.93,
+    Player limit:5,
+    Map Name:Melanester_XVIII_Round_3.txt,
+    Port:4970,
+    Turn duration:30s,
+    Round duration:1800s,
+    Sink delay:1 turns,
+    Map rotation period:5 turns,
+    Disengage behavior:simple,
+    Vote majority percentage: [voting on] 75%,
+    Jobbers quality: elite,
+    Team names: attacker,defender,
+    Auth code: "",
+    Run continuous: true,
+    Multiclient permitted: true,
+    Breaks duration/interval: -1:-1,
+    Update scheduled for: not set,
+    Server time is: 2020-12-02T16:38:46.599-06:00[America/Chicago]]
+[2020-12-02T22:38:46.603Z]: Starting up the host server....
+[2020-12-02T22:38:47.028Z]: Starting up the game service....
+[2020-12-02T22:38:47.040Z]: Game Server loaded successfully in 2653 ms.
+[2020-12-02T22:38:47.050Z]: Placing/clobbering instance file: .CADESIM_INSTANCE_1B2M2Y8AsgTpgAmY7PhCfgee
+[2020-12-02T22:39:11.300Z]: [player joined] New player added to channel 127.0.0.1. Registered players:0/1.
+[2020-12-02T22:39:11.438Z]: [auth] /127.0.0.1:60738 provided correct code
+[2020-12-02T22:39:11.446Z]: [player joined] Registered player "User4175", attacker, warfrig joined on 127.0.0.1. Registered players:1/1.
+[2020-12-02T22:39:11.449Z]: [chat] <cadesim_broadcast>:Welcome User4175 (attacker)
+[2020-12-02T22:39:11.450Z]: [chat] <cadesim_private>(to User4175):The following Cadesim commands are supported: /propose, /vote, /info, /show
+[2020-12-02T22:39:12.638Z]: INFO: player User4175 is lagged, sending catch up packets...
+[2020-12-02T22:39:23.037Z]: [chat] <cadesim_broadcast>:Goodbye User4175 (attacker)
+[2020-12-02T22:39:23.038Z]: [chat] <cadesim_broadcast>:Players in server: 0 ( Att. 0, Def. 0)
+Attackers:
+    -
+Defenders:
+    -
+[2020-12-02T22:39:23.038Z]: [player left] De-registered and logged out player "User4175", 127.0.0.1. Registered players:0/0.
+[2020-12-02T22:39:23.039Z]: [chat] <cadesim_broadcast>:Round ended, final scores were:
+    Defender:0
+    Attacker:0
+[2020-12-02T22:39:23.040Z]: Ending game #0.
+[2020-12-02T22:39:23.040Z]: [chat] <cadesim_broadcast>:all temporary settings were reverted
+[2020-12-02T22:39:23.040Z]: [chat] <cadesim_broadcast>:Started new round: #2
+[2020-12-02T22:39:49.303Z]: [player joined] New player added to channel 127.0.0.1. Registered players:0/1.
+[2020-12-02T22:39:49.337Z]: [auth] /127.0.0.1:60746 provided correct code
+[2020-12-02T22:39:49.338Z]: [player joined] Registered player "User4175", attacker, warfrig joined on 127.0.0.1. Registered players:1/1.
+[2020-12-02T22:39:49.339Z]: [chat] <cadesim_broadcast>:Welcome User4175 (attacker)
+[2020-12-02T22:39:49.339Z]: [chat] <cadesim_private>(to User4175):The following Cadesim commands are supported: /propose, /vote, /info, /show
+[2020-12-02T22:39:50.537Z]: INFO: player User4175 is lagged, sending catch up packets...
+[2020-12-02T22:39:53.439Z]: [chat] <cadesim_broadcast>:Goodbye User4175 (attacker)
+[2020-12-02T22:39:53.442Z]: [chat] <cadesim_broadcast>:Players in server: 0 ( Att. 0, Def. 0)
+Attackers:
+    -
+Defenders:
+    -
+[2020-12-02T22:39:53.443Z]: [player left] De-registered and logged out player "User4175", 127.0.0.1. Registered players:0/0.
+[2020-12-02T22:39:53.443Z]: [chat] <cadesim_broadcast>:Round ended, final scores were:
+    Defender:0
+    Attacker:0
+[2020-12-02T22:39:53.443Z]: Ending game #1.
+[2020-12-02T22:39:53.444Z]: [chat] <cadesim_broadcast>:all temporary settings were reverted
+[2020-12-02T22:39:53.444Z]: [chat] <cadesim_broadcast>:Started new round: #3
+[2020-12-02T22:41:35.066Z]: [player joined] New player added to channel 127.0.0.1. Registered players:0/1.
+[2020-12-02T22:41:35.138Z]: [auth] /127.0.0.1:60748 provided correct code
+[2020-12-02T22:41:35.138Z]: [player joined] Registered player "User4175", attacker, warfrig joined on 127.0.0.1. Registered players:1/1.
+[2020-12-02T22:41:35.139Z]: [chat] <cadesim_broadcast>:Welcome User4175 (attacker)
+[2020-12-02T22:41:35.139Z]: [chat] <cadesim_private>(to User4175):The following Cadesim commands are supported: /propose, /vote, /info, /show
+[2020-12-02T22:41:48.526Z]: Channel exception caught: Connection reset by peer
+[2020-12-02T22:41:48.537Z]: [chat] <cadesim_broadcast>:Goodbye User4175 (attacker)
+[2020-12-02T22:41:48.538Z]: [chat] <cadesim_broadcast>:Players in server: 0 ( Att. 0, Def. 0)
+Attackers:
+    -
+Defenders:
+    -
+[2020-12-02T22:41:48.538Z]: [player left] De-registered and logged out player "User4175", 127.0.0.1. Registered players:0/0.
+[2020-12-02T22:41:48.538Z]: [chat] <cadesim_broadcast>:Round ended, final scores were:
+    Defender:0
+    Attacker:0
+[2020-12-02T22:41:48.538Z]: Ending game #2.
+[2020-12-02T22:41:48.539Z]: [chat] <cadesim_broadcast>:all temporary settings were reverted
+[2020-12-02T22:41:48.539Z]: [chat] <cadesim_broadcast>:Started new round: #4
+[2020-12-02T22:47:48.459Z]: [player joined] New player added to channel 127.0.0.1. Registered players:0/1.
+[2020-12-02T22:47:48.538Z]: [auth] /127.0.0.1:60814 provided correct code
+[2020-12-02T22:47:48.539Z]: [player joined] Registered player "User", attacker, warfrig joined on 127.0.0.1. Registered players:1/1.
+[2020-12-02T22:47:48.539Z]: [chat] <cadesim_broadcast>:Welcome User (attacker)
+[2020-12-02T22:47:48.540Z]: [chat] <cadesim_private>(to User):The following Cadesim commands are supported: /propose, /vote, /info, /show
+[2020-12-02T22:47:49.737Z]: INFO: player User is lagged, sending catch up packets...
+[2020-12-02T22:47:51.438Z]: [chat] <cadesim_broadcast>:Goodbye User (attacker)
+[2020-12-02T22:47:51.438Z]: [chat] <cadesim_broadcast>:Players in server: 0 ( Att. 0, Def. 0)
+Attackers:
+    -
+Defenders:
+    -
+[2020-12-02T22:47:51.438Z]: [player left] De-registered and logged out player "User", 127.0.0.1. Registered players:0/0.
+[2020-12-02T22:47:51.439Z]: [chat] <cadesim_broadcast>:Round ended, final scores were:
+    Defender:0
+    Attacker:0
+[2020-12-02T22:47:51.439Z]: Ending game #3.
+[2020-12-02T22:47:51.439Z]: [chat] <cadesim_broadcast>:all temporary settings were reverted
+[2020-12-02T22:47:51.440Z]: [chat] <cadesim_broadcast>:Started new round: #5
