@@ -36,7 +36,7 @@ public class ReceiveTeamPacket extends ClientPacketExecutor {
      		    	   if(vessel.getName().matches(getContext().myVessel) && playerName.matches(getContext().myVessel)) {
      		    		   getContext().setTeam(playerTeam);
      		    		   vessel.setTeam(Team.forId(playerTeam));
-     		    		  Gdx.graphics.setTitle("CadeSim: " + getContext().myVessel + " (" + getContext().myTeam.toString() + ")");
+     		    		  Gdx.graphics.setTitle("GC: " + getContext().myVessel + " (" + getContext().myTeam.toString() + ")");
      		    	   }else if(playerName.matches(vessel.getName())){
      		    		   vessel.setTeam(Team.forId(playerTeam));	   
      		    	   }

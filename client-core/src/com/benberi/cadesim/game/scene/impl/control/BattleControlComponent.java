@@ -768,7 +768,8 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
      */
     public void displayMessage(String message, Texture messageTexture) {
     	// create the data
-    	chatMessages.row().padBottom(CHAT_WINDOW_BOTTOM_PAD).padLeft(5f);
+        chatMessages.align(Align.left).padRight(25f).padLeft(2f);
+    	chatMessages.row().padBottom(CHAT_WINDOW_BOTTOM_PAD);
         Label chat1;
         
         // define the background textures based on the message source
@@ -783,13 +784,13 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
         {
         	// use whole thing
         	tr = new TextureRegion(messageTexture, 0, 0, 282, 24);
-        	chatMessages.add(chat1).width(resolutionWidthDiction.get(Gdx.graphics.getWidth())[1]).align(Align.left).padRight(10f);
+        	chatMessages.add(chat1).width(resolutionWidthDiction.get(Gdx.graphics.getWidth())[1]-9).align(Align.left).padRight(25f);
         }
         else
         {
         	// use width plus some constant (10 padding either side of inside lines)
         	tr = new TextureRegion(messageTexture, 0, 0, (int)chat1.getWidth() + 10, 24);
-        	chatMessages.add(chat1).width(chat1.getWidth() + 10).align(Align.left).padRight(10f);
+        	chatMessages.add(chat1).width(chat1.getWidth() + 10).align(Align.left).padRight(25f);
         }
         
     	
@@ -807,7 +808,6 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
             chatMessages.getCells().removeValue(cell, true); // rm lingering physical presence
             chatMessages.invalidate();
         }
-        chatMessages.padLeft(20f);
         chatScroller.layout();
         chatScroller.scrollTo(0, 0, 0, 0);
     }
@@ -868,6 +868,7 @@ public class BattleControlComponent extends SceneComponent<ControlAreaScene> imp
 
     @Override
     public void render() {
+    	getContext().gameStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),false);
         renderMoveControl();
         renderDisengage();
     }

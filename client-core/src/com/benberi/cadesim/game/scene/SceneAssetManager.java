@@ -113,7 +113,6 @@ public class SceneAssetManager {
 	private final static String WARFRIG_SINKING = "vessel/warfrig/sink.png";
 	private final static String WARGAL_SINKING ="vessel/wargal/sink.png";
 	private final static String XEBEC_SINKING = "vessel/xebec/sink.png";
-	
 	/*
 	 * Map texture location
 	 */
@@ -228,6 +227,8 @@ public class SceneAssetManager {
 
     private final static String MAPEDITOR = "skin/mapEditor.png";
     private final static String MAPEDITOR_DISABLED ="skin/mapEditor_disabled.png";
+    
+	private final static String CLIENTLOGO = "gclogo.png";
     
     /*
      * asset descriptors for textures
@@ -383,6 +384,8 @@ public class SceneAssetManager {
 
     public AssetDescriptor<Texture> mapEditorButtonUp = new AssetDescriptor<Texture>(MAPEDITOR, Texture.class);
     public AssetDescriptor<Texture> mapEditorButtonDown = new AssetDescriptor<Texture>(MAPEDITOR_DISABLED, Texture.class);
+    
+    public AssetDescriptor<Texture> clientlogo = new AssetDescriptor<Texture>(CLIENTLOGO, Texture.class);
 	/*
 	 * Font asset descriptors
 	 */
@@ -535,6 +538,7 @@ public class SceneAssetManager {
     }
     
 	public void loadConnectSceneTextures() {
+		manager.load(clientlogo);
 		manager.load(background);
 		manager.load(smallBackground);
 		manager.load(mapEditorButtonUp);

@@ -335,7 +335,8 @@ public class CollisionCalculator {
             	collide(player, claimed, turn, phase);
             	collide(claimed, player, turn, phase);
                 return true;
-            }else if(next.equals(claimed)) {
+            }
+            else if(next.equals(claimed)) {
                 player.getVessel().appendDamage(claimed.getVessel().getRamDamage(), claimed.getTeam());
                 claimed.getVessel().appendDamage(player.getVessel().getRamDamage(), player.getTeam()); //needed if claimed is by a rock 
                 Position bumpPos = context.getMap().getNextActionTilePositionForTile(claimed, context.getMap().getTile(player.getX(), player.getY()));
@@ -361,9 +362,8 @@ public class CollisionCalculator {
                 }
             	return true;
             }
-        }else {
-        	return performActionCollision(player,target,turn,phase,setPosition);
         }
+        performActionCollision(player,target,turn,phase,setPosition);
         return false;
     }
     /**
@@ -395,14 +395,13 @@ public class CollisionCalculator {
 //            	}
             }
             return true;
-        }else {
-        	if(!player.getCollisionStorage().isCollided(turn,phase)) {
-        		if (setPosition) {
-                    player.set(target);
-                    player.getCollisionStorage().setPositionChanged(true);
-                }
-        	}
         }
+        if(!player.getCollisionStorage().isCollided(turn,phase)) {
+    		if (setPosition) {
+                player.set(target);
+                player.getCollisionStorage().setPositionChanged(true);
+            }
+    	}
         return false;
     }
 

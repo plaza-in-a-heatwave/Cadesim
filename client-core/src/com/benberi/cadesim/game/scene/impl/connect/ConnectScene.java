@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
@@ -50,17 +48,17 @@ public class ConnectScene implements GameScene, InputProcessor {
     // the connect state
     private ConnectionSceneState state = ConnectionSceneState.DEFAULT;
     private long loginAttemptTimestampMillis; // initialised when used
-    private long popupTimestamp;
+//    private long popupTimestamp;
 
     /**
      * Batch for opening screen
      */
-    private SpriteBatch batch;
+    public SpriteBatch batch;
 
     /**
      * The shape renderer
      */
-    private ShapeRenderer renderer;
+    public ShapeRenderer renderer;
 
     private int connectAnimationState = 0;
 
@@ -92,8 +90,8 @@ public class ConnectScene implements GameScene, InputProcessor {
     private TextField address;
     private TextField code;
 
-    private Texture background;
-    private Texture smallBackground;
+    private Texture clientlogo;
+    
     private Texture textfieldTexture;
     private Texture loginButtonUp;
     private Texture loginButtonDown;
@@ -116,8 +114,8 @@ public class ConnectScene implements GameScene, InputProcessor {
     private Texture wargal;
     private Texture xebec;
 
+    public Table settingTable;
     private SelectBox<ShipTypeLabel> shipType;
-    private SelectBox<ResolutionTypeLabel> resolutionType;
     private SelectBox<TeamTypeLabel> teamType;
     private SelectBox<RoomNumberLabel> roomLabel;
 
@@ -141,35 +139,13 @@ public class ConnectScene implements GameScene, InputProcessor {
     private ImageButtonStyle mapEditorButtonStyle;
     private ImageButtonStyle loginButtonStyle;
     
-    private String[] resolution;
-    private String[] oldResolution;
-    private Dialog dialog;
-    private int indexResolution;
     private Random random = new Random();
     
     TextField.TextFieldStyle style;
     SelectBox.SelectBoxStyle selectBoxStyle;
     
-    private Map<Integer,int[]> resolutionWidthDiction;
-    
     public ConnectScene(GameContext ctx) {
-        this.context = ctx;
-        resolutionWidthDiction = new HashMap<Integer, int[]>();
-        resolutionWidthDiction.put(800, new int[]{640,484,328,360});
-        resolutionWidthDiction.put(1024, new int[]{722,566,410,480});
-        resolutionWidthDiction.put(1280, new int[]{832,676,520,660});
-        resolutionWidthDiction.put(1366, new int[]{932,776,620,640});
-        resolutionWidthDiction.put(1440, new int[]{932,776,620,690});
-        resolutionWidthDiction.put(1600, new int[]{1032,876,720,770});
-        resolutionWidthDiction.put(1680, new int[]{1032,876,720,830});
-        resolutionWidthDiction.put(1920, new int[]{1182,1026,870,920});
-        resolutionWidthDiction.put(2500, new int[]{1482,1326,1170,1230});
-        resolutionWidthDiction.put(3600, new int[]{2082,1926,1770,1700});
-        //safety net for custom resolution width
-        if(!(resolutionWidthDiction.containsKey(Gdx.graphics.getWidth()))) {
-        	resolutionWidthDiction.put(Gdx.graphics.getWidth(), new int[]{640,484,328,360});
-        }
-        
+        this.context = ctx; 
     }
     
     @Override
@@ -186,8 +162,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         setup();
-        //resolution extras
-        stage_dialog = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+
         //styles
         style = new TextField.TextFieldStyle();
         style.fontColor = new Color(0.16f, 0.16f, 0.16f, 1);
@@ -219,32 +194,34 @@ public class ConnectScene implements GameScene, InputProcessor {
         selectBoxStyle.background.setLeftWidth(10);
    
         teamType = new SelectBox<>(selectBoxStyle);
-        teamType.setSize(150, 44);
-        
-        resolutionType = new SelectBox<>(selectBoxStyle);
-        resolutionType.setSize(150, 44);
+        teamType.setSize(200, 44);
 
         shipType = new SelectBox<>(selectBoxStyle);
-        shipType.setSize(150, 44);
+        shipType.setSize(200, 44);
         
         roomLabel = new SelectBox<RoomNumberLabel>(selectBoxStyle);
-        roomLabel.setSize(150.0f, 44.0f);
+        roomLabel.setSize(200, 44);
     
     	fillSelectBoxes();
     	initProperties();
-    	setupDialog();
         initListeners();
-        setActorPositions(Gdx.graphics.getWidth());
         
         getServerCode(); // initialize server code with currently selected room
         
+        settingTable = new Table();
+        settingTable.add(teamType).width(170).growX().row();
+        settingTable.add(roomLabel).width(170).growX().row();
+        settingTable.add(shipType).width(170).growX().row();
+        settingTable.padLeft(190).padBottom(100);
+        setActorPositions(Gdx.graphics.getWidth());
+        addStage();
+    }
+    
+    public void addStage() {
         stage.addActor(name);
         stage.addActor(address);
         stage.addActor(code);
-        stage.addActor(shipType);
-        stage.addActor(resolutionType);
-        stage.addActor(teamType);
-        stage.addActor(roomLabel);
+        stage.addActor(settingTable);
         stage.addActor(buttonConn);
         stage.addActor(buttonMapEditor); // comment to toggle
     }
@@ -257,7 +234,13 @@ public class ConnectScene implements GameScene, InputProcessor {
             code.setText(Constants.SERVER_CODE);
         }
     }
-
+    public Color toRGB(int r, int g, int b) {
+    	  float RED = r / 255.0f;
+    	  float GREEN = g / 255.0f;
+    	  float BLUE = b / 255.0f;
+    	  return new Color(RED, GREEN, BLUE, 1);
+    	 }
+    
     @Override
     public void update() {
     }
@@ -266,22 +249,14 @@ public class ConnectScene implements GameScene, InputProcessor {
     public void render() {
     	batch.setTransformMatrix(stage.getCamera().view);
     	batch.setProjectionMatrix(stage.getCamera().projection);
-        if(dialog.isVisible()) {
-        	if((System.currentTimeMillis() - popupTimestamp) >= 15000) {
-        		dialog.setVisible(false);
-        		revertResolution();
-            	}
-        }
-        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        batch.begin();
-        if(Gdx.graphics.getWidth() >= 2500) {
-        	batch.draw(background, 0, 0);
-        }else {
-        	batch.draw(smallBackground, 0, 0);
-        }
         if (state == ConnectionSceneState.DEFAULT) {
-        	titleFont.draw(batch, "Blockade Simulator", Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0], MAIN_GROUP_OFFSET_Y + 450);
-        	notesFont.draw(batch, chosenGreeting,       Gdx.graphics.getWidth() - (resolutionWidthDiction.get(Gdx.graphics.getWidth())[0] -431), MAIN_GROUP_OFFSET_Y + 429);        		
+        	batch.begin();
+        	batch.draw(clientlogo, Gdx.graphics.getWidth()/2 - 60, MAIN_GROUP_OFFSET_Y + 432, 128, 128);
+        	batch.end();
+        	batch.begin();
+        	titleFont.setColor(toRGB(240,137,13));
+        	titleFont.draw(batch, "Global CadeSim", Gdx.graphics.getWidth()/2 - 230, MAIN_GROUP_OFFSET_Y + 420);
+        	notesFont.draw(batch, chosenGreeting,       Gdx.graphics.getWidth()/2 + 130, MAIN_GROUP_OFFSET_Y + 399);        		
 			notesFont.draw(batch, "Version " + Constants.VERSION + " by Cyclist & Fatigue, based on the Cadesim by Benberi", 15, 75);
         	notesFont.draw(batch, "Inspired by the original Dachimpy Cadesim", 15, 50);
         	notesFont.draw(batch, "Found a bug? Let us know!", 15, 25);
@@ -291,13 +266,12 @@ public class ConnectScene implements GameScene, InputProcessor {
             notesFont.setColor(Color.WHITE);
         	
             font.setColor(Color.WHITE);
-            font.draw(batch, "Display name:",   Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0], MAIN_GROUP_OFFSET_Y + 400);
-            font.draw(batch, "Server address:", Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[1], MAIN_GROUP_OFFSET_Y + 400);
-            font.draw(batch, "Server code:",    Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[2], MAIN_GROUP_OFFSET_Y + 400);
-	        batch.draw(textfieldTexture, Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[0], MAIN_GROUP_OFFSET_Y + 325, 140, 49);
-	        batch.draw(textfieldTexture, Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[1], MAIN_GROUP_OFFSET_Y + 325, 140, 49);
-	        batch.draw(textfieldTexture, Gdx.graphics.getWidth() - resolutionWidthDiction.get(Gdx.graphics.getWidth())[2], MAIN_GROUP_OFFSET_Y + 325, 140, 49);
-            font.draw(batch, "Settings:", Gdx.graphics.getWidth() - 160, 220);
+            font.draw(batch, "Display name:",   Gdx.graphics.getWidth()/2 - 230, MAIN_GROUP_OFFSET_Y + 370);
+            font.draw(batch, "Server address:", Gdx.graphics.getWidth()/2 - 75, MAIN_GROUP_OFFSET_Y + 370);
+            font.draw(batch, "Server code:",    Gdx.graphics.getWidth()/2 + 82, MAIN_GROUP_OFFSET_Y + 370);
+	        batch.draw(textfieldTexture, Gdx.graphics.getWidth()/2 - 230, MAIN_GROUP_OFFSET_Y + 295, 140, 49);
+	        batch.draw(textfieldTexture, Gdx.graphics.getWidth()/2 - 75, MAIN_GROUP_OFFSET_Y + 295, 140, 49);
+	        batch.draw(textfieldTexture, Gdx.graphics.getWidth()/2 + 82, MAIN_GROUP_OFFSET_Y + 295, 140, 49);
             batch.end();
 
             // buttons need to be drawn, then ship texture is drawn over them
@@ -307,27 +281,24 @@ public class ConnectScene implements GameScene, InputProcessor {
             Texture t;
             batch.begin();
             font.setColor(new Color(0.1f, 0.1f, 0.1f, 1));
-            font.draw(batch, "Connect", (resolutionWidthDiction.get(Gdx.graphics.getWidth())[3]), MAIN_GROUP_OFFSET_Y + 296);
+            font.draw(batch, "Connect", Gdx.graphics.getWidth()/2 - 25, MAIN_GROUP_OFFSET_Y + 269);
             t = shipType.getSelected().getType();
-            batch.draw(t, Gdx.graphics.getWidth() - 65, 5); // draw t, whatever it may be
+            batch.draw(t, settingTable.getX() + 115, -2); // draw t, whatever it may be
             batch.end();
-            
-            stage_dialog.act();
-            stage_dialog.draw();
 
             if (popup) {
                 Gdx.gl.glEnable(GL20.GL_BLEND);
                 Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
                 renderer.begin(ShapeRenderer.ShapeType.Filled);
                 renderer.setColor(new Color(0f, 0f, 0f, 0.9f));
-                renderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//                renderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
                 GlyphLayout layout = new GlyphLayout(font, popupMessage);
 
 
-                int x = Gdx.graphics.getWidth() / 2 - 200;
+                int x = Gdx.graphics.getWidth() / 2 - 170;
                 int y = Gdx.graphics.getHeight() / 2 - 50;
-                int width = 400;
+                int width = 300;
                 int height = 50;
 
                 renderer.setColor(new Color(213 / 255f, 54 / 255f, 53 / 255f, 1));
@@ -351,7 +322,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                     font.draw(batch, "Close", x + 400 - 55, y + (25 + (layout.height / 2)));
                 }
                 batch.end();
-                Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
+                Gdx.graphics.setTitle("GC: v" + Constants.VERSION);
             }
         }
         else {
@@ -385,6 +356,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                 }
 
                 GlyphLayout layout = new GlyphLayout(font, text);
+                batch.begin();
                 font.draw(batch, text + dot, Gdx.graphics.getWidth() / 2 - (layout.width / 2), 300);
 
             if (System.currentTimeMillis() - lastConnectionAnimatinoStateChange >= 200) {
@@ -402,53 +374,7 @@ public class ConnectScene implements GameScene, InputProcessor {
             batch.end();
         }
     }
-    
-	/*
-	 * Initialize resolution dialog
-	 */
-    public void setupDialog() {
-        //resolution dialog 
-        Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
-		dialog = new Dialog("Resolution", skin, "dialog") {
-			protected void result(Object object)
-            {
-				//if 'No' is pushed
-				if (object.equals(2L))
-			    {
-					dialog.setVisible(false);
-					revertResolution();
-			    } else if(object.equals(1L)){
-			    	dialog.setVisible(false);
-                    // save for next time
-                    try {
-						changeProperty("user.config", "user.width", resolution[0]);
-	                    changeProperty("user.config", "user.height", resolution[1]);
-	                    changeProperty("user.config", "user.last_resolution", Integer.toString(resolutionType.getSelectedIndex()));
-	                    changeProperty("user.config", "user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
-	                    changeProperty("user.config", "user.last_team", Integer.toString(teamType.getSelectedIndex()));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			        context.gameStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-			    	Gdx.input.setInputProcessor(stage);
-			    }
-            }
-		};
-		//show specific text in resolution dialog
-		if(resolution != null) {
-			String text = String.format("Selected screen resolution - %s", 
-					ResolutionTypeLabel.resToString(resolution));
-			dialog.text(text
-					+ "\n(Changes will revert in 15 seconds)"
-					+ "\n\nWould you like to accept the changes?");
-			dialog.button("Yes", 1L);
-			dialog.button("No", 2L);
-			dialog.show(stage_dialog);
-		}
-		dialog.setVisible(false);
-    }
-    
+
 	/*
 	 * Greeting list for startup screen
 	 */
@@ -497,10 +423,9 @@ public class ConnectScene implements GameScene, InputProcessor {
     public void initTextures() {
         // fonts
         font = context.getManager().get(context.getAssetObject().regularFont);
+        clientlogo = context.getManager().get(context.getAssetObject().clientlogo);
         notesFont = context.getManager().get(context.getAssetObject().notesFont);
         titleFont = context.getManager().get(context.getAssetObject().titleFont);
-        background = context.getManager().get(context.getAssetObject().background);
-        smallBackground = context.getManager().get(context.getAssetObject().smallBackground);
         textfieldTexture = context.getManager().get(context.getAssetObject().textfieldTexture);
 
         loginButtonUp = context.getManager().get(context.getAssetObject().loginButton);
@@ -517,7 +442,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         style.selection = new Image(
         		context.getManager().get(context.getAssetObject().selection)).getDrawable();
 
-        baghlah = context.getManager().get(context.getAssetObject().baghlah);
+        baghlah = context.getManager().get(context.getAssetObject().baghlahSkin);
         blackship = context.getManager().get(context.getAssetObject().blackshipSkin);
         dhow = context.getManager().get(context.getAssetObject().dhowSkin);
         fanchuan = context.getManager().get(context.getAssetObject().fanchuanSkin);
@@ -570,13 +495,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         }
 
         shipType.setItems(blob);
-
-        ResolutionTypeLabel[] blob3 = new ResolutionTypeLabel[ResolutionTypeLabel.RES_LIST.length];
-        for (int i=0; i<ResolutionTypeLabel.RES_LIST.length; i++)
-        {
-        	blob3[i] = new ResolutionTypeLabel(i, ResolutionTypeLabel.RES_LIST[i], labelStyle);
-        }
-        resolutionType.setItems(blob3);
 
         TeamTypeLabel[] blob2 = new TeamTypeLabel[2];
         blob2[0] = new TeamTypeLabel("Defender", labelStyle, TeamTypeLabel.DEFENDER);
@@ -639,9 +557,6 @@ public class ConnectScene implements GameScene, InputProcessor {
             e.printStackTrace();
         }
         
-        
-        oldResolution = ResolutionTypeLabel.restypeToRes(Integer.parseInt(prop.getProperty("user.last_resolution")));
-        
         if(prop.getProperty("user.username") == null) {
         	name = new TextField("User"+Integer.toString(random.nextInt(9999)), style);
         }else {
@@ -661,17 +576,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         }
         catch(IndexOutOfBoundsException e) {
         	shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
-        }
-        try 
-        {
-        	if(prop.getProperty("user.last_resolution") == null) {
-        		resolutionType.setSelectedIndex(0);
-        	}else {
-        		resolutionType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_resolution")));
-        	}
-        }
-        catch(IndexOutOfBoundsException e) {
-        	resolutionType.setSelectedIndex(0);
         }
         
         try
@@ -746,55 +650,26 @@ public class ConnectScene implements GameScene, InputProcessor {
                 }
             }
         });
-        
-        //use click listener to get previous item selected in selectbox for resolutions
-        resolutionType.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		oldResolution = ResolutionTypeLabel.restypeToRes(resolutionType.getSelectedIndex());
-        		indexResolution = resolutionType.getSelectedIndex();
-        	}
-        });
-      
-        resolutionType.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                // if graphics state not what it was, reload graphics
-                try {
-                    changeProperty("user.config", "user.last_resolution", Integer.toString(resolutionType.getSelectedIndex()));
-                    resolution = ResolutionTypeLabel.restypeToRes(resolutionType.getSelectedIndex());
-                    resize(Integer.parseInt(resolution[0]), Integer.parseInt(resolution[1]));
-                    dialog.setVisible(true);
-                    Gdx.input.setInputProcessor(stage_dialog);
-                    popupTimestamp = System.currentTimeMillis();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-         });
     }
     
 	/*
 	 * wrapper method to set size of window
 	 */
     public void resize(int width, int height) {
-        Gdx.graphics.setWindowedMode(width, height);
-        create();
+//        context.getCallback().setWindowSizeLimits(width, height, width, height);
+//        create();
     }
 
 	/*
 	 * Set position of actors in stage
 	 */
     public void setActorPositions(int width) {
-        buttonConn.setPosition(width - resolutionWidthDiction.get(width)[0] + 5, 290);
-        buttonMapEditor.setPosition(width - 70, Gdx.graphics.getHeight() - 50);
-        name.setPosition(width - (resolutionWidthDiction.get(width)[0] - 10), MAIN_GROUP_OFFSET_Y + 325);
-        address.setPosition(width - (resolutionWidthDiction.get(width)[1] - 10), MAIN_GROUP_OFFSET_Y + 325);
-        code.setPosition(width - (resolutionWidthDiction.get(width)[2] - 10), MAIN_GROUP_OFFSET_Y + 325);
-        teamType.setPosition(width - 160, 105);
-        resolutionType.setPosition(width - 160, 155);
-        shipType.setPosition(width - 160, 5);
-        roomLabel.setPosition(width - 160, 55);
+        buttonConn.setPosition(width/2 - 225, 260);
+        settingTable.setPosition(width - 175, 15);
+        buttonMapEditor.setPosition(width - 70, Gdx.graphics.getHeight()-50);
+        name.setPosition(width/2 - 220 , MAIN_GROUP_OFFSET_Y + 295);
+        address.setPosition(width/2 - 68 , MAIN_GROUP_OFFSET_Y + 295);
+        code.setPosition(width/2 + 90, MAIN_GROUP_OFFSET_Y + 295);
     }
 
     public void setPopup(String message, boolean allowPopupClose) {
@@ -819,7 +694,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 
     @Override
     public boolean handleDrag(float screenX, float screenY, float diffX, float diffY) {
-        return false;
+    	return false;
     }
 
     @Override
@@ -989,18 +864,17 @@ public class ConnectScene implements GameScene, InputProcessor {
 		} else {
             // Save current choices for next time
             try {
-                resolution = ResolutionTypeLabel.restypeToRes(resolutionType.getSelectedIndex());
                 changeProperty("user.config", "user.username", name.getText());
                 changeProperty("user.config", "user.last_address", address.getText());
-                changeProperty("user.config", "user.width", resolution[0]);
-                changeProperty("user.config", "user.height", resolution[1]);
+                changeProperty("user.config", "user.width", Integer.toString(Gdx.graphics.getWidth()));
+                changeProperty("user.config", "user.height", Integer.toString(Gdx.graphics.getHeight()));
                 changeProperty("user.config", "user.last_ship", Integer.toString(shipType.getSelectedIndex()));
-                changeProperty("user.config", "user.last_resolution", Integer.toString(resolutionType.getSelectedIndex()));
                 changeProperty("user.config", "user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
                 changeProperty("user.config", "user.last_team", Integer.toString(teamType.getSelectedIndex()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            Gdx.graphics.setResizable(false);
 	        setState(ConnectionSceneState.CONNECTING);
 	        context.connect(name.getText(), address.getText(), code.getText(), shipType.getSelected().getIndex(), teamType.getSelected().getType());
            }
@@ -1068,12 +942,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         inputMultiplexer.addProcessor(this);
         inputMultiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
-    }
-    
-    public void revertResolution() {
-    	resolutionType.setSelectedIndex(indexResolution);
-    	System.out.println("Reverting resolution to previous settings.");
-		resize(Integer.parseInt(oldResolution[0]), Integer.parseInt(oldResolution[1]));
     }
 
     public boolean hasPopup() {

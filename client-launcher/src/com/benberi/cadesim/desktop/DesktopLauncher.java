@@ -33,14 +33,12 @@ public class DesktopLauncher {
 		}
 
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		BlockadeSimulator cadesim = new BlockadeSimulator();
-		
+        config.setWindowSizeLimits(800, 600, 99999, 99999);
 		if(prop.getProperty("user.width") == null || !(prop.getProperty("user.width").matches("[0-9]{3,}")) ||
 				prop.getProperty("user.height") == null || !(prop.getProperty("user.height").matches("[0-9]{3,}")) ||
 				prop.getProperty("user.last_resolution") == null || !(prop.getProperty("user.last_resolution").matches("[0-9]+"))) {
 			int width = 800;
 			int height = 600;
-			config.setResizable(false);
 			config.setWindowedMode(width, height);
 			try {
 				changeProperty("user.config","user.last_resolution", "0");
@@ -50,12 +48,14 @@ public class DesktopLauncher {
 				e.printStackTrace();
 			}
 		}else {
-			config.setWindowedMode(Integer.parseInt(prop.getProperty("user.width")), Integer.parseInt(prop.getProperty("user.height")));		
+			int width = Integer.parseInt(prop.getProperty("user.width"));
+			int height = Integer.parseInt(prop.getProperty("user.height"));
+			config.setWindowedMode(width, height);
 		}
-		config.setTitle("CadeSim: v" + Constants.VERSION);
+		config.setTitle("GC: v" + Constants.VERSION);
 		config.useVsync(true);
 		config.setForegroundFPS(60);
-		new Lwjgl3Application(cadesim, config);
+		new Lwjgl3Application(new BlockadeSimulator(), config);
 	}
 	
     public static void changeProperty(String filename, String key, String value) throws IOException {

@@ -43,7 +43,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GameContext {
-
     private Channel serverChannel;
     public InputMultiplexer inputMultiplexer;
     public boolean clear;
@@ -290,6 +289,7 @@ public class GameContext {
         scenes.add(mapEditorMenu);
     }
     public void createFurtherScenes(int shipId) {
+    	gameStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     	ControlAreaScene.shipId = shipId;
     	this.input = new GameInputProcessor(this);
         inputMultiplexer.addProcessor(this.input);
@@ -305,7 +305,7 @@ public class GameContext {
 	        scenes.set(0, controlArea);
 	        scenes.set(1, seaBattleScene);
 		}
-		Gdx.graphics.setTitle("CadeSim: " + myVessel + " (" + myTeam + ")");
+		Gdx.graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
     }
 
     public MapEditorMapScene getMapEditor() {
@@ -499,8 +499,11 @@ public class GameContext {
     
     public void setStartedMapEditor(boolean started) {
         this.isInMapEditor = started;
-//        Gdx.input.setInputProcessor(input);
         clear = true;
+    }
+    
+    public boolean isStartedMapEditor() {
+        return this.isInMapEditor;
     }
 
 	public GameInputProcessor getInputProcessor() {
@@ -595,31 +598,35 @@ public class GameContext {
      * When the client (or user) decides to disconnect
      */
     public void disconnect() {
+		gameStage.clear();
+		inputMultiplexer.clear();
+	    maps.clear();
     	setClientInitiatedDisconnect(true); // wedunnit!
         setConnected(false);
         setIsInLobby(true);
         getServerChannel().disconnect();
 		getConnectScene().setState(ConnectionSceneState.DEFAULT);
-		gameStage.clear();
-		inputMultiplexer.clear();
 		connectScene.setPopup("Returning to Lobby...", false);
-		Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
+		Gdx.graphics.setTitle("GC:" + Constants.VERSION);
 		System.out.println("Client disconnected.");
-	    maps.clear();
+	    getBattleScene().dispose();
+	    getControlScene().dispose();
 	    pixmapArray = null;
+	    Gdx.graphics.setResizable(true);
     }
     /*
      * When the client (or user) decides to disconnect
      */
     public void exitMapEditor() {
+    	Gdx.graphics.setResizable(true);
+		setStartedMapEditor(false);
     	setClientInitiatedDisconnect(true); // wedunnit!
         setConnected(false);
         setIsInLobby(true);
 		getConnectScene().setState(ConnectionSceneState.DEFAULT);
 		getScenes().clear();
 		getConnectScene().setup();
-		setStartedMapEditor(false);
-		Gdx.graphics.setTitle("CadeSim: v" + Constants.VERSION);
+		Gdx.graphics.setTitle("GC: v" + Constants.VERSION);
     }
     /*
      * When the server decides to disconnect

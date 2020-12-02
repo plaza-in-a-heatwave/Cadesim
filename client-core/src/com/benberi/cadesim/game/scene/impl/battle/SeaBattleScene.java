@@ -801,18 +801,18 @@ public class SeaBattleScene implements GameScene {
 
     @Override
     public void dispose() {
-    	
         currentPhase = MovePhase.MOVE_TOKEN;
         currentSlot = -1;
         information.dispose();
         recountVessels();
         camera = null;
+        context.gameStage = null;
     }
 
     @Override
     public boolean handleDrag(float sx, float sy, float x, float y) {
         if(!mainmenu.audio_slider.isVisible() && !mainmenu.isSettingsDialogOpen()) {
-            if (sy > camera.viewportHeight) {
+            if (camera != null && sy > camera.viewportHeight) {
                 return false;
             }
 
@@ -833,7 +833,7 @@ public class SeaBattleScene implements GameScene {
             if (mainmenu.handleClick(x, y, button)) {
                 return true;
             }
-            if (y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
+            if (camera != null && y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
                 // handle camera not following vessel
                 cameraFollowsVessel = false;
 
@@ -859,7 +859,7 @@ public class SeaBattleScene implements GameScene {
 	        if (mainmenu.handleRelease(x, y, button)) {
 	            return true;
 	        }
-        	if (y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
+        	if (camera != null && y < camera.viewportHeight && !mainmenu.teamTable.isVisible()) {
                 // handle camera following/not following vessel
                 if (button == Input.Buttons.RIGHT) {
                     cameraFollowsVessel = false;
