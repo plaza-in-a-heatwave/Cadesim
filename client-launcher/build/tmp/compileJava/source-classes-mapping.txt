@@ -1,2 +1,0 @@
-com/benberi/cadesim/desktop/DesktopLauncher.java
- com.benberi.cadesim.desktop.DesktopLauncher
