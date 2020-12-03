@@ -156,7 +156,6 @@ public class SceneAssetManager {
     private final static String FLAGTEXTURE_DISABLED = "cade/buoy_disable.png";
     
     private final static String BACKGROUND = "client_bg.png";
-    private final static String SMALLBACKGROUND = "client_bg_small.png";
     private final static String TEXTFIELDTEXTURE = "skin/textfield.png";
     private final static String LOGINBUTTON = "skin/login.png";
     private final static String LOGINBUTTONHOVER = "skin/login-hover.png";
@@ -316,7 +315,6 @@ public class SceneAssetManager {
     public AssetDescriptor<Texture> flagTexture_disabled = new AssetDescriptor<Texture>(FLAGTEXTURE_DISABLED, Texture.class);
     
     public AssetDescriptor<Texture> background = new AssetDescriptor<Texture>(BACKGROUND, Texture.class);
-    public AssetDescriptor<Texture> smallBackground = new AssetDescriptor<Texture>(SMALLBACKGROUND, Texture.class);
     public AssetDescriptor<Texture> textfieldTexture = new AssetDescriptor<Texture>(TEXTFIELDTEXTURE, Texture.class);
     public AssetDescriptor<Texture> loginButton = new AssetDescriptor<Texture>(LOGINBUTTON, Texture.class);
     public AssetDescriptor<Texture> loginButtonDown = new AssetDescriptor<Texture>(LOGINBUTTONHOVER, Texture.class);
@@ -540,7 +538,6 @@ public class SceneAssetManager {
 	public void loadConnectSceneTextures() {
 		manager.load(clientlogo);
 		manager.load(background);
-		manager.load(smallBackground);
 		manager.load(mapEditorButtonUp);
 		manager.load(mapEditorButtonDown);
 		manager.load(textfieldTexture);

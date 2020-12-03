@@ -55,6 +55,7 @@ public class DesktopLauncher {
 		config.setTitle("GC: v" + Constants.VERSION);
 		config.useVsync(true);
 		config.setForegroundFPS(60);
+		config.setWindowIcon("gclogo.png");
 		new Lwjgl3Application(new BlockadeSimulator(), config);
 	}
 	

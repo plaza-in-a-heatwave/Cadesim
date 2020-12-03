@@ -76,8 +76,8 @@ declare -a clientfiles=(
     "getdown.jar"
     "getdown.txt"
     "getdown-bg.png"
-    "growup.ico"
-    "growup.png"
+    "gclogo.ico"
+    "gclogo.png"
     "user.config"
     "version.txt"
 )
