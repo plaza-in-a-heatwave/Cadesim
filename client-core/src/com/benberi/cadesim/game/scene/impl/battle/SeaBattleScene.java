@@ -817,7 +817,7 @@ public class SeaBattleScene implements GameScene {
             }
 
             if (this.canDragMap) {
-                camera.translate(-x*1.5f, y*1.5f); // speed up panning of camera
+                camera.translate(-x*1.1f, y*1.1f); // speed up panning of camera
             }
             if (mainmenu.handleDrag(sx, sy, x, y)) {
                 return true;

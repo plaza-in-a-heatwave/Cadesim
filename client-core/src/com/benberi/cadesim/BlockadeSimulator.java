@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.benberi.cadesim.game.scene.GameScene;
 
 
+
 public class BlockadeSimulator extends ApplicationAdapter{
 
 	/**
@@ -56,8 +57,6 @@ public class BlockadeSimulator extends ApplicationAdapter{
 	
 	@Override
 	public void dispose () {
-		Gdx.app.exit();
-		System.exit(-1);
 	}
 	
 	@Override

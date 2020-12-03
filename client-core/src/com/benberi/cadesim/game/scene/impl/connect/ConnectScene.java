@@ -632,6 +632,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                     return;
                 }
             }});
+        
         name.addListener(new ChangeListener(){
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {

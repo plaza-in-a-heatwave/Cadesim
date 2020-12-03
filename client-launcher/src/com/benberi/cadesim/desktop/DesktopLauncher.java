@@ -6,8 +6,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import org.lwjgl.opengl.Display;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Files.FileType;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.benberi.cadesim.BlockadeSimulator;
 import com.benberi.cadesim.Constants;
 
@@ -31,32 +34,42 @@ public class DesktopLauncher {
 				Constants.AUTO_UPDATE = false;
 			}
 		}
-
-        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setWindowSizeLimits(800, 600, 99999, 99999);
+		int windowWidth = 800; //minimum window width size
+		int windowHeight = 600; //minimum window height size
+		//unable to use LWJGL3 as it does not cooperate with macOS very well. 
+		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		//since LWJGL2 has no minimum window size setter; had to create our own - causes a graphics glitch when undersized
+		BlockadeSimulator cadesim = new BlockadeSimulator() {
+			public void resize (int width, int height) {
+				if(Display.wasResized() && Display.getWidth() < windowWidth  || Display.getHeight() < windowHeight) {
+					Gdx.graphics.setWindowedMode(windowWidth,windowHeight);
+				}else {
+					super.resize(width, height);	
+				}
+			}
+		};
+		config.width = windowWidth;
+		config.height = windowHeight;
+		config.addIcon("gclogo.png", FileType.Internal);
 		if(prop.getProperty("user.width") == null || !(prop.getProperty("user.width").matches("[0-9]{3,}")) ||
-				prop.getProperty("user.height") == null || !(prop.getProperty("user.height").matches("[0-9]{3,}")) ||
-				prop.getProperty("user.last_resolution") == null || !(prop.getProperty("user.last_resolution").matches("[0-9]+"))) {
-			int width = 800;
-			int height = 600;
-			config.setWindowedMode(width, height);
+				prop.getProperty("user.height") == null || !(prop.getProperty("user.height").matches("[0-9]{3,}"))) {
+
+			config.width = windowWidth;
+			config.height = windowHeight;
 			try {
-				changeProperty("user.config","user.last_resolution", "0");
-				changeProperty("user.config","user.width", Integer.toString(width));
-				changeProperty("user.config","user.height", Integer.toString(height));
+				changeProperty("user.config","user.width", Integer.toString(windowWidth));
+				changeProperty("user.config","user.height", Integer.toString(windowHeight));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}else {
-			int width = Integer.parseInt(prop.getProperty("user.width"));
-			int height = Integer.parseInt(prop.getProperty("user.height"));
-			config.setWindowedMode(width, height);
+			config.width = Integer.parseInt(prop.getProperty("user.width"));
+			config.height = Integer.parseInt(prop.getProperty("user.height"));
 		}
-		config.setTitle("GC: v" + Constants.VERSION);
-		config.useVsync(true);
-		config.setForegroundFPS(60);
-		config.setWindowIcon("gclogo.png");
-		new Lwjgl3Application(new BlockadeSimulator(), config);
+		//config.backgroundFPS = 20;    // bugfix high CPU
+		config.vSyncEnabled = false; // "
+		config.title = "GC: v" + Constants.VERSION;
+		new LwjglApplication(cadesim, config);
 	}
 	
     public static void changeProperty(String filename, String key, String value) throws IOException {
