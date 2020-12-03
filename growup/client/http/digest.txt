@@ -1,9 +1,9 @@
 getdown.txt = 06c16c16633cb5e19a664d7498905883
 cadesim.jar = 03e481ab71308925a5ed5ca024a077ac
-version.txt = b6b64a644a895d824e432f13c19b030d
+version.txt = 24d8070e79a2667e2efed9a534f0f309
 server.config = 382bb3fd05a9f1f72e064c2d2f8b6faf
 bg.png = d6b547db8d8dd100af06b7006ff495d8
 getdown-bg.png = f8cc5c0a4dbaef22db28e6b84bdb5ebd
 gclogo.ico = faffdc2be5f580973899c51ebe478a3c
 gclogo.png = fb631e2653cb5c6616748199de6b44f4
-digest.txt = 07f4067c51f1f00899f1b6e867f2f0fc
+digest.txt = 688364f4d53371a224800e586fae098f
