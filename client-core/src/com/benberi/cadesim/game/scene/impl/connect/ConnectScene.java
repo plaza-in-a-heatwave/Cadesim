@@ -228,7 +228,6 @@ public class ConnectScene implements GameScene, InputProcessor {
     //gets server code for the specific selected room
     public void getServerCode() {
         if (roomLabel.getSelectedIndex() < port_numbers.size()) { //sanity check
-        	System.out.println("Room " + (roomLabel.getSelectedIndex() + 1) + " Selected.");
             Constants.PROTOCOL_PORT = Integer.parseInt(port_numbers.get(roomLabel.getSelectedIndex()));
             Constants.SERVER_CODE = server_codes.get(roomLabel.getSelectedIndex());
             code.setText(Constants.SERVER_CODE);
@@ -298,7 +297,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 
                 int x = Gdx.graphics.getWidth() / 2 - 170;
                 int y = Gdx.graphics.getHeight() / 2 - 50;
-                int width = 300;
+                int width = 400;
                 int height = 50;
 
                 renderer.setColor(new Color(213 / 255f, 54 / 255f, 53 / 255f, 1));
@@ -506,10 +505,10 @@ public class ConnectScene implements GameScene, InputProcessor {
          * Parse server code/port data for rooms
          */
         try {
-        	if(ConnectScene.getProperty("user.config", "user.room_locations") == null) {
+        	if(ConnectScene.getProperty("server.config", "server.room_locations") == null) {
         		
         	}else {
-        		room_info = ConnectScene.getProperty("user.config", "user.room_locations");
+        		room_info = ConnectScene.getProperty("server.config", "server.room_locations");
         	}
 			//Split info for each room (Port:Server Code)
 			String[] rooms = room_info.split(",");
@@ -543,35 +542,40 @@ public class ConnectScene implements GameScene, InputProcessor {
 	 * Initialize properties such as team info/resolution, etc.
 	 */
     public void initProperties() {
-        String fileName = "user.config";
-        InputStream is = null;
+        String userFileName = "user.config";
+        String serverFileName = "server.config";
+        InputStream userIS = null;
+        InputStream serverIS = null;
         try {
-            is = new FileInputStream(fileName);
+        	userIS = new FileInputStream(userFileName);
+        	serverIS = new FileInputStream(serverFileName);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        Properties prop = new Properties();
+        Properties userProp = new Properties();
+        Properties serverProp = new Properties();
         try {
-            prop.load(is);
+            userProp.load(userIS);
+            serverProp.load(serverIS);
         } catch (IOException e) {
             e.printStackTrace();
         }
         
-        if(prop.getProperty("user.username") == null) {
+        if(userProp.getProperty("user.username") == null) {
         	name = new TextField("User"+Integer.toString(random.nextInt(9999)), style);
         }else {
-        	name = new TextField( prop.getProperty("user.username"), style);	
+        	name = new TextField( userProp.getProperty("user.username"), style);	
         }
-        address = new TextField( prop.getProperty("user.last_address"), style);
+        address = new TextField( serverProp.getProperty("server.last_address"), style);
         
         
         // set previous values/defaults from config file
         try 
         {
-        	if(prop.getProperty("user.last_ship") == null || !(prop.getProperty("user.last_ship").matches("[0-9]+"))) {
+        	if(userProp.getProperty("user.last_ship") == null || !(userProp.getProperty("user.last_ship").matches("[0-9]+"))) {
         		shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
         	}else {
-        		shipType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_ship")));
+        		shipType.setSelectedIndex(Integer.parseInt(userProp.getProperty("user.last_ship")));
         	}
         }
         catch(IndexOutOfBoundsException e) {
@@ -580,11 +584,11 @@ public class ConnectScene implements GameScene, InputProcessor {
         
         try
         {
-        	if(prop.getProperty("user.last_team") == null || 
-        			!(prop.getProperty("user.last_team").matches("[0-9]+"))) {
+        	if(userProp.getProperty("user.last_team") == null || 
+        			!(userProp.getProperty("user.last_team").matches("[0-9]+"))) {
         		teamType.setSelectedIndex(0);
         	}else {
-        		teamType.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_team")));
+        		teamType.setSelectedIndex(Integer.parseInt(userProp.getProperty("user.last_team")));
         	}
         }
         catch(IndexOutOfBoundsException e)
@@ -592,11 +596,11 @@ public class ConnectScene implements GameScene, InputProcessor {
         	teamType.setSelectedIndex(0);
         }
         try {
-        	if(prop.getProperty("user.last_room_index") == null || 
-        			!(prop.getProperty("user.last_room_index").matches("[0-9]+"))) {
+        	if(userProp.getProperty("user.last_room_index") == null || 
+        			!(userProp.getProperty("user.last_room_index").matches("[0-9]+"))) {
         		roomLabel.setSelectedIndex(0);
         	}else {
-        		roomLabel.setSelectedIndex(Integer.parseInt(prop.getProperty("user.last_room_index")));
+        		roomLabel.setSelectedIndex(Integer.parseInt(userProp.getProperty("user.last_room_index")));
         	}
         }
         catch (IndexOutOfBoundsException e) {
@@ -651,14 +655,6 @@ public class ConnectScene implements GameScene, InputProcessor {
                 }
             }
         });
-    }
-    
-	/*
-	 * wrapper method to set size of window
-	 */
-    public void resize(int width, int height) {
-//        context.getCallback().setWindowSizeLimits(width, height, width, height);
-//        create();
     }
 
 	/*
@@ -866,7 +862,7 @@ public class ConnectScene implements GameScene, InputProcessor {
             // Save current choices for next time
             try {
                 changeProperty("user.config", "user.username", name.getText());
-                changeProperty("user.config", "user.last_address", address.getText());
+                changeProperty("server.config", "server.last_address", address.getText());
                 changeProperty("user.config", "user.width", Integer.toString(Gdx.graphics.getWidth()));
                 changeProperty("user.config", "user.height", Integer.toString(Gdx.graphics.getHeight()));
                 changeProperty("user.config", "user.last_ship", Integer.toString(shipType.getSelectedIndex()));
