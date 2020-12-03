@@ -23,3 +23,7 @@ strict_comments = true
 apparg = --no-update
 
 resource = version.txt
+resource = bg.png
+resource = getdown-bg.png
+resource = gclogo.ico
+resource = gclogo.png
