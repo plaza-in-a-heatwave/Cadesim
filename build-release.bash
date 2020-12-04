@@ -13,8 +13,8 @@ echo "* before creating the release.  *"
 echo "*********************************"
 
 # jars can have different names when released for compatibility
-CLIENTJARNAME="cadesim.jar"        # also remember to change this in getdown.txt
-SERVERJARNAME="cadesim-server.jar"
+CLIENTJARNAME="beta.jar"        # also remember to change this in getdown.txt
+SERVERJARNAME="beta-server.jar"
 
 # project dirs
 ROOT="$(realpath "$(dirname "$0")")"
@@ -38,8 +38,8 @@ CLIENTUSERDIR="$CLIENTBUILDDIR"/user
 SERVERUSERDIR="$SERVERBUILDDIR"/user
 
 # zip: one package option for user
-CLIENTZIPNAME="$CLIENTUSERDIR"/cadesim-client.zip
-SERVERZIPNAME="$SERVERUSERDIR"/cadesim-server.zip
+CLIENTZIPNAME="$CLIENTUSERDIR"/beta-client.zip
+SERVERZIPNAME="$SERVERUSERDIR"/beta-server.zip
 
 # change working directory to cadesim
 pushd "$ROOT">/dev/null
@@ -154,8 +154,8 @@ declare -a serverfiles=(
     "getdown.jar"
     "getdown.txt"
     "getdown-bg.png"
-    "growup.ico"
-    "growup.png"
+    "gclogo.ico"
+    "gclogo.png"
     "start_servers.py"
     "stop_servers.py"
     "restart_servers.py"

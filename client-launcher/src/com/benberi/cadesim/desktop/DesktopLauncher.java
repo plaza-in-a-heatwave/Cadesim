@@ -68,7 +68,8 @@ public class DesktopLauncher {
 		}
 		//config.backgroundFPS = 20;    // bugfix high CPU
 		config.vSyncEnabled = false; // "
-		config.title = "GC: v" + Constants.VERSION;
+//		config.title = "GC: v" + Constants.VERSION;
+		config.title = "Beta GC: v" + Constants.VERSION;
 		new LwjglApplication(cadesim, config);
 	}
 	
