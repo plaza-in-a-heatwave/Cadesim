@@ -1,5 +1,5 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /). URL is case sensitive.
-appbase = https://plaza-in-a-heatwave.github.io/Cadesim/beta/client/http/
+appbase = https://plaza-in-a-heatwave.github.io/Cadesim/growup/client/http/
 
 # UI Configuration
 ui.name = CadeSim Updater
