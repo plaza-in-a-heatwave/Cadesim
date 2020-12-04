@@ -13,8 +13,8 @@ echo "* before creating the release.  *"
 echo "*********************************"
 
 # jars can have different names when released for compatibility
-CLIENTJARNAME="beta.jar"        # also remember to change this in getdown.txt
-SERVERJARNAME="beta-server.jar"
+CLIENTJARNAME="cadesim.jar"        # also remember to change this in getdown.txt
+SERVERJARNAME="cadesim-server.jar"
 
 # project dirs
 ROOT="$(realpath "$(dirname "$0")")"
@@ -38,8 +38,8 @@ CLIENTUSERDIR="$CLIENTBUILDDIR"/user
 SERVERUSERDIR="$SERVERBUILDDIR"/user
 
 # zip: one package option for user
-CLIENTZIPNAME="$CLIENTUSERDIR"/beta-client.zip
-SERVERZIPNAME="$SERVERUSERDIR"/beta-server.zip
+CLIENTZIPNAME="$CLIENTUSERDIR"/cadesim-client.zip
+SERVERZIPNAME="$SERVERUSERDIR"/cadesim-server.zip
 
 # change working directory to cadesim
 pushd "$ROOT">/dev/null
