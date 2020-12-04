@@ -622,6 +622,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     public void initListeners() {
         buttonMapEditor.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
+            	Gdx.graphics.setResizable(false);
             	context.createMapEditorScene();
             	context.setStartedMapEditor(true);
             }
@@ -846,6 +847,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     }
     
     private void performLogin() throws UnknownHostException {
+    	Gdx.graphics.setResizable(false);
         loginAttemptTimestampMillis = System.currentTimeMillis();
 
 		if (name.getText().length() > Constants.MAX_NAME_SIZE) {
