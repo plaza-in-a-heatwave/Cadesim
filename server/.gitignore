@@ -1,3 +1,5 @@
 /bin/
 .CADESIM_INSTANCE_*
 .STOP
+/getdown.txt
+/build.gradle
