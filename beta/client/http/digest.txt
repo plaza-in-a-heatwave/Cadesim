@@ -1,9 +1,9 @@
 getdown.txt = 9b37ae4ec0e2760f749d250d41123358
 beta.jar = 6713f25f94a6c661827f969bec16d6b4
-version.txt = 9e75bc89b6a8c95316b96943c1666d65
-server.config = d3b6f77bd2c892b9221101dc367350f1
+version.txt = a09384b56f1e1efb4f10c7feadcb9331
+server.config = 707543e3484436add6920e65f0b3678a
 bg.png = d6b547db8d8dd100af06b7006ff495d8
 getdown-bg.png = f8cc5c0a4dbaef22db28e6b84bdb5ebd
 gclogo.ico = faffdc2be5f580973899c51ebe478a3c
 gclogo.png = fb631e2653cb5c6616748199de6b44f4
-digest.txt = 2d631a92d5ca821ff948a41b7504df1d
+digest.txt = ddb089be74b1f0373ba97f0940a356ce
