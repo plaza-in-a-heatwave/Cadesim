@@ -50,7 +50,12 @@ public class DesktopLauncher {
 		};
 		config.width = windowWidth;
 		config.height = windowHeight;
-		config.addIcon("gclogo.png", FileType.Internal);
+
+		config.addIcon("gclogo16.png", FileType.Internal);
+		config.addIcon("gclogo32.png", FileType.Internal);
+		config.addIcon("gclogo64.png", FileType.Internal);
+		config.addIcon("gclogo128.png", FileType.Internal);
+		
 		if(prop.getProperty("user.width") == null || !(prop.getProperty("user.width").matches("[0-9]{3,}")) ||
 				prop.getProperty("user.height") == null || !(prop.getProperty("user.height").matches("[0-9]{3,}"))) {
 
