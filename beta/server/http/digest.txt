@@ -1,0 +1,8 @@
+getdown.txt = 73dbc57d7b9b1804527b98dbcf37aec0
+beta-server.jar = 3e83dcff16ccd1dee94f586a754de781
+getdown-bg.png = f8cc5c0a4dbaef22db28e6b84bdb5ebd
+gclogo.png = fb631e2653cb5c6616748199de6b44f4
+getdown.jar = f8e8a577bb648030a882b35ddbc70019
+stop_servers.py = 191e2c47f9801e40ec2d6611bd52959b
+restart_servers.py = 1500f8cd298d029323890f9465051b3e
+digest.txt = 6d4904ac0472438d5154f60401c6bb72

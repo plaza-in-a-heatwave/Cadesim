@@ -1,0 +1,32 @@
+# The URL from which the client is downloaded (must start with http:// and end with trailing /). URL is case sensitive.
+appbase = https://plaza-in-a-heatwave.github.io/Cadesim/beta/client/http/
+
+# UI Configuration
+ui.name = Beta CadeSim Updater
+ui.icon = gclogo.png
+ui.background_image = getdown-bg.png
+ui.hide_decorations = true
+ui.progress = 30, 220, 364, 17
+ui.progress_bar = C9B612
+ui.progress_text = FBFAD8
+ui.status = 30, 136, 364, 80
+ui.status_text = FFEC48
+
+# Application jar files
+code = beta.jar
+
+# The main entry point for the application
+class = com.benberi.cadesim.desktop.DesktopLauncher
+
+strict_comments = true
+
+apparg = --no-update
+
+resource = version.txt
+#resouce needed to separate server/user stuff
+resource = server.config
+#resource needed to change images
+resource = bg.png
+resource = getdown-bg.png
+resource = gclogo.ico
+resource = gclogo.png
