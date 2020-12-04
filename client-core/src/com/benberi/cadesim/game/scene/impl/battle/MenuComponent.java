@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -20,10 +19,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -39,7 +36,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
@@ -152,13 +148,11 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private Table mapTable;
 	private Table selectionTable;
 	private Container<Table> tableContainer;
-	private Cell<?> cell;
 	private Label disengageLabel;
 	private Label turnLabel;
 	private Label roundLabel;
 	private Label sinkLabel;
 	private Label jobberLabel;
-	private Label previewLabel;
 	private List<String> defenderList;
 	private String[] defenderNames;
 	private List<String> attackerList;
@@ -168,10 +162,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	private int turnMax = 60;
 	private int roundMax = 7200;
 	private int respawnPenaltyMax = 10;
-	
-	private int DIALOG_WIDTH = 550;
-	private int DIALOG_HEIGHT = 575;
-	
+
 	private int DIALOG_WIDTH_1 = 523;
 	private int DIALOG_HEIGHT_1 = 331;
 	
@@ -218,7 +209,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		roundLabel = new Label("Round Duration (seconds):",skin);
 		sinkLabel = new Label("Sink Penalty (turns):",skin);
 		jobberLabel = new Label("Jobber Quality:", skin);
-		previewLabel = new Label("Map preview not available.",skin);
 		
 		selectBox=new SelectBox<String>(skin);
 		audio_slider = new Slider(0.0f, audioMax, 0.01f,true, sliderskin);
@@ -354,7 +344,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 		qualityTable.add(jobberLabel).pad(5.0f).padRight(5.0f);
 		qualityTable.add(getBasicQualityButton()).pad(5.0f);
 		qualityTable.add(getEliteQualityButton()).pad(5.0f).row();
-		cell = mapTable.add().colspan(3).expandX();
 		mapTable.add().row();
 		mapButtonTable.add(selectBox).pad(5.0f);
 		mapButtonTable.add(customMapButton);
@@ -403,8 +392,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	    	}
 	    	attackerList.setItems(attackerNames);
 	    	defenderList.setItems(defenderNames);
-	    	attackerList.setAlignment(Align.center);
-	    	defenderList.setAlignment(Align.center);
     }
 	/*
 	 * Initialize listeners for actors of stage
@@ -707,12 +694,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             		setMapType(false);
             		customMap = null;
             		mapName = selectBox.getSelected();
-                	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
-                	if(pixmap != null) {
-	                	setMapPreview(pixmap);
-                	}else {
-                		clearMapPreview();
-                	}
                 	if(settingsScroller != null) {
                 		settingsScroller.layout();	
                 	}
@@ -728,7 +709,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             public void clicked(InputEvent event, float x, float y) {
 				getCustomMapButton().setDisabled(true);
     			setMapType(true);
-    			clearMapPreview();
     			selectCustomMap();
 			}
 		});
@@ -858,15 +838,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     }
     
     /*
-     * Clears map preview with label
-     */
-    public void clearMapPreview() {
-    	if(settingsDialog != null && cell != null && previewLabel != null) {
-    		cell.setActor(previewLabel);	
-    	}
-    }
-    
-    /*
      * Shows the game menu
      */
     public void showMenu() {
@@ -900,22 +871,9 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	settingsButton.setVisible(false);
     	teamButton.setVisible(false);
     }
-    /*
-     * Sets map preview to selected map screenshot 
-    */
-    public void setMapPreview(Pixmap pixmap) {
-    	if(settingsDialog != null && cell != null) {
-        	cell.setActor(new Image(new Texture(pixmap)));
-        	resizeSettingsDialog();
-    	}
-    }
     
     public void resizeSettingsDialog() {
-    	if(cell.getActor() instanceof Label || cell.getActor() == null) {
-    		settingsDialog.setSize(DIALOG_WIDTH_1, DIALOG_HEIGHT_1);
-    	}else {
-    		settingsDialog.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
-    	}
+    	settingsDialog.setSize(DIALOG_WIDTH_1, DIALOG_HEIGHT_1);
     	settingsDialog.setPosition(Gdx.graphics.getWidth()/2 - (settingsDialog.getWidth()/2), Gdx.graphics.getHeight()/2 - (settingsDialog.getHeight()/4));	
     }
     /*
@@ -942,14 +900,6 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
     	}
 		settingsDialog.show(context.gameStage);
 		settingsDialog.setVisible(true);
-		if(selectBox.getSelectedIndex() != -1) {
-	    	Pixmap pixmap = context.pixmapArray[selectBox.getSelectedIndex()];
-	    	if(pixmap != null) {
-	    		setMapPreview(pixmap);
-	    	}else {
-	    		clearMapPreview();
-	    	}
-		}
 		settingsDialog.pack();
 		settingsScroller.layout();
 		resizeSettingsDialog();
@@ -1070,7 +1020,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	}
 
 	@Override
-	public boolean scrolled(float amountX, float amountY) {
+	public boolean scrolled(int amount) {
 		return false;
 	}
 

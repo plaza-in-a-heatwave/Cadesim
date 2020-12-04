@@ -4,7 +4,6 @@ package com.benberi.cadesim;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.benberi.cadesim.client.ClientConnectionCallback;
@@ -117,7 +116,6 @@ public class GameContext {
      * List of maps
      */
     private List<String> maps = new ArrayList<String>();
-    public Pixmap[] pixmapArray = new Pixmap[1];
     public String currentMapName;
     /**
      * If connected to server
@@ -611,7 +609,6 @@ public class GameContext {
 		System.out.println("Client disconnected.");
 	    getBattleScene().dispose();
 	    getControlScene().dispose();
-	    pixmapArray = null;
 	    Gdx.graphics.setResizable(true);
     }
     /*

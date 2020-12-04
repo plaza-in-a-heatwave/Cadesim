@@ -527,9 +527,9 @@ public class MapEditorMapScene implements GameScene {
     /**
      * Zoom camera
      */
-    public boolean scrolled(float amountX, float amountY) {
-    	if(camera.zoom + (amountY*0.2) > 0.2f && camera.zoom + (amountY*0.2) < 3.0f) {
-        	camera.zoom+=(amountY*0.2);
+    public boolean scrolled(int amount) {
+    	if(camera.zoom + (amount*0.2) > 0.2f && camera.zoom + (amount*0.2) < 3.0f) {
+        	camera.zoom+=(amount*0.2);
     	}
 		return true;
     	

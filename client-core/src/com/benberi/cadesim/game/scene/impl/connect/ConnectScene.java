@@ -871,7 +871,6 @@ public class ConnectScene implements GameScene, InputProcessor {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Gdx.graphics.setResizable(false);
 	        setState(ConnectionSceneState.CONNECTING);
 	        context.connect(name.getText(), address.getText(), code.getText(), shipType.getSelected().getIndex(), teamType.getSelected().getType());
            }
@@ -920,7 +919,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     }
 
     @Override
-    public boolean scrolled(float amountX, float amountY) {
+    public boolean scrolled(int amount) {
         return false;
     }
     

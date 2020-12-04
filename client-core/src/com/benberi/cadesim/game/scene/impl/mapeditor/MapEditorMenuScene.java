@@ -672,7 +672,7 @@ public class MapEditorMenuScene implements GameScene, InputProcessor {
 	}
 
 	@Override
-	public boolean scrolled(float amountX, float amountY) {
+	public boolean scrolled(int amount) {
 		// TODO Auto-generated method stub
 		return false;
 	}

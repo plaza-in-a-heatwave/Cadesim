@@ -92,13 +92,13 @@ public class GameInputProcessor implements InputProcessor {
     }
 
 	@Override
-	public boolean scrolled(float amountX, float amountY) {
+	public boolean scrolled(int amount) {
     	if(context.getScenes().get(0) instanceof ControlAreaScene){
-            context.getControlScene().getBnavComponent().scrolled(amountX,amountY);
+            context.getControlScene().getBnavComponent().scrolled(amount);
     	}
     	
     	if(context.getScenes().get(0) instanceof MapEditorMapScene) {
-    		context.getMapEditor().scrolled(amountX,amountY);
+    		context.getMapEditor().scrolled(amount);
     	}
 		return false;
 	}
