@@ -14,7 +14,7 @@ ui.status_text = FFEC48
 
 strict_comments = true
 resource = getdown-bg.png
-resource = growup.png
+resource = gclogo.png
 resource = getdown.jar
 resource = stop_servers.py
 resource = restart_servers.py
