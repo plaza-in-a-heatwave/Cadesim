@@ -1,9 +1,9 @@
 # The URL from which the client is downloaded (must start with http:// and end with trailing /). The URL is case sensitive.
-appbase = https://plaza-in-a-heatwave.github.io/Cadesim/growup/server/http/
+appbase = https://plaza-in-a-heatwave.github.io/Cadesim/beta/server/http/
 
 # UI Configuration
-ui.name = CadeSim Server Updater
-ui.icon = growup.png
+ui.name = Beta CadeSim Server Updater
+ui.icon = gclogo.png
 ui.background_image = getdown-bg.png
 ui.hide_decorations = true
 ui.progress = 30, 220, 364, 17
@@ -14,7 +14,7 @@ ui.status_text = FFEC48
 
 strict_comments = true
 resource = getdown-bg.png
-resource = growup.png
+resource = gclogo.png
 resource = getdown.jar
 resource = stop_servers.py
 resource = restart_servers.py
@@ -27,6 +27,6 @@ resource = restart_servers.py
 # getdown insists on running an app, but the server will restart itself,
 # so here we pass getdown a configuration that instantly quits
 # and allow server to handle its own restart.
-code = cadesim-server.jar
+code = beta-server.jar
 class = com.benberi.cadesim.server.service.GameServerBootstrap
 apparg = --do-nothing
