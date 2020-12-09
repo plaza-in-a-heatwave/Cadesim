@@ -1,4 +1,4 @@
 apply plugin: "java"
 
-sourceCompatibility = 1.8
+sourceCompatibility = 13
 sourceSets.main.java.srcDirs = [ "src/" ]

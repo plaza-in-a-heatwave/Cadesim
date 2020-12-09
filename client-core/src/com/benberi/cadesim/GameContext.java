@@ -436,6 +436,7 @@ public class GameContext {
                 if (!haveServerResponse) {
                 	connectScene.loginFailed();
                 }
+                Gdx.graphics.setResizable(true);
             }
         }));
     }
@@ -452,22 +453,23 @@ public class GameContext {
 
             switch (response) {
                 case LoginResponsePacket.BAD_VERSION:
-                    connectScene.setPopup("Outdated client", false);
+                    connectScene.setPopupMessage("Outdated client.");
                     break;
                 case LoginResponsePacket.NAME_IN_USE:
-                    connectScene.setPopup("Display name already in use", false);
+                    connectScene.setPopupMessage("Display name already in use.");
                     break;
                 case LoginResponsePacket.BAD_SHIP:
-                    connectScene.setPopup("The selected ship is not allowed", false);
+                    connectScene.setPopupMessage("The selected ship is not allowed.");
                     break;
                 case LoginResponsePacket.SERVER_FULL:
-                    connectScene.setPopup("The server is full", false);
+                    connectScene.setPopupMessage("The server is full.");
                     break;
                 case LoginResponsePacket.BAD_NAME:
-                	connectScene.setPopup("That ship name is not allowed", false);
+                	connectScene.setPopupMessage("That ship name is not allowed.");
                 	break;
                 default:
-                    connectScene.setPopup("Unknown login failure", false);
+                    connectScene.setPopupMessage("Unknown login failure.");
+        			connectScene.showPopup();
                     break;
             }
 
@@ -518,7 +520,8 @@ public class GameContext {
 			if (getIsInLobby()) {
 				System.out.println("Returned to lobby");
 			}else {
-				connectScene.setPopup("You have disconnected from the server.", true);
+				connectScene.setPopupMessage("You have disconnected from the server.");
+				connectScene.showPopup();			
 			}
 			
 			// #83 reset any lag test mode if we disconnect.
@@ -604,9 +607,10 @@ public class GameContext {
         setIsInLobby(true);
         getServerChannel().disconnect();
 		getConnectScene().setState(ConnectionSceneState.DEFAULT);
-		connectScene.setPopup("Returning to Lobby...", false);
 		Gdx.graphics.setTitle("GC:" + Constants.VERSION);
 		System.out.println("Client disconnected.");
+		connectScene.setPopupMessage("Client Disconnected.");
+		connectScene.showPopup();
 	    getBattleScene().dispose();
 	    getControlScene().dispose();
 	    Gdx.graphics.setResizable(true);
@@ -637,8 +641,8 @@ public class GameContext {
 	        setIsInLobby(true);
 	        getServerChannel().disconnect();
 			getConnectScene().setState(ConnectionSceneState.DEFAULT);
-			connectScene.setPopup("Server Disconnected; Returning to Lobby...", false);
-			System.out.println("Server disconnected.");
+			connectScene.setPopupMessage("Server Disconnected.");
+			connectScene.showPopup();
     	}
     }
 

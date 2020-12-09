@@ -1020,7 +1020,7 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 	}
 
 	@Override
-	public boolean scrolled(int amount) {
+	public boolean scrolled(float amountx, float amounty) {
 		return false;
 	}
 

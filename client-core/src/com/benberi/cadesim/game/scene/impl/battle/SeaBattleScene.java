@@ -960,23 +960,26 @@ public class SeaBattleScene implements GameScene {
         	switch(vessel.getCannonSize()) {
 		        case "large":
 		        	cannonBigSound.play(getSound_volume());
+		            break;
 		        case "medium":
 		            cannonMediumSound.play(getSound_volume());
+		            break;
 		        case "small":
 		            cannonSmallSound.play(getSound_volume());
+		            break;
 	    	}
     	}else if(shots == 2) {
         	switch(vessel.getCannonSize()) {
 		        case "large":
 		        	//doesn't sound like shooting 2, need to figure out how to add delay
 		        	cannonBigSound.play(getSound_volume());
-		        	cannonBigSound.play(getSound_volume());
+		            break;
 		        case "medium":
 		            cannonMediumSound.play(getSound_volume());
-		            cannonMediumSound.play(getSound_volume());
+		            break;
 		        case "small":
 		            cannonSmallSound.play(getSound_volume());
-		            cannonSmallSound.play(getSound_volume());
+		            break;
 		    	}
     		}
     	}

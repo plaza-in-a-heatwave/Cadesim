@@ -43,6 +43,7 @@ public class DesktopLauncher {
 			public void resize (int width, int height) {
 				if(Display.wasResized() && Display.getWidth() < windowWidth  || Display.getHeight() < windowHeight) {
 					Gdx.graphics.setWindowedMode(windowWidth,windowHeight);
+					super.setScreenRect(width * 2, height);
 				}else {
 					super.resize(width, height);	
 				}

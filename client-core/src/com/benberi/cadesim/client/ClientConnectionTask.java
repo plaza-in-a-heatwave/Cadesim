@@ -1,5 +1,6 @@
 package com.benberi.cadesim.client;
 
+import com.badlogic.gdx.Gdx;
 import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.ClientChannelHandler;
@@ -67,7 +68,7 @@ public class ClientConnectionTask extends Bootstrap implements Runnable {
 		            	@Override public void operationComplete(ChannelFuture future) throws Exception{
 		            		worker.shutdownGracefully().addListener(e -> {
 		            			context.dispose();
-		            			context.getConnectScene().closePopup();
+		            			Gdx.graphics.setResizable(true);
 		            		});
 		            			try {
 			            			if (!context.clientInitiatedDisconnect()) { // whodunnit?

@@ -59,6 +59,11 @@ public class BlockadeSimulator extends ApplicationAdapter{
 	public void dispose () {
 	}
 	
+	public void setScreenRect (int width, int height){
+        context.getConnectScene().screenWidth = width;
+        context.getConnectScene().screenHeight = height;
+	}
+	
 	@Override
 	public void resize (int width, int height) {
 		if(!context.isConnected() &&  !context.isStartedMapEditor()) {
@@ -69,6 +74,7 @@ public class BlockadeSimulator extends ApplicationAdapter{
 			context.getConnectScene().stage = new Stage(new FitViewport(width, height));
 			context.getConnectScene().stage.getViewport().update(width, height, true);
 			context.getConnectScene().setActorPositions(width);
+			setScreenRect(width,height);
 			context.getConnectScene().addStage();
 			context.getConnectScene().setup();
 		}

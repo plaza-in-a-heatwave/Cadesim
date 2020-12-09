@@ -49,6 +49,9 @@ public class GameInputProcessor implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    	
+    	context.getConnectScene().handleClick(screenX, screenY, button);
+    	
     	for (GameScene scene : context.getScenes()) {
             if (scene.handleClick(screenX, screenY, button)) {
                 break;
@@ -92,13 +95,13 @@ public class GameInputProcessor implements InputProcessor {
     }
 
 	@Override
-	public boolean scrolled(int amount) {
+	public boolean scrolled(float amountX, float amountY) {
     	if(context.getScenes().get(0) instanceof ControlAreaScene){
-            context.getControlScene().getBnavComponent().scrolled(amount);
+            context.getControlScene().getBnavComponent().scrolled(amountX, amountY);
     	}
     	
     	if(context.getScenes().get(0) instanceof MapEditorMapScene) {
-    		context.getMapEditor().scrolled(amount);
+    		context.getMapEditor().scrolled(amountX, amountY);
     	}
 		return false;
 	}

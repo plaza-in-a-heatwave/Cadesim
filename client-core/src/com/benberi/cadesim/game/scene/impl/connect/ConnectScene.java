@@ -17,7 +17,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -25,6 +24,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -84,7 +84,7 @@ public class ConnectScene implements GameScene, InputProcessor {
      * The main stage for elements
      */
     public Stage stage;
-    public Stage stage_dialog;
+    public Dialog popup;
 
     private TextField name;
     private TextField address;
@@ -119,10 +119,6 @@ public class ConnectScene implements GameScene, InputProcessor {
     private SelectBox<TeamTypeLabel> teamType;
     private SelectBox<RoomNumberLabel> roomLabel;
 
-    private boolean popup;
-    private boolean allowPopupClose;
-    private String popupMessage;
-    private boolean popupCloseHover;
     private boolean codeURL;
     
     private String old_Name;
@@ -138,6 +134,11 @@ public class ConnectScene implements GameScene, InputProcessor {
     private ImageButton buttonMapEditor;
     private ImageButtonStyle mapEditorButtonStyle;
     private ImageButtonStyle loginButtonStyle;
+    
+    public int screenWidth;
+    public int screenHeight;
+
+    private Skin skin;
     
     private Random random = new Random();
     
@@ -159,6 +160,8 @@ public class ConnectScene implements GameScene, InputProcessor {
         renderer = new ShapeRenderer();
         loginButtonStyle = new ImageButtonStyle();
         mapEditorButtonStyle = new ImageButtonStyle();
+        
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         setup();
@@ -202,6 +205,8 @@ public class ConnectScene implements GameScene, InputProcessor {
         roomLabel = new SelectBox<RoomNumberLabel>(selectBoxStyle);
         roomLabel.setSize(200, 44);
     
+        createPopup();
+        
     	fillSelectBoxes();
     	initProperties();
         initListeners();
@@ -215,6 +220,32 @@ public class ConnectScene implements GameScene, InputProcessor {
         settingTable.padLeft(190).padBottom(100);
         setActorPositions(Gdx.graphics.getWidth());
         addStage();
+        screenWidth = Gdx.graphics.getWidth();
+        screenHeight = Gdx.graphics.getHeight();
+    }
+    
+    public void createPopup() {
+        popup = new Dialog("Client Message:",skin);
+        popup.setColor(Color.RED);
+        popup.show(stage);
+        popup.setResizable(false);
+        popup.setVisible(false);
+       
+    }
+    
+    public void setPopupMessage(String message) {
+    	popup.getContentTable().clear();
+		popup.text(message);
+    	popup.pack();
+    }
+    
+    public void closePopup() {
+    	popup.setVisible(false);
+    }
+    
+    public void showPopup() {
+    	popup.setX((Gdx.graphics.getWidth()/2) - (popup.getWidth()/2));
+    	popup.setVisible(true);
     }
     
     public void addStage() {
@@ -224,6 +255,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         stage.addActor(settingTable);
         stage.addActor(buttonConn);
         stage.addActor(buttonMapEditor); // comment to toggle
+        stage.addActor(popup);
     }
     //gets server code for the specific selected room
     public void getServerCode() {
@@ -249,6 +281,10 @@ public class ConnectScene implements GameScene, InputProcessor {
     	batch.setTransformMatrix(stage.getCamera().view);
     	batch.setProjectionMatrix(stage.getCamera().projection);
         if (state == ConnectionSceneState.DEFAULT) {
+        	//enable login click if disabled
+        	if(!buttonConn.isTouchable()) {
+        		buttonConn.setTouchable(Touchable.enabled);
+        	}
         	batch.begin();
         	batch.draw(clientlogo, Gdx.graphics.getWidth()/2 - 60, MAIN_GROUP_OFFSET_Y + 432, 128, 128);
         	batch.end();
@@ -284,48 +320,10 @@ public class ConnectScene implements GameScene, InputProcessor {
             t = shipType.getSelected().getType();
             batch.draw(t, settingTable.getX() + 115, -2); // draw t, whatever it may be
             batch.end();
-
-            if (popup) {
-                Gdx.gl.glEnable(GL20.GL_BLEND);
-                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-                renderer.begin(ShapeRenderer.ShapeType.Filled);
-                renderer.setColor(new Color(0f, 0f, 0f, 0.9f));
-//                renderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-                GlyphLayout layout = new GlyphLayout(font, popupMessage);
-
-
-                int x = Gdx.graphics.getWidth() / 2 - 170;
-                int y = Gdx.graphics.getHeight() / 2 - 50;
-                int width = 400;
-                int height = 50;
-
-                renderer.setColor(new Color(213 / 255f, 54 / 255f, 53 / 255f, 1));
-                renderer.rect(x, y, width, height);
-
-                if (popupCloseHover && allowPopupClose) {
-                    renderer.setColor(new Color(250 / 255f, 93 / 255f, 93 / 255f, 1));
-                } else {
-                    renderer.setColor(new Color(170 / 255f, 39 / 255f, 39 / 255f, 1));
-                }
-
-                if (allowPopupClose) {
-                    renderer.rect(x + 330, y, 70, 50);
-                }
-                renderer.end();
-                batch.begin();
-                font.setColor(Color.WHITE);
-                font.draw(batch, popupMessage, x + ((400 / 2) - layout.width / 2) - 30, y + (25 + (layout.height / 2)));
-
-                if (allowPopupClose) {
-                    font.draw(batch, "Close", x + 400 - 55, y + (25 + (layout.height / 2)));
-                }
-                batch.end();
-                Gdx.graphics.setTitle("GC: v" + Constants.VERSION);
-            }
         }
         else {
-
+        	//make sure login cannot be activated accidentally
+        	buttonConn.setTouchable(Touchable.disabled);
             /*
              * Cheap way of animation dots lol...
              */
@@ -361,14 +359,15 @@ public class ConnectScene implements GameScene, InputProcessor {
             if (System.currentTimeMillis() - lastConnectionAnimatinoStateChange >= 200) {
                 connectAnimationState++;
                 lastConnectionAnimatinoStateChange = System.currentTimeMillis();
+                Gdx.graphics.setResizable(false);
             }
             if(connectAnimationState > 2) {
                 connectAnimationState = 0;
             }
             // if screen hangs on connecting for long period of time.
             if(System.currentTimeMillis() - loginAttemptTimestampMillis >= 8000) {
-            	System.out.println("Unable to login; return to lobby.");
             	setState(ConnectionSceneState.DEFAULT);
+            	Gdx.graphics.setResizable(true);
             }
             batch.end();
         }
@@ -631,6 +630,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
                 try {
+                	Gdx.graphics.setResizable(false);
                     performUpdateCheck();
                     buttonConn.toggle();
                 } catch (UnknownHostException e) {
@@ -670,20 +670,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         code.setPosition(width/2 + 90, MAIN_GROUP_OFFSET_Y + 295);
     }
 
-    public void setPopup(String message, boolean allowPopupClose) {
-        popup = true;
-        this.allowPopupClose = allowPopupClose;
-        popupMessage = message;
-        name.setDisabled(true);
-        address.setDisabled(true);
-    }
-
-    public void closePopup() {
-        popup = false;
-        name.setDisabled(false);
-        address.setDisabled(false);
-    }
-
     @Override
     public void dispose() {
     	batch.dispose();
@@ -717,7 +703,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.ENTER || keycode == Input.Keys.CENTER) {
-            if (!popup) {
+            if (!popup.isVisible()) {
                 if (stage.getKeyboardFocus() != name && name.getText().isEmpty()) {
                     stage.setKeyboardFocus(name);
                 } else if (stage.getKeyboardFocus() != address && address.getText().isEmpty()) {
@@ -731,7 +717,7 @@ public class ConnectScene implements GameScene, InputProcessor {
                 }
             }
             else {
-                closePopup();
+                popup.setVisible(false);
             }
         }
         return false;
@@ -749,6 +735,10 @@ public class ConnectScene implements GameScene, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    	if(state == ConnectionSceneState.DEFAULT && popup.isVisible()) {
+    		closePopup();
+    		return true;
+    	}
 		if (isMouseOverCodeUrl(screenX, Gdx.graphics.getHeight() - screenY))
 		{
 	    	try {
@@ -766,9 +756,6 @@ public class ConnectScene implements GameScene, InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (popup && popupCloseHover) {
-            closePopup();
-        }
         return false;
     }
 
@@ -847,19 +834,18 @@ public class ConnectScene implements GameScene, InputProcessor {
     }
     
     private void performLogin() throws UnknownHostException {
-    	Gdx.graphics.setResizable(false);
         loginAttemptTimestampMillis = System.currentTimeMillis();
 
 		if (name.getText().length() > Constants.MAX_NAME_SIZE) {
-			setPopup("Display name must be less than " + Constants.MAX_NAME_SIZE + " letters.", true);
+			setPopupMessage("Display name must be less than " + Constants.MAX_NAME_SIZE + " letters.");
 		} else if (code.getText().length() > Constants.MAX_CODE_SIZE) {
-			setPopup("Server code must be less than " + Constants.MAX_CODE_SIZE + " letters.", true);
+			setPopupMessage("Server code must be less than " + Constants.MAX_CODE_SIZE + " letters.");
 		} else if (name.getText().length() <= 0) {
-			setPopup("Please enter a display name.", true);
+			setPopupMessage("Please enter a display name.");
 		} else if (address.getText().length() <= 0) {
-			setPopup("Please enter an IP Address.", true);
+			setPopupMessage("Please enter an IP Address.");
 		} else if (!RandomUtils.validIP(address.getText()) && !RandomUtils.validUrl(address.getText())) {
-			setPopup("Please enter a valid IP Address or URL.", true);
+			setPopupMessage("Please enter a valid IP Address or URL.");
 		} else {
             // Save current choices for next time
             try {
@@ -903,31 +889,20 @@ public class ConnectScene implements GameScene, InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        int width = Gdx.graphics.getWidth();
         int height = Gdx.graphics.getHeight();
-        
-        if (popup) {
-            int popupleftedge = width / 2 - 200;
-            int popuprightedge = width / 2 + 200;
-            int popuptopedge = height / 2;
-            int popupbottomedge = height / 2 + 50;
-           // 505 398
-            popupCloseHover = screenX >= popupleftedge && screenX <= popuprightedge && screenY >= popuptopedge && screenY <= popupbottomedge;
-        }
-        else {
-        	codeURL = isMouseOverCodeUrl(screenX, height - screenY);
-        }
+        codeURL = isMouseOverCodeUrl(screenX, height - screenY);
         return false;
     }
 
     @Override
-    public boolean scrolled(int amount) {
+    public boolean scrolled(float amountX, float amountY) {
         return false;
     }
     
 
     public void loginFailed() {
-        setPopup("Could not connect to server.", true);
+        setPopupMessage("Could not connect to server.");
+        showPopup();
     }
 
     public void setState(ConnectionSceneState state) {
@@ -940,10 +915,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         inputMultiplexer.addProcessor(this);
         inputMultiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
-    }
-
-    public boolean hasPopup() {
-        return popup;
     }
 
 	public String getOld_Name() {
