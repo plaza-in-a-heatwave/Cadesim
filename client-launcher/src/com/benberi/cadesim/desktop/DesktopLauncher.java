@@ -16,19 +16,6 @@ import com.benberi.cadesim.Constants;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-		
-		// load the properties config
-		Properties prop = new Properties();
-		try {
-		    prop.load(new FileInputStream("user.config"));
-		}
-		catch (FileNotFoundException e) {
-		    e.printStackTrace();
-		}
-		catch (IOException e) {
-		    e.printStackTrace();
-		}
-		
         for (String s : arg) {
             if (s.equals("--no-update")) {
 				Constants.AUTO_UPDATE = false;
@@ -51,43 +38,52 @@ public class DesktopLauncher {
 		};
 		config.width = windowWidth;
 		config.height = windowHeight;
-
+		String [] windowSize = getSizeProperty("user.config","user.width","user.height");
+		if(windowSize[0] == null || !(windowSize[0].matches("[0-9]{3,}")) ||
+				windowSize[1] == null || !(windowSize[1].matches("[0-9]{3,}"))) {
+			config.width = windowWidth;
+			config.height = windowHeight;
+			changeSizeProperty("user.config","user.width","user.height", Integer.toString(windowWidth), Integer.toString(windowHeight));
+		}else {
+			config.width = Integer.parseInt(windowSize[0]);
+			config.height = Integer.parseInt(windowSize[1]);
+		}
+		config.vSyncEnabled = false; // "
+		config.title = "GC: v" + Constants.VERSION;
 		config.addIcon("gclogo16.png", FileType.Internal);
 		config.addIcon("gclogo32.png", FileType.Internal);
 		config.addIcon("gclogo64.png", FileType.Internal);
 		config.addIcon("gclogo128.png", FileType.Internal);
-		
-		if(prop.getProperty("user.width") == null || !(prop.getProperty("user.width").matches("[0-9]{3,}")) ||
-				prop.getProperty("user.height") == null || !(prop.getProperty("user.height").matches("[0-9]{3,}"))) {
-
-			config.width = windowWidth;
-			config.height = windowHeight;
-			try {
-				changeProperty("user.config","user.width", Integer.toString(windowWidth));
-				changeProperty("user.config","user.height", Integer.toString(windowHeight));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}else {
-			config.width = Integer.parseInt(prop.getProperty("user.width"));
-			config.height = Integer.parseInt(prop.getProperty("user.height"));
-		}
-		//config.backgroundFPS = 20;    // bugfix high CPU
-		config.vSyncEnabled = false; // "
-		config.title = "GC: v" + Constants.VERSION;
 		new LwjglApplication(cadesim, config);
 	}
 	
-    public static void changeProperty(String filename, String key, String value) throws IOException {
+    public static void changeSizeProperty(String filename, String width, String value, String height, String otherValue){
         Properties prop =new Properties();
-        prop.load(new FileInputStream(filename));
-        prop.setProperty(key, value);
-        prop.store(new FileOutputStream(filename),null);
+        try {
+            prop.load(new FileInputStream(filename));
+            prop.setProperty(width, value);
+            prop.setProperty(height, otherValue);
+            prop.store(new FileOutputStream(filename),null);
+		}
+		catch (FileNotFoundException e) {
+		    e.printStackTrace();
+		}
+		catch (IOException e) {
+		    e.printStackTrace();
+		}
     }
 
-    public static String getProperty(String filename, String key) throws IOException {
-        Properties prop =new Properties();
-        prop.load(new FileInputStream(filename));
-        return prop.getProperty(key);
+    public static String[] getSizeProperty(String filename, String width, String height){
+        try {
+            Properties prop =new Properties();
+            prop.load(new FileInputStream(filename));
+            return new String[] {prop.getProperty(width),prop.getProperty(height)};
+		}
+		catch (FileNotFoundException e) {
+		    return new String[] {"800","600"};
+		}
+		catch (IOException e) {
+		    return new String[] {"800","600"};
+		}
     }
 }

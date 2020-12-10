@@ -3,9 +3,13 @@ package com.benberi.cadesim.game.scene.impl.battle;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -44,7 +48,6 @@ import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
 import com.benberi.cadesim.game.scene.SceneComponent;
 import com.benberi.cadesim.game.scene.impl.battle.map.BlockadeMap;
-import com.benberi.cadesim.game.scene.impl.connect.ConnectScene;
 
 public class MenuComponent extends SceneComponent<SeaBattleScene> implements InputProcessor {
     /**
@@ -680,11 +683,8 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
             	context.getBattleScene().setSound_volume((float)audio_slider.getValue());
             	//set user config volume
-            	try {
-					ConnectScene.changeProperty("user.config", "user.volume", Float.toString((float)audio_slider.getValue()));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				changeProperty("user.config", "user.volume", Float.toString((float)audio_slider.getValue()));
+			
             }});
 		selectBox.addListener(new ChangeListener(){
             @Override
@@ -1160,4 +1160,19 @@ public class MenuComponent extends SceneComponent<SeaBattleScene> implements Inp
 				break;
 		}
 	}
+	
+	public static void changeProperty(String filename, String key, String value){
+        Properties prop =new Properties();
+        try {
+            prop.load(new FileInputStream(filename));
+            prop.setProperty(key, value);
+            prop.store(new FileOutputStream(filename),null);
+		}
+		catch (FileNotFoundException e) {
+		    e.printStackTrace();
+		}
+		catch (IOException e) {
+		    e.printStackTrace();
+		}
+    }
 }

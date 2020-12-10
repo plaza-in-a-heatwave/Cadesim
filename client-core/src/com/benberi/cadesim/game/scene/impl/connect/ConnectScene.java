@@ -7,8 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Scanner;
 
 import org.apache.commons.io.IOUtils;
 
@@ -123,6 +125,7 @@ public class ConnectScene implements GameScene, InputProcessor {
     
     private String old_Name;
     private String room_info;
+    private String address_info;
     
     private final int MAIN_GROUP_OFFSET_Y = 20;
     
@@ -141,6 +144,8 @@ public class ConnectScene implements GameScene, InputProcessor {
     private Skin skin;
     
     private Random random = new Random();
+    private HashMap<String,String> userProperties;
+    private String[] url = null;
     
     TextField.TextFieldStyle style;
     SelectBox.SelectBoxStyle selectBoxStyle;
@@ -160,7 +165,7 @@ public class ConnectScene implements GameScene, InputProcessor {
         renderer = new ShapeRenderer();
         loginButtonStyle = new ImageButtonStyle();
         mapEditorButtonStyle = new ImageButtonStyle();
-        
+        url = null;
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -206,9 +211,9 @@ public class ConnectScene implements GameScene, InputProcessor {
         roomLabel.setSize(200, 44);
     
         createPopup();
-        
-    	fillSelectBoxes();
     	initProperties();
+    	fillSelectBoxes();
+    	fillInfo();
         initListeners();
         
         getServerCode(); // initialize server code with currently selected room
@@ -359,7 +364,6 @@ public class ConnectScene implements GameScene, InputProcessor {
             if (System.currentTimeMillis() - lastConnectionAnimatinoStateChange >= 200) {
                 connectAnimationState++;
                 lastConnectionAnimatinoStateChange = System.currentTimeMillis();
-                Gdx.graphics.setResizable(false);
             }
             if(connectAnimationState > 2) {
                 connectAnimationState = 0;
@@ -367,7 +371,6 @@ public class ConnectScene implements GameScene, InputProcessor {
             // if screen hangs on connecting for long period of time.
             if(System.currentTimeMillis() - loginAttemptTimestampMillis >= 8000) {
             	setState(ConnectionSceneState.DEFAULT);
-            	Gdx.graphics.setResizable(true);
             }
             batch.end();
         }
@@ -468,6 +471,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 	 * fill selectboxes with appropriate information
 	 */
     public void fillSelectBoxes() {
+    	splitRoomInfo();
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
         labelStyle.fontColor = new Color(0.16f, 0.16f, 0.16f, 1);
@@ -500,36 +504,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         
         teamType.setItems(blob2);
         
-        /*
-         * Parse server code/port data for rooms
-         */
-        try {
-        	if(ConnectScene.getProperty("server.config", "server.room_locations") == null) {
-        		
-        	}else {
-        		room_info = ConnectScene.getProperty("server.config", "server.room_locations");
-        	}
-			//Split info for each room (Port:Server Code)
-			String[] rooms = room_info.split(",");
-			for (int i = 0; i < rooms.length; i++) {
-				String[] temp_room_info = rooms[i].split(":");
-				for (int j = 0; j < temp_room_info.length;j++)
-				{
-					if (j % 2 == 0) {
-						port_numbers.add(temp_room_info[j]);
-					}
-					else {
-						String[] print = temp_room_info[j].split(";");
-						server_codes.add(print[0]);
-						room_names.add(print[1]);
-					}
-				}
-			}
-		} catch (IOException e) {
-			System.out.println("Check format");
-			e.printStackTrace();
-		}
-        
         RoomNumberLabel[] blob_room = new RoomNumberLabel[port_numbers.size()];
         for (int i = 0; i < port_numbers.size(); ++i) {
         	blob_room[i] = new RoomNumberLabel((CharSequence)room_names.get(i), labelStyle, 0);
@@ -537,44 +511,49 @@ public class ConnectScene implements GameScene, InputProcessor {
         roomLabel.setItems(blob_room);
     }
     
+    public void splitRoomInfo() {
+		//Split info for each room (Port:Server Code)
+		String[] rooms = room_info.split(",");
+		for (int i = 0; i < rooms.length; i++) {
+			String[] temp_room_info = rooms[i].split(":");
+			for (int j = 0; j < temp_room_info.length;j++)
+			{
+				if (j % 2 == 0) {
+					port_numbers.add(temp_room_info[j].replace("\\", ""));
+				}
+				else {
+					String[] print = temp_room_info[j].split(";");
+					server_codes.add(print[0]);
+					room_names.add(print[1]);
+				}
+			}
+		}
+    }
+    
 	/*
 	 * Initialize properties such as team info/resolution, etc.
 	 */
     public void initProperties() {
-        String userFileName = "user.config";
-        String serverFileName = "server.config";
-        InputStream userIS = null;
-        InputStream serverIS = null;
-        try {
-        	userIS = new FileInputStream(userFileName);
-        	serverIS = new FileInputStream(serverFileName);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        Properties userProp = new Properties();
-        Properties serverProp = new Properties();
-        try {
-            userProp.load(userIS);
-            serverProp.load(serverIS);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        if(userProp.getProperty("user.username") == null) {
+    	userProperties = getUserProperties();
+    }
+	/*
+	 * Initialize properties such as team info/resolution, etc.
+	 */
+    public void fillInfo() {
+        if(userProperties.get("user.username") == null) {
         	name = new TextField("User"+Integer.toString(random.nextInt(9999)), style);
         }else {
-        	name = new TextField( userProp.getProperty("user.username"), style);	
+        	name = new TextField(userProperties.get("user.username"), style);	
         }
-        address = new TextField( serverProp.getProperty("server.last_address"), style);
-        
+        address = new TextField(address_info, style);
         
         // set previous values/defaults from config file
         try 
         {
-        	if(userProp.getProperty("user.last_ship") == null || !(userProp.getProperty("user.last_ship").matches("[0-9]+"))) {
+        	if(userProperties.get("user.last_ship") == null || !(userProperties.get("user.last_ship").matches("[0-9]+"))) {
         		shipType.setSelectedIndex(Vessel.getIdFromName("warfrig"));
         	}else {
-        		shipType.setSelectedIndex(Integer.parseInt(userProp.getProperty("user.last_ship")));
+        		shipType.setSelectedIndex(Integer.parseInt(userProperties.get("user.last_ship")));
         	}
         }
         catch(IndexOutOfBoundsException e) {
@@ -583,23 +562,24 @@ public class ConnectScene implements GameScene, InputProcessor {
         
         try
         {
-        	if(userProp.getProperty("user.last_team") == null || 
-        			!(userProp.getProperty("user.last_team").matches("[0-9]+"))) {
+        	if(userProperties.get("user.last_team") == null || 
+        			!(userProperties.get("user.last_team").matches("[0-9]+"))) {
         		teamType.setSelectedIndex(0);
         	}else {
-        		teamType.setSelectedIndex(Integer.parseInt(userProp.getProperty("user.last_team")));
+        		teamType.setSelectedIndex(Integer.parseInt(userProperties.get("user.last_team")));
         	}
         }
         catch(IndexOutOfBoundsException e)
         {
         	teamType.setSelectedIndex(0);
         }
+        
         try {
-        	if(userProp.getProperty("user.last_room_index") == null || 
-        			!(userProp.getProperty("user.last_room_index").matches("[0-9]+"))) {
+        	if(userProperties.get("user.last_room_index") == null || 
+        			!(userProperties.get("user.last_room_index").matches("[0-9]+"))) {
         		roomLabel.setSelectedIndex(0);
         	}else {
-        		roomLabel.setSelectedIndex(Integer.parseInt(userProp.getProperty("user.last_room_index")));
+        		roomLabel.setSelectedIndex(Integer.parseInt(userProperties.get("user.last_room_index")));
         	}
         }
         catch (IndexOutOfBoundsException e) {
@@ -662,6 +642,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 	 * Set position of actors in stage
 	 */
     public void setActorPositions(int width) {
+    	popup.setX((width/2) - (popup.getWidth()/2));
         buttonConn.setPosition(width/2 - 225, 260);
         settingTable.setPosition(width - 175, 15);
         buttonMapEditor.setPosition(width - 70, Gdx.graphics.getHeight()-50);
@@ -759,24 +740,35 @@ public class ConnectScene implements GameScene, InputProcessor {
         return false;
     }
 
+    public void lookupUrl() {
+    	try {
+	        String line = null;
+	        BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
+	        while((line = sc.readLine())!=null) {	
+				if(line.isEmpty() || line.startsWith("#")) {	
+					continue;	
+				}	
+				//remove spaces	
+				line = line.replaceAll("\\s", "");	
+				//check getdown.txt for url	
+				if(line.startsWith("appbase=")) {	
+					url = line.split("=");
+					sc.close();
+					break;
+				}
+	        }
+    	}catch(Exception e) {
+        	System.out.println("Unable to start getdown.jar; run manually. Please delete digest files and re-run. " + e);
+        }
+    }
+    
     private void performUpdateCheck() throws UnknownHostException{
-		// load the properties config
-		Properties prop = new Properties();
-		try {
-		    prop.load(new FileInputStream("user.config"));
-		}
-		catch (FileNotFoundException e) {
-		    e.printStackTrace();
-		}
-		catch (IOException e) {
-		    e.printStackTrace();
-		}
 
 		// schedule update.
 		//     enabled  if not defined.
         //     enabled  if defined and == "yes".
 		//     disabled if defined and != "yes".
-		String updateType = prop.getProperty("autoupdate");
+		String updateType = userProperties.get("autoupdate");
 		if ((updateType != null) && (!updateType.equalsIgnoreCase("yes")))
 		{
 			System.out.println("Automatic updates are disabled in user.config.");
@@ -792,22 +784,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 	        {
 	        	try {
 	        		System.out.println("Automatic updates are enabled. Checking for updates...");
-		            String line = null;
-		            String[] url = null;
-		            BufferedReader sc = new BufferedReader(new FileReader("getdown.txt"));
-		            while((line = sc.readLine())!=null) {	
-						if(line.isEmpty() || line.startsWith("#")) {	
-							continue;	
-						}	
-						//remove spaces	
-						line = line.replaceAll("\\s", "");	
-						//check getdown.txt for url	
-						if(line.startsWith("appbase=")) {	
-							url = line.split("=");
-							sc.close();
-							break;
-						}
-		            }
+	        		lookupUrl();
 	                try {
 	                	if(!new String(Files.readAllBytes(Paths.get("version.txt"))).matches(IOUtils.toString(new URL(url[1]+"version.txt").openStream(),StandardCharsets.UTF_8)) ) {
 		                    System.out.println("Performing update; deleting digest files...");
@@ -821,7 +798,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 	                		performLogin();
 	                	}
 	                }catch(IOException e){
-	                    System.out.println("File not found." + e);
+	                    System.out.println("File not found. " + e);
 	                    //if for some reason version.txt is not there
 	                    new File("version.txt").createNewFile();
 	                    performUpdateCheck();
@@ -848,33 +825,111 @@ public class ConnectScene implements GameScene, InputProcessor {
 			setPopupMessage("Please enter a valid IP Address or URL.");
 		} else {
             // Save current choices for next time
-            try {
-                changeProperty("user.config", "user.username", name.getText());
-                changeProperty("server.config", "server.last_address", address.getText());
-                changeProperty("user.config", "user.width", Integer.toString(Gdx.graphics.getWidth()));
-                changeProperty("user.config", "user.height", Integer.toString(Gdx.graphics.getHeight()));
-                changeProperty("user.config", "user.last_ship", Integer.toString(shipType.getSelectedIndex()));
-                changeProperty("user.config", "user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
-                changeProperty("user.config", "user.last_team", Integer.toString(teamType.getSelectedIndex()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+			updateProperties();
 	        setState(ConnectionSceneState.CONNECTING);
 	        context.connect(name.getText(), address.getText(), code.getText(), shipType.getSelected().getIndex(), teamType.getSelected().getType());
            }
     }
 
-    public static void changeProperty(String filename, String key, String value) throws IOException {
-        Properties prop =new Properties();
-        prop.load(new FileInputStream(filename));
-        prop.setProperty(key, value);
-        prop.store(new FileOutputStream(filename),null);
+    public void updateProperties() {
+    	Properties prop =new Properties();
+    	try {
+            prop.load(new FileInputStream("user.config"));
+            prop.setProperty("user.width", Integer.toString(Gdx.graphics.getWidth()));
+            prop.setProperty("user.height", Integer.toString(Gdx.graphics.getHeight()));
+            prop.setProperty("user.username", name.getText());
+            prop.setProperty("user.last_ship", Integer.toString(shipType.getSelectedIndex()));
+            prop.setProperty("user.last_team", Integer.toString(teamType.getSelectedIndex()));
+            prop.setProperty("user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
+            prop.store(new FileOutputStream("user.config"),null);
+    	}catch (FileNotFoundException e) {
+			System.out.println("No config files found on system. Creating config files..");
+			
+            prop.setProperty("user.width", Integer.toString(Gdx.graphics.getWidth()));
+            prop.setProperty("user.height", Integer.toString(Gdx.graphics.getHeight()));
+            prop.setProperty("user.username", name.getText());
+            prop.setProperty("user.last_ship", Integer.toString(shipType.getSelectedIndex()));
+            prop.setProperty("user.last_team", Integer.toString(teamType.getSelectedIndex()));
+            prop.setProperty("user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
+            
+            try {
+				prop.store(new FileOutputStream(new File("user.config")),null);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 
-    public static String getProperty(String filename, String key) throws IOException {
+    public HashMap<String,String> getUserProperties(){
         Properties prop =new Properties();
-        prop.load(new FileInputStream(filename));
-        return prop.getProperty(key);
+        try {
+			prop.load(new FileInputStream("user.config"));
+			return new HashMap<String,String> (){
+				private static final long serialVersionUID = 1L;
+				{
+					put("user.username", prop.getProperty("user.username"));
+					put("user.last_room_index", prop.getProperty("user.last_room_index"));
+					put("user.last_team", prop.getProperty("user.last_team"));
+					put("user.width", prop.getProperty("user.width"));
+					put("user.height", prop.getProperty("user.height"));
+					put("user.last_ship", prop.getProperty("user.last_ship"));
+					put("user.volume", prop.getProperty("user.volume"));
+					put("autoupdate", prop.getProperty("autoupdate"));
+			}};
+		}catch (FileNotFoundException e) {
+			return new HashMap<String,String> (){
+				private static final long serialVersionUID = 1L;
+				{
+					put("user.username", "User"+Integer.toString(random.nextInt(9999)));
+					put("user.last_room_index", "0");
+					put("user.last_team", "0");
+					put("user.width", "800");
+					put("user.height", "600");
+					put("user.last_ship", "11");
+					put("user.volume", "0.15");
+					put("autoupdate", "yes");
+			}};
+		} catch (IOException e) {
+			return new HashMap<String,String> (){
+				private static final long serialVersionUID = 1L;
+				{
+					put("user.username", "User"+Integer.toString(random.nextInt(9999)));
+					put("user.last_room_index", "0");
+					put("user.last_team", "0");
+					put("user.width", "800");
+					put("user.height", "600");
+					put("user.last_ship", "11");
+					put("user.volume", "0.15");
+					put("autoupdate", "yes");
+			}};
+		}
+    }
+
+    public void readURLServerConfig() {
+    	try {
+    		String line = null;
+    		Scanner sc = new Scanner(new URL(url[1]+"server.config").openStream());
+	        while((line = sc.nextLine())!=null) {	
+				if(line.isEmpty() || line.startsWith("#")) {	
+					continue;	
+				}	
+				//remove spaces	
+				line = line.replaceAll("\\s", "");	
+				//check getdown.txt for url	
+				if(line.startsWith("server.room_locations=")) {	
+					room_info = line.split("=")[1];
+				}
+				if(line.startsWith("server.last_address=")) {	
+					address_info = line.split("=")[1];
+					sc.close();
+					break;
+				}
+	        }
+    	} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
     
     public boolean isMouseOverCodeUrl(float x, float y)
@@ -899,7 +954,6 @@ public class ConnectScene implements GameScene, InputProcessor {
         return false;
     }
     
-
     public void loginFailed() {
         setPopupMessage("Could not connect to server.");
         showPopup();

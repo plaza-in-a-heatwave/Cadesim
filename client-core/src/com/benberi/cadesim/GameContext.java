@@ -33,11 +33,14 @@ import com.benberi.cadesim.util.RandomUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -230,6 +233,8 @@ public class GameContext {
         textures.create();
 
         this.connectScene = new ConnectScene(this);
+        connectScene.lookupUrl();
+        connectScene.readURLServerConfig();
         connectScene.create();
     }
 
@@ -477,20 +482,33 @@ public class GameContext {
         }
         else {
         	createFurtherScenes(shipId);
-            try {
-				if(ConnectScene.getProperty("user.config","user.volume") != null || ConnectScene.getProperty("user.config","user.volume").matches("[0-9]{3,}")){
-					getBattleScene().mainmenu.audio_slider.setValue(Float.parseFloat(ConnectScene.getProperty("user.config","user.volume")));
-					getBattleScene().setSound_volume(Float.parseFloat(ConnectScene.getProperty("user.config","user.volume")));
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+        	String volume = getVolumeProperty();
+			if(volume == null){
+				System.out.println("null pointer while getting volume");
+			}else if(volume != null || volume.matches("[0-9]{3,}")) {
+				getBattleScene().mainmenu.audio_slider.setValue(Float.parseFloat(volume));
+				getBattleScene().setSound_volume(Float.parseFloat(volume));
 			}
             connectScene.setState(ConnectionSceneState.CREATING_MAP);
         }
 
     }
 
+    public String getVolumeProperty(){
+    	Properties prop =new Properties();
+        try {
+			prop.load(new FileInputStream("user.config"));
+			return prop.getProperty("user.volume");
+        }
+		catch(FileNotFoundException e) {
+			System.out.println("File not found.");
+		}
+        catch(IOException e) {
+			
+		}
+        return null;
+    }
+    
     public void setConnected(boolean connected) {
         this.connected = connected;
         Gdx.input.setInputProcessor(input);

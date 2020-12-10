@@ -79,7 +79,6 @@ declare -a clientfiles=(
     "gclogo.ico"
     "gclogo.png"
     "user.config"
-    "server.config"
     "version.txt"
 )
 for file in "${clientfiles[@]}"; do
