@@ -37,7 +37,6 @@ public class PlayerManager {
      * List of players in the game
      */
     private List<Player> players = new ArrayList<>();
-    
     /**
      * List of temporarily banned IPs in the game
      */
@@ -334,6 +333,9 @@ public class PlayerManager {
      * Handles and executes all turns
      */
     public void handleTurns() {
+    	for(Player player : listBots()) {
+    		player.performLogic();
+    	}
         if (ServerConfiguration.isTestMode()) {
             if (!context.getRegressionTests().loadNextScenario()) {
                 context.getRegressionTests().getSummary();
@@ -341,7 +343,7 @@ public class PlayerManager {
                 System.exit(Constants.EXIT_SUCCESS);
             }
         }
-
+        
         for (Player player : listRegisteredPlayers()) {
             player.getPackets().sendSelectedMoves(); // unglitch players' moves
             player.resetAnimationStructure();  // reset all of their animation structures before the animation builds up again
@@ -649,6 +651,21 @@ public class PlayerManager {
     }
     
     /**
+     * Lists all bots
+     *
+     * @return Sorted list of {@link #players} with only registered players
+     */
+    public List<Player> listBots() {
+    	List<Player> bots = new ArrayList<>();
+        for (Player p : players) {
+            if (p.isRegistered() && p.isBot()) {
+            	bots.add(p);
+            }
+        }
+        return bots;
+    }
+    
+    /**
      * unregistered players get a few seconds to properly register.
      */
     public void timeoutUnregisteredPlayers() {
@@ -733,7 +750,8 @@ public class PlayerManager {
             VesselFace startFace,
             float startDamage
     ) {
-        Player p = registerPlayer(null);
+    	Player p = new Player(context,null);
+    	registerPlayer(null, p);
         p.register(
                 name,
                 vesselID,
@@ -744,6 +762,95 @@ public class PlayerManager {
                 true
         );
         return p;
+    }
+    /**
+     * Create new NPC.
+     * @param type its AI type if specified
+     * @param name its name
+     * @param vesselID its ship type enum
+     * @param team its team (team type enum)
+     * @param startPosition -1,-1 to start not spawned, or >=0,>=0 to start on the map.
+     * @param startFace     which way to face to start with?
+     * @param startDamage   how much damage to spawn in with
+     * 
+     * ie. createBot(NPC_Type.TYPE1, "Type1", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
+     */
+    public Player createBot(
+    		NPC_Type type ,
+            String name,
+            int vesselID,
+            Team team,
+            int[] startPosition,
+            VesselFace startFace,
+            float startDamage
+    ) {
+    	switch(type) {
+    		case TYPE1:
+    			NPC_Type1 npc1 = new NPC_Type1(context, null);
+    	    	registerPlayer(null, npc1);
+    	    	npc1.register(
+    	                name,
+    	                vesselID,
+    	                team.getID(),
+    	                startPosition,
+    	                startFace,
+    	                startDamage,
+    	                true
+    	        );
+    	        return npc1;
+    		case TYPE2:
+    			NPC_Type2 npc2 = new NPC_Type2(context, null);
+    	    	registerPlayer(null, npc2);
+    	    	npc2.register(
+    	                name,
+    	                vesselID,
+    	                team.getID(),
+    	                startPosition,
+    	                startFace,
+    	                startDamage,
+    	                true
+    	        );
+    	        return npc2;
+    		case TYPE3:
+    			NPC_Type3 npc3 = new NPC_Type3(context, null);
+    	    	registerPlayer(null, npc3);
+    	    	npc3.register(
+    	                name,
+    	                vesselID,
+    	                team.getID(),
+    	                startPosition,
+    	                startFace,
+    	                startDamage,
+    	                true
+    	        );
+    	        return npc3;
+    		case TYPE4:
+    			NPC_Type4 npc4 = new NPC_Type4(context, null);
+    	    	registerPlayer(null, npc4);
+    	    	npc4.register(
+    	                name,
+    	                vesselID,
+    	                team.getID(),
+    	                startPosition,
+    	                startFace,
+    	                startDamage,
+    	                true
+    	        );
+    	        return npc4;
+    	     default:
+    	     	Player p = new Player(context,null);
+    	    	registerPlayer(null, p);
+    	        p.register(
+    	                name,
+    	                vesselID,
+    	                team.getID(),
+    	                startPosition,
+    	                startFace,
+    	                startDamage,
+    	                true
+    	        );
+    	        return p;
+    	}
     }
 
     /**
@@ -761,8 +868,7 @@ public class PlayerManager {
      * @param c The channel to register
      * @return  the newly created player
      */
-    public Player registerPlayer(Channel c) {
-        Player player = new Player(context, c);
+    public Player registerPlayer(Channel c, Player player) {
         String ip = player.getIP();
         if ((!player.isBot()) && (temporaryBannedIPs.contains(ip))) // bots are exempt
         {
@@ -1089,8 +1195,10 @@ public class PlayerManager {
 
     public void queueOutgoing() {
         for (Player p : players) {
-            p.getPackets().queueOutgoingPackets();
-            p.getChannel().flush();
+        	if(!p.isBot()) {
+                p.getPackets().queueOutgoingPackets();
+                p.getChannel().flush();
+        	}
         }
     }
 

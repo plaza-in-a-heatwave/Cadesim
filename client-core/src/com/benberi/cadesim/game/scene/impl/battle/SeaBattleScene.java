@@ -169,13 +169,6 @@ public class SeaBattleScene implements GameScene {
         selectedIsland = islandList.get(context.getIslandId());
     }
 
-    /**
-     * set up the input processor for the chat and game
-     */
-    public void setup() {
-        
-    }
-
     private void recountVessels() {
         vesselsCountWithCurrentPhase = context.getEntities().countVesselsByPhase(currentPhase);
         vesselsCountNonSinking = context.getEntities().countNonSinking();

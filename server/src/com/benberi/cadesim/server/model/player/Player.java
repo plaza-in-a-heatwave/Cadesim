@@ -83,7 +83,7 @@ public class Player extends Position {
      * The server context
      */
     private ServerContext context;
-
+    protected NPC_Type type;
     /**
      * If the player is registered
      */
@@ -422,7 +422,7 @@ public class Player extends Position {
         respawn(customPosition, customFace, customDamage, shouldSpawnFullCannons);
     }
     
-    /**
+     /**
      * wrapper for register
      */
     public void register(String name, int ship, int team) {
@@ -944,5 +944,17 @@ public class Player extends Position {
 
 	public void setTeam(Team team) {
 		this.team = team;
+	}
+
+	public void printType() {
+		System.out.println(name + " ,"+ type);
+	}
+	
+	public NPC_Type getType() {
+		return type;
+	}
+	
+	public void setType(NPC_Type typeValue) {
+		type = typeValue;
 	}
 }

@@ -652,9 +652,11 @@ public class GameContext {
      */
     public void handleServersideDisconnect() {
     	if(getServerResponse()) {
+    		inputMultiplexer.clear();
     		getServerChannel().disconnect();
     		System.out.println("Login error; handling response.");
     	}else {
+    		inputMultiplexer.clear();
 	        setConnected(false);
 	        setIsInLobby(true);
 	        getServerChannel().disconnect();

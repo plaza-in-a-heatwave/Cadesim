@@ -44,7 +44,7 @@ public class ServerPacketManager {
      */
     public void queuePackets() {
         for (Player p : context.getPlayerManager().getPlayers()) {
-            p.getPackets().queueIncomingPackets();
+        	p.getPackets().queueIncomingPackets();
         }
     }
 

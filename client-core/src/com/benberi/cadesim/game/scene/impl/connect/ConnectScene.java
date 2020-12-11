@@ -522,6 +522,7 @@ public class ConnectScene implements GameScene, InputProcessor {
 					port_numbers.add(temp_room_info[j].replace("\\", ""));
 				}
 				else {
+					
 					String[] print = temp_room_info[j].split(";");
 					server_codes.add(print[0]);
 					room_names.add(print[1]);
@@ -915,8 +916,6 @@ public class ConnectScene implements GameScene, InputProcessor {
 				if(line.isEmpty() || line.startsWith("#")) {	
 					continue;	
 				}	
-				//remove spaces	
-				line = line.replaceAll("\\s", "");	
 				//check getdown.txt for url	
 				if(line.startsWith("server.room_locations=")) {	
 					room_info = line.split("=")[1];

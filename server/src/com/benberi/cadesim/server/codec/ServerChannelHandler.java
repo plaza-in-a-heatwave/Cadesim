@@ -26,7 +26,8 @@ public class ServerChannelHandler implements ChannelInboundHandler {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         try {
-            context.getPlayerManager().registerPlayer(ctx.channel());
+        	Player p = new Player(context, ctx.channel());
+            context.getPlayerManager().registerPlayer(ctx.channel(), p);
         } catch (Exception e) {
             ServerContext.log("Channel register error: " + e.getMessage());
             e.printStackTrace();
