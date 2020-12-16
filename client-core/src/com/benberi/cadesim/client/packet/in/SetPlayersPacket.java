@@ -24,7 +24,7 @@ public class SetPlayersPacket extends ClientPacketExecutor {
             int team = p.readByte();
             getContext().getEntities().addEntity(name, x, y, face, ship, team);
             if (name.equals(getContext().myVessel)) {
-                getContext().getBattleScene().initializePlayerCamera(getContext().getEntities().getVesselByName(name));
+                getContext().getBattleScreen().initializePlayerCamera(getContext().getEntities().getVesselByName(name));
             }
         }
 

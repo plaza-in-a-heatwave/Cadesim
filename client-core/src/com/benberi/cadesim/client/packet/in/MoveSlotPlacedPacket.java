@@ -16,7 +16,7 @@ public class MoveSlotPlacedPacket extends ClientPacketExecutor {
         int slot = p.readByte();
         MoveType move = MoveType.forId(p.readByte());
 
-        getContext().getControlScene().getBnavComponent().placeMove(slot, move, false);
+        getContext().getControl().getBnavComponent().placeMove(slot, move, false);
     }
 
     @Override

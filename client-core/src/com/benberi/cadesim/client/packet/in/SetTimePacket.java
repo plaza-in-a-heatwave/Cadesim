@@ -20,12 +20,12 @@ public class SetTimePacket extends ClientPacketExecutor {
         byte counter       = p.readByte();
 
         // current positions within timeframes
-        getContext().getControlScene().getBnavComponent().setTime(turnTime);
-        getContext().getBattleScene().getInformation().setTime(gameTime);
+        getContext().getControl().getBnavComponent().setTime(turnTime);
+        getContext().getBattleScreen().getInformation().setTime(gameTime);
         getContext().setTurnDuration(getContext().getTurnSetting()); //
         // breaks
-        getContext().getBattleScene().getInformation().setTimeUntilBreak(timeUntilBreak);
-        getContext().getBattleScene().getInformation().setBreakTime(breakTime);
+        getContext().getBattleScreen().getInformation().setTimeUntilBreak(timeUntilBreak);
+        getContext().getBattleScreen().getInformation().setBreakTime(breakTime);
 
         // send a response packet to show client is still alive
         ClientAlivePacket packet = new ClientAlivePacket();

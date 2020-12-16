@@ -19,9 +19,9 @@ public class ReceiveGameSettings extends ClientPacketExecutor {
 	@Override
     public void execute(Packet p) {
         //set GUI settings each time settings are changed
-        if(getContext().getBattleSceneMenu() != null) {
-            getContext().getBattleSceneMenu().clearDisengageBehavior();
-            getContext().getBattleSceneMenu().clearQuality();
+        if(getContext().getBattleMenu() != null) {
+            getContext().getBattleMenu().clearDisengageBehavior();
+            getContext().getBattleMenu().clearQuality();
             int length = p.readInt();
             ObjectInputStream ois;
     		try {

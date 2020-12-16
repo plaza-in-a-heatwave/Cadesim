@@ -69,7 +69,7 @@ public class ClientPacketHandler {
         }
 
         // #83 only handle certain packets during animation
-        if (context.isConnected() && context.getBattleScene().isAnimationOngoing()) {
+        if (context.isConnected() && context.getBattleScreen().isAnimationOngoing()) {
             switch (packet.getOpcode()) {
             case IncomingPackets.SET_TIME:
             case IncomingPackets.RECEIVE_MESSAGE:

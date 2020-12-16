@@ -23,9 +23,9 @@ public class PlayerRespawnPacket extends ClientPacketExecutor {
             v.setPosition(x, y, true);      // queue if sinking
             v.setRotationIndex(face, true); // queue if sinking
             if (v.getName().equals(getContext().myVessel)) {
-                getContext().getControlScene().dispose();
-                getContext().getControlScene().reset();
-                getContext().getBattleScene().initializePlayerCamera(v);
+                getContext().getControl().dispose();
+                getContext().getControl().reset();
+                getContext().getBattleScreen().initializePlayerCamera(v);
             }
         }
     }

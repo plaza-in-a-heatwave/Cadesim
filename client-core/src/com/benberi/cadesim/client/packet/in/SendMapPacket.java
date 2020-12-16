@@ -20,10 +20,9 @@ public class SendMapPacket extends ClientPacketExecutor {
             int y = p.readByte();
             map[x][y] = tile;
         }
-        
         getContext().setIslandId(p.readByte());
-        getContext().getBattleScene().createMap(map);
-        getContext().setConnected(true);
+        getContext().getBattleScreen().createMap(map);
+        getContext().setConnected(true);   
     }
 
     @Override

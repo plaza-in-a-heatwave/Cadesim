@@ -6,7 +6,7 @@ import com.benberi.cadesim.client.packet.ClientPacketExecutor;
 import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.vessel.FlagSymbol;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
-import com.benberi.cadesim.game.scene.impl.battle.map.tile.impl.Flag;
+import com.benberi.cadesim.game.screen.impl.battle.map.tile.impl.Flag;
 
 public class SetFlagsPacket extends ClientPacketExecutor {
 
@@ -17,7 +17,7 @@ public class SetFlagsPacket extends ClientPacketExecutor {
     @Override
     public void execute(Packet p) {
         // update the flags
-        getContext().getBattleScene().getMap().getFlags().clear();
+        getContext().getBattleScreen().getMap().getFlags().clear();
 
         int defenderPoints = p.readInt();
         int attackerPoints = p.readInt();
@@ -36,9 +36,9 @@ public class SetFlagsPacket extends ClientPacketExecutor {
             flag.setControllerTeam(Team.forId(controllerTeam));
             flag.setAtWar(isAtWar == 1);
             flag.updateTextureRegion();
-            getContext().getBattleScene().getMap().getFlags().add(flag);
+            getContext().getBattleScreen().getMap().getFlags().add(flag);
         }
-        getContext().getBattleScene().getInformation().setPoints(defenderPoints, attackerPoints);
+        getContext().getBattleScreen().getInformation().setPoints(defenderPoints, attackerPoints);
 
         // update the player flags
         getContext().getEntities().clearFlagSymbols();
@@ -54,7 +54,7 @@ public class SetFlagsPacket extends ClientPacketExecutor {
                     int x = p.readByte();
                     int y = p.readByte();
 
-                    Flag flag = getContext().getBattleScene().getMap().getFlags().get(x, y);
+                    Flag flag = getContext().getBattleScreen().getMap().getFlags().get(x, y);
                     if (flag != null && flag.getControllerTeam() != null) {
                         FlagSymbol fs = new FlagSymbol(getContext(),flag.getSize(), flag.isAtWar(), flag.getControllerTeam());
                         if (!flag.isAtWar() && (vesselName.equals(getContext().myVessel) || vessel.getTeam().getID() == getContext().myTeam.getID())) {

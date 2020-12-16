@@ -2,10 +2,9 @@ package com.benberi.cadesim;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.benberi.cadesim.client.ClientConnectionCallback;
 import com.benberi.cadesim.client.ClientConnectionTask;
 import com.benberi.cadesim.client.codec.util.Packet;
@@ -16,19 +15,16 @@ import com.benberi.cadesim.client.packet.out.*;
 import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.EntityManager;
 import com.benberi.cadesim.game.entity.vessel.move.MoveType;
-import com.benberi.cadesim.game.scene.impl.connect.ConnectScene;
-import com.benberi.cadesim.game.scene.impl.connect.ConnectionSceneState;
-import com.benberi.cadesim.game.scene.GameScene;
-import com.benberi.cadesim.game.scene.SceneAssetManager;
-import com.benberi.cadesim.game.scene.TextureCollection;
-import com.benberi.cadesim.game.scene.impl.battle.MenuComponent;
-import com.benberi.cadesim.game.scene.impl.battle.SeaBattleScene;
-import com.benberi.cadesim.game.scene.impl.control.ControlAreaScene;
-import com.benberi.cadesim.game.scene.impl.mapeditor.MapEditorMapScene;
-import com.benberi.cadesim.game.scene.impl.mapeditor.MapEditorMenuScene;
-import com.benberi.cadesim.input.GameInputProcessor;
+import com.benberi.cadesim.game.assets.SceneAssetManager;
+import com.benberi.cadesim.game.screen.ControlAreaScene;
+import com.benberi.cadesim.game.screen.LobbyScreen;
+import com.benberi.cadesim.game.screen.MenuComponent;
+import com.benberi.cadesim.game.screen.SeaBattleScreen;
 import com.benberi.cadesim.util.GameToolsContainer;
 import com.benberi.cadesim.util.RandomUtils;
+import com.benberi.cadesim.util.ScreenEnum;
+import com.benberi.cadesim.util.ScreenManager;
+import com.benberi.cadesim.util.TextureCollection;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -45,8 +41,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GameContext {
-    private Channel serverChannel;
-    public InputMultiplexer inputMultiplexer;
+
+	private Channel serverChannel;
+    private ClientConnectionTask connectTask;
+
+	public InputMultiplexer inputMultiplexer;
     public boolean clear;
     public boolean isInLobby = true;
 
@@ -75,26 +74,15 @@ public class GameContext {
     private SceneAssetManager assetManager;
 
     /**
-     * The main input processor of the game
-     */
-    private GameInputProcessor input;
-
-    /**
      * The sea battle scene
      */
-    private SeaBattleScene seaBattleScene;
-
-    /**
-     * The control area scene
-     */
-    private ControlAreaScene controlArea;
+    private SeaBattleScreen seaBattleScreen;
     
-    /**
-     * The map editor scene
-     */
-    private MapEditorMapScene mapEditor;
-    private MapEditorMenuScene mapEditorMenu;
+    private LobbyScreen lobbyScreen;
 
+    private ControlAreaScene controlArea;
+
+    private MenuComponent battleMenu;
     /**
      * The texture collection
      */
@@ -109,11 +97,6 @@ public class GameContext {
     public int myVesselY;
     
     public int myVesselType;
-
-    /**
-     * List of scenes
-     */
-    private List<GameScene> scenes = new ArrayList<GameScene>();
     
     /**
      * List of maps
@@ -141,8 +124,8 @@ public class GameContext {
     private GameToolsContainer tools;
 
     private ClientPacketHandler packets;
-
-    private ConnectScene connectScene;
+    final Graphics graphics = Gdx.graphics;
+//    private ConnectScene connectScene;
     public Team myTeam;
     
     public void setTeam(int value) {
@@ -204,15 +187,13 @@ public class GameContext {
         this.lagTestMode = (Constants.ENABLE_LAG_TEST_MODE && lagTestMode);
     }
 
-    public Stage gameStage;
     public GameContext(BlockadeSimulator main) {
         this.tools = new GameToolsContainer();
 
         entities = new EntityManager(this);
         // init client
         this.packets = new ClientPacketHandler(this);
-        inputMultiplexer = new InputMultiplexer();
-        gameStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        create();
     }
 
     /**
@@ -231,15 +212,6 @@ public class GameContext {
 
         textures = new TextureCollection(this);
         textures.create();
-
-        this.connectScene = new ConnectScene(this);
-        connectScene.lookupUrl();
-        connectScene.readURLServerConfig();
-        connectScene.create();
-    }
-
-    public List<GameScene> getScenes() {
-        return this.scenes;
     }
     
     public List<String> getMaps() {
@@ -280,55 +252,41 @@ public class GameContext {
     public ClientPacketHandler getPacketHandler() {
         return packets;
     }
-    
-    public void createMapEditorScene() {
-    	this.input = new GameInputProcessor(this);
-        this.mapEditor = new MapEditorMapScene(this);
-        this.mapEditorMenu = new MapEditorMenuScene(this);
-        mapEditor.create();
-        mapEditor.createEmptyMap();
-        scenes.add(mapEditor);
-        mapEditorMenu.create();
-        scenes.add(mapEditorMenu);
-    }
+
     public void createFurtherScenes(int shipId) {
-    	gameStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-    	ControlAreaScene.shipId = shipId;
-    	this.input = new GameInputProcessor(this);
-        inputMultiplexer.addProcessor(this.input);
-        this.seaBattleScene = new SeaBattleScene(this);
-        seaBattleScene.create();
-        this.controlArea = new ControlAreaScene(this);
-        controlArea.create();
-        //fix crash on server disconnect after dispose has been called
-		if(scenes.size() == 0) {
-	        scenes.add(controlArea);
-	        scenes.add(seaBattleScene);
-		}else {
-	        scenes.set(0, controlArea);
-	        scenes.set(1, seaBattleScene);
-		}
 		Gdx.graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
     }
 
-    public MapEditorMapScene getMapEditor() {
-        return (MapEditorMapScene) scenes.get(0);
-    }
-
-    public SeaBattleScene getBattleScene() {
-        return (SeaBattleScene) scenes.get(1);
+    public void setLobbyScreen(LobbyScreen lobby) {
+    	lobbyScreen = lobby;
     }
     
-    public ControlAreaScene getControlScene() {
-        return (ControlAreaScene) scenes.get(0);
+    public LobbyScreen getLobbyScreen() {
+        return lobbyScreen;
     }
     
-    public MenuComponent getBattleSceneMenu() {
-    	if(scenes.get(1) instanceof SeaBattleScene) {
-        	SeaBattleScene seaBattle = (SeaBattleScene) scenes.get(1);
-            return seaBattle.mainmenu; 
-    	}
-        return null;
+    public void setBattleScreen(SeaBattleScreen seaBattle) {
+        seaBattleScreen = seaBattle;
+    }
+    
+    public SeaBattleScreen getBattleScreen() {
+        return seaBattleScreen;
+    }
+    
+    public void setControl(ControlAreaScene control) {
+    	controlArea = control;
+    }
+    
+    public ControlAreaScene getControl() {
+    	return controlArea;
+    }
+    
+    public void setBattleMenu(MenuComponent menu) {
+    	battleMenu = menu;
+    }
+    
+    public MenuComponent getBattleMenu() {
+    	return battleMenu;
     }
     public boolean isConnected() {
         return connected;
@@ -359,14 +317,6 @@ public class GameContext {
         p.encode();
         serverChannel.write(p);
         serverChannel.flush();
-    }
-
-    /**
-     * Gets the connection scene
-     * @return  {@link #connectScene}
-     */
-    public ConnectScene getConnectScene() {
-        return connectScene;
     }
 
     /**
@@ -424,11 +374,10 @@ public class GameContext {
     			return;
     		}
     	}
-        service.execute(new ClientConnectionTask(this, ip, new ClientConnectionCallback() {
+    	connectTask = new ClientConnectionTask(this, ip, new ClientConnectionCallback() {
             @Override
             public void onSuccess(Channel channel) {
                 serverChannel = channel; // initialize the server channel
-                connectScene.setState(ConnectionSceneState.CREATING_PROFILE);
                 sendLoginPacket(code, displayName, ship, team); // send login packet
                 myVessel = displayName;
                 myVesselType = ship;
@@ -439,11 +388,18 @@ public class GameContext {
             public void onFailure() {
                 // only show if server appears dead
                 if (!haveServerResponse) {
-                	connectScene.loginFailed();
+                	getLobbyScreen().loginFailed();
                 }
-                Gdx.graphics.setResizable(true);
+            	Gdx.app.postRunnable(new Runnable() {
+					@Override
+					public void run() {
+						graphics.setResizable(false);
+					}
+            	});
             }
-        }));
+        });
+        getService().execute(connectTask);
+        ScreenManager.getInstance().showScreen(ScreenEnum.GAME, this);
     }
 
     /**
@@ -458,27 +414,31 @@ public class GameContext {
 
             switch (response) {
                 case LoginResponsePacket.BAD_VERSION:
-                    connectScene.setPopupMessage("Outdated client.");
+                    getLobbyScreen().setPopupMessage("Outdated client.");
+                    getLobbyScreen().showPopup();
                     break;
                 case LoginResponsePacket.NAME_IN_USE:
-                    connectScene.setPopupMessage("Display name already in use.");
+                    getLobbyScreen().setPopupMessage("Display name already in use.");
+                    getLobbyScreen().showPopup();
                     break;
                 case LoginResponsePacket.BAD_SHIP:
-                    connectScene.setPopupMessage("The selected ship is not allowed.");
+                    getLobbyScreen().setPopupMessage("The selected ship is not allowed.");
+                    getLobbyScreen().showPopup();
                     break;
                 case LoginResponsePacket.SERVER_FULL:
-                    connectScene.setPopupMessage("The server is full.");
+                    getLobbyScreen().setPopupMessage("The server is full.");
+                    getLobbyScreen().showPopup();
                     break;
                 case LoginResponsePacket.BAD_NAME:
-                	connectScene.setPopupMessage("That ship name is not allowed.");
+                	getLobbyScreen().setPopupMessage("That ship name is not allowed.");
+                	getLobbyScreen().showPopup();
                 	break;
                 default:
-                    connectScene.setPopupMessage("Unknown login failure.");
-        			connectScene.showPopup();
+                    getLobbyScreen().setPopupMessage("Unknown login failure.");
+        			getLobbyScreen().showPopup();
                     break;
             }
 
-            connectScene.setState(ConnectionSceneState.DEFAULT);
         }
         else {
         	createFurtherScenes(shipId);
@@ -486,10 +446,9 @@ public class GameContext {
 			if(volume == null){
 				System.out.println("null pointer while getting volume");
 			}else if(volume != null || volume.matches("[0-9]{3,}")) {
-				getBattleScene().mainmenu.audio_slider.setValue(Float.parseFloat(volume));
-				getBattleScene().setSound_volume(Float.parseFloat(volume));
+				getBattleScreen().battleMenu.audio_slider.setValue(Float.parseFloat(volume));
+				getBattleScreen().setSound_volume(Float.parseFloat(volume));
 			}
-            connectScene.setState(ConnectionSceneState.CREATING_MAP);
         }
 
     }
@@ -511,7 +470,6 @@ public class GameContext {
     
     public void setConnected(boolean connected) {
         this.connected = connected;
-        Gdx.input.setInputProcessor(input);
         clear = true;
     }
     
@@ -524,22 +482,16 @@ public class GameContext {
         return this.isInMapEditor;
     }
 
-	public GameInputProcessor getInputProcessor() {
-    	return input;
-    }
-
 	public void dispose() {
 		try {
 			if (entities != null) {
 				entities.dispose();
 			}
-			getScenes().clear(); // clear other scenes
-			connectScene.setup();
 			if (getIsInLobby()) {
 				System.out.println("Returned to lobby");
 			}else {
-				connectScene.setPopupMessage("You have disconnected from the server.");
-				connectScene.showPopup();			
+				getLobbyScreen().setPopupMessage("You have disconnected from the server.");
+				getLobbyScreen().showPopup();			
 			}
 			
 			// #83 reset any lag test mode if we disconnect.
@@ -588,7 +540,7 @@ public class GameContext {
             if (message.equals("/lagtestmode")) {
                 setLagTestMode(!isLagTestMode());
 
-                getControlScene().getBnavComponent().addNewMessage(
+                getControl().getBnavComponent().addNewMessage(
                         "lag test mode", (isLagTestMode()?"ENABLED":"DISABLED") +
                         ". type /lagtestmode to " + (isLagTestMode()?"disable":"enable") + "."
                 );
@@ -617,20 +569,18 @@ public class GameContext {
      * When the client (or user) decides to disconnect
      */
     public void disconnect() {
-		gameStage.clear();
-		inputMultiplexer.clear();
 	    maps.clear();
     	setClientInitiatedDisconnect(true); // wedunnit!
         setConnected(false);
         setIsInLobby(true);
         getServerChannel().disconnect();
-		getConnectScene().setState(ConnectionSceneState.DEFAULT);
+        ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, this);
 		Gdx.graphics.setTitle("GC:" + Constants.VERSION);
 		System.out.println("Client disconnected.");
-		connectScene.setPopupMessage("Client Disconnected.");
-		connectScene.showPopup();
-	    getBattleScene().dispose();
-	    getControlScene().dispose();
+		getLobbyScreen().setPopupMessage("Client Disconnected.");
+		getLobbyScreen().showPopup();
+		getBattleScreen().dispose();
+	    getControl().dispose();
 	    Gdx.graphics.setResizable(true);
     }
     /*
@@ -642,9 +592,6 @@ public class GameContext {
     	setClientInitiatedDisconnect(true); // wedunnit!
         setConnected(false);
         setIsInLobby(true);
-		getConnectScene().setState(ConnectionSceneState.DEFAULT);
-		getScenes().clear();
-		getConnectScene().setup();
 		Gdx.graphics.setTitle("GC: v" + Constants.VERSION);
     }
     /*
@@ -652,17 +599,17 @@ public class GameContext {
      */
     public void handleServersideDisconnect() {
     	if(getServerResponse()) {
-    		inputMultiplexer.clear();
+//    		inputMultiplexer.clear();
     		getServerChannel().disconnect();
     		System.out.println("Login error; handling response.");
     	}else {
-    		inputMultiplexer.clear();
+//    		inputMultiplexer.clear();
 	        setConnected(false);
 	        setIsInLobby(true);
 	        getServerChannel().disconnect();
-			getConnectScene().setState(ConnectionSceneState.DEFAULT);
-			connectScene.setPopupMessage("Server Disconnected.");
-			connectScene.showPopup();
+//			getConnectScene().setState(ConnectionSceneState.DEFAULT);
+//			connectScene.setPopupMessage("Server Disconnected.");
+//			connectScene.showPopup();
     	}
     }
 
@@ -797,5 +744,13 @@ public class GameContext {
 	
 	public String getDefaultJobberSetting() {
 		return (String)gameSettings.get(12);
+	}
+
+	public ExecutorService getService() {
+		return service;
+	}
+	
+    public ClientConnectionTask getConnectTask() {
+		return connectTask;
 	}
 }

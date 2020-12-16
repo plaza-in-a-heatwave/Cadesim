@@ -1,6 +1,6 @@
 package com.benberi.cadesim.client;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Disposable;
 import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.ClientChannelHandler;
@@ -12,7 +12,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-public class ClientConnectionTask extends Bootstrap implements Runnable {
+public class ClientConnectionTask extends Bootstrap implements Runnable,Disposable {
 
     /**
      * The game context
@@ -22,7 +22,7 @@ public class ClientConnectionTask extends Bootstrap implements Runnable {
     /**
      * The worker
      */
-    private EventLoopGroup worker = new NioEventLoopGroup(1);
+    public EventLoopGroup worker = new NioEventLoopGroup(1);
 
     /**
      * The IP Address to connect
@@ -33,7 +33,7 @@ public class ClientConnectionTask extends Bootstrap implements Runnable {
      * The callback to notify
      */
     private ClientConnectionCallback callback;
-    private Channel channel;
+    public Channel channel;
 
     public ClientConnectionTask(GameContext context, String ip, ClientConnectionCallback callback) {
         this.context = context;
@@ -68,7 +68,6 @@ public class ClientConnectionTask extends Bootstrap implements Runnable {
 		            	@Override public void operationComplete(ChannelFuture future) throws Exception{
 		            		worker.shutdownGracefully().addListener(e -> {
 		            			context.dispose();
-		            			Gdx.graphics.setResizable(true);
 		            		});
 		            			try {
 			            			if (!context.clientInitiatedDisconnect()) { // whodunnit?
@@ -84,7 +83,11 @@ public class ClientConnectionTask extends Bootstrap implements Runnable {
 		        }
         	}
         });
-
 	}
- 
+
+	@Override
+	public void dispose() {
+		channel.close();
+		worker.shutdownGracefully();
+	}
 }

@@ -56,7 +56,7 @@ public class ReceiveTeamPacket extends ClientPacketExecutor {
 	    	   vessel.setDefaultTexture();
 		}
 		
-		getContext().getBattleScene().getInformation().setTeamColors();
+		getContext().getBattleScreen().getInformation().setTeamColors();
     }
 
     @Override

@@ -21,13 +21,13 @@ public class ReceiveMessagePacket extends ClientPacketExecutor {
         	Team chatTeam = Team.forId(p.readInt());
         	if(channel.matches("team")) {
         		if(getContext().myTeam == chatTeam) {
-        			getContext().getControlScene().getBnavComponent().addNewMessage(sender, message, Constants.serverTeam);
+        			getContext().getControl().getBnavComponent().addNewMessage(sender, message, Constants.serverTeam);
         		}
         	}else {
-        		getContext().getControlScene().getBnavComponent().addNewMessage(sender, message);
+        		getContext().getControl().getBnavComponent().addNewMessage(sender, message);
         	}
         }else {
-        	getContext().getControlScene().getBnavComponent().addNewMessage(sender, message);
+        	getContext().getControl().getBnavComponent().addNewMessage(sender, message);
         }
     }
 

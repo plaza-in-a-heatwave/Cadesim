@@ -47,7 +47,7 @@ public class TurnAnimationPacket extends ClientPacketExecutor {
 
         }
 
-        getContext().getBattleScene().setTurnExecute();
+        getContext().getBattleScreen().setTurnExecute();
     }
 
     @Override

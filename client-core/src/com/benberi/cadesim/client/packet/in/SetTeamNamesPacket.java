@@ -15,7 +15,7 @@ public class SetTeamNamesPacket extends ClientPacketExecutor {
         String attacker = p.readByteString();
         String defender = p.readByteString();
         
-        getContext().getBattleScene().getInformation().setTeamNames(attacker, defender);
+        getContext().getBattleScreen().getInformation().setTeamNames(attacker, defender);
         
     }
 

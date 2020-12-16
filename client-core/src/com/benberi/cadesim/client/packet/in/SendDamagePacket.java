@@ -12,8 +12,8 @@ public class SendDamagePacket extends ClientPacketExecutor {
 
     @Override
     public void execute(Packet p) {
-        getContext().getControlScene().getBnavComponent().setDamagePercentage(p.readByte());
-        getContext().getControlScene().getBnavComponent().setBilgePercentage(p.readByte());
+        getContext().getControl().getBnavComponent().setDamagePercentage(p.readByte());
+        getContext().getControl().getBnavComponent().setBilgePercentage(p.readByte());
     }
 
     @Override
