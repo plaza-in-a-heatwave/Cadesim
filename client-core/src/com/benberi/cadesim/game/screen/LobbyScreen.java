@@ -30,7 +30,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
@@ -76,8 +78,6 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     private String chosenGreeting;
     private final String CODE_URL = "https://github.com/plaza-in-a-heatwave/Cadesim/issues";
     private final int CODE_URL_WIDTH = 278; // px
-
-    private boolean failed;
 
     /**
      * The main stage for elements
@@ -221,10 +221,9 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
         addStage();
         screenWidth = Gdx.graphics.getWidth();
         screenHeight = Gdx.graphics.getHeight();
-    	multiplexer.addProcessor(stage);
     	multiplexer.addProcessor(this);
+    	multiplexer.addProcessor(stage);
     	Gdx.input.setInputProcessor(multiplexer);
-    	
     	if(!Constants.AUTO_UPDATE) { // test purposes
     		Constants.PROTOCOL_PORT = 4970;
     		address.setText("localhost");
@@ -641,14 +640,9 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     	super.dispose();
     	renderer.dispose();
     }
-
-    public void setFailed(boolean failed) {
-        this.failed = failed;
-    }
-
+    
     @Override
     public boolean keyDown(int keycode) {
-    	System.out.println("key"+keycode);
         if (keycode == Input.Keys.ENTER || keycode == Input.Keys.CENTER) {
             if (!popup.isVisible()) {
                 if (stage.getKeyboardFocus() != name && name.getText().isEmpty()) {
@@ -656,11 +650,7 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
                 } else if (stage.getKeyboardFocus() != address && address.getText().isEmpty()) {
                 	stage.setKeyboardFocus(address);
                 } else {
-                    try {
-                        performUpdateCheck();
-                    } catch (UnknownHostException e) {
-                        return failed;
-                    }
+                	performClick(buttonConn);
                 }
             }
             else {
@@ -672,13 +662,12 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-    	System.out.println(1);
+
         return false;
     }
 
     @Override
     public boolean keyTyped(char character) {
-    	System.out.println("here");
         return false;
     }
 
@@ -773,6 +762,17 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
 	        	}
 	        }        
 		}
+    }
+    
+
+    public static void performClick(Actor actor) {
+        Array<EventListener> listeners = actor.getListeners();
+        for(int i=0;i<listeners.size;i++)
+        {
+            if(listeners.get(i) instanceof ClickListener){
+                ((ClickListener)listeners.get(i)).clicked(null, 0, 0);
+            }
+        }
     }
     
     private void performLogin() throws UnknownHostException {
