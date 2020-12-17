@@ -44,7 +44,6 @@ public class ClientPacketHandler {
         if (packetQueue.isEmpty()) {
             return;
         }
-
         Packet packet = packetQueue.poll();
         handle(packet);
     }

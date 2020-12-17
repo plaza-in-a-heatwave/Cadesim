@@ -1,4 +1,4 @@
-package com.benberi.cadesim.game.assets;
+package com.benberi.cadesim.util;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.assets.AssetDescriptor;
 
-public class SceneAssetManager {
+public class GameAssetManager {
 	public final AssetManager manager = new AssetManager();
 	
 	/*

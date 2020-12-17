@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;

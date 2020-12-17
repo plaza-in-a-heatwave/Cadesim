@@ -1,9 +1,9 @@
 package com.benberi.cadesim.game.screen.impl.battle.map.tile.impl;
 
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.screen.impl.battle.map.GameObject;
 import com.benberi.cadesim.util.RandomUtils;
+import com.benberi.cadesim.util.Team;
 
 public class Flag extends GameObject {
 

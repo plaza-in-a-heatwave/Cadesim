@@ -4,7 +4,7 @@ import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
-import com.benberi.cadesim.game.cade.Team;
+import com.benberi.cadesim.util.Team;
 
 public class ReceiveMessagePacket extends ClientPacketExecutor {
 
@@ -21,13 +21,13 @@ public class ReceiveMessagePacket extends ClientPacketExecutor {
         	Team chatTeam = Team.forId(p.readInt());
         	if(channel.matches("team")) {
         		if(getContext().myTeam == chatTeam) {
-        			getContext().getControl().getBnavComponent().addNewMessage(sender, message, Constants.serverTeam);
+        			getContext().getControl().addNewMessage(sender, message, Constants.serverTeam);
         		}
         	}else {
-        		getContext().getControl().getBnavComponent().addNewMessage(sender, message);
+        		getContext().getControl().addNewMessage(sender, message);
         	}
         }else {
-        	getContext().getControl().getBnavComponent().addNewMessage(sender, message);
+        	getContext().getControl().addNewMessage(sender, message);
         }
     }
 

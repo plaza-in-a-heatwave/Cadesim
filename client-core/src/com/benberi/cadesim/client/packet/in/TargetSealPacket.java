@@ -14,7 +14,7 @@ public class TargetSealPacket extends ClientPacketExecutor {
     @Override
     public void execute(Packet p) {
         int pos = p.readByte();
-        getContext().getControl().getBnavComponent().setMoveSealTarget(MoveType.forId(pos));
+        getContext().getControl().setMoveSealTarget(MoveType.forId(pos));
     }
 
     @Override

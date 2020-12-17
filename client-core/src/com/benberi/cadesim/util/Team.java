@@ -1,4 +1,4 @@
-package com.benberi.cadesim.game.cade;
+package com.benberi.cadesim.util;
 
 
 import com.badlogic.gdx.graphics.Color;

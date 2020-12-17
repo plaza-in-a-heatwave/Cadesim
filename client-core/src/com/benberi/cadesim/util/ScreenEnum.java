@@ -9,7 +9,7 @@ import com.benberi.cadesim.game.screen.SeaBattleScreen;
 public enum ScreenEnum {
 	LOADING {
 		public AbstractScreen getScreen(Object... params) {
-			return new LoadingScreen((GameContext)params[0]);
+			return new LoadingScreen((GameContext)params[0],(String)params[1]);
 		}
 	},
 	LOBBY {

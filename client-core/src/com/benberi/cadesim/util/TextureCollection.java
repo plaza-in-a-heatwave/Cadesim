@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.game.cade.Team;
 
 public class TextureCollection {
 

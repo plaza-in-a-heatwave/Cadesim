@@ -16,7 +16,7 @@ public class SendMovesPacket extends ClientPacketExecutor {
         byte[] left = p.readBytes(4);
         byte[] right = p.readBytes(4);
 
-        getContext().getControl().getBnavComponent().setMovePlaces(moves, left, right);
+        getContext().getControl().setMovePlaces(moves, left, right);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.benberi.cadesim.game.screen;
+package com.benberi.cadesim.game.screen.component;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.math.Vector2;
 import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
@@ -521,10 +520,10 @@ public class BattleControlComponent implements InputProcessor {
      * The camera view of the scene
      */
     private OrthographicCamera camera;
-    private FitViewport viewport;
-    protected BattleControlComponent(GameContext context, Stage stage, boolean big, boolean doubleShot) {
+    
+    public BattleControlComponent(GameContext context, Stage stage, boolean big, boolean doubleShot) {
         this.context = context;
-        
+        this.stage = stage;
         isDoubleShot = doubleShot;
         isBigShip    = big;
         if (isDoubleShot) {
@@ -560,10 +559,6 @@ public class BattleControlComponent implements InputProcessor {
 
     public void buildStage() {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(),  200);
-        viewport = new FitViewport(camera.viewportWidth, camera.viewportHeight, camera);
-    	viewport.setScreenBounds(0, 0, Gdx.graphics.getWidth(), 200);
-    	stage = new Stage();
-    	stage.setViewport(viewport);
         shape = new ShapeRenderer();
         // stage for chatContainer
         initTextures();
@@ -603,8 +598,8 @@ public class BattleControlComponent implements InputProcessor {
         
         initListeners();
         disengageButton.setPosition(DISENGAGE_buttonX, DISENGAGE_buttonY);
-        stage.addActor(chatTable);
         stage.addActor(disengageButton);
+        stage.addActor(chatTable);
     }
     /**
      * initialize listeners for LibGdx actors
@@ -857,27 +852,29 @@ public class BattleControlComponent implements InputProcessor {
     }
 
     public void show() {
-    	viewport.apply();
-    	camera.update();
-        int turnDuration = context.getTurnDuration(); // getTurnSetting() causes a render bug when setTimePacket is sent
-        double ratio = (double) 43 / (double) turnDuration;
+    	if(context != null) {
+            int turnDuration = context.getTurnDuration(); // getTurnSetting() causes a render bug when setTimePacket is sent
+            double ratio = (double) 43 / (double) turnDuration;
 
-        sandTop.setRegionY(43 - ((int) Math.round(time * ratio)));
-        sandTop.setRegionHeight((int) Math.round(time * ratio));
+            sandTop.setRegionY(43 - ((int) Math.round(time * ratio)));
+            sandTop.setRegionHeight((int) Math.round(time * ratio));
 
-        ratio =  (double) 43 / (double) turnDuration;
-        sandBottom.setRegionY(43 - ((int) Math.round((turnDuration - time) * ratio)));
-        sandBottom.setRegionHeight((int) Math.round((turnDuration - time) * ratio));
+            ratio =  (double) 43 / (double) turnDuration;
+            sandBottom.setRegionY(43 - ((int) Math.round((turnDuration - time) * ratio)));
+            sandBottom.setRegionHeight((int) Math.round((turnDuration - time) * ratio));
+    	}
+
     }
 
     public void render(float delta) {
         Gdx.gl.glViewport(0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     	stage.getBatch().setTransformMatrix(camera.view);
-    	stage.act();
-    	stage.draw();
+    	renderBackground();
     	stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),false);
         renderMoveControl();
         renderDisengage();
+    	stage.act();
+    	stage.draw();
     }
     
     public void reset() {
@@ -1156,10 +1153,8 @@ public class BattleControlComponent implements InputProcessor {
 
     private void renderMoveControl() {
     	stage.getBatch().begin();
-
         // The yellow BG for tokens and moves and hourglass
         stage.getBatch().draw(controlBackground, MOVES_backgroundX, MOVES_backgroundY);
-
         drawMoveHolder();
         drawShipStatus();
         drawTimer();
@@ -1236,6 +1231,24 @@ public class BattleControlComponent implements InputProcessor {
 
         stage.getBatch().end();
     }
+    
+    private void renderBackground() {
+    	shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.setColor(new Color(48 / 255f, 98 / 255f, 123 / 255f, 1));
+        //shapeRenderer.setColor(new Color(65 / 255f, 101 / 255f, 139 / 255f, 1));
+        shape.rect(0, 0, Gdx.graphics.getWidth(), 200);
+
+        shape.setColor(new Color(72 / 255f, 72 / 255f, 72 / 255f, 1));
+        shape.rect(0, 199, Gdx.graphics.getWidth(), 1);
+
+        shape.setColor(new Color(135 / 255f, 161 / 255f, 188 / 255f, 1));
+        shape.rect(0, 198, Gdx.graphics.getWidth(), 1);
+
+        shape.setColor(new Color(68 / 255f, 101 / 255f, 136 / 255f, 1));
+        shape.rect(0, 197, Gdx.graphics.getWidth(), 1);
+        shape.end();
+    }
+
 
     /**
      * background for disengage button / pirates aboard

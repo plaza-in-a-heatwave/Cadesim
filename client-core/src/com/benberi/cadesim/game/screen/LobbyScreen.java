@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Timer;
 
 import org.apache.commons.io.IOUtils;
 
@@ -49,7 +50,8 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     final Graphics graphics = Gdx.graphics;
 
     // the connect state
-    private long loginAttemptTimestampMillis; // initialised when used
+    @SuppressWarnings("unused")
+	private long loginAttemptTimestampMillis; // initialised when used
 //    private long popupTimestamp;
 
     /**
@@ -222,6 +224,12 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     	multiplexer.addProcessor(stage);
     	multiplexer.addProcessor(this);
     	Gdx.input.setInputProcessor(multiplexer);
+    	
+    	if(!Constants.AUTO_UPDATE) { // test purposes
+    		Constants.PROTOCOL_PORT = 4970;
+    		address.setText("localhost");
+    		code.setText("");
+    	}
     }
     
     public void createPopup() {
@@ -240,10 +248,24 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     }
     
     public void closePopup() {
-    	popup.setVisible(false);
+    	if(popup.isVisible()) {
+        	Timer t = new java.util.Timer();
+        	t.schedule( 
+        	        new java.util.TimerTask() {
+        	            @Override
+        	            public void run() {
+        	            	popup.setVisible(false);
+        	            }
+        	        }, 
+        	        5000 
+        	);	
+    	}else {
+    		return;
+    	}
     }
     
     public void showPopup() {
+    	popup.toFront();
     	popup.setX((Gdx.graphics.getWidth()/2) - (popup.getWidth()/2));
     	popup.setVisible(true);
     }
@@ -275,6 +297,7 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public void render(float delta) {
+    	closePopup();
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		//enable login click if disabled
@@ -558,6 +581,14 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
         
         buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
+            	Gdx.app.postRunnable(new Runnable() {
+
+        			@Override
+        			public void run() {
+        	        	ScreenManager.getInstance().showScreen(ScreenEnum.LOADING,context,"Connecting, please wait...");
+        			}
+            		
+            	});
                 try {
                     performUpdateCheck();
                     buttonConn.toggle();
@@ -617,6 +648,7 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+    	System.out.println("key"+keycode);
         if (keycode == Input.Keys.ENTER || keycode == Input.Keys.CENTER) {
             if (!popup.isVisible()) {
                 if (stage.getKeyboardFocus() != name && name.getText().isEmpty()) {
@@ -640,20 +672,19 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
+    	System.out.println(1);
         return false;
     }
 
     @Override
     public boolean keyTyped(char character) {
+    	System.out.println("here");
         return false;
     }
 
+    
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-    	if(popup.isVisible()) {
-    		closePopup();
-    		return true;
-    	}
 		if (isMouseOverCodeUrl(screenX, Gdx.graphics.getHeight() - screenY))
 		{
 	    	try {

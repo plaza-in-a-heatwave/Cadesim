@@ -20,7 +20,7 @@ public class SetTimePacket extends ClientPacketExecutor {
         byte counter       = p.readByte();
 
         // current positions within timeframes
-        getContext().getControl().getBnavComponent().setTime(turnTime);
+        getContext().getControl().setTime(turnTime);
         getContext().getBattleScreen().getInformation().setTime(gameTime);
         getContext().setTurnDuration(getContext().getTurnSetting()); //
         // breaks

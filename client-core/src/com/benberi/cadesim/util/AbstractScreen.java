@@ -23,7 +23,6 @@ public abstract class AbstractScreen extends ScreenAdapter {
 	}
 	// Subclasses must load actors in this method
 	public abstract void buildStage();
-
 	@Override
 	public void render(float delta) {
 		// Clear screen

@@ -149,225 +149,8 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	Gdx.graphics.setTitle("MapEditor - Blank");
         this.context = context;
         create();
-//        createMenu();
     }
-    /**
-     * Creates an empty map with SafeZone tiles
-     */
-    public void createEmptyMap() {
-    	Gdx.graphics.setTitle("MapEditor - Blank");
-    	//clear the tiles
-    	topLayer.clear();
-    	// Create the sea tiles
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            for (int y = 0; y < MAP_HEIGHT; y++) {
-                if (y < 3 || y > 32) {
-                	tiles[x][y] = safezone;
-                }
-                else {
-                	tiles[x][y] = cell;
-                }
-            }
-        }
-    }
-    /**
-     * Helper method, flip array horizontally
-     */
-    public static int[][] flipArray(int[][] theArray) {
-        for(int i = 0; i < (theArray.length / 2); i++) {
-            int[] temp = theArray[i];
-            theArray[i] = theArray[theArray.length - i - 1];
-            theArray[theArray.length - i - 1] = temp;
-        }
-        return theArray;
-    }
-    /**
-     * Helper method, flipv vertically
-     */
-    public static int[][] inverseArray(int[][] matrix)
-    {
-        int m = matrix.length;
-        int n = matrix[0].length;
 
-        int[][] transposedMatrix = new int[n][m];
-
-        for(int i = 0; i < n; i++)
-        {
-            for(int j = 0; j < m; j++)
-            {
-                transposedMatrix[i][j] = matrix[j][i];
-            }
-        }
-
-        return transposedMatrix;
-    }
-    /**
-     * Wrapper to clear tiles
-     */
-    public void clearTiles() {
-    	//clear the tiles
-    	topLayer.clear();
-    	createEmptyMap();
-    }
-    /**
-     * Save current map
-     */
-    public void saveMap() {
-    	if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-    		File selectedFile = fileChooser.getSelectedFile();
-    		Gdx.graphics.setTitle("MapEditor - current map: " + selectedFile.getName());
-    		if(!selectedFile.getAbsolutePath().endsWith(".txt") ) {
-    			String fname = selectedFile.getAbsolutePath().toString() + ".txt";
-    			selectedFile = new File(fname);
-    		}
-        	int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
-        	//iterate through layer first to get entities
-        	for(int x = 0; x < tiles.length; x++) {
-        		for(int y = 0; y < tiles[x].length; y++) {
-        			for (GameObject object : topLayer.getObjects()) {
-	                    if (object != null && object.getX() == x && object.getY() == y) {
-                    		if(object instanceof Flag) {
-                    			if(((Flag) object).getSize() == 1) {
-                    				tempTiles[x][y] = FLAG_1;
-                    			}else if(((Flag) object).getSize() == 2) {
-                    				tempTiles[x][y] = FLAG_2;
-                    			}else if(((Flag) object).getSize() == 3) {
-                    				tempTiles[x][y] = FLAG_3;
-                    			}
-                    		}else if(object instanceof SmallRock) {
-                    			tempTiles[x][y] = SMALL_ROCK;
-                    		}else if(object instanceof BigRock) {
-                    			tempTiles[x][y] = BIG_ROCK;
-                    		}
-                    	}
-                    }
-                }
-        	}
-        	//iterate through tiles and change to numbers
-        	for(int x = 0; x < tiles.length; x++) {
-        		for(int y = 0; y < tiles[x].length; y++) {
-        			if(tiles[x][y] == windEast) {
-        				tempTiles[x][y] = WIND_EAST;
-        			}else if(tiles[x][y] == windWest) {
-        				tempTiles[x][y] = WIND_WEST;
-        			}else if(tiles[x][y] == windSouth) {
-        				tempTiles[x][y] = WIND_SOUTH;
-        			}else if(tiles[x][y] == windNorth) {
-        				tempTiles[x][y] = WIND_NORTH;
-        			}else if(tiles[x][y] == whirlNW) {
-        				tempTiles[x][y] = WP_NW;
-        			}else if(tiles[x][y] == whirlNE) {
-        				tempTiles[x][y] = WP_NE;
-        			}else if(tiles[x][y] == whirlSW) {
-        				tempTiles[x][y] = WP_SW;
-        			}else if(tiles[x][y] == whirlSE) {
-        				tempTiles[x][y] = WP_SE;
-        			}
-        		}
-        	}
-        	//flip and inverse array
-        	tempTiles = flipArray(tempTiles);
-        	tempTiles = inverseArray(tempTiles);
-        	StringBuilder builder = new StringBuilder();
-        	for (int i = tempTiles.length - 1; i >= 0; i--) {
-        	    for (int j = tempTiles[i].length - 1; j >= 0; j--) {
-        			builder.append(tempTiles[i][j]);
-        			if(j < tempTiles[i].length && j !=0){
-        				//if this is not the last row element
-       		         	builder.append(",");
-        			}
-        		}
-        		builder.append("\n");//append new line at the end of the row
-        	}
-        	BufferedWriter writer;
-    		try {
-    			writer = new BufferedWriter(new FileWriter(selectedFile));
-    	    	writer.write(builder.toString());//save the string representation of the board
-    	    	writer.close();
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
-    	}
-    }
-    /**
-     * Load selected map
-     */
-    public void loadMap() {
-    	fileChooser.setDialogTitle("Select Map File");
-    	if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-    		int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
-    		File selectedFile = fileChooser.getSelectedFile();
-    		int x = 0;
-	        int y = 0;
-	        clearTiles();
-	        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()))) {
-	            String line;
-	            while ((line = br.readLine()) != null) {
-	                String[] split = line.split(",");
-	                for (String tile : split) {
-	                	tempTiles[x][y] = Integer.parseInt(tile);
-	                    x++;
-	                }
-	                x = 0;
-	                y++;
-	            }
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-
-	        int x1 = 0;
-	        int y1 = 0;
-	        for (int i = 0; i < tempTiles.length; i++) {
-	            for (int j = tempTiles[i].length - 1; j > -1; j--) {
-        			if(tempTiles[i][j] == WIND_EAST) {
-        				tiles[x1][y1] = windEast;
-        			}else if(tempTiles[i][j] == WIND_WEST) {
-        				tiles[x1][y1] = windWest;
-        			}else if(tempTiles[i][j] == WIND_SOUTH) {
-        				tiles[x1][y1] = windSouth;
-        			}else if(tempTiles[i][j] == WIND_NORTH) {
-        				tiles[x1][y1] = windNorth;
-        			}else if(tempTiles[i][j] == WP_NW) {
-        				tiles[x1][y1] = whirlNW;
-        			}else if(tempTiles[i][j] == WP_NE) {
-        				tiles[x1][y1] = whirlNE;
-        			}else if(tempTiles[i][j] == WP_SW) {
-        				tiles[x1][y1] = whirlSW;
-        			}else if(tempTiles[i][j] == WP_SE) {
-        				tiles[x1][y1] = whirlSE;
-        			}else if(tempTiles[i][j] == SMALL_ROCK) {
-        				SmallRock small = new SmallRock(context,x1,y1,false);
-        				topLayer.add(small);
-        			}else if(tempTiles[i][j] == BIG_ROCK) {
-        				BigRock big = new BigRock(context,x1,y1,false);
-        				topLayer.add(big);
-        			}else if(tempTiles[i][j] == FLAG_1) {
-	        			Flag flag_1 = new Flag(context,x1,y1,1);	
-        				topLayer.add(flag_1);
-        			}else if(tempTiles[i][j] == FLAG_2) {
-        				Flag flag_2 = new Flag(context,x1,y1,2);
-        				topLayer.add(flag_2);
-        			}else if(tempTiles[i][j] == FLAG_3) {
-        				Flag flag_3 = new Flag(context,x1,y1,3);
-        				topLayer.add(flag_3);
-        			}else if(tempTiles[i][j] == 0) {
-                        if (y1 < 3 || y1 > 32) {
-                        	tiles[x1][y1] = safezone;
-                        }
-                        else {
-                        	tiles[x1][y1] = cell;
-                        }
-        			}
-        			
-	                y1++;
-	            }
-	            y1 = 0;
-	            x1++;
-	        }
-	        Gdx.graphics.setTitle("MapEditor - loaded map: "+selectedFile.getName());
-    	}
-    }
-    
     public void create() {
     	fileChooser = new JFileChooser();
         tiles = new GameTile[MAP_WIDTH][MAP_HEIGHT];
@@ -427,18 +210,18 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public void render(float delta) {
-    	Gdx.gl.glViewport(0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     	stage.getBatch().setProjectionMatrix(camera.combined);
     	viewport.apply();
     	stage.getBatch().begin();
-        
         drawSea();
         // Render the map
         renderMap();
         // Render separate layer of rocks/flags
         renderEntities();
         stage.getBatch().end();
+        stage.getBatch().begin();
     	drawBackground();
+    	stage.getBatch().end();
         stage.act();
         stage.draw();
     }
@@ -516,8 +299,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
      * Draws only the top layer stuff such as rocks/flags
      */
     private void renderEntities() {
-        renderer.setProjectionMatrix(camera.combined);
-
         for (int x = MAP_WIDTH - 1; x > -1; x--) {
             for (int y = MAP_HEIGHT - 1; y > -1; y--) {
                 GameObject object = getObject(x, y);
@@ -841,8 +622,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         seaTile = context.getManager().get(context.getAssetObject().sea);
         seaTile.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         renderer = new ShapeRenderer();
-//        setup();
-        
+
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         initButtons();
@@ -895,12 +675,16 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         table.add(saveButton).pad(3.0f).row();
         table.add(helpButton).padTop(3.0f).padBottom(20.0f).row();
         table.add(lobbyButton).pad(3.0f).row();
-        stage.addActor(windTable);
-        stage.addActor(whirlTable);
-        stage.addActor(rockTable);
-        stage.addActor(flagTable);
-        stage.addActor(table);
-        table.setPosition(Gdx.graphics.getWidth()-88, 100);
+        
+        Table menuTable = new Table();
+        menuTable.add(windTable).row();
+        menuTable.add(whirlTable).row();
+        menuTable.add(rockTable).row();
+        menuTable.add(flagTable).row();
+        menuTable.add(table).row();
+        stage.addActor(menuTable);
+        menuTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()/2);;
+        menuTable.setBackground(skin.getDrawable("dialogDim"));
         
         loadButton.addListener(new ClickListener() {
         	@Override
@@ -1256,9 +1040,8 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     /**
      * Draws the menu background
      */
-    @SuppressWarnings("unused")
 	private void drawBackground() {
-    	Gdx.gl.glEnable(GL20.GL_BLEND);
+     	Gdx.gl.glEnable(GL20.GL_BLEND);
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(new Color(128 / 255f, 128 / 255f, 128 / 255f, 0.7f));
         renderer.rect(Gdx.graphics.getWidth()-175, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -1296,5 +1079,222 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
 		dialog.setResizable(true);
     }
 
+    /**
+     * Creates an empty map with SafeZone tiles
+     */
+    public void createEmptyMap() {
+    	Gdx.graphics.setTitle("MapEditor - Blank");
+    	//clear the tiles
+    	topLayer.clear();
+    	// Create the sea tiles
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            for (int y = 0; y < MAP_HEIGHT; y++) {
+                if (y < 3 || y > 32) {
+                	tiles[x][y] = safezone;
+                }
+                else {
+                	tiles[x][y] = cell;
+                }
+            }
+        }
+    }
+    /**
+     * Helper method, flip array horizontally
+     */
+    public static int[][] flipArray(int[][] theArray) {
+        for(int i = 0; i < (theArray.length / 2); i++) {
+            int[] temp = theArray[i];
+            theArray[i] = theArray[theArray.length - i - 1];
+            theArray[theArray.length - i - 1] = temp;
+        }
+        return theArray;
+    }
+    /**
+     * Helper method, flipv vertically
+     */
+    public static int[][] inverseArray(int[][] matrix)
+    {
+        int m = matrix.length;
+        int n = matrix[0].length;
+
+        int[][] transposedMatrix = new int[n][m];
+
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = 0; j < m; j++)
+            {
+                transposedMatrix[i][j] = matrix[j][i];
+            }
+        }
+
+        return transposedMatrix;
+    }
+    /**
+     * Wrapper to clear tiles
+     */
+    public void clearTiles() {
+    	//clear the tiles
+    	topLayer.clear();
+    	createEmptyMap();
+    }
+    /**
+     * Save current map
+     */
+    public void saveMap() {
+    	if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+    		File selectedFile = fileChooser.getSelectedFile();
+    		Gdx.graphics.setTitle("MapEditor - current map: " + selectedFile.getName());
+    		if(!selectedFile.getAbsolutePath().endsWith(".txt") ) {
+    			String fname = selectedFile.getAbsolutePath().toString() + ".txt";
+    			selectedFile = new File(fname);
+    		}
+        	int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
+        	//iterate through layer first to get entities
+        	for(int x = 0; x < tiles.length; x++) {
+        		for(int y = 0; y < tiles[x].length; y++) {
+        			for (GameObject object : topLayer.getObjects()) {
+	                    if (object != null && object.getX() == x && object.getY() == y) {
+                    		if(object instanceof Flag) {
+                    			if(((Flag) object).getSize() == 1) {
+                    				tempTiles[x][y] = FLAG_1;
+                    			}else if(((Flag) object).getSize() == 2) {
+                    				tempTiles[x][y] = FLAG_2;
+                    			}else if(((Flag) object).getSize() == 3) {
+                    				tempTiles[x][y] = FLAG_3;
+                    			}
+                    		}else if(object instanceof SmallRock) {
+                    			tempTiles[x][y] = SMALL_ROCK;
+                    		}else if(object instanceof BigRock) {
+                    			tempTiles[x][y] = BIG_ROCK;
+                    		}
+                    	}
+                    }
+                }
+        	}
+        	//iterate through tiles and change to numbers
+        	for(int x = 0; x < tiles.length; x++) {
+        		for(int y = 0; y < tiles[x].length; y++) {
+        			if(tiles[x][y] == windEast) {
+        				tempTiles[x][y] = WIND_EAST;
+        			}else if(tiles[x][y] == windWest) {
+        				tempTiles[x][y] = WIND_WEST;
+        			}else if(tiles[x][y] == windSouth) {
+        				tempTiles[x][y] = WIND_SOUTH;
+        			}else if(tiles[x][y] == windNorth) {
+        				tempTiles[x][y] = WIND_NORTH;
+        			}else if(tiles[x][y] == whirlNW) {
+        				tempTiles[x][y] = WP_NW;
+        			}else if(tiles[x][y] == whirlNE) {
+        				tempTiles[x][y] = WP_NE;
+        			}else if(tiles[x][y] == whirlSW) {
+        				tempTiles[x][y] = WP_SW;
+        			}else if(tiles[x][y] == whirlSE) {
+        				tempTiles[x][y] = WP_SE;
+        			}
+        		}
+        	}
+        	//flip and inverse array
+        	tempTiles = flipArray(tempTiles);
+        	tempTiles = inverseArray(tempTiles);
+        	StringBuilder builder = new StringBuilder();
+        	for (int i = tempTiles.length - 1; i >= 0; i--) {
+        	    for (int j = tempTiles[i].length - 1; j >= 0; j--) {
+        			builder.append(tempTiles[i][j]);
+        			if(j < tempTiles[i].length && j !=0){
+        				//if this is not the last row element
+       		         	builder.append(",");
+        			}
+        		}
+        		builder.append("\n");//append new line at the end of the row
+        	}
+        	BufferedWriter writer;
+    		try {
+    			writer = new BufferedWriter(new FileWriter(selectedFile));
+    	    	writer.write(builder.toString());//save the string representation of the board
+    	    	writer.close();
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}
+    	}
+    }
+    /**
+     * Load selected map
+     */
+    public void loadMap() {
+    	fileChooser.setDialogTitle("Select Map File");
+    	if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+    		int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
+    		File selectedFile = fileChooser.getSelectedFile();
+    		int x = 0;
+	        int y = 0;
+	        clearTiles();
+	        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()))) {
+	            String line;
+	            while ((line = br.readLine()) != null) {
+	                String[] split = line.split(",");
+	                for (String tile : split) {
+	                	tempTiles[x][y] = Integer.parseInt(tile);
+	                    x++;
+	                }
+	                x = 0;
+	                y++;
+	            }
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+
+	        int x1 = 0;
+	        int y1 = 0;
+	        for (int i = 0; i < tempTiles.length; i++) {
+	            for (int j = tempTiles[i].length - 1; j > -1; j--) {
+        			if(tempTiles[i][j] == WIND_EAST) {
+        				tiles[x1][y1] = windEast;
+        			}else if(tempTiles[i][j] == WIND_WEST) {
+        				tiles[x1][y1] = windWest;
+        			}else if(tempTiles[i][j] == WIND_SOUTH) {
+        				tiles[x1][y1] = windSouth;
+        			}else if(tempTiles[i][j] == WIND_NORTH) {
+        				tiles[x1][y1] = windNorth;
+        			}else if(tempTiles[i][j] == WP_NW) {
+        				tiles[x1][y1] = whirlNW;
+        			}else if(tempTiles[i][j] == WP_NE) {
+        				tiles[x1][y1] = whirlNE;
+        			}else if(tempTiles[i][j] == WP_SW) {
+        				tiles[x1][y1] = whirlSW;
+        			}else if(tempTiles[i][j] == WP_SE) {
+        				tiles[x1][y1] = whirlSE;
+        			}else if(tempTiles[i][j] == SMALL_ROCK) {
+        				SmallRock small = new SmallRock(context,x1,y1,false);
+        				topLayer.add(small);
+        			}else if(tempTiles[i][j] == BIG_ROCK) {
+        				BigRock big = new BigRock(context,x1,y1,false);
+        				topLayer.add(big);
+        			}else if(tempTiles[i][j] == FLAG_1) {
+	        			Flag flag_1 = new Flag(context,x1,y1,1);	
+        				topLayer.add(flag_1);
+        			}else if(tempTiles[i][j] == FLAG_2) {
+        				Flag flag_2 = new Flag(context,x1,y1,2);
+        				topLayer.add(flag_2);
+        			}else if(tempTiles[i][j] == FLAG_3) {
+        				Flag flag_3 = new Flag(context,x1,y1,3);
+        				topLayer.add(flag_3);
+        			}else if(tempTiles[i][j] == 0) {
+                        if (y1 < 3 || y1 > 32) {
+                        	tiles[x1][y1] = safezone;
+                        }
+                        else {
+                        	tiles[x1][y1] = cell;
+                        }
+        			}
+        			
+	                y1++;
+	            }
+	            y1 = 0;
+	            x1++;
+	        }
+	        Gdx.graphics.setTitle("MapEditor - loaded map: "+selectedFile.getName());
+    	}
+    }
+    
 	
 }

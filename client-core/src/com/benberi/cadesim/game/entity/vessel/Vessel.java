@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.Entity;
 import com.benberi.cadesim.game.entity.projectile.CannonBall;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
@@ -31,6 +30,7 @@ import com.benberi.cadesim.game.entity.vessel.move.MoveType;
 import com.benberi.cadesim.game.screen.impl.battle.map.GameObject;
 import com.benberi.cadesim.game.screen.impl.battle.map.tile.impl.BigRock;
 import com.benberi.cadesim.util.OrientationLocation;
+import com.benberi.cadesim.util.Team;
 import com.benberi.cadesim.util.TextureCollection;
 
 import java.lang.reflect.Constructor;

@@ -10,8 +10,8 @@ import com.badlogic.gdx.Gdx;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
-import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
+import com.benberi.cadesim.util.Team;
 
 public class ReceiveTeamPacket extends ClientPacketExecutor {
 
@@ -21,7 +21,6 @@ public class ReceiveTeamPacket extends ClientPacketExecutor {
 
 	@Override
     public void execute(Packet p) {
-		//why is teams not setting correctly from server?
         int length = p.readInt();
         ObjectInputStream ois;
 		try {

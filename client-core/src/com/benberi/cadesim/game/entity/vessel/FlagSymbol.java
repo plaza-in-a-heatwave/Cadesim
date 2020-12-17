@@ -2,7 +2,7 @@ package com.benberi.cadesim.game.entity.vessel;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.game.cade.Team;
+import com.benberi.cadesim.util.Team;
 
 public class FlagSymbol extends TextureRegion {
 	

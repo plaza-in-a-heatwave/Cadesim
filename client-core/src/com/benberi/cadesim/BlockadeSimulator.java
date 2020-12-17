@@ -29,4 +29,9 @@ public class BlockadeSimulator extends Game{
 		}
 		Gdx.app.exit();
 	}
+	@Override
+	public void render() {
+		super.render();
+		context.getPacketHandler().tickQueue();
+	}
 }

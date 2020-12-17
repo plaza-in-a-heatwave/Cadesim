@@ -1,4 +1,4 @@
-package com.benberi.cadesim.game.screen;
+package com.benberi.cadesim.game.screen.component;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.game.cade.Team;
+import com.benberi.cadesim.util.Team;
 
 public class GameInformation{
 	private GameContext context;
@@ -44,12 +44,13 @@ public class GameInformation{
     // are we defender or attacker?
     boolean areDefender;
 
-	GameInformation(GameContext context,Stage stage) {
+	public GameInformation(GameContext context,Stage stage) {
         this.context = context;
         this.stage = stage;
     }
 
     public void buildStage() {
+    	
         this.panel = context.getManager().get(context.getAssetObject().infoPanel);
         this.contenders = context.getManager().get(context.getAssetObject().contenders);
         this.defenderThem = new TextureRegion(contenders, 0, 0, 13, 18);
@@ -63,7 +64,6 @@ public class GameInformation{
         fontPointsDefender = context.getManager().get(context.getAssetObject().fontTeamDefender_Points);
         timeFont = context.getManager().get(context.getAssetObject().fontTime);
         breakInfoFont = context.getManager().get(context.getAssetObject().fontBreak);
-        System.out.println(context.myTeam.name());
         areDefender = context.myTeam.name().equals(Team.DEFENDER.toString());
         setTeamColors();
     }
@@ -105,7 +105,7 @@ public class GameInformation{
     public void render(float delta) {
         int xPlacement = 60 + (longestTeam.length() * 6);
         Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        
+        stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
         stage.getBatch().begin();
         stage.getBatch().draw(panel, 5, 5);
 

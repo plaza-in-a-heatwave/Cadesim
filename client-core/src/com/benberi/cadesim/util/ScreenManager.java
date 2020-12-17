@@ -7,6 +7,7 @@ public class ScreenManager {
 	
 	// Singleton: unique instance
 	private static ScreenManager instance;
+	private static AbstractScreen currentScreen;
 	
 	// Reference to game
 	private Game game;
@@ -24,6 +25,15 @@ public class ScreenManager {
 		return instance;
 	}
 	
+	// Singleton: retrieve instance
+	public static AbstractScreen getScreen() {
+		return currentScreen;
+	}
+	
+	public void setCurrentScreen(AbstractScreen screen) {
+		ScreenManager.currentScreen = screen;
+	}
+	
 	// Initialization with the game class
 	public void initialize(Game game) {
 		this.game = game;
@@ -37,6 +47,7 @@ public class ScreenManager {
 		
 		// Show new screen
 		AbstractScreen newScreen = screenEnum.getScreen(params);
+		setCurrentScreen(newScreen);
 		newScreen.buildStage();
 		game.setScreen(newScreen);
 		// Dispose previous screen

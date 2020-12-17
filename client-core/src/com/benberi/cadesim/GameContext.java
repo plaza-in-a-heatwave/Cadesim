@@ -12,18 +12,18 @@ import com.benberi.cadesim.client.packet.ClientPacketHandler;
 import com.benberi.cadesim.client.packet.OutgoingPacket;
 import com.benberi.cadesim.client.packet.in.LoginResponsePacket;
 import com.benberi.cadesim.client.packet.out.*;
-import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.EntityManager;
 import com.benberi.cadesim.game.entity.vessel.move.MoveType;
-import com.benberi.cadesim.game.assets.SceneAssetManager;
-import com.benberi.cadesim.game.screen.ControlAreaScene;
 import com.benberi.cadesim.game.screen.LobbyScreen;
-import com.benberi.cadesim.game.screen.MenuComponent;
+import com.benberi.cadesim.game.screen.component.BattleControlComponent;
+import com.benberi.cadesim.game.screen.component.MenuComponent;
 import com.benberi.cadesim.game.screen.SeaBattleScreen;
+import com.benberi.cadesim.util.GameAssetManager;
 import com.benberi.cadesim.util.GameToolsContainer;
 import com.benberi.cadesim.util.RandomUtils;
 import com.benberi.cadesim.util.ScreenEnum;
 import com.benberi.cadesim.util.ScreenManager;
+import com.benberi.cadesim.util.Team;
 import com.benberi.cadesim.util.TextureCollection;
 
 import io.netty.channel.Channel;
@@ -71,7 +71,7 @@ public class GameContext {
 	
 	private ArrayList<Object> gameSettings = new ArrayList<Object>();
 
-    private SceneAssetManager assetManager;
+    private GameAssetManager assetManager;
 
     /**
      * The sea battle scene
@@ -80,7 +80,7 @@ public class GameContext {
     
     private LobbyScreen lobbyScreen;
 
-    private ControlAreaScene controlArea;
+    private BattleControlComponent controlArea;
 
     private MenuComponent battleMenu;
     /**
@@ -200,7 +200,7 @@ public class GameContext {
      * Create!
      */
     public void create() {
-        assetManager = new SceneAssetManager();
+        assetManager = new GameAssetManager();
         assetManager.loadConnectSceneTextures();
         assetManager.loadAllShipTextures();
         assetManager.loadShipInfo();
@@ -254,6 +254,15 @@ public class GameContext {
     }
 
     public void createFurtherScenes(int shipId) {
+    	GameContext context = this;
+    	Gdx.app.postRunnable(new Runnable() {
+
+			@Override
+			public void run() {
+		    	ScreenManager.getInstance().showScreen(ScreenEnum.GAME, context);
+			}
+    		
+    	});
 		Gdx.graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
     }
 
@@ -273,11 +282,11 @@ public class GameContext {
         return seaBattleScreen;
     }
     
-    public void setControl(ControlAreaScene control) {
+    public void setControl(BattleControlComponent control) {
     	controlArea = control;
     }
     
-    public ControlAreaScene getControl() {
+    public BattleControlComponent getControl() {
     	return controlArea;
     }
     
@@ -356,7 +365,7 @@ public class GameContext {
         packet.set(slot1, slot2);
         sendPacket(packet);
     }
-
+    int response;
     /**
      * Attempts to connect to server
      *
@@ -364,6 +373,7 @@ public class GameContext {
      * @param ip            The IP Address to connect
      * @throws UnknownHostException 
      */
+	GameContext context = this;
     public void connect(final String displayName, String ip, String code, int ship, int team) throws UnknownHostException {
     	haveServerResponse = false; // reset for next connect
     	if(!RandomUtils.validIP(ip) && RandomUtils.validUrl(ip)) {
@@ -399,7 +409,6 @@ public class GameContext {
             }
         });
         getService().execute(connectTask);
-        ScreenManager.getInstance().showScreen(ScreenEnum.GAME, this);
     }
 
     /**
@@ -450,7 +459,6 @@ public class GameContext {
 				getBattleScreen().setSound_volume(Float.parseFloat(volume));
 			}
         }
-
     }
 
     public String getVolumeProperty(){
@@ -540,7 +548,7 @@ public class GameContext {
             if (message.equals("/lagtestmode")) {
                 setLagTestMode(!isLagTestMode());
 
-                getControl().getBnavComponent().addNewMessage(
+                getControl().addNewMessage(
                         "lag test mode", (isLagTestMode()?"ENABLED":"DISABLED") +
                         ". type /lagtestmode to " + (isLagTestMode()?"disable":"enable") + "."
                 );
@@ -613,7 +621,7 @@ public class GameContext {
     	}
     }
 
-    public SceneAssetManager getAssetObject() {
+    public GameAssetManager getAssetObject() {
         return assetManager;
     }
     

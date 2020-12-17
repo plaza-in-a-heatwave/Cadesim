@@ -16,7 +16,7 @@ public class CannonSlotPlacedPacket extends ClientPacketExecutor {
         int side = p.readByte();
         int amount = p.readByte();
 
-        getContext().getControl().getBnavComponent().setCannons(side, slot, amount);
+        getContext().getControl().setCannons(side, slot, amount);
     }
 
     @Override

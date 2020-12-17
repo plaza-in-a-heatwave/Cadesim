@@ -1,4 +1,4 @@
-package com.benberi.cadesim.game.screen;
+package com.benberi.cadesim.game.screen.component;
 
 import java.awt.Rectangle;
 import java.io.BufferedReader;
@@ -42,9 +42,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
 import com.benberi.cadesim.game.screen.impl.battle.map.BlockadeMap;
+import com.benberi.cadesim.util.Team;
 
 public class MenuComponent implements InputProcessor {
 	GameContext context;
@@ -179,7 +179,7 @@ public class MenuComponent implements InputProcessor {
 		return settingsDialog;
 	}
 	
-    protected MenuComponent(GameContext context,Stage stage) {
+    public MenuComponent(GameContext context,Stage stage) {
         this.context = context;
         this.stage = stage;
         fileChooser = new JFileChooser();
@@ -461,7 +461,7 @@ public class MenuComponent implements InputProcessor {
     }
 
     public void render(float delta) {
-        Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
+//        Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
     	stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
         stage.getBatch().begin();
         if(menuButton.isDisabled()) {

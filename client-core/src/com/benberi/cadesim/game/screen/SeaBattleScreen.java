@@ -20,6 +20,9 @@ import com.benberi.cadesim.game.entity.vessel.*;
 import com.benberi.cadesim.game.entity.vessel.move.MoveAnimationTurn;
 import com.benberi.cadesim.game.entity.vessel.move.MovePhase;
 import com.benberi.cadesim.game.entity.vessel.move.MoveType;
+import com.benberi.cadesim.game.screen.component.BattleControlComponent;
+import com.benberi.cadesim.game.screen.component.GameInformation;
+import com.benberi.cadesim.game.screen.component.MenuComponent;
 import com.benberi.cadesim.game.screen.impl.battle.map.BlockadeMap;
 import com.benberi.cadesim.game.screen.impl.battle.map.GameObject;
 import com.benberi.cadesim.game.screen.impl.battle.map.tile.GameTile;
@@ -103,7 +106,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     private BlockadeMap blockadeMap;
     public MenuComponent battleMenu;
-    public ControlAreaScene control;
+    public BattleControlComponent control;
 
     private int vesselsCountWithCurrentPhase = 0;
     private int vesselsCountNonSinking = 0;
@@ -170,7 +173,13 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
     @Override
     public void buildStage() {
         battleMenu = new MenuComponent(context,stage);
-        control = new ControlAreaScene(context,stage);
+    	Vessel v = Vessel.createVesselByType(context, null, 0, 0, context.myVesselType);
+        control = new BattleControlComponent(
+        	context,
+        	stage,
+        	v.getMoveType() != VesselMoveType.FOUR_MOVES, // is it a big ship
+        	v.isDoubleShot()                              // single or double shot
+        );
         information = new GameInformation(context,stage);
         battleMenu.buildStage();
         control.buildStage();
@@ -502,7 +511,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                 waitingForSink = true;
             }
         }
-        BattleControlComponent b = context.getControl().getBnavComponent();
+        BattleControlComponent b = context.getControl();
         if (b.isLockedDuringAnimate()) {
 
             // this condition breaks the lock if we've been timed out for too long
@@ -530,7 +539,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     @Override
     public void render(float delta) {
-    	context.getPacketHandler().tickQueue();
+    	if(battleMenu.teamTable.isVisible()) {
+    		battleMenu.fillTeamList();
+    	}
     	stage.getBatch().setProjectionMatrix(camera.combined);
         Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
     	stage.getBatch().begin();
@@ -538,14 +549,12 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
         drawIsland();
         // Render the map
         renderSeaBattle();
-//        // Render ships
+        // Render ships
         renderEntities();
         stage.getBatch().end();
-        //game stage
-        stage.act();
-        stage.draw();
         information.render(delta);
         control.render(delta);
+        control.show();
         battleMenu.render(delta);
     }
 
@@ -565,11 +574,13 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
     }
     
     private void drawIsland() {
-//        if(selectedIsland == pukru_island) {
-//        	stage.getBatch().draw(selectedIsland, -1190,1090);
-//        }else {
-//        	stage.getBatch().draw(selectedIsland, -1290,1050);
-//        }
+    	if(selectedIsland != null) {
+            if(selectedIsland == pukru_island) {
+            	stage.getBatch().draw(selectedIsland, -1190,1090);
+            }else {
+            	stage.getBatch().draw(selectedIsland, -1290,1050);
+            }	
+    	}
     }
 
     /**
@@ -841,9 +852,8 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
             vessel.setMovePhase(null);
         }
         recountVessels();
-
         //lock controls
-//        context.getControlScene().getBnavComponent().setLockedDuringAnimate(true);
+        context.getControl().setLockedDuringAnimate(true);
         setAnimationOngoing(true);
     }
 
@@ -917,6 +927,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
 	@Override
 	public boolean touchDown(int x, int y, int pointer, int button) {
+		if(control.touchDown(x, y, pointer,button)) {
+			return true;
+		}
     	if(!battleMenu.isClickingMenuButton(x, y) && !battleMenu.isClickingMenuTable(x, y) && !battleMenu.isSettingsDialogOpen()) {//keep from moving when menu button clicked
             if (battleMenu.touchDown(x, y, pointer, button)) {
                 return true;
@@ -935,6 +948,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
 	@Override
 	public boolean touchUp(int x, int y, int pointer, int button) {	
+		if(control.touchUp(x, y, pointer,button)) {
+			return true;
+		}
 		if(!battleMenu.isClickingMenuButton(x, y) && !battleMenu.isClickingMenuTable(x, y) && !battleMenu.isSettingsDialogOpen() ) {//keep from moving when menu button clicked
 	        if (battleMenu.touchUp(x, y, pointer,button)) {
 	            return true;
@@ -962,6 +978,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
 	@Override
 	public boolean touchDragged(int sx, int sy, int pointer) {
+		if(control.touchDragged(sx, sy, pointer)) {
+			return true;
+		}
         if(!battleMenu.audio_slider.isVisible() && !battleMenu.isSettingsDialogOpen()) {
             if (camera != null && sy > camera.viewportHeight) {
                 return false;
@@ -981,9 +1000,12 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
 	@Override
 	public boolean mouseMoved(int x, int y) {
-//        if (mainmenu.mouseMoved(x, y)) {
-//            return true;
-//        }
+        if (control.mouseMoved(x, y)) {
+            return true;
+        }
+        if (battleMenu.mouseMoved(x, y)) {
+            return true;
+        }
 		return false;
 	}
 

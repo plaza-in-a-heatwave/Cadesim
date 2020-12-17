@@ -1,9 +1,9 @@
 package com.benberi.cadesim.game.entity;
 
 import com.benberi.cadesim.GameContext;
-import com.benberi.cadesim.game.cade.Team;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
 import com.benberi.cadesim.game.entity.vessel.move.MovePhase;
+import com.benberi.cadesim.util.Team;
 
 import java.util.*;
 
