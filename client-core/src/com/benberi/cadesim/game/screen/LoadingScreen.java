@@ -151,4 +151,8 @@ public class LoadingScreen extends AbstractScreen{
         // Dispose the loading assets as we no longer need them
     	context.getManager().unload("loading.pack");
     }
+    
+    public void dispose() {
+    	super.dispose();
+    }
 }

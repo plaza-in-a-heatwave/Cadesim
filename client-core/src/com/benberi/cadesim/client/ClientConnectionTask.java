@@ -87,7 +87,9 @@ public class ClientConnectionTask extends Bootstrap implements Runnable,Disposab
 
 	@Override
 	public void dispose() {
-		channel.close();
+		if(channel != null) {
+			channel.close();
+		}
 		worker.shutdownGracefully();
 	}
 }
