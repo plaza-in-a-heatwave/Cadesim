@@ -122,6 +122,8 @@ public class LoadingScreen extends AbstractScreen{
         			@Override
         			public void run() {
                     	ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
+                    	context.getLobbyScreen().setPopupMessage("Unable to connect; please retry.");
+                    	context.getLobbyScreen().showPopup();
         			}
             		
             	});
