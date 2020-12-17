@@ -539,6 +539,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     @Override
     public void render(float delta) {
+    	this.show();
     	if(battleMenu.teamTable.isVisible()) {
     		battleMenu.fillTeamList();
     	}
