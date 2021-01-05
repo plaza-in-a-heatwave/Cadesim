@@ -9,7 +9,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -30,14 +29,14 @@ import com.badlogic.gdx.math.Vector2;
 import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.entity.vessel.move.MoveType;
+import com.benberi.cadesim.game.screen.SeaBattleScreen;
 import com.benberi.cadesim.game.screen.impl.control.hand.HandMove;
 import com.benberi.cadesim.game.screen.impl.control.hand.impl.BigShipHandMove;
 import com.benberi.cadesim.game.screen.impl.control.hand.impl.SmallShipHandMove;
 
-public class BattleControlComponent implements InputProcessor {
+public class BattleControlComponent extends SeaBattleScreen implements InputProcessor {
 	
 	private GameContext context;
-	private Stage stage;
     /**
      * Left moves
      */
@@ -154,11 +153,6 @@ public class BattleControlComponent implements InputProcessor {
         forwardMovesByTurn[4] = 0;
         rightMovesByTurn[4] = 0;
     }
-    
-    /**
-     * Shape renderer for shapes, used for damage/bilge and such
-     */
-    private ShapeRenderer shape;
 
     /**
      * Font for texts/messages
@@ -475,7 +469,7 @@ public class BattleControlComponent implements InputProcessor {
     private int DISENGAGE_buttonX     = DISENGAGE_REF_X + 5+336+5 + 30;
     private int DISENGAGE_buttonY     = DISENGAGE_REF_Y + 8 + 24;
     
-	private ImageButton disengageButton;
+	public ImageButton disengageButton;
 	private ImageButtonStyle disengageButtonStyle;
 
     // DISENGAGE shapes
@@ -514,16 +508,11 @@ public class BattleControlComponent implements InputProcessor {
     
     private boolean  draggingScroll = false; // keeps scrollbar locked until release
     private Map<Integer,int[]> resolutionWidthDiction;
-    private Skin skin;
-    
-    /**
-     * The camera view of the scene
-     */
-    private OrthographicCamera camera;
-    
-    public BattleControlComponent(GameContext context, Stage stage, boolean big, boolean doubleShot) {
-        this.context = context;
-        this.stage = stage;
+    protected Stage stage;
+    public BattleControlComponent(GameContext context,Stage stage, boolean big, boolean doubleShot) {
+    	super(context);
+    	this.stage = stage;
+    	this.context = context;
         isDoubleShot = doubleShot;
         isBigShip    = big;
         if (isDoubleShot) {
@@ -558,13 +547,10 @@ public class BattleControlComponent implements InputProcessor {
     }
 
     public void buildStage() {
-        camera = new OrthographicCamera(Gdx.graphics.getWidth(),  200);
-        shape = new ShapeRenderer();
         // stage for chatContainer
         initTextures();
         
         // set chat view and scroll to default positions
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         selectChat = new SelectBox<String>(skin);
         selectChat.setItems(new String[]{"Global", "Team"});
@@ -851,7 +837,7 @@ public class BattleControlComponent implements InputProcessor {
         return new SmallShipHandMove();
     }
 
-    public void show() {
+    public void update() {
     	if(context != null) {
             int turnDuration = context.getTurnDuration(); // getTurnSetting() causes a render bug when setTimePacket is sent
             double ratio = (double) 43 / (double) turnDuration;
@@ -867,10 +853,9 @@ public class BattleControlComponent implements InputProcessor {
     }
 
     public void render(float delta) {
-        Gdx.gl.glViewport(0,0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-    	stage.getBatch().setTransformMatrix(camera.view);
+        stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
+        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),false);
     	renderBackground();
-    	stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),false);
         renderMoveControl();
         renderDisengage();
     	stage.act();
@@ -1233,20 +1218,19 @@ public class BattleControlComponent implements InputProcessor {
     }
     
     private void renderBackground() {
-    	shape.begin(ShapeRenderer.ShapeType.Filled);
-        shape.setColor(new Color(48 / 255f, 98 / 255f, 123 / 255f, 1));
-        //shapeRenderer.setColor(new Color(65 / 255f, 101 / 255f, 139 / 255f, 1));
-        shape.rect(0, 0, Gdx.graphics.getWidth(), 200);
+    	shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+    	shapeRenderer.setColor(new Color(48 / 255f, 98 / 255f, 123 / 255f, 1));
+    	shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), 200);
 
-        shape.setColor(new Color(72 / 255f, 72 / 255f, 72 / 255f, 1));
-        shape.rect(0, 199, Gdx.graphics.getWidth(), 1);
+    	shapeRenderer.setColor(new Color(72 / 255f, 72 / 255f, 72 / 255f, 1));
+        shapeRenderer.rect(0, 199, Gdx.graphics.getWidth(), 1);
 
-        shape.setColor(new Color(135 / 255f, 161 / 255f, 188 / 255f, 1));
-        shape.rect(0, 198, Gdx.graphics.getWidth(), 1);
+        shapeRenderer.setColor(new Color(135 / 255f, 161 / 255f, 188 / 255f, 1));
+        shapeRenderer.rect(0, 198, Gdx.graphics.getWidth(), 1);
 
-        shape.setColor(new Color(68 / 255f, 101 / 255f, 136 / 255f, 1));
-        shape.rect(0, 197, Gdx.graphics.getWidth(), 1);
-        shape.end();
+        shapeRenderer.setColor(new Color(68 / 255f, 101 / 255f, 136 / 255f, 1));
+        shapeRenderer.rect(0, 197, Gdx.graphics.getWidth(), 1);
+        shapeRenderer.end();
     }
 
 
@@ -1409,7 +1393,7 @@ public class BattleControlComponent implements InputProcessor {
 
         stage.getBatch().end();
 
-        shape.begin(ShapeRenderer.ShapeType.Filled);
+        renderer.begin(ShapeRenderer.ShapeType.Filled);
 
         // The values for damage and water are hard-coded here, they
         // should come from your code
@@ -1423,11 +1407,11 @@ public class BattleControlComponent implements InputProcessor {
         float blueStart = 270.0f;
         float blueLength = 180.0f * bluestuff;
 
-        shape.setColor(new Color(131 / 255f, 6 / 255f, 0f, .7f));
-        shape.arc(MOVES_shipDamageX, MOVES_shipDamageY, 16.50f, redStart, redLength);
-        shape.setColor(new Color(0f, 207 / 255f, 249f, .7f));
-        shape.arc(MOVES_shipBilgeX, MOVES_shipBilgeY, 16.50f, blueStart, blueLength);
-        shape.end();
+        renderer.setColor(new Color(131 / 255f, 6 / 255f, 0f, .7f));
+        renderer.arc(MOVES_shipDamageX, MOVES_shipDamageY, 16.50f, redStart, redLength);
+        renderer.setColor(new Color(0f, 207 / 255f, 249f, .7f));
+        renderer.arc(MOVES_shipBilgeX, MOVES_shipBilgeY, 16.50f, blueStart, blueLength);
+        renderer.end();
 
         stage.getBatch().begin();
 

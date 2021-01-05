@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
+import com.badlogic.gdx.Gdx;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
@@ -26,7 +27,7 @@ public class LoginResponsePacket extends ClientPacketExecutor {
 	@Override
     public void execute(Packet p) {
         int response = p.readByte();
-        getContext().handleLoginResponse(response);
+        String string = getContext().handleLoginResponse(response);
         int length = p.readInt();
         ObjectInputStream ois;
 		try {
@@ -42,6 +43,15 @@ public class LoginResponsePacket extends ClientPacketExecutor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+    	Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				if(string != null) {
+	                getContext().getLobbyScreen().setPopupMessage(string);
+	                getContext().getLobbyScreen().showPopup();	
+				}
+			}
+    	});
     }
 
     @Override

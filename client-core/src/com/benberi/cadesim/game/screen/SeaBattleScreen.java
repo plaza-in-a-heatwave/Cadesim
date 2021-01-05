@@ -74,10 +74,6 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
     
     Texture selectedIsland = alkaid_island;
 
-    /**
-     * The shape renderer
-     */
-    private ShapeRenderer renderer;
 
     /**
      * If the user can drag the map
@@ -172,7 +168,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     @Override
     public void buildStage() {
-        battleMenu = new MenuComponent(context,stage);
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
     	Vessel v = Vessel.createVesselByType(context, null, 0, 0, context.myVesselType);
         control = new BattleControlComponent(
         	context,
@@ -180,21 +176,26 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
         	v.getMoveType() != VesselMoveType.FOUR_MOVES, // is it a big ship
         	v.isDoubleShot()                              // single or double shot
         );
-        information = new GameInformation(context,stage);
-        battleMenu.buildStage();
-        control.buildStage();
+        battleMenu = new MenuComponent(context,stage);
+        information = new GameInformation(context);
         context.setBattleScreen(this);
         context.setControl(control);
         context.setBattleMenu(battleMenu);
         font = context.getManager().get(context.getAssetObject().seaFont);
-        renderer = new ShapeRenderer();
-        information.buildStage();
         initSounds();
         initTextures();
-        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
-    	multiplexer.addProcessor(stage);
-    	multiplexer.addProcessor(this);
-    	Gdx.input.setInputProcessor(multiplexer);
+        SeaBattleScreen screen = this;
+        Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+		    	multiplexer.addProcessor(stage);
+		    	multiplexer.addProcessor(screen);
+		    	Gdx.input.setInputProcessor(multiplexer);
+			}
+        });
+    	update();
+    	control.buildStage();
+    	battleMenu.buildStage();
     }
     /*
      * Initialize sound effects for game
@@ -230,9 +231,8 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 	public void setSound_volume(float sound_volume) {
 		this.sound_volume = sound_volume;
 	}
-    @Override
-    public void show(){
-		
+	
+    public void update(){
         // update the camera
         camera.update();
         //keep user from scrolling to far to black screens
@@ -539,23 +539,22 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     @Override
     public void render(float delta) {
-    	this.show();
+    	Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
+    	update();
     	if(battleMenu.teamTable.isVisible()) {
     		battleMenu.fillTeamList();
     	}
     	stage.getBatch().setProjectionMatrix(camera.combined);
-        Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
-    	stage.getBatch().begin();
         drawSea();
         drawIsland();
         // Render the map
         renderSeaBattle();
         // Render ships
         renderEntities();
-        stage.getBatch().end();
         information.render(delta);
+        // Render control
         control.render(delta);
-        control.show();
+        control.update();
         battleMenu.render(delta);
     }
 
@@ -571,15 +570,21 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
      * Draws the sea background
      */
     private void drawSea() {
+    	stage.getBatch().begin();
     	stage.getBatch().draw(sea, -2000, -1000, 0, 0, 5000, 5000);
+    	stage.getBatch().end();
     }
     
     private void drawIsland() {
     	if(selectedIsland != null) {
             if(selectedIsland == pukru_island) {
+            	stage.getBatch().begin();
             	stage.getBatch().draw(selectedIsland, -1190,1090);
+            	stage.getBatch().end();
             }else {
+            	stage.getBatch().begin();
             	stage.getBatch().draw(selectedIsland, -1290,1050);
+            	stage.getBatch().end();
             }	
     	}
     }
@@ -610,7 +615,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                                 offsetX = object.getCustomOffsetX();
                                 offsetY = object.getCustomOffsetY();
                             }
+                            stage.getBatch().begin();
                             stage.getBatch().draw(region, xx + offsetX, yy + offsetY);
+                            stage.getBatch().end();
                         }
                     }
 
@@ -624,7 +631,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
                         if (canDraw(xx + vessel.getOrientationLocation().getOffsetx(), yy + vessel.getOrientationLocation().getOffsety(), vessel.getRegionWidth(), vessel.getRegionHeight())) {
                             // draw vessel
+                        	stage.getBatch().begin();
                         	stage.getBatch().draw(vessel, xx + vessel.getOrientationLocation().getOffsetx(), yy + vessel.getOrientationLocation().getOffsety());
+                        	stage.getBatch().end();
                         }
 
 
@@ -635,8 +644,6 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                         float yyy = yy + vessel.getOrientationLocation().getOffsety();
 
                         if (v.x>= xxx && v.x <= xxx + vessel.getRegionWidth() && v.y >= yyy && v.y <= yyy + vessel.getRegionHeight()) {
-
-                        	stage.getBatch().end();
 
                             // get diameter, divide by sqrt(2): our diameter matches |_ (geometric), but we want \ (isometric).
                             float diameter = (vessel.getInfluenceRadius() * 2) / 1.4142f;
@@ -657,7 +664,6 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                             renderer.end();
 
                             Gdx.gl.glDisable(GL20.GL_BLEND);
-                            stage.getBatch().begin();
                         }
                     }
                 }
@@ -673,12 +679,16 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                     }
 
                     if (!c.reached()) {
+                    	stage.getBatch().begin();
                     	stage.getBatch().draw(c, cx, cy);
+                    	stage.getBatch().end();
                     }
                     else {
                         cx = getIsometricX(c.getX(), c.getY(), c.getEndingAnimationRegion());
                         cy = getIsometricY(c.getX(), c.getY(), c.getEndingAnimationRegion());
+                        stage.getBatch().begin();
                         stage.getBatch().draw(c.getEndingAnimationRegion(), cx, cy);
+                        stage.getBatch().end();
                         if(isStartedShooting)
                         {
         	            	if(c.getEndingAnimationRegion().getTexture() == context.getManager().get(context.getAssetObject().hit)) {
@@ -698,11 +708,11 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                     float cx = getIsometricX(vessel.getX(), vessel.getY(), r);
                     float cy = getIsometricY(vessel.getX(), vessel.getY(), r);
                     if (canDraw(cx, cy, r.getRegionWidth(), r.getRegionHeight())) {
+                    	stage.getBatch().begin();
                     	stage.getBatch().draw(r, cx, cy);
+                    	stage.getBatch().end();
                     }
                 }
-
-                stage.getBatch().end();
                 
                 // render move bar
                 int BAR_HEIGHT_ABOVE_SHIP = 15; // px
@@ -752,10 +762,10 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
                 // name
                 int NAME_HEIGHT_ABOVE_SHIP = BAR_HEIGHT_ABOVE_SHIP + BAR_HEIGHT + (int)font.getCapHeight() + 10; // px
-                stage.getBatch().begin();
                 GlyphLayout layout = new GlyphLayout(font, vessel.getName());
+                stage.getBatch().begin();
                 font.draw(stage.getBatch(), vessel.getName(), x + (vessel.getRegionWidth() / 2) - (layout.width / 2), y + vessel.getRegionHeight() + NAME_HEIGHT_ABOVE_SHIP);
-
+                stage.getBatch().end();
                 // flags
                 int FLAG_HEIGHT_ABOVE_SHIP = 10 + NAME_HEIGHT_ABOVE_SHIP;
 
@@ -770,7 +780,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                     if (!symbol.isWar()) {
                         points += symbol.getSize();
                     }
+                    stage.getBatch().begin();
                     stage.getBatch().draw(symbol, startX, flagsY);
+                    stage.getBatch().end();
                     startX += symbol.getRegionWidth() + 3;
                 }
 
@@ -782,7 +794,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                             color.a = 0;
                         }
                         font.setColor(color);
+                        stage.getBatch().begin();
                         font.draw(stage.getBatch(), "+" + points + " points", x + vessel.getRegionWidth() + 20, y + vessel.getRegionHeight() * 1.7f - (100 - vessel.getScoreDisplayMovement()));
+                        stage.getBatch().end();
                     }
                     vessel.tickScoreMovement();
                 }
@@ -824,15 +838,20 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                     int y = (i * GameTile.TILE_HEIGHT / 2) + (j * GameTile.TILE_HEIGHT / 2) - region.getRegionHeight() / 2;
 
                     if (canDraw(x, y, GameTile.TILE_WIDTH, GameTile.TILE_HEIGHT)) {
+                    	stage.getBatch().begin();
                     	stage.getBatch().draw(region, x, y);
+                    	stage.getBatch().end();
                         if (winds[i][j] != null) {
                             region = winds[i][j].getRegion();
-
+                            stage.getBatch().begin();
                             stage.getBatch().draw(region, x, y);
+                            stage.getBatch().end();
                         }
                         else if (whirls[i][j] != null) {
                             region = whirls[i][j].getRegion();
+                            stage.getBatch().begin();
                             stage.getBatch().draw(region, x, y);
+                            stage.getBatch().end();
                         }
                     }
                 }
@@ -980,7 +999,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 	@Override
 	public boolean touchDragged(int sx, int sy, int pointer) {
 		if(control.touchDragged(sx, sy, pointer)) {
-			return true;
+			return false;
 		}
         if(!battleMenu.audio_slider.isVisible() && !battleMenu.isSettingsDialogOpen()) {
             if (camera != null && sy > camera.viewportHeight) {
@@ -1014,5 +1033,10 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 	public boolean scrolled(float amountX, float amountY) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
 	}
 }

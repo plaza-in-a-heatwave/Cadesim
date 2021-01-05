@@ -9,11 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -22,13 +20,12 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.Array;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.screen.impl.battle.map.GameObject;
 import com.benberi.cadesim.game.screen.impl.battle.map.tile.GameTile;
@@ -43,19 +40,95 @@ import com.benberi.cadesim.game.screen.impl.screen.map.layer.BlockadeMapLayer;
 import com.benberi.cadesim.util.AbstractScreen;
 import com.benberi.cadesim.util.ScreenEnum;
 import com.benberi.cadesim.util.ScreenManager;
+import com.kotcrab.vis.ui.widget.file.FileChooser;
+import com.kotcrab.vis.ui.widget.file.FileChooser.Mode;
+import com.kotcrab.vis.ui.widget.file.FileChooserAdapter;
+import com.kotcrab.vis.ui.widget.file.FileTypeFilter;
 
 public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     /**
      * The main game context
      */
-	private GameContext context;
 	
-	private FitViewport viewport;
-
-    /**
+	/**
      * The shape renderer
      */
-    private ShapeRenderer renderer;
+    
+    private TextButton loadButton;
+    private TextButton helpButton;
+    private TextButton saveButton;
+    private TextButton newButton;
+    private TextButton lobbyButton;
+    
+    private TextButton addWhirlButton;
+    
+    private ImageButton windNButton;
+    private ImageButtonStyle windNStyle;
+    private TextureRegionDrawable windNregularDrawable;
+    private TextureRegionDrawable windNhoverDrawable;
+    
+    private ImageButton windSButton;
+    private ImageButtonStyle windSStyle;
+    private TextureRegionDrawable windSregularDrawable;
+    private TextureRegionDrawable windShoverDrawable;
+    
+    private ImageButton windEButton;
+    private ImageButtonStyle windEStyle;
+    private TextureRegionDrawable windEregularDrawable;
+    private TextureRegionDrawable windEhoverDrawable;
+    
+    private ImageButton windWButton;
+    private ImageButtonStyle windWStyle;
+    private TextureRegionDrawable windWregularDrawable;
+    private TextureRegionDrawable windWhoverDrawable;
+    
+    private ImageButton whirlNWButton;
+    private ImageButtonStyle whirlNWStyle;
+    private TextureRegionDrawable whirlNWregularDrawable;
+    private TextureRegionDrawable whirlNWhoverDrawable;
+    
+    private ImageButton whirlNEButton;
+    private ImageButtonStyle whirlNEStyle;
+    private TextureRegionDrawable whirlNEregularDrawable;
+    private TextureRegionDrawable whirlNEhoverDrawable;
+    
+    private ImageButton whirlSWButton;
+    private ImageButtonStyle whirlSWStyle;
+    private TextureRegionDrawable whirlSWregularDrawable;
+    private TextureRegionDrawable whirlSWhoverDrawable;
+    
+    private ImageButton whirlSEButton;
+    private ImageButtonStyle whirlSEStyle;
+    private TextureRegionDrawable whirlSEregularDrawable;
+    private TextureRegionDrawable whirlSEhoverDrawable;
+    
+    private ImageButton smallRockButton;
+    private ImageButtonStyle smallRockStyle;
+    private TextureRegionDrawable smallRockregularDrawable;
+    private TextureRegionDrawable smallRockhoverDrawable;  
+    
+    private ImageButton bigRockButton;
+    private ImageButtonStyle bigRockStyle;
+    private TextureRegionDrawable bigRockregularDrawable;
+    private TextureRegionDrawable bigRockhoverDrawable;
+    
+    private ImageButton flag1Button;
+    private ImageButtonStyle flag1Style;
+    private TextureRegionDrawable flag1regularDrawable;
+    private TextureRegionDrawable flag1hoverDrawable; 
+    
+    private ImageButton flag2Button;
+    private ImageButtonStyle flag2Style;
+    private TextureRegionDrawable flag2regularDrawable;
+    private TextureRegionDrawable flag2hoverDrawable;  
+    
+    private ImageButton flag3Button;
+    private ImageButtonStyle flag3Style;
+    private TextureRegionDrawable flag3regularDrawable;
+    private TextureRegionDrawable flag3hoverDrawable;  
+    
+    private ArrayList<Button> buttonList = new ArrayList<Button>();
+	private GameContext context;
 
     /**
      * If the user can drag the map
@@ -138,70 +211,34 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
      * The sea texture
      */
     private Texture seaTile;
-    /**
-     * File open/save dialog
-     */
-    private JFileChooser fileChooser;
-    
-	OrthographicCamera camera;
     
     public MapEditorScreen(GameContext context) {
-    	Gdx.graphics.setTitle("MapEditor - Blank");
         this.context = context;
-        create();
-    }
-
-    public void create() {
-    	fileChooser = new JFileChooser();
-        tiles = new GameTile[MAP_WIDTH][MAP_HEIGHT];
-        seaTile = context.getManager().get(context.getAssetObject().sea);
-        seaTile.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        safezone = new SafeZone(context);
-        cell = new Cell(context);
-        windEast = new Wind(context,WIND_EAST,false);
-        windEastDisabled = new Wind(context,WIND_EAST,true);
-        windSouth = new Wind(context,WIND_SOUTH,false);
-        windSouthDisabled = new Wind(context,WIND_SOUTH,true);
-        windWest = new Wind(context,WIND_WEST,false);
-        windWestDisabled = new Wind(context,WIND_WEST,true);
-        windNorth = new Wind(context,WIND_NORTH,false);
-        windNorthDisabled = new Wind(context,WIND_NORTH,true);
-        whirlSE = new Whirlpool(context,WP_SE,false);
-        whirlSEDisabled = new Whirlpool(context,WP_SE,true);
-        whirlSW = new Whirlpool(context,WP_SW,false);
-        whirlSWDisabled = new Whirlpool(context,WP_SW,true);
-        whirlNW = new Whirlpool(context,WP_NW,false);
-        whirlNWDisabled = new Whirlpool(context,WP_NW,true);
-        whirlNE = new Whirlpool(context,WP_NE,false);
-        whirlNEDisabled = new Whirlpool(context,WP_NE,true);
-        topLayer = new BlockadeMapLayer<GameObject>();
-        //need to initialize with no location to avoid nullpointer
-        smallRock = new SmallRock(context,false);
-        smallRockDisabled = new SmallRock(context,true);
-        bigRock = new BigRock(context,false);
-        bigRockDisabled = new BigRock(context,true);
-        flag1 = new Flag(context,1,false);
-        flag2 = new Flag(context,2,false);
-        flag3 = new Flag(context,3,false);
-        flag1Disabled = new Flag(context,1,true);
-        flag2Disabled = new Flag(context,2,true);
-        flag3Disabled = new Flag(context,3,true);
-        //initialize currentTile
-        setCurrentTile(cell);
-    	fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
-        renderer = new ShapeRenderer();
-        viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        viewport.setScreenBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera = (OrthographicCamera)viewport.getCamera();
-        camera.position.x = 0;
-        camera.position.y = 200;
-        createEmptyMap();
     }
 
     @Override
-    public void show(){
-    	super.show();
+    public void buildStage() {
+        tiles = new GameTile[MAP_WIDTH][MAP_HEIGHT];
+        createTiles();
+        createEmptyMap();
+        createMenu();
+        camera.position.x = 0;
+        camera.position.y = 200;
+        MapEditorScreen screen = this;
+        Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				initListeners();
+		    	multiplexer.addProcessor(stage);
+		    	multiplexer.addProcessor(screen);
+		    	Gdx.input.setInputProcessor(multiplexer);
+//		    	graphics.setTitle("MapEditor - Blank");
+			}
+        });
+        update();
+    }
+    
+    public void update(){
         // update the camera
     	camera.position.x = clamp(camera.position.x, Gdx.graphics.getWidth() , -Gdx.graphics.getWidth());
     	camera.position.y = clamp(camera.position.y, Gdx.graphics.getHeight()+ 1000, 0);
@@ -211,17 +248,13 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     @Override
     public void render(float delta) {
     	stage.getBatch().setProjectionMatrix(camera.combined);
-    	viewport.apply();
-    	stage.getBatch().begin();
+    	update();
         drawSea();
         // Render the map
         renderMap();
         // Render separate layer of rocks/flags
         renderEntities();
-        stage.getBatch().end();
-        stage.getBatch().begin();
     	drawBackground();
-    	stage.getBatch().end();
         stage.act();
         stage.draw();
     }
@@ -278,7 +311,9 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
      * Draws the sea background
      */
     private void drawSea() {
+    	stage.getBatch().begin();
     	stage.getBatch().draw(seaTile, -2000, -1000, 0, 0, 5000, 5000);
+    	stage.getBatch().end();
     }
     /**
      * Draws the entire map
@@ -290,7 +325,9 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
                     TextureRegion region = tiles[tileX][tileY].getRegion();
                     int worldX = (tileX - tileY)*TILE_WIDTH_HALF - region.getRegionWidth()/2;
                     int worldY = (tileX + tileY)*TILE_HEIGHT_HALF - region.getRegionHeight()/2;
+                    stage.getBatch().begin();
                     stage.getBatch().draw(region, worldX, worldY);
+                    stage.getBatch().end();
             	}
             }
         }
@@ -316,7 +353,9 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
                         offsetX = object.getCustomOffsetX();
                         offsetY = object.getCustomOffsetY();
                     }
+                    stage.getBatch().begin();
                     stage.getBatch().draw(region, xx + offsetX, yy + offsetY);
+                    stage.getBatch().end();
                 }
             }
         }
@@ -536,155 +575,250 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
 	public boolean mouseMoved(int screenX, int screenY) {
 		return false;
 	}
-	
-	/**
-     * The shape renderer
-     */
     
-    private Skin skin;
-    private TextButton loadButton;
-    private TextButton helpButton;
-    private TextButton saveButton;
-    private TextButton newButton;
-    private TextButton lobbyButton;
-    
-    private TextButton addWhirlButton;
-    
-    private ImageButton windNButton;
-    private ImageButtonStyle windNStyle;
-    private TextureRegionDrawable windNregularDrawable;
-    private TextureRegionDrawable windNhoverDrawable;
-    
-    private ImageButton windSButton;
-    private ImageButtonStyle windSStyle;
-    private TextureRegionDrawable windSregularDrawable;
-    private TextureRegionDrawable windShoverDrawable;
-    
-    private ImageButton windEButton;
-    private ImageButtonStyle windEStyle;
-    private TextureRegionDrawable windEregularDrawable;
-    private TextureRegionDrawable windEhoverDrawable;
-    
-    private ImageButton windWButton;
-    private ImageButtonStyle windWStyle;
-    private TextureRegionDrawable windWregularDrawable;
-    private TextureRegionDrawable windWhoverDrawable;
-    
-    private ImageButton whirlNWButton;
-    private ImageButtonStyle whirlNWStyle;
-    private TextureRegionDrawable whirlNWregularDrawable;
-    private TextureRegionDrawable whirlNWhoverDrawable;
-    
-    private ImageButton whirlNEButton;
-    private ImageButtonStyle whirlNEStyle;
-    private TextureRegionDrawable whirlNEregularDrawable;
-    private TextureRegionDrawable whirlNEhoverDrawable;
-    
-    private ImageButton whirlSWButton;
-    private ImageButtonStyle whirlSWStyle;
-    private TextureRegionDrawable whirlSWregularDrawable;
-    private TextureRegionDrawable whirlSWhoverDrawable;
-    
-    private ImageButton whirlSEButton;
-    private ImageButtonStyle whirlSEStyle;
-    private TextureRegionDrawable whirlSEregularDrawable;
-    private TextureRegionDrawable whirlSEhoverDrawable;
-    
-    private ImageButton smallRockButton;
-    private ImageButtonStyle smallRockStyle;
-    private TextureRegionDrawable smallRockregularDrawable;
-    private TextureRegionDrawable smallRockhoverDrawable;  
-    
-    private ImageButton bigRockButton;
-    private ImageButtonStyle bigRockStyle;
-    private TextureRegionDrawable bigRockregularDrawable;
-    private TextureRegionDrawable bigRockhoverDrawable;
-    
-    private ImageButton flag1Button;
-    private ImageButtonStyle flag1Style;
-    private TextureRegionDrawable flag1regularDrawable;
-    private TextureRegionDrawable flag1hoverDrawable; 
-    
-    private ImageButton flag2Button;
-    private ImageButtonStyle flag2Style;
-    private TextureRegionDrawable flag2regularDrawable;
-    private TextureRegionDrawable flag2hoverDrawable;  
-    
-    private ImageButton flag3Button;
-    private ImageButtonStyle flag3Style;
-    private TextureRegionDrawable flag3regularDrawable;
-    private TextureRegionDrawable flag3hoverDrawable;  
-    
-    private ArrayList<Button> buttonList = new ArrayList<Button>();
-
-    @Override
-    public void buildStage() {
+    public void createTiles() {
         seaTile = context.getManager().get(context.getAssetObject().sea);
         seaTile.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-        renderer = new ShapeRenderer();
+        safezone = new SafeZone(context);
+        cell = new Cell(context);
+        windEast = new Wind(context,WIND_EAST,false);
+        windEastDisabled = new Wind(context,WIND_EAST,true);
+        windSouth = new Wind(context,WIND_SOUTH,false);
+        windSouthDisabled = new Wind(context,WIND_SOUTH,true);
+        windWest = new Wind(context,WIND_WEST,false);
+        windWestDisabled = new Wind(context,WIND_WEST,true);
+        windNorth = new Wind(context,WIND_NORTH,false);
+        windNorthDisabled = new Wind(context,WIND_NORTH,true);
+        whirlSE = new Whirlpool(context,WP_SE,false);
+        whirlSEDisabled = new Whirlpool(context,WP_SE,true);
+        whirlSW = new Whirlpool(context,WP_SW,false);
+        whirlSWDisabled = new Whirlpool(context,WP_SW,true);
+        whirlNW = new Whirlpool(context,WP_NW,false);
+        whirlNWDisabled = new Whirlpool(context,WP_NW,true);
+        whirlNE = new Whirlpool(context,WP_NE,false);
+        whirlNEDisabled = new Whirlpool(context,WP_NE,true);
+        topLayer = new BlockadeMapLayer<GameObject>();
+        //need to initialize with no location to avoid nullpointer
+        smallRock = new SmallRock(context,false);
+        smallRockDisabled = new SmallRock(context,true);
+        bigRock = new BigRock(context,false);
+        bigRockDisabled = new BigRock(context,true);
+        flag1 = new Flag(context,1,false);
+        flag2 = new Flag(context,2,false);
+        flag3 = new Flag(context,3,false);
+        flag1Disabled = new Flag(context,1,true);
+        flag2Disabled = new Flag(context,2,true);
+        flag3Disabled = new Flag(context,3,true);
+        //initialize currentTile
+        setCurrentTile(cell);
+    }
+    
+    public void createMenu() {
+	    initButtons();
+	    addWhirlButton = new TextButton("Add WhirlPool", skin);
+	    addWhirlButton.getStyle().disabled = addWhirlButton.getStyle().down;
+	    Button[] buttonArray = {windNButton,windSButton,windWButton,windEButton,
+	  		whirlNWButton,whirlNEButton,whirlSWButton,whirlSEButton,
+	  		smallRockButton,bigRockButton,
+	  		flag1Button,flag2Button,flag3Button,
+	  		addWhirlButton};
+	    Collections.addAll(buttonList, buttonArray);
+	    saveButton = new TextButton("Save Map", skin);
+	    newButton = new TextButton("New Map", skin);
+	    loadButton = new TextButton("Load Map", skin);
+	    helpButton = new TextButton("Help", skin);
+	    lobbyButton = new TextButton("Exit Editor", skin);
 
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
-
-        initButtons();
-        addWhirlButton = new TextButton("Add WhirlPool", skin);
-        addWhirlButton.getStyle().disabled = addWhirlButton.getStyle().down;
-        Button[] buttonArray = {windNButton,windSButton,windWButton,windEButton,
-        		whirlNWButton,whirlNEButton,whirlSWButton,whirlSEButton,
-        		smallRockButton,bigRockButton,
-        		flag1Button,flag2Button,flag3Button,
-        		addWhirlButton};
-        Collections.addAll(buttonList, buttonArray);
-        saveButton = new TextButton("Save Map", skin);
-        newButton = new TextButton("New Map", skin);
-        loadButton = new TextButton("Load Map", skin);
-        helpButton = new TextButton("Help", skin);
-        lobbyButton = new TextButton("Exit Editor", skin);
-
-        context.getManager().get(context.getAssetObject().regularFont);
-
-        Table windTable = new Table();
-        windTable.add(windNButton).pad(3.0f);
-        windTable.add(windSButton).pad(3.0f).row();
-        windTable.add(windWButton).pad(3.0f);
-        windTable.add(windEButton).pad(3.0f);
-        windTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-55);
+	    Table windTable = new Table();
+	    windTable.add(windNButton).pad(3.0f);
+	    windTable.add(windSButton).pad(3.0f).row();
+	    windTable.add(windWButton).pad(3.0f);
+	    windTable.add(windEButton).pad(3.0f);
+	    windTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-55);
+	    
+	    Table whirlTable = new Table();
+	    whirlTable.add(whirlNWButton).pad(1.0f);
+	    whirlTable.add(whirlNEButton).pad(1.0f).row();
+	    whirlTable.add(whirlSWButton).pad(1.0f);
+	    whirlTable.add(whirlSEButton).pad(1.0f).row();
+	    whirlTable.add(addWhirlButton).colspan(2).row();
+	    whirlTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-190);   
+	    Table rockTable = new Table();
+	    rockTable.add(smallRockButton).pad(3.0f);
+	    rockTable.add(bigRockButton).pad(3.0f);
+	    rockTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-310);
+	    
+	    Table flagTable = new Table();
+	    flagTable.add(flag1Button).pad(3.0f);
+	    flagTable.add(flag2Button).pad(3.0f);
+	    flagTable.add(flag3Button).pad(3.0f);
+	    flagTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-370);
+	    
+	    //menu button options
+	    Table table = new Table();
+	    table.add(newButton).pad(3.0f).row();
+	    table.add(loadButton).pad(3.0f).row();
+	    table.add(saveButton).pad(3.0f).row();
+	    table.add(helpButton).padTop(3.0f).padBottom(20.0f).row();
+	    table.add(lobbyButton).pad(3.0f).row();
+	    
+	    Table menuTable = new Table();
+	    menuTable.add(windTable).row();
+	    menuTable.add(whirlTable).row();
+	    menuTable.add(rockTable).row();
+	    menuTable.add(flagTable).row();
+	    menuTable.add(table).row();
+	    stage.addActor(menuTable);
+	    menuTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()/2);
+    }
+    
+    public void initListeners() {
+    	 windNButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		setAddWhirlPool(false);
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(windNorth);
+         		windNButton.setDisabled(true);
+         	}
+         });
+         whirlSEButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(whirlSE);
+         		whirlSEButton.setDisabled(true);
+         	}
+         });
+         
+         whirlSWButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		setAddWhirlPool(false);
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(whirlSW);
+         		whirlSWButton.setDisabled(true);
+         	}
+         });
+         
         
-        Table whirlTable = new Table();
-        whirlTable.add(whirlNWButton).pad(1.0f);
-        whirlTable.add(whirlNEButton).pad(1.0f).row();
-        whirlTable.add(whirlSWButton).pad(1.0f);
-        whirlTable.add(whirlSEButton).pad(1.0f).row();
-        whirlTable.add(addWhirlButton).colspan(2).row();
-        whirlTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-190);
-        
-        Table rockTable = new Table();
-        rockTable.add(smallRockButton).pad(3.0f);
-        rockTable.add(bigRockButton).pad(3.0f);
-        rockTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-310);
-        
-        Table flagTable = new Table();
-        flagTable.add(flag1Button).pad(3.0f);
-        flagTable.add(flag2Button).pad(3.0f);
-        flagTable.add(flag3Button).pad(3.0f);
-        flagTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()-370);
-        
-        //menu button options
-        Table table = new Table();
-        table.add(newButton).pad(3.0f).row();
-        table.add(loadButton).pad(3.0f).row();
-        table.add(saveButton).pad(3.0f).row();
-        table.add(helpButton).padTop(3.0f).padBottom(20.0f).row();
-        table.add(lobbyButton).pad(3.0f).row();
-        
-        Table menuTable = new Table();
-        menuTable.add(windTable).row();
-        menuTable.add(whirlTable).row();
-        menuTable.add(rockTable).row();
-        menuTable.add(flagTable).row();
-        menuTable.add(table).row();
-        stage.addActor(menuTable);
-        menuTable.setPosition(Gdx.graphics.getWidth()-88, Gdx.graphics.getHeight()/2);;
-        menuTable.setBackground(skin.getDrawable("dialogDim"));
+         whirlNEButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		setAddWhirlPool(false);
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(whirlNE);
+         		whirlNEButton.setDisabled(true);
+         	}
+         });
+         
+         whirlNWButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		setAddWhirlPool(false);
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(whirlNW);
+         		whirlNWButton.setDisabled(true);
+         	}
+         });
+         windEButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		setAddWhirlPool(false);
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(windEast);
+         		windEButton.setDisabled(true);
+         	}
+         });
+         windWButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		setAddWhirlPool(false);
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(windWest);
+         		windWButton.setDisabled(true);
+         	}
+         });
+         windSButton.addListener(new ClickListener() {
+         	@Override
+             public void clicked(InputEvent event, float x, float y) {
+         		setAddWhirlPool(false);
+         		for(Button button : buttonList) {
+         			button.setDisabled(false);
+         		}
+         		setCurrentTile(windSouth);
+         		windSButton.setDisabled(true);
+         	}
+         });
+     	flag3Button.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		setAddWhirlPool(false);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
+        		setCurrentTile(flag3);
+        		flag3Button.setDisabled(true);
+        	}
+        });
+    	flag2Button.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		setAddWhirlPool(false);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
+        		setCurrentTile(flag2);
+        		flag2Button.setDisabled(true);
+        	}
+        });
+    	flag1Button.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		setAddWhirlPool(false);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
+        		setCurrentTile(flag1);
+        		flag1Button.setDisabled(true);
+        	}
+        });
+    	bigRockButton.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		setAddWhirlPool(false);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
+        		setCurrentTile(bigRock);
+        		bigRockButton.setDisabled(true);
+        	}
+        });
+    	smallRockButton.addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		setAddWhirlPool(false);
+        		for(Button button : buttonList) {
+        			button.setDisabled(false);
+        		}
+        		setCurrentTile(smallRock);
+        		smallRockButton.setDisabled(true);
+        	}
+        });
         
         loadButton.addListener(new ClickListener() {
         	@Override
@@ -747,13 +881,10 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
         		ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
-        		ScreenManager.getInstance();
         		context.exitMapEditor();
         	}
         });
-    	multiplexer.addProcessor(stage);
-    	multiplexer.addProcessor(this);
-    	Gdx.input.setInputProcessor(multiplexer);
+    	
     }
     
     public void initButtons() {
@@ -766,17 +897,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         windNStyle.imageDisabled = windNregularDrawable;
         
         windNButton = new ImageButton(windNStyle);
-        windNButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(windNorth);
-        		windNButton.setDisabled(true);
-        	}
-        });
         
     	windSregularDrawable = new TextureRegionDrawable(windSouthDisabled.getRegion());
         windShoverDrawable = new TextureRegionDrawable(windSouth.getRegion());
@@ -787,17 +907,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         windSStyle.imageDisabled = windSregularDrawable;
         
         windSButton = new ImageButton(windSStyle);
-        windSButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(windSouth);
-        		windSButton.setDisabled(true);
-        	}
-        });
         //
     	windWregularDrawable = new TextureRegionDrawable(windWestDisabled.getRegion());
         windWhoverDrawable = new TextureRegionDrawable(windWest.getRegion());
@@ -808,17 +917,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         windWStyle.imageDisabled = windWregularDrawable;
         
         windWButton = new ImageButton(windWStyle);
-        windWButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(windWest);
-        		windWButton.setDisabled(true);
-        	}
-        });
         
         //
         //
@@ -831,18 +929,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         windEStyle.imageDisabled = windEregularDrawable;
         
         windEButton = new ImageButton(windEStyle);
-        windEButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(windEast);
-        		windEButton.setDisabled(true);
-        	}
-        });
-        
         
         //WhirlPool
     	whirlNWregularDrawable = new TextureRegionDrawable(whirlNWDisabled.getRegion());
@@ -854,17 +940,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	whirlNWStyle.imageDisabled = whirlNWregularDrawable;
         
     	whirlNWButton = new ImageButton(whirlNWStyle);
-        whirlNWButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(whirlNW);
-        		whirlNWButton.setDisabled(true);
-        	}
-        });
         
     	whirlNEregularDrawable = new TextureRegionDrawable(whirlNEDisabled.getRegion());
     	whirlNEhoverDrawable = new TextureRegionDrawable(whirlNE.getRegion());
@@ -875,17 +950,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	whirlNEStyle.imageDisabled = whirlNEregularDrawable;
         
     	whirlNEButton = new ImageButton(whirlNEStyle);
-        whirlNEButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(whirlNE);
-        		whirlNEButton.setDisabled(true);
-        	}
-        });
         
     	whirlSWregularDrawable = new TextureRegionDrawable(whirlSWDisabled.getRegion());
     	whirlSWhoverDrawable = new TextureRegionDrawable(whirlSW.getRegion());
@@ -896,18 +960,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	whirlSWStyle.imageDisabled = whirlSWregularDrawable;
         
     	whirlSWButton = new ImageButton(whirlSWStyle);
-        whirlSWButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(whirlSW);
-        		whirlSWButton.setDisabled(true);
-        	}
-        });
-        
+
     	whirlSEregularDrawable = new TextureRegionDrawable(whirlSEDisabled.getRegion());
     	whirlSEhoverDrawable = new TextureRegionDrawable(whirlSE.getRegion());
         
@@ -917,16 +970,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	whirlSEStyle.imageDisabled = whirlSEregularDrawable;
         
     	whirlSEButton = new ImageButton(whirlSEStyle);
-        whirlSEButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(whirlSE);
-        		whirlSEButton.setDisabled(true);
-        	}
-        });
         
         //rocks
     	smallRockregularDrawable = new TextureRegionDrawable(smallRockDisabled.getRegion());
@@ -938,17 +981,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	smallRockStyle.imageDisabled = smallRockregularDrawable;
         
     	smallRockButton = new ImageButton(smallRockStyle);
-    	smallRockButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(smallRock);
-        		smallRockButton.setDisabled(true);
-        	}
-        });
     	
     	bigRockregularDrawable = new TextureRegionDrawable(bigRockDisabled.getRegion());
     	bigRockhoverDrawable = new TextureRegionDrawable(bigRock.getRegion());
@@ -959,18 +991,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	bigRockStyle.imageDisabled = bigRockregularDrawable;
         
     	bigRockButton = new ImageButton(bigRockStyle);
-    	bigRockButton.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(bigRock);
-        		bigRockButton.setDisabled(true);
-        	}
-        });
-    	
+
     	flag1regularDrawable = new TextureRegionDrawable(flag1Disabled.getRegion());
     	flag1hoverDrawable = new TextureRegionDrawable(flag1.getRegion());
         
@@ -980,17 +1001,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	flag1Style.imageDisabled = flag1regularDrawable;
         
     	flag1Button = new ImageButton(flag1Style);
-    	flag1Button.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(flag1);
-        		flag1Button.setDisabled(true);
-        	}
-        });
     	
     	flag2regularDrawable = new TextureRegionDrawable(flag2Disabled.getRegion());
     	flag2hoverDrawable = new TextureRegionDrawable(flag2.getRegion());
@@ -1001,18 +1011,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	flag2Style.imageDisabled = flag2regularDrawable;
         
     	flag2Button = new ImageButton(flag2Style);
-    	flag2Button.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(flag2);
-        		flag2Button.setDisabled(true);
-        	}
-        });
-    	
     	
     	flag3regularDrawable = new TextureRegionDrawable(flag3Disabled.getRegion());
     	flag3hoverDrawable = new TextureRegionDrawable(flag3.getRegion());
@@ -1023,17 +1021,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     	flag3Style.imageDisabled = flag3regularDrawable;
         
     	flag3Button = new ImageButton(flag3Style);
-    	flag3Button.addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		setAddWhirlPool(false);
-        		for(Button button : buttonList) {
-        			button.setDisabled(false);
-        		}
-        		setCurrentTile(flag3);
-        		flag3Button.setDisabled(true);
-        	}
-        });
         
     }
 
@@ -1060,7 +1047,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
 
 
     public void showHelp() {
-    	Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
     	Dialog dialog = new Dialog("Help", skin, "dialog");
 		dialog.text("Basic Instructions:"
 				+ "\n -------------------------------------------------------------------------------------------------------------------------"
@@ -1083,7 +1069,12 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
      * Creates an empty map with SafeZone tiles
      */
     public void createEmptyMap() {
-    	Gdx.graphics.setTitle("MapEditor - Blank");
+    	Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				graphics.setTitle("MapEditor - Blank");
+			}
+    	});
     	//clear the tiles
     	topLayer.clear();
     	// Create the sea tiles
@@ -1141,160 +1132,195 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
      * Save current map
      */
     public void saveMap() {
-    	if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-    		File selectedFile = fileChooser.getSelectedFile();
-    		Gdx.graphics.setTitle("MapEditor - current map: " + selectedFile.getName());
-    		if(!selectedFile.getAbsolutePath().endsWith(".txt") ) {
-    			String fname = selectedFile.getAbsolutePath().toString() + ".txt";
-    			selectedFile = new File(fname);
-    		}
-        	int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
-        	//iterate through layer first to get entities
-        	for(int x = 0; x < tiles.length; x++) {
-        		for(int y = 0; y < tiles[x].length; y++) {
-        			for (GameObject object : topLayer.getObjects()) {
-	                    if (object != null && object.getX() == x && object.getY() == y) {
-                    		if(object instanceof Flag) {
-                    			if(((Flag) object).getSize() == 1) {
-                    				tempTiles[x][y] = FLAG_1;
-                    			}else if(((Flag) object).getSize() == 2) {
-                    				tempTiles[x][y] = FLAG_2;
-                    			}else if(((Flag) object).getSize() == 3) {
-                    				tempTiles[x][y] = FLAG_3;
-                    			}
-                    		}else if(object instanceof SmallRock) {
-                    			tempTiles[x][y] = SMALL_ROCK;
-                    		}else if(object instanceof BigRock) {
-                    			tempTiles[x][y] = BIG_ROCK;
-                    		}
-                    	}
+        FileChooser fileChooser = new FileChooser(Mode.SAVE);
+    	fileChooser.setSize(500, 300);
+        fileChooser.setDirectory(System.getProperty("user.home"));
+        FileTypeFilter typeFilter = new FileTypeFilter(true); //allow "All Types" mode where all files are shown
+        typeFilter.addRule("Text files (*.txt)", "txt");
+        fileChooser.setFileTypeFilter(typeFilter);
+        stage.addActor(fileChooser.fadeIn());
+        fileChooser.setListener(new FileChooserAdapter() {
+        	@Override
+        	public void selected (Array<FileHandle> file) {
+        		File selectedFile = file.first().file();
+        		String name = selectedFile.getName();
+            	Gdx.app.postRunnable(new Runnable() {
+        			@Override
+        			public void run() {
+        				graphics.setTitle("MapEditor - current map: " + name);
+        			}
+            	});
+        		if(!selectedFile.getAbsolutePath().endsWith(".txt") ) {
+        			String fname = selectedFile.getAbsolutePath().toString() + ".txt";
+        			selectedFile = new File(fname);
+        		}
+            	int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
+            	//iterate through layer first to get entities
+            	for(int x = 0; x < tiles.length; x++) {
+            		for(int y = 0; y < tiles[x].length; y++) {
+            			for (GameObject object : topLayer.getObjects()) {
+    	                    if (object != null && object.getX() == x && object.getY() == y) {
+                        		if(object instanceof Flag) {
+                        			if(((Flag) object).getSize() == 1) {
+                        				tempTiles[x][y] = FLAG_1;
+                        			}else if(((Flag) object).getSize() == 2) {
+                        				tempTiles[x][y] = FLAG_2;
+                        			}else if(((Flag) object).getSize() == 3) {
+                        				tempTiles[x][y] = FLAG_3;
+                        			}
+                        		}else if(object instanceof SmallRock) {
+                        			tempTiles[x][y] = SMALL_ROCK;
+                        		}else if(object instanceof BigRock) {
+                        			tempTiles[x][y] = BIG_ROCK;
+                        		}
+                        	}
+                        }
                     }
-                }
-        	}
-        	//iterate through tiles and change to numbers
-        	for(int x = 0; x < tiles.length; x++) {
-        		for(int y = 0; y < tiles[x].length; y++) {
-        			if(tiles[x][y] == windEast) {
-        				tempTiles[x][y] = WIND_EAST;
-        			}else if(tiles[x][y] == windWest) {
-        				tempTiles[x][y] = WIND_WEST;
-        			}else if(tiles[x][y] == windSouth) {
-        				tempTiles[x][y] = WIND_SOUTH;
-        			}else if(tiles[x][y] == windNorth) {
-        				tempTiles[x][y] = WIND_NORTH;
-        			}else if(tiles[x][y] == whirlNW) {
-        				tempTiles[x][y] = WP_NW;
-        			}else if(tiles[x][y] == whirlNE) {
-        				tempTiles[x][y] = WP_NE;
-        			}else if(tiles[x][y] == whirlSW) {
-        				tempTiles[x][y] = WP_SW;
-        			}else if(tiles[x][y] == whirlSE) {
-        				tempTiles[x][y] = WP_SE;
-        			}
+            	}
+            	//iterate through tiles and change to numbers
+            	for(int x = 0; x < tiles.length; x++) {
+            		for(int y = 0; y < tiles[x].length; y++) {
+            			if(tiles[x][y] == windEast) {
+            				tempTiles[x][y] = WIND_EAST;
+            			}else if(tiles[x][y] == windWest) {
+            				tempTiles[x][y] = WIND_WEST;
+            			}else if(tiles[x][y] == windSouth) {
+            				tempTiles[x][y] = WIND_SOUTH;
+            			}else if(tiles[x][y] == windNorth) {
+            				tempTiles[x][y] = WIND_NORTH;
+            			}else if(tiles[x][y] == whirlNW) {
+            				tempTiles[x][y] = WP_NW;
+            			}else if(tiles[x][y] == whirlNE) {
+            				tempTiles[x][y] = WP_NE;
+            			}else if(tiles[x][y] == whirlSW) {
+            				tempTiles[x][y] = WP_SW;
+            			}else if(tiles[x][y] == whirlSE) {
+            				tempTiles[x][y] = WP_SE;
+            			}
+            		}
+            	}
+            	//flip and inverse array
+            	tempTiles = flipArray(tempTiles);
+            	tempTiles = inverseArray(tempTiles);
+            	StringBuilder builder = new StringBuilder();
+            	for (int i = tempTiles.length - 1; i >= 0; i--) {
+            	    for (int j = tempTiles[i].length - 1; j >= 0; j--) {
+            			builder.append(tempTiles[i][j]);
+            			if(j < tempTiles[i].length && j !=0){
+            				//if this is not the last row element
+           		         	builder.append(",");
+            			}
+            		}
+            		builder.append("\n");//append new line at the end of the row
+            	}
+            	BufferedWriter writer;
+        		try {
+        			writer = new BufferedWriter(new FileWriter(selectedFile));
+        	    	writer.write(builder.toString());//save the string representation of the board
+        	    	writer.close();
+        		} catch (IOException e) {
+        			e.printStackTrace();
         		}
         	}
-        	//flip and inverse array
-        	tempTiles = flipArray(tempTiles);
-        	tempTiles = inverseArray(tempTiles);
-        	StringBuilder builder = new StringBuilder();
-        	for (int i = tempTiles.length - 1; i >= 0; i--) {
-        	    for (int j = tempTiles[i].length - 1; j >= 0; j--) {
-        			builder.append(tempTiles[i][j]);
-        			if(j < tempTiles[i].length && j !=0){
-        				//if this is not the last row element
-       		         	builder.append(",");
-        			}
-        		}
-        		builder.append("\n");//append new line at the end of the row
-        	}
-        	BufferedWriter writer;
-    		try {
-    			writer = new BufferedWriter(new FileWriter(selectedFile));
-    	    	writer.write(builder.toString());//save the string representation of the board
-    	    	writer.close();
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
-    	}
+        });
     }
     /**
      * Load selected map
      */
     public void loadMap() {
-    	fileChooser.setDialogTitle("Select Map File");
-    	if(fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-    		int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
-    		File selectedFile = fileChooser.getSelectedFile();
-    		int x = 0;
-	        int y = 0;
-	        clearTiles();
-	        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()))) {
-	            String line;
-	            while ((line = br.readLine()) != null) {
-	                String[] split = line.split(",");
-	                for (String tile : split) {
-	                	tempTiles[x][y] = Integer.parseInt(tile);
-	                    x++;
-	                }
-	                x = 0;
-	                y++;
-	            }
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
+    	FileChooser fileChooser = new FileChooser(Mode.OPEN);
+    	fileChooser.setSize(500, 300);
+        fileChooser.setDirectory(System.getProperty("user.home"));
+        FileTypeFilter typeFilter = new FileTypeFilter(true); //allow "All Types" mode where all files are shown
+        typeFilter.addRule("Text files (*.txt)", "txt");
+        fileChooser.setFileTypeFilter(typeFilter);
+        stage.addActor(fileChooser.fadeIn());
+        fileChooser.setListener(new FileChooserAdapter() {
+        	@Override
+        	public void selected(Array<FileHandle> file) {
+        		int[][] tempTiles = new int[MAP_WIDTH][MAP_HEIGHT];
+        		File selectedFile = file.first().file();
+        		int x = 0;
+    	        int y = 0;
+    	        clearTiles();
+    	        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()))) {
+    	            String line;
+    	            while ((line = br.readLine()) != null) {
+    	                String[] split = line.split(",");
+    	                for (String tile : split) {
+    	                	tempTiles[x][y] = Integer.parseInt(tile);
+    	                    x++;
+    	                }
+    	                x = 0;
+    	                y++;
+    	            }
+    	        } catch (IOException e) {
+    	            e.printStackTrace();
+    	        }
 
-	        int x1 = 0;
-	        int y1 = 0;
-	        for (int i = 0; i < tempTiles.length; i++) {
-	            for (int j = tempTiles[i].length - 1; j > -1; j--) {
-        			if(tempTiles[i][j] == WIND_EAST) {
-        				tiles[x1][y1] = windEast;
-        			}else if(tempTiles[i][j] == WIND_WEST) {
-        				tiles[x1][y1] = windWest;
-        			}else if(tempTiles[i][j] == WIND_SOUTH) {
-        				tiles[x1][y1] = windSouth;
-        			}else if(tempTiles[i][j] == WIND_NORTH) {
-        				tiles[x1][y1] = windNorth;
-        			}else if(tempTiles[i][j] == WP_NW) {
-        				tiles[x1][y1] = whirlNW;
-        			}else if(tempTiles[i][j] == WP_NE) {
-        				tiles[x1][y1] = whirlNE;
-        			}else if(tempTiles[i][j] == WP_SW) {
-        				tiles[x1][y1] = whirlSW;
-        			}else if(tempTiles[i][j] == WP_SE) {
-        				tiles[x1][y1] = whirlSE;
-        			}else if(tempTiles[i][j] == SMALL_ROCK) {
-        				SmallRock small = new SmallRock(context,x1,y1,false);
-        				topLayer.add(small);
-        			}else if(tempTiles[i][j] == BIG_ROCK) {
-        				BigRock big = new BigRock(context,x1,y1,false);
-        				topLayer.add(big);
-        			}else if(tempTiles[i][j] == FLAG_1) {
-	        			Flag flag_1 = new Flag(context,x1,y1,1);	
-        				topLayer.add(flag_1);
-        			}else if(tempTiles[i][j] == FLAG_2) {
-        				Flag flag_2 = new Flag(context,x1,y1,2);
-        				topLayer.add(flag_2);
-        			}else if(tempTiles[i][j] == FLAG_3) {
-        				Flag flag_3 = new Flag(context,x1,y1,3);
-        				topLayer.add(flag_3);
-        			}else if(tempTiles[i][j] == 0) {
-                        if (y1 < 3 || y1 > 32) {
-                        	tiles[x1][y1] = safezone;
-                        }
-                        else {
-                        	tiles[x1][y1] = cell;
-                        }
+    	        int x1 = 0;
+    	        int y1 = 0;
+    	        for (int i = 0; i < tempTiles.length; i++) {
+    	            for (int j = tempTiles[i].length - 1; j > -1; j--) {
+            			if(tempTiles[i][j] == WIND_EAST) {
+            				tiles[x1][y1] = windEast;
+            			}else if(tempTiles[i][j] == WIND_WEST) {
+            				tiles[x1][y1] = windWest;
+            			}else if(tempTiles[i][j] == WIND_SOUTH) {
+            				tiles[x1][y1] = windSouth;
+            			}else if(tempTiles[i][j] == WIND_NORTH) {
+            				tiles[x1][y1] = windNorth;
+            			}else if(tempTiles[i][j] == WP_NW) {
+            				tiles[x1][y1] = whirlNW;
+            			}else if(tempTiles[i][j] == WP_NE) {
+            				tiles[x1][y1] = whirlNE;
+            			}else if(tempTiles[i][j] == WP_SW) {
+            				tiles[x1][y1] = whirlSW;
+            			}else if(tempTiles[i][j] == WP_SE) {
+            				tiles[x1][y1] = whirlSE;
+            			}else if(tempTiles[i][j] == SMALL_ROCK) {
+            				SmallRock small = new SmallRock(context,x1,y1,false);
+            				topLayer.add(small);
+            			}else if(tempTiles[i][j] == BIG_ROCK) {
+            				BigRock big = new BigRock(context,x1,y1,false);
+            				topLayer.add(big);
+            			}else if(tempTiles[i][j] == FLAG_1) {
+    	        			Flag flag_1 = new Flag(context,x1,y1,1);	
+            				topLayer.add(flag_1);
+            			}else if(tempTiles[i][j] == FLAG_2) {
+            				Flag flag_2 = new Flag(context,x1,y1,2);
+            				topLayer.add(flag_2);
+            			}else if(tempTiles[i][j] == FLAG_3) {
+            				Flag flag_3 = new Flag(context,x1,y1,3);
+            				topLayer.add(flag_3);
+            			}else if(tempTiles[i][j] == 0) {
+                            if (y1 < 3 || y1 > 32) {
+                            	tiles[x1][y1] = safezone;
+                            }
+                            else {
+                            	tiles[x1][y1] = cell;
+                            }
+            			}
+            			
+    	                y1++;
+    	            }
+    	            y1 = 0;
+    	            x1++;
+    	        }
+    	        String name = selectedFile.getName();
+            	Gdx.app.postRunnable(new Runnable() {
+        			@Override
+        			public void run() {
+        				graphics.setTitle("MapEditor - loaded map: " + name);
         			}
-        			
-	                y1++;
-	            }
-	            y1 = 0;
-	            x1++;
-	        }
-	        Gdx.graphics.setTitle("MapEditor - loaded map: "+selectedFile.getName());
-    	}
+            	});
+        	}
+        });
     }
     
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
+	}
 	
 }

@@ -37,10 +37,10 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setTitle("GC: v" + Constants.VERSION);
 		config.setWindowIcon("gclogo.png");
-		if(System.getProperty("os.name").toLowerCase().contains("mac")) {
-			ShaderProgram.prependVertexCode = "#version 130\n#define varying out\n#define attribute in\n";
-			ShaderProgram.prependFragmentCode = "#version 130\n#define varying in\n#define texture2D texture\n#define gl_FragColor fragColor\nout vec4 fragColor;\n";
-		}
+//		if(System.getProperty("os.name").toLowerCase().contains("mac")) {
+//			ShaderProgram.prependVertexCode = "#version 110\n#define varying out\n#define attribute in\n";
+//			ShaderProgram.prependFragmentCode = "#version 110\n#define varying in\n#define texture2D texture\n#define gl_FragColor fragColor\nout vec4 fragColor;\n";
+//		}
         new Lwjgl3Application(cadesim, config);
 	}
 	

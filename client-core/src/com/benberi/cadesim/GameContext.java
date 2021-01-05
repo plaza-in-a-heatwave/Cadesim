@@ -256,14 +256,13 @@ public class GameContext {
     public void createFurtherScenes(int shipId) {
     	GameContext context = this;
     	Gdx.app.postRunnable(new Runnable() {
-
 			@Override
 			public void run() {
 		    	ScreenManager.getInstance().showScreen(ScreenEnum.GAME, context);
+				graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
 			}
     		
     	});
-		Gdx.graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
     }
 
     public void setLobbyScreen(LobbyScreen lobby) {
@@ -403,7 +402,7 @@ public class GameContext {
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
-						graphics.setResizable(false);
+						graphics.setResizable(true);
 					}
             	});
             }
@@ -416,36 +415,23 @@ public class GameContext {
      *
      * @param response  The response code
      */
-    public void handleLoginResponse(int response) {
+    public String handleLoginResponse(int response) {
         if (response != LoginResponsePacket.SUCCESS) {
         	getServerChannel().disconnect();
         	haveServerResponse = true;
-
             switch (response) {
                 case LoginResponsePacket.BAD_VERSION:
-                    getLobbyScreen().setPopupMessage("Outdated client.");
-                    getLobbyScreen().showPopup();
-                    break;
+                	return "Outdated client.";
                 case LoginResponsePacket.NAME_IN_USE:
-                    getLobbyScreen().setPopupMessage("Display name already in use.");
-                    getLobbyScreen().showPopup();
-                    break;
+                	return "Display name already in use.";
                 case LoginResponsePacket.BAD_SHIP:
-                    getLobbyScreen().setPopupMessage("The selected ship is not allowed.");
-                    getLobbyScreen().showPopup();
-                    break;
+                	return "The selected ship is not allowed.";
                 case LoginResponsePacket.SERVER_FULL:
-                    getLobbyScreen().setPopupMessage("The server is full.");
-                    getLobbyScreen().showPopup();
-                    break;
+                	return "The server is full.";
                 case LoginResponsePacket.BAD_NAME:
-                	getLobbyScreen().setPopupMessage("That ship name is not allowed.");
-                	getLobbyScreen().showPopup();
-                	break;
+                	return "That ship name is not allowed.";
                 default:
-                    getLobbyScreen().setPopupMessage("Unknown login failure.");
-        			getLobbyScreen().showPopup();
-                    break;
+                	return "Unknown login failure.";
             }
 
         }
@@ -458,6 +444,7 @@ public class GameContext {
 				getBattleScreen().battleMenu.audio_slider.setValue(Float.parseFloat(volume));
 				getBattleScreen().setSound_volume(Float.parseFloat(volume));
 			}
+			return null;
         }
     }
 
@@ -595,30 +582,43 @@ public class GameContext {
      * When the client (or user) decides to disconnect
      */
     public void exitMapEditor() {
-    	Gdx.graphics.setResizable(true);
 		setStartedMapEditor(false);
     	setClientInitiatedDisconnect(true); // wedunnit!
         setConnected(false);
         setIsInLobby(true);
-		Gdx.graphics.setTitle("GC: v" + Constants.VERSION);
+        Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				graphics.setResizable(true);
+				graphics.setTitle("GC: v" + Constants.VERSION);
+			}
+        	
+        });
     }
     /*
      * When the server decides to disconnect
      */
     public void handleServersideDisconnect() {
     	if(getServerResponse()) {
-//    		inputMultiplexer.clear();
     		getServerChannel().disconnect();
+	        getLobbyScreen().setPopupMessage("Login error.");
+			getLobbyScreen().showPopup();
     		System.out.println("Login error; handling response.");
     	}else {
-//    		inputMultiplexer.clear();
 	        setConnected(false);
 	        setIsInLobby(true);
 	        getServerChannel().disconnect();
-//			getConnectScene().setState(ConnectionSceneState.DEFAULT);
-//			connectScene.setPopupMessage("Server Disconnected.");
-//			connectScene.showPopup();
+	        getLobbyScreen().setPopupMessage("Server Disconnected.");
+			getLobbyScreen().showPopup();
     	}
+
+    	Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+		        ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
+		        graphics.setResizable(true);
+			}
+    	});
     }
 
     public GameAssetManager getAssetObject() {

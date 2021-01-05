@@ -5,13 +5,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.benberi.cadesim.GameContext;
+import com.benberi.cadesim.game.screen.SeaBattleScreen;
 import com.benberi.cadesim.util.Team;
 
-public class GameInformation{
+public class GameInformation extends SeaBattleScreen{
 	private GameContext context;
-    private Stage stage;
     private Texture panel;
     private Texture contenders;
     private TextureRegion defenderThem;
@@ -44,9 +43,10 @@ public class GameInformation{
     // are we defender or attacker?
     boolean areDefender;
 
-	public GameInformation(GameContext context,Stage stage) {
+	public GameInformation(GameContext context) {
+		super(context);
         this.context = context;
-        this.stage = stage;
+        buildStage();
     }
 
     public void buildStage() {

@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -39,16 +36,22 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.files.FileHandle;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.game.entity.vessel.Vessel;
+import com.benberi.cadesim.game.screen.SeaBattleScreen;
 import com.benberi.cadesim.game.screen.impl.battle.map.BlockadeMap;
 import com.benberi.cadesim.util.Team;
+import com.kotcrab.vis.ui.widget.file.FileChooser;
+import com.kotcrab.vis.ui.widget.file.FileChooserAdapter;
+import com.kotcrab.vis.ui.widget.file.FileTypeFilter;
+import com.kotcrab.vis.ui.widget.file.FileChooser.Mode;
 
-public class MenuComponent implements InputProcessor {
-	GameContext context;
-	Stage stage;
+public class MenuComponent extends SeaBattleScreen implements InputProcessor {
+	private GameContext context;
     /**
      * Textures
      */
@@ -82,12 +85,8 @@ public class MenuComponent implements InputProcessor {
     Rectangle menuLobby_Shape;
     Rectangle menuMap_Shape;
 
-    
-    private JFileChooser fileChooser;
 	private SelectBox<String> selectBox;
 	private Dialog settingsDialog;
-
-	public Skin skin;
 	private String[] mapStrings;
 	private int[][] customMap;
 	private boolean mapType = false;
@@ -156,7 +155,7 @@ public class MenuComponent implements InputProcessor {
 	
 	private ButtonGroup<TextButton> disengageBehaviorGroup;
 	private ButtonGroup<TextButton> jobberQualityGroup;
-	
+	private Stage stage;
 	/**
 	 * Allow other parts of Cadesim to close the dialog
 	 */
@@ -179,11 +178,10 @@ public class MenuComponent implements InputProcessor {
 		return settingsDialog;
 	}
 	
-    public MenuComponent(GameContext context,Stage stage) {
+    public MenuComponent(GameContext context, Stage stage) {
+    	super(context);
         this.context = context;
         this.stage = stage;
-        fileChooser = new JFileChooser();
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
         Skin sliderskin = new Skin(Gdx.files.internal("skin/uiskin.json"));
         settingsDialog = new Dialog("Game Settings", skin, "dialog");
         menuTable_Shape = new Rectangle(MENU_tableX, 0, 80, 400);
@@ -244,9 +242,6 @@ public class MenuComponent implements InputProcessor {
     	stage.addActor(settingsButton);
     	stage.addActor(teamButton);
     	stage.addActor(audio_slider);	
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-    	fileChooser.setFileFilter(new FileNameExtensionFilter("txt file","txt"));
-    	fileChooser.setDialogTitle("Select Map File");
     	createDialog();
     	createTeams();
 		hideMenu();
@@ -461,8 +456,10 @@ public class MenuComponent implements InputProcessor {
     }
 
     public void render(float delta) {
-//        Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
+        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),true);
     	stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
+        stage.act();
+        stage.draw();
         stage.getBatch().begin();
         if(menuButton.isDisabled()) {
         	//overlay buttons with text
@@ -474,7 +471,6 @@ public class MenuComponent implements InputProcessor {
     }
 
     public void dispose() {
-    	fileChooser = null;
     }
     
     /*
@@ -782,44 +778,52 @@ public class MenuComponent implements InputProcessor {
     public void selectCustomMap() {
     	int[][] finalMap = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
 		int[][] tempTiles = new int[BlockadeMap.MAP_WIDTH][BlockadeMap.MAP_HEIGHT];
-    	if(fileChooser.showOpenDialog(fileChooser) == JFileChooser.APPROVE_OPTION) {
-    		File selectedFile = fileChooser.getSelectedFile();
-    		if(selectedFile.length()/1024 < 5) {
-    			int x = 0;
-    	        int y = 0;
-    	        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()))) {
-    	            String line;
-    	            while ((line = br.readLine()) != null) {
-    	                String[] split = line.split(",");
-    	                for (String tile : split) {
-    	                	tempTiles[x][y] = Integer.parseInt(tile);
-    	                    x++;
-    	                }
-    	                x = 0;
-    	                y++;
-    	            }
-    	            int x1 = 0;
-    	            int y1 = 0;
+    	FileChooser fileChooser = new FileChooser(Mode.OPEN);
+    	fileChooser.setSize(500, 300);
+        fileChooser.setDirectory(System.getProperty("user.home"));
+        FileTypeFilter typeFilter = new FileTypeFilter(true); //allow "All Types" mode where all files are shown
+        typeFilter.addRule("Text files (*.txt)", "txt");
+        fileChooser.setFileTypeFilter(typeFilter);
+        stage.addActor(fileChooser.fadeIn());
+        fileChooser.setListener(new FileChooserAdapter() {
+        	@Override
+        	public void selected(Array<FileHandle> file) {
+        		File selectedFile = file.first().file();
+        		if(selectedFile.length()/1024 < 5) {
+        			int x = 0;
+        	        int y = 0;
+        	        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()))) {
+        	            String line;
+        	            while ((line = br.readLine()) != null) {
+        	                String[] split = line.split(",");
+        	                for (String tile : split) {
+        	                	tempTiles[x][y] = Integer.parseInt(tile);
+        	                    x++;
+        	                }
+        	                x = 0;
+        	                y++;
+        	            }
+        	            int x1 = 0;
+        	            int y1 = 0;
 
-    	            for (int i = 0; i < tempTiles.length; i++) {
-    	                for (int j = tempTiles[i].length - 1; j > -1; j--) {
-    	                    finalMap[x1][y1] = tempTiles[i][j];
-    	                    y1++;
-    	                }
-    	                y1 = 0;
-    	                x1++;
-    	            }
-    	        	customMap = finalMap;
-    	        	mapName = selectedFile.getName();
-    	        } catch (IOException e) {
-    	            e.printStackTrace();
-    	        }
-    		}else {
-    			selectCustomMap();
-    		}
-    	}else {
-    		return;
-    	}
+        	            for (int i = 0; i < tempTiles.length; i++) {
+        	                for (int j = tempTiles[i].length - 1; j > -1; j--) {
+        	                    finalMap[x1][y1] = tempTiles[i][j];
+        	                    y1++;
+        	                }
+        	                y1 = 0;
+        	                x1++;
+        	            }
+        	        	customMap = finalMap;
+        	        	mapName = selectedFile.getName();
+        	        } catch (IOException e) {
+        	            e.printStackTrace();
+        	        }
+        		}else {
+        			selectCustomMap();
+        		}
+        	}
+        });
     }
     
     /*

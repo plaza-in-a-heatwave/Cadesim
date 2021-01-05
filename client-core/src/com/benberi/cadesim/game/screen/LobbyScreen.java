@@ -24,7 +24,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -60,10 +59,6 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
      * Batch for opening screen
      */
 
-    /**
-     * The shape renderer
-     */
-    public ShapeRenderer renderer;
 
     private BitmapFont font;
     private BitmapFont titleFont;
@@ -136,8 +131,6 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     
     public int screenWidth;
     public int screenHeight;
-
-    private Skin skin;
     
     private Random random = new Random();
     private HashMap<String,String> userProperties;
@@ -160,11 +153,9 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     	room_names.clear();
     	server_codes.clear();
     	greetings.clear();
-        renderer = new ShapeRenderer();
         loginButtonStyle = new ImageButtonStyle();
         mapEditorButtonStyle = new ImageButtonStyle();
         url = null;
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         //styles
         style = new TextField.TextFieldStyle();
@@ -566,12 +557,12 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     public void initListeners() {
         buttonMapEditor.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
-            	stage.clear();
-            	ScreenManager.getInstance().showScreen(ScreenEnum.MAPEDITOR,context);
-            	context.setStartedMapEditor(true);
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
+		            	stage.clear();
+		            	ScreenManager.getInstance().showScreen(ScreenEnum.MAPEDITOR,context);
+		            	context.setStartedMapEditor(true);
 						graphics.setResizable(false);
 					}
             	});
@@ -581,22 +572,16 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
         buttonConn.addListener(new ClickListener() {//runs update if there is one before logging in 
             public void clicked(InputEvent event, float x, float y){
             	Gdx.app.postRunnable(new Runnable() {
-
         			@Override
         			public void run() {
         	        	ScreenManager.getInstance().showScreen(ScreenEnum.LOADING,context,"Connecting, please wait...");
+        	        	graphics.setResizable(false);
         			}
             		
             	});
                 try {
                     performUpdateCheck();
                     buttonConn.toggle();
-                	Gdx.app.postRunnable(new Runnable() {
-    					@Override
-    					public void run() {
-    						graphics.setResizable(false);
-    					}
-                	});
                 } catch (UnknownHostException e) {
                     return;
                 }
