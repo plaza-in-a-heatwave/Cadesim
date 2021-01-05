@@ -1,6 +1,5 @@
 package com.benberi.cadesim.game.screen.component;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -104,20 +103,19 @@ public class GameInformation extends SeaBattleScreen{
 
     public void render(float delta) {
         int xPlacement = 60 + (longestTeam.length() * 6);
-        Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
         stage.getBatch().begin();
-        stage.getBatch().draw(panel, 5, 5);
+        stage.getBatch().draw(panel, 5, 205);
 
         // draw defender
-        fontTeamDefender.draw(stage.getBatch(), defender + ":", 38,120 );
-        fontPointsDefender.draw(stage.getBatch(), Integer.toString(defenderPoints), xPlacement,118 );
-        stage.getBatch().draw(areDefender?defenderUs:defenderThem, 18, 105);
+        fontTeamDefender.draw(stage.getBatch(), defender + ":", 38,320 );
+        fontPointsDefender.draw(stage.getBatch(), Integer.toString(defenderPoints), xPlacement,318 );
+        stage.getBatch().draw(areDefender?defenderUs:defenderThem, 18, 305);
 
         // draw attacker
-        fontTeamAttacker.draw(stage.getBatch(), attacker + ":", 38,97 );
-        fontPointsAttacker.draw(stage.getBatch(), Integer.toString(attackerPoints), xPlacement,95 );
-        stage.getBatch().draw(areDefender?attackerThem:attackerUs, 18, 82);
+        fontTeamAttacker.draw(stage.getBatch(), attacker + ":", 38,297 );
+        fontPointsAttacker.draw(stage.getBatch(), Integer.toString(attackerPoints), xPlacement,295 );
+        stage.getBatch().draw(areDefender?attackerThem:attackerUs, 18, 282);
 
         if (timeUntilBreak == 0 && breakTime >= 0)
         {
@@ -130,7 +128,7 @@ public class GameInformation extends SeaBattleScreen{
                     ":" +
                     (seconds < 10 ? "0" + seconds : seconds),
                 62,
-                50
+                350
             );
 
             // draw current break info
@@ -138,7 +136,7 @@ public class GameInformation extends SeaBattleScreen{
             		stage.getBatch(),
                 "Break",
                 62,
-                65
+                265
             );
         }
         else
@@ -152,7 +150,7 @@ public class GameInformation extends SeaBattleScreen{
                     ":" +
                     (seconds < 10 ? "0" + seconds : seconds),
                 62,
-                50
+                250
             );
 
             // draw next break info
@@ -167,7 +165,7 @@ public class GameInformation extends SeaBattleScreen{
                         ":" +
                         (breakSeconds < 10 ? "0" + breakSeconds: breakSeconds),
                     62,
-                    65
+                    365
                 );
             }
             else

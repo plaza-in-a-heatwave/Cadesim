@@ -249,7 +249,6 @@ public class PlayerPacketManager {
     public void sendRemovePlayer(Player p) {
         RemovePlayerShipPacket packet = new RemovePlayerShipPacket();
         packet.setName(p.getName());
-
         player.sendPacket(packet);
     }
 

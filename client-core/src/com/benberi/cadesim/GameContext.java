@@ -258,6 +258,7 @@ public class GameContext {
     	Gdx.app.postRunnable(new Runnable() {
 			@Override
 			public void run() {
+				graphics.setResizable(false);
 		    	ScreenManager.getInstance().showScreen(ScreenEnum.GAME, context);
 				graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
 			}

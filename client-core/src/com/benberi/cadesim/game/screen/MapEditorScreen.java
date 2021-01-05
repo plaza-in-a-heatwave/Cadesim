@@ -211,7 +211,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
      * The sea texture
      */
     private Texture seaTile;
-    
+    private OrthographicCamera camera;
     public MapEditorScreen(GameContext context) {
         this.context = context;
     }
@@ -222,6 +222,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         createTiles();
         createEmptyMap();
         createMenu();
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         camera.position.x = 0;
         camera.position.y = 200;
         MapEditorScreen screen = this;
@@ -232,7 +233,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
 		    	multiplexer.addProcessor(stage);
 		    	multiplexer.addProcessor(screen);
 		    	Gdx.input.setInputProcessor(multiplexer);
-//		    	graphics.setTitle("MapEditor - Blank");
+		    	graphics.setTitle("MapEditor - Blank");
 			}
         });
         update();
@@ -247,8 +248,8 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public void render(float delta) {
-    	stage.getBatch().setProjectionMatrix(camera.combined);
     	update();
+    	stage.getBatch().setProjectionMatrix(camera.combined);
         drawSea();
         // Render the map
         renderMap();

@@ -32,7 +32,7 @@ public abstract class AbstractScreen extends ScreenAdapter {
 		multiplexer = new InputMultiplexer();
         renderer = new ShapeRenderer();
         shapeRenderer = new ShapeRenderer();
-        camera = new OrthographicCamera(viewport.getScreenWidth(),viewport.getScreenHeight());
+        camera = new OrthographicCamera();
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 	}
 	// Subclasses must load actors in this method

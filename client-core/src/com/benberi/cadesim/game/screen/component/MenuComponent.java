@@ -366,6 +366,7 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 		settingsDialog.setMovable(true);
 		settingsDialog.setResizable(true);
 		resizeSettingsDialog();
+		disableAI();
     }
 	/*
 	 * Fill list with proper teams
@@ -541,38 +542,38 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     			stage.setScrollFocus(null);
     		}
     	});
-		getAIOffButton().addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		clearAI();
-        		getCustomMapButton().setDisabled(false);
-        		setAIButton("off",true);
-        		context.setAISetting("off");
-        	}});
-    	getAIEasyDifficultyButton().addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		clearAI();
-        		getCustomMapButton().setDisabled(false);
-        		setAIButton("easy",true);
-        		context.setAISetting("easy");
-        	}});
-    	getAIMediumDifficultyButton().addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		clearAI();
-        		getCustomMapButton().setDisabled(false);
-        		setAIButton("medium",true);
-        		context.setAISetting("medium");
-        	}});
-    	getAIHardDifficultyButton().addListener(new ClickListener() {
-        	@Override
-            public void clicked(InputEvent event, float x, float y) {
-        		clearAI();
-        		getCustomMapButton().setDisabled(false);
-        		setAIButton("hard",true);
-        		context.setAISetting("hard");
-        	}});
+//		getAIOffButton().addListener(new ClickListener() {
+//        	@Override
+//            public void clicked(InputEvent event, float x, float y) {
+//        		clearAI();
+//        		getCustomMapButton().setDisabled(false);
+//        		setAIButton("off",true);
+//        		context.setAISetting("off");
+//        	}});
+//    	getAIEasyDifficultyButton().addListener(new ClickListener() {
+//        	@Override
+//            public void clicked(InputEvent event, float x, float y) {
+//        		clearAI();
+//        		getCustomMapButton().setDisabled(false);
+//        		setAIButton("easy",true);
+//        		context.setAISetting("easy");
+//        	}});
+//    	getAIMediumDifficultyButton().addListener(new ClickListener() {
+//        	@Override
+//            public void clicked(InputEvent event, float x, float y) {
+//        		clearAI();
+//        		getCustomMapButton().setDisabled(false);
+//        		setAIButton("medium",true);
+//        		context.setAISetting("medium");
+//        	}});
+//    	getAIHardDifficultyButton().addListener(new ClickListener() {
+//        	@Override
+//            public void clicked(InputEvent event, float x, float y) {
+//        		clearAI();
+//        		getCustomMapButton().setDisabled(false);
+//        		setAIButton("hard",true);
+//        		context.setAISetting("hard");
+//        	}});
     	getDisengageOffButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1163,6 +1164,12 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 	public void clearAI() {
     	for (TextButton button: aiGroup.getButtons()) {
     		button.setDisabled(false);
+    	}
+	}
+	
+	public void disableAI() {
+    	for (TextButton button: aiGroup.getButtons()) {
+    		button.setDisabled(true);
     	}
 	}
 	

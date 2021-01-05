@@ -45,7 +45,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
     /**
      * The camera view of the scene
      */
-    public OrthographicCamera camera;
+    public OrthographicCamera othercamera;
     
     /**
      * Whether the camera follows the vessel
@@ -168,7 +168,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     @Override
     public void buildStage() {
-        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
+        othercamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
     	Vessel v = Vessel.createVesselByType(context, null, 0, 0, context.myVesselType);
         control = new BattleControlComponent(
         	context,
@@ -234,10 +234,10 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 	
     public void update(){
         // update the camera
-        camera.update();
+        othercamera.update();
         //keep user from scrolling to far to black screens
-        camera.position.x = clamp(camera.position.x, Gdx.graphics.getWidth() , -Gdx.graphics.getWidth() - 100);
-        camera.position.y = clamp(camera.position.y, Gdx.graphics.getHeight() + 800, -Gdx.graphics.getHeight() + 500);
+        othercamera.position.x = clamp(othercamera.position.x, Gdx.graphics.getWidth() , -Gdx.graphics.getWidth() - 100);
+        othercamera.position.y = clamp(othercamera.position.y, Gdx.graphics.getHeight() + 800, -Gdx.graphics.getHeight() + 500);
         if (currentSlot > -1) { 
             if (vesselsCountWithCurrentPhase != vesselsCountNonSinking) { //bug fix-new players joining
                 MovePhase phase = MovePhase.getNext(currentPhase);
@@ -474,11 +474,11 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
             
             // let camera move with vessel if it's supposed to
             if (cameraFollowsVessel) {
-                if(camera != null && context.myVessel != null) {
+                if(othercamera != null && context.myVessel != null) {
                     Vessel myVessel = context.getEntities().getVesselByName(context.myVessel);
-                    camera.translate(
-                            getIsometricX(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.x,
-                            getIsometricY(myVessel.getX(), myVessel.getY(), myVessel) - camera.position.y
+                    othercamera.translate(
+                            getIsometricX(myVessel.getX(), myVessel.getY(), myVessel) - othercamera.position.x,
+                            getIsometricY(myVessel.getX(), myVessel.getY(), myVessel) - othercamera.position.y
                     );
                 }
             }
@@ -539,12 +539,13 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     @Override
     public void render(float delta) {
-    	Gdx.gl.glViewport(0,200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
     	update();
     	if(battleMenu.teamTable.isVisible()) {
     		battleMenu.fillTeamList();
     	}
-    	stage.getBatch().setProjectionMatrix(camera.combined);
+    	stage.getViewport().setCamera(othercamera);
+    	stage.getBatch().setProjectionMatrix(othercamera.combined);
+    	stage.getViewport().apply();
         drawSea();
         drawIsland();
         // Render the map
@@ -552,7 +553,6 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
         // Render ships
         renderEntities();
         information.render(delta);
-        // Render control
         control.render(delta);
         control.update();
         battleMenu.render(delta);
@@ -593,7 +593,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
      * Renders all entities
      */
     private void renderEntities() {
-        renderer.setProjectionMatrix(camera.combined);
+        renderer.setProjectionMatrix(othercamera.combined);
         if(blockadeMap != null) {
         	for (int x = BlockadeMap.MAP_WIDTH - 1; x > -1; x--) {
                 for (int y = BlockadeMap.MAP_HEIGHT - 1; y > -1; y--) {
@@ -638,7 +638,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
 
                         Vector3 v = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-                        camera.unproject(v, 0, 200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
+                        othercamera.unproject(v, 0, 200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
 
                         float xxx = xx + vessel.getOrientationLocation().getOffsetx();
                         float yyy = yy + vessel.getOrientationLocation().getOffsety();
@@ -820,7 +820,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
         currentSlot = -1;
         information.dispose();
         recountVessels();
-        camera = null;
+        othercamera = null;
     }
 
     private void renderSeaBattle() {
@@ -861,8 +861,8 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
     }
 
     private boolean canDraw(float x, float y, int width, int height) {
-        return x + width >= camera.position.x - camera.viewportWidth / 2 && x <= camera.position.x + camera.viewportWidth / 2 &&
-                y + height >= camera.position.y - camera.viewportHeight / 2 && y <= camera.position.y + camera.viewportHeight / 2;
+        return x + width >= othercamera.position.x - othercamera.viewportWidth / 2 && x <= othercamera.position.x + othercamera.viewportWidth / 2 &&
+                y + height >= othercamera.position.y - othercamera.viewportHeight / 2 && y <= othercamera.position.y + othercamera.viewportHeight / 2;
     }
 
     public void setTurnExecute() {
@@ -883,8 +883,8 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     public void initializePlayerCamera(Vessel vessel) {
         cameraFollowsVessel = true; // force reset
-	   	camera.position.add(getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y, 0); 
-	   	camera.update();
+	   	othercamera.position.add(getIsometricX(vessel.getX(), vessel.getY(), vessel) - othercamera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - othercamera.position.y, 0); 
+	   	othercamera.update();
     }
     
     /**
@@ -954,7 +954,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
             if (battleMenu.touchDown(x, y, pointer, button)) {
                 return true;
             }
-            if (camera != null && y < camera.viewportHeight && !battleMenu.teamTable.isVisible()) {
+            if (othercamera != null && y < othercamera.viewportHeight && !battleMenu.teamTable.isVisible()) {
                 // handle camera not following vessel
                 cameraFollowsVessel = false;
 
@@ -975,7 +975,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 	        if (battleMenu.touchUp(x, y, pointer,button)) {
 	            return true;
 	        }
-        	if (camera != null && y < camera.viewportHeight && !battleMenu.teamTable.isVisible()) {
+        	if (othercamera != null && y < othercamera.viewportHeight && !battleMenu.teamTable.isVisible()) {
                 // handle camera following/not following vessel
                 if (button == Input.Buttons.RIGHT) {
                     cameraFollowsVessel = false;
@@ -983,8 +983,8 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                     this.cameraFollowsVessel = true;
                     try {
                         Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
-	    	        	 camera.position.add(getIsometricX(vessel.getX(), vessel.getY(), vessel) - camera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - camera.position.y, 0); 
-	    	        	 camera.update();
+	    	        	 othercamera.position.add(getIsometricX(vessel.getX(), vessel.getY(), vessel) - othercamera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - othercamera.position.y, 0); 
+	    	        	 othercamera.update();
                     }catch(NullPointerException e){
                         //TO-DO -fix issue with null pointer
                     }
@@ -1002,14 +1002,13 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 			return false;
 		}
         if(!battleMenu.audio_slider.isVisible() && !battleMenu.isSettingsDialogOpen()) {
-            if (camera != null && sy > camera.viewportHeight) {
+            if (othercamera != null && sy > othercamera.viewportHeight) {
                 return false;
             }
-
-            if (this.canDragMap) {
+            if (this.canDragMap && sy < Gdx.graphics.getHeight() - 200) {
 	        	 float x = Gdx.input.getDeltaX(); float y = Gdx.input.getDeltaY();
-	        	 camera.position.add(-x*1.3f, y*1.3f, 0); 
-	        	 camera.update();
+	        	 othercamera.position.add(-x*1.3f, y*1.3f, 0); 
+	        	 othercamera.update();
             }
             if (battleMenu.touchDragged(sx, sy, pointer)) {
                 return true;

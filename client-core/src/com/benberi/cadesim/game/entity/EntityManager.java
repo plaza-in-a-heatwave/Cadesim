@@ -17,7 +17,7 @@ public class EntityManager {
     /**
      * List of vessel entities in the game
      */
-    private List<Vessel> vessels = new ArrayList<Vessel>();
+    public List<Vessel> vessels = new ArrayList<Vessel>();
 
     public EntityManager(GameContext context) {
         this.context = context;

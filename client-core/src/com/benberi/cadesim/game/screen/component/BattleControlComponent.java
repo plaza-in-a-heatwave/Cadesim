@@ -853,8 +853,9 @@ public class BattleControlComponent extends SeaBattleScreen implements InputProc
     }
 
     public void render(float delta) {
+        stage.getViewport().setCamera(camera);
+        stage.getViewport().apply();
         stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
-        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),false);
     	renderBackground();
         renderMoveControl();
         renderDisengage();
