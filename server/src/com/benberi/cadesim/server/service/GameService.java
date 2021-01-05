@@ -127,7 +127,7 @@ public class GameService implements Runnable {
                 // complete the game refresh
                 playerManager.renewGame();
                 context.getTimeMachine().renewRound(); // bugfix - order matters
-
+                playerManager.spawnAI();
                 playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
             }
 

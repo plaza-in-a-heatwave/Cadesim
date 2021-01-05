@@ -34,6 +34,7 @@ public class ServerConfiguration {
     private static String mapFilter = ".txt";
 	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
+	private static String aiLevel = "easy";
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
@@ -49,7 +50,7 @@ public class ServerConfiguration {
     private static boolean checkForUpdatesOnStartup = false;
 
     private static ArrayList<Object> gameSettings = new ArrayList<Object>(Arrays.asList(turnDuration,
-    		roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(), isCustomMap(), mapName, null,
+    		roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(), isCustomMap(), mapName, null, aiLevel,
     		turnDuration,roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString()));
     // uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
@@ -455,31 +456,39 @@ public class ServerConfiguration {
 		ServerConfiguration.gameSettings.set(7, value);
 	}
 	
+	public static String getAISetting() {
+		return (String)ServerConfiguration.gameSettings.get(8);
+	}
+
+	public static void setAISetting(String value) {
+		ServerConfiguration.gameSettings.set(8, value);
+	}
+	
 	public static int getDefaultTurnSetting() {
-		return (int)ServerConfiguration.gameSettings.get(8);
-	}
-	
-	public static void setDefaultTurnSetting(int value) {
-		ServerConfiguration.gameSettings.set(8,value);
-	}
-	
-	public static int getDefaultRoundSetting() {
 		return (int)ServerConfiguration.gameSettings.get(9);
 	}
 	
-	public static void setDefaultRoundSetting(int value) {
+	public static void setDefaultTurnSetting(int value) {
 		ServerConfiguration.gameSettings.set(9,value);
 	}
 	
-	public static int getDefaultRespawnSetting() {
+	public static int getDefaultRoundSetting() {
 		return (int)ServerConfiguration.gameSettings.get(10);
 	}
 	
+	public static void setDefaultRoundSetting(int value) {
+		ServerConfiguration.gameSettings.set(10,value);
+	}
+	
+	public static int getDefaultRespawnSetting() {
+		return (int)ServerConfiguration.gameSettings.get(11);
+	}
+	
 	public static String getDefaultDisengageSetting() {
-		return (String)ServerConfiguration.gameSettings.get(11);
+		return (String)ServerConfiguration.gameSettings.get(12);
 	}
 	
 	public static String getDefaultJobberSetting() {
-		return (String)ServerConfiguration.gameSettings.get(12);
+		return (String)ServerConfiguration.gameSettings.get(13);
 	}
 }

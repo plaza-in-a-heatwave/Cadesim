@@ -8,7 +8,6 @@ import java.util.Properties;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.benberi.cadesim.BlockadeSimulator;
 import com.benberi.cadesim.Constants;
 
@@ -37,10 +36,6 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setTitle("GC: v" + Constants.VERSION);
 		config.setWindowIcon("gclogo.png");
-//		if(System.getProperty("os.name").toLowerCase().contains("mac")) {
-//			ShaderProgram.prependVertexCode = "#version 110\n#define varying out\n#define attribute in\n";
-//			ShaderProgram.prependFragmentCode = "#version 110\n#define varying in\n#define texture2D texture\n#define gl_FragColor fragColor\nout vec4 fragColor;\n";
-//		}
         new Lwjgl3Application(cadesim, config);
 	}
 	

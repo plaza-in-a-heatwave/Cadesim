@@ -158,6 +158,10 @@ public class PlayerManager {
     {
     	return persistTemporarySettings;
     }
+    
+    public static void setAILevel(String value){
+		ServerConfiguration.setAISetting(value);
+	}
 	/**
 	 * set with string so can load from cli
 	 */
@@ -1565,6 +1569,7 @@ public class PlayerManager {
 				setRespawnDelay(ServerConfiguration.getRespawnSetting());
 				setDisengageBehavior(ServerConfiguration.getDisengageSetting());
 				setJobbersQuality(ServerConfiguration.getJobberSetting());				
+				setAILevel(ServerConfiguration.getAISetting());
 				if(!ServerConfiguration.isCustomMap() || ServerConfiguration.getMapSetting() == null) { //check if customMap is false
 					String match=null;
 	    		    for (String s : ServerConfiguration.getAvailableMaps()) {
@@ -1646,6 +1651,49 @@ public class PlayerManager {
         	);
     	}
     	
+    }
+    
+    public void removeAI() {
+    	for(Player p : listRegisteredPlayers()) {
+	    	for (Player player : listRegisteredPlayers()) {
+	    		if((!player.isBot()) && p.isBot()) {
+	    			player.getPackets().sendRemovePlayer(p);
+	    			removeBot(p);
+	    		}
+	    	}
+    	}
+    }
+
+    public void spawnAI() {
+    	removeAI();
+    	int playerListSize = listRegisteredPlayers().size();
+    	switch(ServerConfiguration.getAISetting()) {
+	    	case "off":
+	    		return;
+	    	case "easy":
+	    		createBot(NPC_Type.TYPE1, "Type1", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
+	    		createBot(NPC_Type.TYPE2, "Type2", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
+	    		break;
+	    	case "medium":
+	    		for (int i =1; i <=(playerListSize * 1.5) ; i++) {
+	    			System.out.println("Medium: " + i);
+	    			createBot(NPC_Type.TYPE1, "Type1", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
+	    		}
+	    		break;
+	    	case "hard":
+	    		for (int i =1; i <=(playerListSize * 2) ; i++) {
+	    			System.out.println("Hard: " + i);
+	    			createBot(NPC_Type.TYPE1, "Type1", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
+	    		}
+	    		break;
+	    	default:
+	    		return;
+    	}
+		for(Player p : listRegisteredPlayers()) {
+			if(!p.isBot()) {
+				p.getPackets().sendPlayers();
+			}
+		}
     }
     
     private void printTeams(Player pl, boolean verbose) {
