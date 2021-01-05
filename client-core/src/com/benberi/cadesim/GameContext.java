@@ -734,26 +734,34 @@ public class GameContext {
 		gameSettings.set(7, value);
 	}
 	
-	public int getDefaultTurnSetting() {
-		return ((int)gameSettings.get(8)/10);
+	public String getAISetting() {
+		return (String)gameSettings.get(8);
 	}
 	
-	public int getDefaultRoundSetting() {
+	public void setAISetting(String value) {
+		gameSettings.set(8, value);
+	}
+	
+	public int getDefaultTurnSetting() {
 		return ((int)gameSettings.get(9)/10);
 	}
 	
+	public int getDefaultRoundSetting() {
+		return ((int)gameSettings.get(10)/10);
+	}
+	
 	public int getDefaultRespawnSetting() {
-		return (int)gameSettings.get(10);
+		return (int)gameSettings.get(11);
 	}
 	
 	public String getDefaultDisengageSetting() {
-		return (String)gameSettings.get(11);
+		return (String)gameSettings.get(12);
 	}
 	
 	public String getDefaultJobberSetting() {
-		return (String)gameSettings.get(12);
+		return (String)gameSettings.get(13);
 	}
-
+	
 	public ExecutorService getService() {
 		return service;
 	}

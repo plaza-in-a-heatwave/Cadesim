@@ -111,6 +111,11 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 	private TextButton disengageOff;
 	private TextButton disengageRealistic;
 	private TextButton disengageSimple;
+	//buttons to select AI
+	private TextButton aiOff;
+	private TextButton aiEasyDifficulty;
+	private TextButton aiMediumDifficulty;
+	private TextButton aiHardDifficulty;
 	//buttons to select job quality
 	private TextButton basicQuality;
 	private TextButton eliteQuality;
@@ -132,10 +137,12 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 	private Table mapButtonTable;
 	private Table disengageTable;
 	private Table qualityTable;
+	private Table aiTable;
 	private Table mapTable;
 	private Table selectionTable;
 	private Container<Table> tableContainer;
 	private Label disengageLabel;
+	private Label aiLabel;
 	private Label turnLabel;
 	private Label roundLabel;
 	private Label sinkLabel;
@@ -155,6 +162,7 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 	
 	private ButtonGroup<TextButton> disengageBehaviorGroup;
 	private ButtonGroup<TextButton> jobberQualityGroup;
+	private ButtonGroup<TextButton> aiGroup;
 	private Stage stage;
 	/**
 	 * Allow other parts of Cadesim to close the dialog
@@ -187,7 +195,7 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
         menuTable_Shape = new Rectangle(MENU_tableX, 0, 80, 400);
         menuButton_Shape = new Rectangle(MENU_buttonX, 13, 25, 25);
         initImageButtonStyles();
-       
+        aiLabel = new Label("AI Difficulty:",skin);
 		disengageLabel = new Label("Disengage Behavior:",skin);
 		turnLabel = new Label("Turn Duration (seconds):",skin);
 		roundLabel = new Label("Round Duration (seconds):",skin);
@@ -209,9 +217,18 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     	respawnPenaltyText = new TextField("",skin);
     	respawnPenaltyText.setMaxLength(5);
 
-    	
+    	aiGroup = new ButtonGroup<TextButton>();
     	disengageBehaviorGroup = new ButtonGroup<TextButton>();
     	jobberQualityGroup = new ButtonGroup<TextButton>();
+    	
+    	aiOff = new TextButton("Off",skin);
+    	aiOff.getStyle().disabled = aiOff.getStyle().down;
+    	aiEasyDifficulty = new TextButton("Easy",skin);
+    	aiEasyDifficulty.getStyle().disabled = aiEasyDifficulty.getStyle().down;
+    	aiMediumDifficulty = new TextButton("Medium",skin);
+    	aiMediumDifficulty.getStyle().disabled = aiMediumDifficulty.getStyle().down;
+    	aiHardDifficulty = new TextButton("Hard",skin);
+    	aiHardDifficulty.getStyle().disabled = aiHardDifficulty.getStyle().down;
     	
     	disengageOff = new TextButton("Off",skin);
     	disengageOff.getStyle().disabled = disengageOff.getStyle().down;
@@ -227,6 +244,7 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     	customMapButton.getStyle().disabled = customMapButton.getStyle().down;
     	disengageBehaviorGroup.add(disengageOff,disengageRealistic,disengageSimple);
     	jobberQualityGroup.add(basicQuality,eliteQuality);
+    	aiGroup.add(aiOff,aiEasyDifficulty,aiMediumDifficulty,aiHardDifficulty);
     	proposeButton = new TextButton("Propose",skin);
     	exitButton = new TextButton("Exit",skin);
     	defaultButton = new TextButton("Reset defaults",skin);
@@ -289,6 +307,7 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 		disengageTable = new Table();
 		qualityTable = new Table();
 		mapTable = new Table();
+		aiTable = new Table();
 		mapButtonTable = new Table();
 		selectionTable = new Table();
 		
@@ -303,11 +322,9 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 		table.add(sliderTable).pad(2.0f).row();
 		table.add(disengageTable).pad(2.0f).row();
 		table.add(qualityTable).pad(2.0f).row();
+		table.add(aiTable).pad(2.0f).row();
 		table.add(mapTable).pad(2.0f).row();
 		table.add(mapButtonTable).pad(2.0f).row();
-		table.add().pad(2.0f).row();
-		table.add().pad(2.0f).row();
-		table.add().pad(2.0f).row();
 		
 		//
 		sliderTable.add(turnLabel).padLeft(50.0f).padRight(5.0f);
@@ -328,6 +345,13 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 		qualityTable.add(jobberLabel).pad(5.0f).padRight(5.0f);
 		qualityTable.add(getBasicQualityButton()).pad(5.0f);
 		qualityTable.add(getEliteQualityButton()).pad(5.0f).row();
+		
+		aiTable.add(aiLabel).pad(5.0f).padRight(5.0f);
+		aiTable.add(getAIOffButton()).pad(5.0f);
+		aiTable.add(getAIEasyDifficultyButton()).pad(5.0f);
+		aiTable.add(getAIMediumDifficultyButton()).pad(5.0f);
+		aiTable.add(getAIHardDifficultyButton()).pad(5.0f).row();
+		
 		mapTable.add().row();
 		mapButtonTable.add(selectBox).pad(5.0f);
 		mapButtonTable.add(customMapButton);
@@ -516,7 +540,39 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     		public void exit(InputEvent event, float x, float y, int pointer, Actor actor) {
     			stage.setScrollFocus(null);
     		}
-    	}); 
+    	});
+		getAIOffButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("off",true);
+        		context.setAISetting("off");
+        	}});
+    	getAIEasyDifficultyButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("easy",true);
+        		context.setAISetting("easy");
+        	}});
+    	getAIMediumDifficultyButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("medium",true);
+        		context.setAISetting("medium");
+        	}});
+    	getAIHardDifficultyButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("hard",true);
+        		context.setAISetting("hard");
+        	}});
     	getDisengageOffButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1102,6 +1158,49 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     	for (TextButton button: jobberQualityGroup.getButtons()) {
     		button.setDisabled(false);
     	}
+	}
+	
+	public void clearAI() {
+    	for (TextButton button: aiGroup.getButtons()) {
+    		button.setDisabled(false);
+    	}
+	}
+	
+	public void setAIButton(String description, boolean toggle) {
+		switch (description)
+		{
+		     case "off":
+		    	 getAIOffButton().setDisabled(toggle);
+		    	 break;
+		     case "easy":
+		    	 getAIEasyDifficultyButton().setDisabled(toggle);
+		    	 break;
+		     case "medium":
+		    	 getAIMediumDifficultyButton().setDisabled(toggle);
+		    	 break;
+		     case "hard":
+		    	 getAIHardDifficultyButton().setDisabled(toggle);
+		    	 break;
+		     default:
+		    	 getAIEasyDifficultyButton().setDisabled(toggle);
+		    	 break;
+		}
+	}
+
+	public TextButton getAIOffButton() {
+		return aiOff;
+	}
+	
+	public TextButton getAIEasyDifficultyButton() {
+		return aiEasyDifficulty;
+	}
+	
+	public TextButton getAIMediumDifficultyButton() {
+		return aiMediumDifficulty;
+	}
+	
+	public TextButton getAIHardDifficultyButton() {
+		return aiHardDifficulty;
 	}
 	
 	public TextButton getBasicQualityButton() {
