@@ -43,9 +43,13 @@ public class ServerPacketManager {
      * Queues all packets and executes them
      */
     public void queuePackets() {
-        for (Player p : context.getPlayerManager().getPlayers()) {
-        	p.getPackets().queueIncomingPackets();
-        }
+    	try {
+            for (Player p : context.getPlayerManager().getPlayers()) {
+            	p.getPackets().queueIncomingPackets();
+            }
+    	}catch(ConcurrentModificationException e) {
+    		
+    	}
     }
 
     /**

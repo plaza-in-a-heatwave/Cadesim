@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
+import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.PlayerManager;
 
 /**
@@ -128,6 +129,9 @@ public class GameService implements Runnable {
                 playerManager.renewGame();
                 context.getTimeMachine().renewRound(); // bugfix - order matters
                 playerManager.spawnAI();
+            	for(Player other : playerManager.listBots()) {
+            		other.performLogic();
+            	}
                 playerManager.serverBroadcastMessage("Started new round: #" + (gamesCompleted + 1));
             }
 

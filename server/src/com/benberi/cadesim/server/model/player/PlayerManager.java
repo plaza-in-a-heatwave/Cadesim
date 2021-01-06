@@ -18,16 +18,21 @@ import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
+
+
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -37,6 +42,35 @@ public class PlayerManager {
      * List of players in the game
      */
     private List<Player> players = new ArrayList<>();
+    /**
+     * List of bot names
+     */
+    private List<String> botFirstName = new ArrayList<String>() {
+		private static final long serialVersionUID = 1L;
+	{
+	    	 add("Bright");add("Caustic");add("Charming");add("Classy");add("Clueless");add("Committed");
+	    	 add("Crabby");add("Crazy");add("Dangerous");add("Dear");add("Dedicated");add("Devouring");
+	    	 add("Dramatic");add("Educated");add("Elegant");add("Enlightened");add("Fat");add("Flexible");
+	    	 add("Free");add("Grateful");add("Haughty");add("Healthy");add("Heartless");add("Hungry");
+	    	 add("Innocent");add("Lucky");add("Magical");add("Magnificent");add("Old-Fashion");add("Passionate");
+	    	 add("Poor");add("Proud");add("Rare");add("Sick");add("Small");add("Strange");add("Touchy");
+	    	 add("Tricky");add("Uninhibited");add("Unique");add("Voracious");add("Well-Dressed");add("Witty");
+    	}
+    };
+    private List<String> botSecondName = new ArrayList<String>() {
+		private static final long serialVersionUID = 1L;
+	{
+	   	 	add("Alewife");add("Anchovy");add("Angelfish");add("Angler");add("Barbel");add("Bass");add("Blowfish");
+		   	add("Bluegill");add("Bream");add("Bullhead");add("Carp");add("Catfish");add("Chub");add("Clownfish");
+		   	add("Cod");add("Eel");add("Flounder");add("Gar");add("Grunion");add("Guppy");add("Gurnard");
+		   	add("Haddock");add("Hagfish");add("Hake");add("Halibut");add("Hammerhead");add("Herring");add("Lamprey");
+		   	add("Mackerel");add("Mako");add("Marlin");add("Mullet");add("Hammerhead");add("Needlefish");add("Pike");
+		   	add("Piranha");add("Plaice");add("Pollack");add("Puffer");add("Hammerhead");add("Roach");add("Rudd");
+		   	add("Sailfish");add("Salmon");add("Sardine");add("Sawfish");add("Shad");add("Shiner");add("Sild");
+		   	add("Silverside");add("Spot");add("Sprat");add("Stickleback");add("Sunfush");add("Tench");add("Tigerfish");
+		   	add("Trout");add("Tuna");add("Whitebait");add("Wrasse");
+   		}
+    };
     /**
      * List of temporarily banned IPs in the game
      */
@@ -125,6 +159,10 @@ public class PlayerManager {
 	    return ret;
 	}
 
+	public String randomBotName() {
+		Random random = new Random();
+		return botFirstName.get(random.nextInt(botFirstName.size())) + " " + botSecondName.get(random.nextInt(botSecondName.size()));
+	}
 	/**
 	 * helper method to reset tmp settings
 	 */
@@ -337,9 +375,6 @@ public class PlayerManager {
      * Handles and executes all turns
      */
     public void handleTurns() {
-    	for(Player player : listBots()) {
-    		player.performLogic();
-    	}
         if (ServerConfiguration.isTestMode()) {
             if (!context.getRegressionTests().loadNextScenario()) {
                 context.getRegressionTests().getSummary();
@@ -525,7 +560,6 @@ public class PlayerManager {
         {
             players.removeIf(p -> (!p.isRegistered())); // purge any unregistered ships
             sendAfterTurn();
-
         }
     }
 
@@ -1180,13 +1214,16 @@ public class PlayerManager {
                 p.giveLife();
             }
         }
-
         // then deal with individual players
         for (Player p : listRegisteredPlayers()) {
             p.getPackets().sendPositions();
             sendMoveBar(p);
             p.getPackets().sendFlags();
         }
+        
+    	for(Player other : listBots()) {
+    		other.performLogic();
+    	}
     }
 
     public int getPointsDefender() {
@@ -1663,7 +1700,95 @@ public class PlayerManager {
 	    	}
     	}
     }
+    
+    public Team getBotTeam() {
+    	switch(listRegisteredPlayers().get(0).getTeam()) {
+	    	case ATTACKER:
+	    		return Team.DEFENDER;
+	    	case DEFENDER:
+	    		return Team.ATTACKER;
+	    	default:
+	    		return Team.ATTACKER;
+    	}
+    }
 
+    public VesselFace getBotFace() {
+    	switch(listRegisteredPlayers().get(0).getTeam()) {
+	    	case ATTACKER:
+	    		return VesselFace.NORTH;
+	    	case DEFENDER:
+	    		return VesselFace.SOUTH;
+	    	default:
+	    		return VesselFace.SOUTH;
+    	}
+    }
+
+    //searches each tile for corresponding flag points
+    public Map<Integer, Map<Integer, Integer>> checkTilePoints(Player player) {
+    	List<Flag> localFlags = new ArrayList<>();
+    	Map<Integer, Map<Integer, Integer>>tilePoints = new HashMap<>();
+        int diameter = player.getVessel().getInfluenceDiameter(); //as much diameter as warfrig
+        int radius = diameter / 2;
+        int squareRadius = radius;
+        for (int i = 0; i < context.getMap().getMap().length; i++) {
+            for(int j = 0; j < context.getMap().getMap()[i].length; j++) {
+                int pointTotal = 0;
+                localFlags.clear();
+            	if(context.getMap().isRock(i, j, player) || context.getMap().isOutOfBounds(i, j)) {
+            		continue;
+            	}
+            	for (int x = i - squareRadius; x < i + squareRadius; x++) {
+      	          	for (int y = j - squareRadius; y < j + squareRadius; y++) {
+      	          		if((java.lang.Math.pow(x - i, 2) + java.lang.Math.pow(y - j, 2)) < java.lang.Math.pow(radius, 2)) {
+      	          			Flag checkedFlag = context.getMap().getFlag(x, y);
+      	          			if ((checkedFlag != null) && (!localFlags.contains(checkedFlag))) { // add once only
+      	                      localFlags.add(checkedFlag);
+      	          			}
+      	          		}
+      	          	}
+            	}
+            	Flag north = context.getMap().getFlag(i, j + radius);
+                Flag south = context.getMap().getFlag(i, j - radius);
+                Flag west = context.getMap().getFlag(i - radius, j);
+                Flag east = context.getMap().getFlag(i + radius, j);
+                
+                // add the four cardinal flags.
+                // in case radius is 0, our cardinal flags will be 4x identical.
+                // avoid adding 4x in this case.
+                if ((north != null) && (!localFlags.contains(north))) {
+                    localFlags.add(north);
+                }
+                if ((south != null) && (!localFlags.contains(south))) {
+                    localFlags.add(south);
+                }
+                if ((west != null) && (!localFlags.contains(west))) {
+                    localFlags.add(west);
+                }
+                if ((east != null) && (!localFlags.contains(east))) {
+                    localFlags.add(east);
+                }
+                
+                for(Flag points : localFlags) {
+                	pointTotal += points.getSize().getID();
+                }
+                if(pointTotal != 0) {
+                    Map<Integer, Integer> tile = new HashMap<Integer, Integer>();
+                    tile.put(i, j);
+                    tilePoints.put(pointTotal,tile);	
+                }
+            }
+        }
+        return tilePoints;
+    }
+    
+    //sorts flags in reverse order giving max points per position
+    public void getMaxTilePoints(Player player) {
+    	Map<Integer, Map<Integer, Integer>> sortedMap = new TreeMap<Integer, Map<Integer, Integer>>(Comparator.reverseOrder());
+    	sortedMap.putAll(checkTilePoints(player));
+    	System.out.println(sortedMap.keySet()); // flag point total
+    	System.out.println(sortedMap.values()); // position of tile (x,y)
+    }
+    
     public void spawnAI() {
     	removeAI();
     	int playerListSize = listRegisteredPlayers().size();
@@ -1671,29 +1796,72 @@ public class PlayerManager {
 	    	case "off":
 	    		return;
 	    	case "easy":
-	    		createBot(NPC_Type.TYPE1, "Type1", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
-	    		createBot(NPC_Type.TYPE2, "Type2", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
-	    		break;
+	    		for (int i =0; i < playerListSize ; i++) {
+	    			createBot(NPC_Type.TYPE4, randomBotName(), listRegisteredPlayers().get(0).getVessel().getID(), getBotTeam(), null, getBotFace(), 0.0f);
+	    		}
+	    		createBot(NPC_Type.TYPE3, randomBotName(), 0, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE1, randomBotName(), 1, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE2, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
+	        	for(Player p : listBots()) {
+	        		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
+	        			p.respawnOnLandside(true);
+	        		}else {
+	        			p.respawnOnLandside(false);
+	        		}
+	        	}
+	    		for(Player p : listRegisteredPlayers()) {
+	    			if(!p.isBot()) {
+	    				p.getPackets().sendPlayers();
+	    			}
+	    		}
+	    		return;
+	    		
 	    	case "medium":
-	    		for (int i =1; i <=(playerListSize * 1.5) ; i++) {
-	    			System.out.println("Medium: " + i);
-	    			createBot(NPC_Type.TYPE1, "Type1", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
+	    		for (int i =0; i < playerListSize *1.5 ; i++) {
+	    			createBot(NPC_Type.TYPE4, randomBotName(), listRegisteredPlayers().get(0).getVessel().getID(), getBotTeam(), null, getBotFace(), 0.0f);
 	    		}
-	    		break;
+	    		createBot(NPC_Type.TYPE1, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE2, randomBotName(), 3, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE3, randomBotName(), 4, getBotTeam(), null, getBotFace(), 0.0f);
+	        	for(Player p : listBots()) {
+	        		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
+	        			p.respawnOnLandside(true);
+	        		}else {
+	        			p.respawnOnLandside(false);
+	        		}
+	        	}
+	    		for(Player p : listRegisteredPlayers()) {
+	    			if(!p.isBot()) {
+	    				p.getPackets().sendPlayers();
+	    			}
+	    		}
+	    		return;
 	    	case "hard":
-	    		for (int i =1; i <=(playerListSize * 2) ; i++) {
-	    			System.out.println("Hard: " + i);
-	    			createBot(NPC_Type.TYPE1, "Type1", 11, Team.ATTACKER, null, VesselFace.SOUTH, 0.0f);
+	    		for (int i =0; i < playerListSize * 2 ; i++) {
+	    			createBot(NPC_Type.TYPE4, randomBotName(), listRegisteredPlayers().get(0).getVessel().getID(), getBotTeam(), null, getBotFace(), 0.0f);
 	    		}
-	    		break;
+	    		createBot(NPC_Type.TYPE1, randomBotName(), 1, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE2, randomBotName(), 1, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE2, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
+	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
+	        	for(Player p : listBots()) {
+	        		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
+	        			p.respawnOnLandside(true);
+	        		}else {
+	        			p.respawnOnLandside(false);
+	        		}
+	        	}
+	    		for(Player p : listRegisteredPlayers()) {
+	    			if(!p.isBot()) {
+	    				p.getPackets().sendPlayers();
+	    			}
+	    		}
+	    		return;
 	    	default:
 	    		return;
     	}
-		for(Player p : listRegisteredPlayers()) {
-			if(!p.isBot()) {
-				p.getPackets().sendPlayers();
-			}
-		}
     }
     
     private void printTeams(Player pl, boolean verbose) {
@@ -1747,13 +1915,17 @@ public class PlayerManager {
     }
 
     public void setTeam(Player pl, int value) {
+    	Team beforeTeam = pl.getTeam();
     	if(value == 0) {
     		pl.setTeam(Team.ATTACKER);
     	}else {
     		pl.setTeam(Team.DEFENDER);
     	}
-    	
+    	Team afterTeam = pl.getTeam();
     	sendTeamInfo();
+    	if(beforeTeam != afterTeam) {
+    		spawnAI();
+    	}
     }
     
     public void sendTeamInfo() {

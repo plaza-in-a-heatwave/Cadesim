@@ -34,7 +34,7 @@ public class ServerConfiguration {
     private static String mapFilter = ".txt";
 	private static String disengageBehavior = "simple";
 	private static int votingMajority = 75;        // percent
-	private static String aiLevel = "easy";
+	private static String aiLevel = "off";
 	private static JobbersQuality jobbersQuality = JobbersQuality.ELITE;
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
@@ -49,9 +49,9 @@ public class ServerConfiguration {
     private static boolean customMap = false;
     private static boolean checkForUpdatesOnStartup = false;
 
-    private static ArrayList<Object> gameSettings = new ArrayList<Object>(Arrays.asList(turnDuration,
-    		roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(), isCustomMap(), mapName, null, aiLevel,
-    		turnDuration,roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString()));
+    private static ArrayList<Object> gameSettings = new ArrayList<Object>(Arrays.asList(
+    		turnDuration,roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(),
+    		turnDuration,roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(), isCustomMap(), mapName, null, aiLevel));
     // uninitializable defaults
     private static String nextMapName = null; // the next map in the rotation. cannot be initialized by CLI.
     private static ArrayList<String> mapList; // store all possible maps, load from file once at the start. restart server to apply change.
@@ -391,104 +391,104 @@ public class ServerConfiguration {
 	public static ArrayList<Object> getGameSettings() {
 		return gameSettings;
 	}
-	
-	public static int getTurnSetting() {
+	public static int getDefaultTurnSetting() {
 		return (int)ServerConfiguration.gameSettings.get(0);
 	}
 	
-	public static void setTurnSetting(int value) {
-		ServerConfiguration.gameSettings.set(0, value);
-	}
-	
-	public static int getRoundSetting() {
-		return (int)ServerConfiguration.gameSettings.get(1);
-	}
-	
-	public static void setRoundSetting(int value) {
-		ServerConfiguration.gameSettings.set(1, value);
-	}
-	
-	public static int getRespawnSetting() {
-		return (int)ServerConfiguration.gameSettings.get(2);
-	}
-	
-	public static void setRespawnSetting(int value) {
-		ServerConfiguration.gameSettings.set(2, value);
-	}
-	
-	public static String getDisengageSetting() {
-		return (String)ServerConfiguration.gameSettings.get(3);
-	}
-	
-	public static void setDisengageSetting(String value) {
-		ServerConfiguration.gameSettings.set(3, value);
-	}
-	
-	public static String getJobberSetting() {
-		return (String)ServerConfiguration.gameSettings.get(4);
-	}
-	
-	public static  void setJobberSetting(String value) {
-		ServerConfiguration.gameSettings.set(4, value);
-	}
-	
-	public static boolean getCustomMapSetting() {
-		return (boolean)ServerConfiguration.gameSettings.get(5);
-	}
-	
-	public static void setCustomMapSetting(boolean b) {
-		ServerConfiguration.gameSettings.set(5, b);
-	}
-	
-	public static String getMapNameSetting() {
-		return (String)ServerConfiguration.gameSettings.get(6);
-	}
-	
-	public static void setMapNameSetting(String value) {
-		ServerConfiguration.gameSettings.set(6, value);
-	}
-	
-	public static int[][] getMapSetting() {
-		return (int[][])ServerConfiguration.gameSettings.get(7);
-	}
-	
-	public static void setMapSetting(int[][] value) {
-		ServerConfiguration.gameSettings.set(7, value);
-	}
-	
-	public static String getAISetting() {
-		return (String)ServerConfiguration.gameSettings.get(8);
-	}
-
-	public static void setAISetting(String value) {
-		ServerConfiguration.gameSettings.set(8, value);
-	}
-	
-	public static int getDefaultTurnSetting() {
-		return (int)ServerConfiguration.gameSettings.get(9);
-	}
-	
 	public static void setDefaultTurnSetting(int value) {
-		ServerConfiguration.gameSettings.set(9,value);
+		ServerConfiguration.gameSettings.set(0,value);
 	}
 	
 	public static int getDefaultRoundSetting() {
-		return (int)ServerConfiguration.gameSettings.get(10);
+		return (int)ServerConfiguration.gameSettings.get(1);
 	}
 	
 	public static void setDefaultRoundSetting(int value) {
-		ServerConfiguration.gameSettings.set(10,value);
+		ServerConfiguration.gameSettings.set(1,value);
 	}
 	
 	public static int getDefaultRespawnSetting() {
-		return (int)ServerConfiguration.gameSettings.get(11);
+		return (int)ServerConfiguration.gameSettings.get(2);
 	}
 	
 	public static String getDefaultDisengageSetting() {
-		return (String)ServerConfiguration.gameSettings.get(12);
+		return (String)ServerConfiguration.gameSettings.get(3);
 	}
 	
 	public static String getDefaultJobberSetting() {
+		return (String)ServerConfiguration.gameSettings.get(4);
+	}
+	
+	public static int getTurnSetting() {
+		return (int)ServerConfiguration.gameSettings.get(5);
+	}
+	
+	public static void setTurnSetting(int value) {
+		ServerConfiguration.gameSettings.set(5, value);
+	}
+	
+	public static int getRoundSetting() {
+		return (int)ServerConfiguration.gameSettings.get(6);
+	}
+	
+	public static void setRoundSetting(int value) {
+		ServerConfiguration.gameSettings.set(6, value);
+	}
+	
+	public static int getRespawnSetting() {
+		return (int)ServerConfiguration.gameSettings.get(7);
+	}
+	
+	public static void setRespawnSetting(int value) {
+		ServerConfiguration.gameSettings.set(7, value);
+	}
+	
+	public static String getDisengageSetting() {
+		return (String)ServerConfiguration.gameSettings.get(8);
+	}
+	
+	public static void setDisengageSetting(String value) {
+		ServerConfiguration.gameSettings.set(8, value);
+	}
+	
+	public static String getJobberSetting() {
+		return (String)ServerConfiguration.gameSettings.get(9);
+	}
+	
+	public static  void setJobberSetting(String value) {
+		ServerConfiguration.gameSettings.set(9, value);
+	}
+	
+	public static boolean getCustomMapSetting() {
+		return (boolean)ServerConfiguration.gameSettings.get(10);
+	}
+	
+	public static void setCustomMapSetting(boolean b) {
+		ServerConfiguration.gameSettings.set(10, b);
+	}
+	
+	public static String getMapNameSetting() {
+		return (String)ServerConfiguration.gameSettings.get(11);
+	}
+	
+	public static void setMapNameSetting(String value) {
+		ServerConfiguration.gameSettings.set(11, value);
+	}
+	
+	public static int[][] getMapSetting() {
+		return (int[][])ServerConfiguration.gameSettings.get(12);
+	}
+	
+	public static void setMapSetting(int[][] value) {
+		ServerConfiguration.gameSettings.set(12, value);
+	}
+	
+	public static String getAISetting() {
 		return (String)ServerConfiguration.gameSettings.get(13);
 	}
+
+	public static void setAISetting(String value) {
+		ServerConfiguration.gameSettings.set(13, value);
+	}
+	
 }

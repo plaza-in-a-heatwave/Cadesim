@@ -22,6 +22,7 @@ public class ReceiveGameSettings extends ClientPacketExecutor {
         if(getContext().getBattleMenu() != null) {
             getContext().getBattleMenu().clearDisengageBehavior();
             getContext().getBattleMenu().clearQuality();
+            getContext().getBattleMenu().clearAI();
             int length = p.readInt();
             ObjectInputStream ois;
     		try {

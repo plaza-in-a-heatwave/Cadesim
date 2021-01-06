@@ -486,8 +486,13 @@ public class GameContext {
 			if (getIsInLobby()) {
 				System.out.println("Returned to lobby");
 			}else {
-				getLobbyScreen().setPopupMessage("You have disconnected from the server.");
-				getLobbyScreen().showPopup();			
+				Gdx.app.postRunnable(new Runnable() {
+					@Override
+					public void run() {
+						getLobbyScreen().setPopupMessage("You have disconnected from the server.");
+						getLobbyScreen().showPopup();	
+					}
+				});		
 			}
 			
 			// #83 reset any lag test mode if we disconnect.
@@ -618,6 +623,9 @@ public class GameContext {
 			public void run() {
 		        ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
 		        graphics.setResizable(true);
+		        getLobbyScreen().setPopupMessage("Server Disconnected.");
+				getLobbyScreen().showPopup();
+				graphics.setTitle("GC: v" + Constants.VERSION);
 			}
     	});
     }
@@ -671,96 +679,96 @@ public class GameContext {
 		return gameSettings;
 	}
 	
-	public int getTurnSetting() {
+	public int getDefaultTurnSetting() {
 		return ((int)gameSettings.get(0)/10);
 	}
 	
-	public void setTurnSetting(int value) {
-		gameSettings.set(0, value);
-	}
-	
-	public int getRoundSetting() {
+	public int getDefaultRoundSetting() {
 		return ((int)gameSettings.get(1)/10);
 	}
 	
-	public void setRoundSetting(int value) {
-		gameSettings.set(1, value);
-	}
-	
-	public int getRespawnSetting() {
+	public int getDefaultRespawnSetting() {
 		return (int)gameSettings.get(2);
 	}
 	
-	public void setRespawnSetting(int value) {
-		gameSettings.set(2, value);
-	}
-	
-	public String getDisengageSetting() {
+	public String getDefaultDisengageSetting() {
 		return (String)gameSettings.get(3);
 	}
 	
-	public void setDisengageSetting(String value) {
-		gameSettings.set(3, value);
-	}
-	
-	public String getJobberSetting() {
+	public String getDefaultJobberSetting() {
 		return (String)gameSettings.get(4);
 	}
 	
-	public void setJobberSetting(String value) {
-		gameSettings.set(4, value);
+	public int getTurnSetting() {
+		return ((int)gameSettings.get(5)/10);
 	}
 	
-	public boolean getCustomMapSetting() {
-		return (boolean)gameSettings.get(5);
+	public void setTurnSetting(int value) {
+		gameSettings.set(5, value);
 	}
 	
-	public void setCustomMapSetting(boolean b) {
-		gameSettings.set(5, b);
+	public int getRoundSetting() {
+		return ((int)gameSettings.get(6)/10);
 	}
 	
-	public String getMapNameSetting() {
-		return (String)gameSettings.get(6);
-	}
-	
-	public void setMapNameSetting(String value) {
+	public void setRoundSetting(int value) {
 		gameSettings.set(6, value);
 	}
 	
-	public int[][] getMapSetting() {
-		return (int[][])gameSettings.get(7);
+	public int getRespawnSetting() {
+		return (int)gameSettings.get(7);
 	}
 	
-	public void setMapSetting(int[][] value) {
+	public void setRespawnSetting(int value) {
 		gameSettings.set(7, value);
 	}
 	
-	public String getAISetting() {
+	public String getDisengageSetting() {
 		return (String)gameSettings.get(8);
 	}
 	
-	public void setAISetting(String value) {
+	public void setDisengageSetting(String value) {
 		gameSettings.set(8, value);
 	}
 	
-	public int getDefaultTurnSetting() {
-		return ((int)gameSettings.get(9)/10);
+	public String getJobberSetting() {
+		return (String)gameSettings.get(9);
 	}
 	
-	public int getDefaultRoundSetting() {
-		return ((int)gameSettings.get(10)/10);
+	public void setJobberSetting(String value) {
+		gameSettings.set(9, value);
 	}
 	
-	public int getDefaultRespawnSetting() {
-		return (int)gameSettings.get(11);
+	public boolean getCustomMapSetting() {
+		return (boolean)gameSettings.get(10);
 	}
 	
-	public String getDefaultDisengageSetting() {
-		return (String)gameSettings.get(12);
+	public void setCustomMapSetting(boolean b) {
+		gameSettings.set(10, b);
 	}
 	
-	public String getDefaultJobberSetting() {
+	public String getMapNameSetting() {
+		return (String)gameSettings.get(11);
+	}
+	
+	public void setMapNameSetting(String value) {
+		gameSettings.set(11, value);
+	}
+	
+	public int[][] getMapSetting() {
+		return (int[][])gameSettings.get(12);
+	}
+	
+	public void setMapSetting(int[][] value) {
+		gameSettings.set(12, value);
+	}
+	
+	public String getAISetting() {
 		return (String)gameSettings.get(13);
+	}
+	
+	public void setAISetting(String value) {
+		gameSettings.set(13, value);
 	}
 	
 	public ExecutorService getService() {

@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Properties;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -287,8 +288,8 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     	
     	teamButtonTable.add(attackerTeamButton).padBottom(2.0f).padLeft(8f).padRight(10.0f);
     	teamButtonTable.add(defenderTeamButton).padBottom(2.0f);
-    	listTables.add(attackerScroller).width(150).height(200).padRight(10.0f);
-    	listTables.add(defenderScroller).width(150).height(200);
+    	listTables.add(attackerScroller).width(250).height(200).padRight(10.0f);
+    	listTables.add(defenderScroller).width(250).height(200);
     	teamTable.add(teamButtonTable).row();
     	teamTable.add(listTables);
     	teamTable.setPosition(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
@@ -366,12 +367,13 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 		settingsDialog.setMovable(true);
 		settingsDialog.setResizable(true);
 		resizeSettingsDialog();
-		disableAI();
     }
 	/*
 	 * Fill list with proper teams
 	 */
     public void fillTeamList() {
+    		HashSet<Object> seen=new HashSet<>();
+    		context.getEntities().vessels.removeIf(e->!seen.add(e.getName()));
 	    	attackerList.getItems().clear();
 	    	defenderList.getItems().clear();
 			ArrayList<Vessel> attacker = new ArrayList<Vessel>();
@@ -542,38 +544,38 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     			stage.setScrollFocus(null);
     		}
     	});
-//		getAIOffButton().addListener(new ClickListener() {
-//        	@Override
-//            public void clicked(InputEvent event, float x, float y) {
-//        		clearAI();
-//        		getCustomMapButton().setDisabled(false);
-//        		setAIButton("off",true);
-//        		context.setAISetting("off");
-//        	}});
-//    	getAIEasyDifficultyButton().addListener(new ClickListener() {
-//        	@Override
-//            public void clicked(InputEvent event, float x, float y) {
-//        		clearAI();
-//        		getCustomMapButton().setDisabled(false);
-//        		setAIButton("easy",true);
-//        		context.setAISetting("easy");
-//        	}});
-//    	getAIMediumDifficultyButton().addListener(new ClickListener() {
-//        	@Override
-//            public void clicked(InputEvent event, float x, float y) {
-//        		clearAI();
-//        		getCustomMapButton().setDisabled(false);
-//        		setAIButton("medium",true);
-//        		context.setAISetting("medium");
-//        	}});
-//    	getAIHardDifficultyButton().addListener(new ClickListener() {
-//        	@Override
-//            public void clicked(InputEvent event, float x, float y) {
-//        		clearAI();
-//        		getCustomMapButton().setDisabled(false);
-//        		setAIButton("hard",true);
-//        		context.setAISetting("hard");
-//        	}});
+		getAIOffButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("off",true);
+        		context.setAISetting("off");
+        	}});
+    	getAIEasyDifficultyButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("easy",true);
+        		context.setAISetting("easy");
+        	}});
+    	getAIMediumDifficultyButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("medium",true);
+        		context.setAISetting("medium");
+        	}});
+    	getAIHardDifficultyButton().addListener(new ClickListener() {
+        	@Override
+            public void clicked(InputEvent event, float x, float y) {
+        		clearAI();
+        		getCustomMapButton().setDisabled(false);
+        		setAIButton("hard",true);
+        		context.setAISetting("hard");
+        	}});
     	getDisengageOffButton().addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -880,6 +882,10 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
         			selectCustomMap();
         		}
         	}
+        	@Override
+        	public void canceled() {
+        		getCustomMapButton().setDisabled(false);
+        	}
         });
     }
     
@@ -941,6 +947,11 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
     	
     	for (TextButton button: jobberQualityGroup.getButtons()) {
     		if(button.getText().toString().toLowerCase().equals(context.getJobberSetting())) {
+    			button.setDisabled(true);
+    		}
+    	}
+    	for (TextButton button: aiGroup.getButtons()) {
+    		if(button.getText().toString().toLowerCase().equals(context.getAISetting())) {
     			button.setDisabled(true);
     		}
     	}

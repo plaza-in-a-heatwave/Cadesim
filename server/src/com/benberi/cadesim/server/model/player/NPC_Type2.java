@@ -22,8 +22,13 @@ public class NPC_Type2 extends Player {
     }
     
     @Override
+    public void calculateRoute() {
+    	
+    }
+    
+    @Override
     public void performLogic() {
-    	this.getMoves().setMove(0, MoveType.RIGHT);
+    	getMoves().setMove(0,MoveType.FORWARD);
     }
     
 	@Override

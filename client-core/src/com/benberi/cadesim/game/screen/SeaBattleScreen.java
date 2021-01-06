@@ -543,6 +543,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
     	if(battleMenu.teamTable.isVisible()) {
     		battleMenu.fillTeamList();
     	}
+    	stage.getBatch().setColor(Color.WHITE);
     	stage.getViewport().setCamera(othercamera);
     	stage.getBatch().setProjectionMatrix(othercamera.combined);
     	stage.getViewport().apply();
@@ -883,8 +884,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     public void initializePlayerCamera(Vessel vessel) {
         cameraFollowsVessel = true; // force reset
-	   	othercamera.position.add(getIsometricX(vessel.getX(), vessel.getY(), vessel) - othercamera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - othercamera.position.y, 0); 
-	   	othercamera.update();
+        othercamera.translate(getIsometricX(vessel.getX(), vessel.getY(), vessel) - othercamera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - othercamera.position.y, 0);
     }
     
     /**
@@ -954,7 +954,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
             if (battleMenu.touchDown(x, y, pointer, button)) {
                 return true;
             }
-            if (othercamera != null && y < othercamera.viewportHeight && !battleMenu.teamTable.isVisible()) {
+            if (othercamera != null && y < othercamera.viewportHeight - 200 && !battleMenu.teamTable.isVisible()) {
                 // handle camera not following vessel
                 cameraFollowsVessel = false;
 
@@ -975,7 +975,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 	        if (battleMenu.touchUp(x, y, pointer,button)) {
 	            return true;
 	        }
-        	if (othercamera != null && y < othercamera.viewportHeight && !battleMenu.teamTable.isVisible()) {
+        	if (othercamera != null && y < othercamera.viewportHeight - 200 && !battleMenu.teamTable.isVisible()) {
                 // handle camera following/not following vessel
                 if (button == Input.Buttons.RIGHT) {
                     cameraFollowsVessel = false;
@@ -983,8 +983,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                     this.cameraFollowsVessel = true;
                     try {
                         Vessel vessel = context.getEntities().getVesselByName(context.myVessel);
-	    	        	 othercamera.position.add(getIsometricX(vessel.getX(), vessel.getY(), vessel) - othercamera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - othercamera.position.y, 0); 
-	    	        	 othercamera.update();
+	    	        	othercamera.translate(getIsometricX(vessel.getX(), vessel.getY(), vessel) - othercamera.position.x, getIsometricY(vessel.getX(), vessel.getY(), vessel) - othercamera.position.y, 0); 
                     }catch(NullPointerException e){
                         //TO-DO -fix issue with null pointer
                     }
@@ -1005,10 +1004,9 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
             if (othercamera != null && sy > othercamera.viewportHeight) {
                 return false;
             }
-            if (this.canDragMap && sy < Gdx.graphics.getHeight() - 200) {
+            if (this.canDragMap && sy < othercamera.viewportHeight - 200) {
 	        	 float x = Gdx.input.getDeltaX(); float y = Gdx.input.getDeltaY();
-	        	 othercamera.position.add(-x*1.3f, y*1.3f, 0); 
-	        	 othercamera.update();
+	        	 othercamera.translate(-x,y*1f);
             }
             if (battleMenu.touchDragged(sx, sy, pointer)) {
                 return true;

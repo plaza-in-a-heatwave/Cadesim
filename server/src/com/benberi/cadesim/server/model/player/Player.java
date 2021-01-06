@@ -552,7 +552,7 @@ public class Player extends Position {
      * wrapper for respawnOnLandside
      * @param landSide true if want to spawn on landside else false
      */
-    private void respawnOnLandside(boolean landside) {
+    protected void respawnOnLandside(boolean landside) {
         respawnOnLandside(landside, null, null, 0, false);
     }
 

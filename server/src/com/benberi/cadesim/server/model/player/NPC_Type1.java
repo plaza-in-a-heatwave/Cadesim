@@ -28,7 +28,7 @@ public class NPC_Type1 extends Player {
     
     @Override
     public void performLogic() {
-    	getMoves().setMove(0, MoveType.FORWARD);
+    	getMoves().setMove(0,MoveType.FORWARD);
     }
     
 	@Override
