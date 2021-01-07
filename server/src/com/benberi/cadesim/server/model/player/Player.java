@@ -7,6 +7,7 @@ import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
+import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.PlayerCollisionStorage;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.model.player.domain.MoveGenerator;

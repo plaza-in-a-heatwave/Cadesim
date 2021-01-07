@@ -8,6 +8,12 @@ import com.benberi.cadesim.server.model.cade.BlockadeTimeMachine;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.player.Vote.VOTE_RESULT;
+import com.benberi.cadesim.server.model.player.ai.NPC_Type1;
+import com.benberi.cadesim.server.model.player.ai.NPC_Type2;
+import com.benberi.cadesim.server.model.player.ai.NPC_Type3;
+import com.benberi.cadesim.server.model.player.ai.NPC_Type4;
+import com.benberi.cadesim.server.model.player.ai.util.AStarSearch;
+import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.CollisionCalculator;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.model.player.domain.PlayerLoginRequest;
@@ -124,6 +130,7 @@ public class PlayerManager {
      * random number generator
      */
     Random randomGenerator = new Random();
+    protected AStarSearch algorithm;
     /**
      * restart conditions
      */
@@ -145,7 +152,7 @@ public class PlayerManager {
 	private String disengageBehavior;
 	@SuppressWarnings("unused")
 	private String chatChannel = "global";
-
+	
 	/**
 	 * helper method to split string into parts
 	 * https://stackoverflow.com/a/3760193
@@ -263,6 +270,7 @@ public class PlayerManager {
     public PlayerManager(ServerContext context) {
         this.context = context;
         this.collision = new CollisionCalculator(context, this);
+        this.algorithm = new AStarSearch(context);
         resetTemporarySettings();
     }
     
@@ -1789,6 +1797,24 @@ public class PlayerManager {
     	System.out.println(sortedMap.values()); // position of tile (x,y)
     }
     
+    public void respawnAI() {
+    	for(Player p : listBots()) {
+    		p.setTeam(getBotTeam());
+    	}
+    	for(Player p : listBots()) {
+    		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
+    			p.respawnOnLandside(true);
+    		}else {
+    			p.respawnOnLandside(false);
+    		}
+    	}
+		for(Player p : listRegisteredPlayers()) {
+			if(!p.isBot()) {
+				p.getPackets().sendPlayers();
+			}
+		}
+    }
+    
     public void spawnAI() {
     	removeAI();
     	int playerListSize = listRegisteredPlayers().size();
@@ -1799,22 +1825,11 @@ public class PlayerManager {
 	    		for (int i =0; i < playerListSize ; i++) {
 	    			createBot(NPC_Type.TYPE4, randomBotName(), listRegisteredPlayers().get(0).getVessel().getID(), getBotTeam(), null, getBotFace(), 0.0f);
 	    		}
-	    		createBot(NPC_Type.TYPE3, randomBotName(), 0, getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE1, randomBotName(), 1, getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE2, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
-	        	for(Player p : listBots()) {
-	        		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
-	        			p.respawnOnLandside(true);
-	        		}else {
-	        			p.respawnOnLandside(false);
-	        		}
-	        	}
-	    		for(Player p : listRegisteredPlayers()) {
-	    			if(!p.isBot()) {
-	    				p.getPackets().sendPlayers();
-	    			}
-	    		}
+//	    		createBot(NPC_Type.TYPE3, randomBotName(), 0, getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE1, randomBotName(), 1, getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE2, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
+	    		respawnAI();
 	    		return;
 	    		
 	    	case "medium":
@@ -1824,18 +1839,7 @@ public class PlayerManager {
 	    		createBot(NPC_Type.TYPE1, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
 	    		createBot(NPC_Type.TYPE2, randomBotName(), 3, getBotTeam(), null, getBotFace(), 0.0f);
 	    		createBot(NPC_Type.TYPE3, randomBotName(), 4, getBotTeam(), null, getBotFace(), 0.0f);
-	        	for(Player p : listBots()) {
-	        		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
-	        			p.respawnOnLandside(true);
-	        		}else {
-	        			p.respawnOnLandside(false);
-	        		}
-	        	}
-	    		for(Player p : listRegisteredPlayers()) {
-	    			if(!p.isBot()) {
-	    				p.getPackets().sendPlayers();
-	    			}
-	    		}
+	    		respawnAI();
 	    		return;
 	    	case "hard":
 	    		for (int i =0; i < playerListSize * 2 ; i++) {
@@ -1846,18 +1850,7 @@ public class PlayerManager {
 	    		createBot(NPC_Type.TYPE2, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
 	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
 	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
-	        	for(Player p : listBots()) {
-	        		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
-	        			p.respawnOnLandside(true);
-	        		}else {
-	        			p.respawnOnLandside(false);
-	        		}
-	        	}
-	    		for(Player p : listRegisteredPlayers()) {
-	    			if(!p.isBot()) {
-	    				p.getPackets().sendPlayers();
-	    			}
-	    		}
+	    		respawnAI();
 	    		return;
 	    	default:
 	    		return;
@@ -1924,7 +1917,8 @@ public class PlayerManager {
     	Team afterTeam = pl.getTeam();
     	sendTeamInfo();
     	if(beforeTeam != afterTeam) {
-    		spawnAI();
+    		respawnAI();
+    		sendTeamInfo();
     	}
     }
     
@@ -2185,4 +2179,8 @@ public class PlayerManager {
 	        }
 		}
     }
+
+	public AStarSearch getAlgorithm() {
+		return algorithm;
+	}
 }

@@ -1,4 +1,4 @@
-package com.benberi.cadesim.server.model.player;
+package com.benberi.cadesim.server.model.player.ai.util;
 
 public enum NPC_Type {
 	TYPE1(),

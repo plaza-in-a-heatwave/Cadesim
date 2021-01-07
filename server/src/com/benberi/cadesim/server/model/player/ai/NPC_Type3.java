@@ -1,6 +1,8 @@
-package com.benberi.cadesim.server.model.player;
+package com.benberi.cadesim.server.model.player.ai;
 
 import com.benberi.cadesim.server.ServerContext;
+import com.benberi.cadesim.server.model.player.Player;
+import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.move.MoveType;
 
 import io.netty.channel.Channel;

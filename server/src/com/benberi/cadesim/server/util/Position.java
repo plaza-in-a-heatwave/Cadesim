@@ -101,9 +101,9 @@ public class Position {
     }
 
     /**
-     * Calculates disstance between two positions
+     * Calculates distance between two positions
      * @param other The other position target
-     * @return  The disstance between the two positions
+     * @return  The distance between the two positions
      */
     public double distance(Position other) {
         return Math.sqrt(Math.pow(x - other.x, 2) +  Math.pow(y - other.y, 2));
