@@ -1732,9 +1732,9 @@ public class PlayerManager {
     }
 
     //searches each tile for corresponding flag points
-    public Map<Integer, Map<Integer, Integer>> checkTilePoints(Player player) {
+    public Map<Integer, Position> checkTilePoints(Player player) {
     	List<Flag> localFlags = new ArrayList<>();
-    	Map<Integer, Map<Integer, Integer>>tilePoints = new HashMap<>();
+    	Map<Integer, Position>tilePoints = new HashMap<>();
         int diameter = player.getVessel().getInfluenceDiameter(); //as much diameter as warfrig
         int radius = diameter / 2;
         int squareRadius = radius;
@@ -1780,8 +1780,7 @@ public class PlayerManager {
                 	pointTotal += points.getSize().getID();
                 }
                 if(pointTotal != 0) {
-                    Map<Integer, Integer> tile = new HashMap<Integer, Integer>();
-                    tile.put(i, j);
+                    Position tile = new Position(i,j);
                     tilePoints.put(pointTotal,tile);	
                 }
             }
@@ -1790,18 +1789,18 @@ public class PlayerManager {
     }
     
     //sorts flags in reverse order giving max points per position
-    public void getMaxTilePoints(Player player) {
-    	Map<Integer, Map<Integer, Integer>> sortedMap = new TreeMap<Integer, Map<Integer, Integer>>(Comparator.reverseOrder());
+    public Position getMaxTilePoints(Player player) {
+    	Map<Integer, Position> sortedMap = new TreeMap<Integer, Position>(Comparator.reverseOrder());
     	sortedMap.putAll(checkTilePoints(player));
-    	System.out.println(sortedMap.keySet()); // flag point total
-    	System.out.println(sortedMap.values()); // position of tile (x,y)
+    	return (Position)sortedMap.values().toArray()[0];
     }
     
     public void respawnAI() {
     	for(Player p : listBots()) {
     		p.setTeam(getBotTeam());
-    	}
-    	for(Player p : listBots()) {
+    		for(int slot = 0; slot < 4; slot++) {
+        		p.getMoves().setMove(slot, MoveType.NONE);
+    		}
     		if(listRegisteredPlayers().get(0).getTeam() == Team.ATTACKER) {
     			p.respawnOnLandside(true);
     		}else {

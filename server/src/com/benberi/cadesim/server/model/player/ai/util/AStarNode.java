@@ -10,8 +10,9 @@ public class AStarNode {
 	public AStarNode parent;
 	public double fCost, gCost, hCost;
 	
-	public AStarNode(Position position, AStarNode parent, double gCost, double hCost) {
+	public AStarNode(Position position, VesselFace face, AStarNode parent, double gCost, double hCost) {
 		this.position = position;
+		this.face = face;
 		this.parent = parent;
 		this.gCost = gCost;
 		this.hCost = hCost;

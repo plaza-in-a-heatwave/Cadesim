@@ -17,7 +17,6 @@ import io.netty.channel.Channel;
  * Priority - shooting, flag points
  */
 public class NPC_Type4 extends Player {
-    @SuppressWarnings("unused")
 	private ServerContext context;
     private List<AStarNode> path = null;
 
@@ -31,11 +30,12 @@ public class NPC_Type4 extends Player {
     
     @Override
     public void calculateRoute() {
-    	Position destination = new Position(3,3); // replace with cluster
+    	//Position destination = new Position (5,3); //test position
+    	Position destination = context.getPlayerManager().getMaxTilePoints(this);
     	if(this.equals(destination)) {
     		return;
     	}
-    	path = context.getPlayerManager().getAlgorithm().findPath(this, destination);
+    	path = context.getPlayerManager().getAlgorithm().findPath(getFace(), this, destination);
     	VesselFace face = getFace();
     	if(path != null) {
     		if(path.size() > 0) {
@@ -50,9 +50,11 @@ public class NPC_Type4 extends Player {
 					Position left = MoveType.LEFT.getFinalPosition(currentPosition, face);
 					Position right = MoveType.RIGHT.getFinalPosition(currentPosition, face);
 					Position forward = MoveType.FORWARD.getFinalPosition(currentPosition, face);
+					
 					if(left.equals(pos)) {
 						currentPosition.add(left.getX() - getX(), left.getY() - getY());
 						getMoves().setMove(slot, MoveType.LEFT);
+						
 						switch(face) {
 							case NORTH:
 								face = VesselFace.WEST;
