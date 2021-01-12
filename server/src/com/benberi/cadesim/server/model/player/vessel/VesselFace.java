@@ -3,10 +3,11 @@ package com.benberi.cadesim.server.model.player.vessel;
 public enum VesselFace {
 
     NORTH(14),
-    SOUTH(6),
     WEST(10),
+    SOUTH(6),
     EAST(2);
 
+	private static VesselFace[] values = values();
     private int directionId;
 
     VesselFace(int dir) {
@@ -16,20 +17,13 @@ public enum VesselFace {
     public int getDirectionId() {
         return this.directionId;
     }
+    
+    public VesselFace getPrev() {
+    	return values[(ordinal() + 1) % values.length];
+    }
 
     public VesselFace getNext() {
-        switch (this) {
-            case NORTH:
-                return EAST;
-            case EAST:
-                return SOUTH;
-            case SOUTH:
-                return WEST;
-            case WEST:
-                return NORTH;
-        }
-
-        return NORTH;
+    	return values[(ordinal() - 1  + values.length) % values.length];
     }
 
     public static VesselFace forId(int id) {

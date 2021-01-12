@@ -12,7 +12,9 @@ import com.benberi.cadesim.server.model.player.ai.NPC_Type1;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type2;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type3;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type4;
+import com.benberi.cadesim.server.model.player.ai.util.AStarNode;
 import com.benberi.cadesim.server.model.player.ai.util.AStarSearch;
+import com.benberi.cadesim.server.model.player.ai.util.DFS;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.CollisionCalculator;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -264,6 +266,7 @@ public class PlayerManager {
 		this.gameEnded = gameEnded;
 	}
 
+	public DFS dfs;
 	/**
      * constructor
      */
@@ -271,6 +274,7 @@ public class PlayerManager {
         this.context = context;
         this.collision = new CollisionCalculator(context, this);
         this.algorithm = new AStarSearch(context);
+        this.dfs = new DFS(context);
         resetTemporarySettings();
     }
     
@@ -1211,6 +1215,17 @@ public class PlayerManager {
         }
     }
 
+    static <T> List<List<T>> chopped(List<T> list, final int L) {
+        List<List<T>> parts = new ArrayList<List<T>>();
+        final int N = list.size();
+        for (int i = 0; i < N; i += L) {
+            parts.add(new ArrayList<T>(
+                list.subList(i, Math.min(N, i + L)))
+            );
+        }
+        return parts;
+    }
+    
     public void sendAfterTurn() {
         // deal with sunk/unspawned ships first
         for (Player p : listRegisteredPlayers()) {
@@ -1222,18 +1237,34 @@ public class PlayerManager {
                 p.giveLife();
             }
         }
+//    	dfs.search(listRegisteredPlayers().get(0));
+//    	dfs.search(listRegisteredPlayers().get(1));
         // then deal with individual players
         for (Player p : listRegisteredPlayers()) {
             p.getPackets().sendPositions();
             sendMoveBar(p);
             p.getPackets().sendFlags();
         }
-        
-    	for(Player other : listBots()) {
-    		other.performLogic();
-    	}
     }
 
+    public void AILogic() {
+        for(Player other : listBots()) {
+        	other.clearPath();
+        	Position destination = getMaxTilePoints(other);
+        	if(destination == null || this.equals(destination)) {
+        		return;
+        	}
+        	List<AStarNode> path = getAlgorithm().findPath(other, destination);
+        	if(path != null && !path.isEmpty()) {
+        		other.setPath(path);
+        	}
+    		other.performLogic();
+    	}
+        for (Player p : listRegisteredPlayers()) {
+            sendMoveBar(p);
+        }
+    }
+    
     public int getPointsDefender() {
         return pointsDefender;
     }
@@ -1792,6 +1823,9 @@ public class PlayerManager {
     public Position getMaxTilePoints(Player player) {
     	Map<Integer, Position> sortedMap = new TreeMap<Integer, Position>(Comparator.reverseOrder());
     	sortedMap.putAll(checkTilePoints(player));
+    	if(sortedMap.size() == 0) {
+    		return null;
+    	}
     	return (Position)sortedMap.values().toArray()[0];
     }
     
@@ -1819,9 +1853,10 @@ public class PlayerManager {
     	int playerListSize = listRegisteredPlayers().size();
     	switch(ServerConfiguration.getAISetting()) {
 	    	case "off":
+	    		sendTeamInfo();
 	    		return;
 	    	case "easy":
-	    		for (int i =0; i < playerListSize ; i++) {
+	    		for (int i =0; i < playerListSize * 3; i++) {
 	    			createBot(NPC_Type.TYPE4, randomBotName(), listRegisteredPlayers().get(0).getVessel().getID(), getBotTeam(), null, getBotFace(), 0.0f);
 	    		}
 //	    		createBot(NPC_Type.TYPE3, randomBotName(), 0, getBotTeam(), null, getBotFace(), 0.0f);
@@ -1829,6 +1864,7 @@ public class PlayerManager {
 //	    		createBot(NPC_Type.TYPE2, randomBotName(), 2, getBotTeam(), null, getBotFace(), 0.0f);
 //	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
 	    		respawnAI();
+	    		sendTeamInfo();
 	    		return;
 	    		
 	    	case "medium":
@@ -1839,6 +1875,7 @@ public class PlayerManager {
 	    		createBot(NPC_Type.TYPE2, randomBotName(), 3, getBotTeam(), null, getBotFace(), 0.0f);
 	    		createBot(NPC_Type.TYPE3, randomBotName(), 4, getBotTeam(), null, getBotFace(), 0.0f);
 	    		respawnAI();
+	    		sendTeamInfo();
 	    		return;
 	    	case "hard":
 	    		for (int i =0; i < playerListSize * 2 ; i++) {
@@ -1850,10 +1887,12 @@ public class PlayerManager {
 	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
 	    		createBot(NPC_Type.TYPE3, randomBotName(), 8, getBotTeam(), null, getBotFace(), 0.0f);
 	    		respawnAI();
+	    		sendTeamInfo();
 	    		return;
 	    	default:
 	    		return;
     	}
+    	
     }
     
     private void printTeams(Player pl, boolean verbose) {

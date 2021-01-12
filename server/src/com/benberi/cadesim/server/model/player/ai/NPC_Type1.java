@@ -3,8 +3,6 @@ package com.benberi.cadesim.server.model.player.ai;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
-import com.benberi.cadesim.server.model.player.move.MoveType;
-
 import io.netty.channel.Channel;
 
 /*
@@ -25,12 +23,30 @@ public class NPC_Type1 extends Player {
     
     @Override
     public void calculateRoute() {
-    	
+//    	if(getPath() != null) {
+//    		if(getVessel().has3Moves()) {
+//
+//        		for(int slot = 0; slot < 4; slot++) { //moves to enter
+//        			if(slot == 0) {
+//        				continue;
+//        			}
+//        			if(slot < getPath().size()) {
+//        				getMoves().setMove(slot, getPath().get(slot-1).move);
+//        			}
+//        		}	
+//    		}else {
+//        		for(int slot = 0; slot < 4; slot++) { //moves to enter
+//        			if(slot < getPath().size()) {
+//        				getMoves().setMove(slot, getPath().get(slot).move);
+//        			}
+//        		}	
+//    		}
+//    	}
     }
     
     @Override
     public void performLogic() {
-    	getMoves().setMove(0,MoveType.FORWARD);
+    	calculateRoute();
     }
     
 	@Override

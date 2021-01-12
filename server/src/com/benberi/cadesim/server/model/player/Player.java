@@ -7,6 +7,7 @@ import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
+import com.benberi.cadesim.server.model.player.ai.util.AStarNode;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.PlayerCollisionStorage;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -141,6 +142,9 @@ public class Player extends Position {
     private boolean needsRespawn;                 // we need a respawn
     private boolean enteredSafeLandside = false;  // reason why
     private boolean enteredSafeOceanside = false; // "
+    
+    private List<AStarNode> path;
+    private Position goal;
     
     /**
      * when the player was last seen alive
@@ -957,5 +961,26 @@ public class Player extends Position {
 	
 	public void setType(NPC_Type typeValue) {
 		type = typeValue;
+	}
+
+	public void setPath(List<AStarNode> path) {
+		this.path = path;
+		
+	}
+	
+	public void clearPath() {
+		if(this.path != null) this.path.clear();
+	}
+	
+	public List<AStarNode> getPath() {
+		return this.path;
+	}
+	
+	public void setGoal(Position goal) {
+		this.goal = goal;	
+	}
+	
+	public Position getGoal() {
+		return this.goal;
 	}
 }

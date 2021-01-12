@@ -2,6 +2,7 @@ package com.benberi.cadesim.server.model.cade;
 
 import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.config.ServerConfiguration;
+import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.ServerContext;
 
 public class BlockadeTimeMachine {
@@ -118,6 +119,17 @@ public class BlockadeTimeMachine {
                 }
             } else {
                 // not enabled
+            }
+            if(turnTime == 250 && !context.getPlayerManager().listBots().isEmpty()) {
+                try {
+                    context.getPlayerManager().AILogic();
+                    for (Player p : context.getPlayerManager().listRegisteredPlayers()) {
+                        context.getPlayerManager().sendMoveBar(p);
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }        
             }
 
             // if turn ended
