@@ -115,7 +115,8 @@ public class LoadingScreen extends AbstractScreen{
     @Override
     public void render(float delta) {
         // Clear the screen
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         if(System.currentTimeMillis() - loginAttemptTimestampMillis >= 8000) {
             if(!(ScreenManager.getScreen() instanceof SeaBattleScreen)) {
             	Gdx.app.postRunnable(new Runnable() {

@@ -232,6 +232,16 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 		this.sound_volume = sound_volume;
 	}
 	
+	@Override
+	public void show() {
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {	
+				graphics.setResizable(false);
+			}
+    	});
+	}
+
     public void update(){
         // update the camera
         othercamera.update();
@@ -539,6 +549,8 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
     @Override
     public void render(float delta) {
+		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     	update();
     	if(battleMenu.teamTable.isVisible()) {
     		battleMenu.fillTeamList();
@@ -554,8 +566,8 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
         // Render ships
         renderEntities();
         information.render(delta);
-        control.render(delta);
         control.update();
+        control.render(delta);
         battleMenu.render(delta);
     }
 

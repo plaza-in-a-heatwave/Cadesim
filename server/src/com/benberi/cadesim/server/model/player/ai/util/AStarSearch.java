@@ -35,7 +35,7 @@ public class AStarSearch {
         }
         
     };
-
+    
     public List<AStarNode> findPath(Player bot, Position goal){
         openList = new ArrayList<AStarNode>();
         closedList = new ArrayList<AStarNode>();
@@ -100,7 +100,7 @@ public class AStarSearch {
             	// Compute the cost to get *to* the action tile.
                 double costToReach = current.position.distance(neighborNode.position);
             	if(neighborNode.move == MoveType.FORWARD) {
-            		costToReach += 0.5;
+            		costToReach += 0.2;
             	}
                 int at = context.getMap().getTile(neighborNode.position.getX(), neighborNode.position.getY());
                 if(context.getMap().isWind(at)){ // special action tiles
@@ -112,7 +112,7 @@ public class AStarSearch {
             		neighborNode.face = neighborNode.face.getNext();
             		costToReach += getActionCost(neighborNode.position, at);
             	}
-                if(at == 1 || at == 2) continue; // ignore rocks
+                if(at == 1 || at == 2) continue;
                 if(context.getPlayerManager().getPlayerByPosition(neighborNode.position.getX(), neighborNode.position.getY()) != null) continue; // skip if player
                 double gCost = current.gCost + costToReach;
                 double hCost = heuristicDistance(neighborNode.position,goal);
@@ -124,7 +124,9 @@ public class AStarSearch {
         closedList.clear();
         return null;
     }
-    
+    /*
+     * Returns a double value for cost to use a specific tile
+     */
     private double getActionCost(Position node, int currentTile) {
     	if(currentTile > 3 && currentTile < 11) {
     		return 0.2;

@@ -257,9 +257,22 @@ public class GameContext {
     	GameContext context = this;
     	Gdx.app.postRunnable(new Runnable() {
 			@Override
-			public void run() {
+			public void run() {	
 				graphics.setResizable(false);
-		    	ScreenManager.getInstance().showScreen(ScreenEnum.GAME, context);
+				ScreenManager.getInstance().showScreen(ScreenEnum.GAME, context);
+				graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
+			}
+    		
+    	});
+    }
+    
+    public void showBattle() {
+    	GameContext context = this;
+    	Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {	
+				graphics.setResizable(false);
+				ScreenManager.getInstance().showScreen(ScreenEnum.GAME, context);
 				graphics.setTitle("GC: " + myVessel + " (" + myTeam + ")");
 			}
     		

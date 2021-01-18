@@ -11,6 +11,7 @@ public class AStarNode {
 	public MoveType move;
 	public AStarNode parent;
 	public double fCost, gCost, hCost;
+	public int time;
 	
 	public AStarNode(Position position, VesselFace face, MoveType move, AStarNode parent, double gCost, double hCost) {
 		this.position = position;

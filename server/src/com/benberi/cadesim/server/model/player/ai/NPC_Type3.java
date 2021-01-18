@@ -23,24 +23,11 @@ public class NPC_Type3 extends Player {
     
     @Override
     public void calculateRoute() {
-//    	if(getPath() != null) {
-//    		if(getVessel().has3Moves()) {
-//        		for(int slot = 0; slot < 4; slot++) { //moves to enter
-//        			if(slot == 0) {
-//        				continue;
-//        			}
-//        			if(slot < getPath().size()) {
-//        				getMoves().setMove(slot, getPath().get(slot-1).move);
-//        			}
-//        		}	
-//    		}else {
-//        		for(int slot = 0; slot < 4; slot++) { //moves to enter
-//        			if(slot < getPath().size()) {
-//        				getMoves().setMove(slot, getPath().get(slot).move);
-//        			}
-//        		}	
-//    		}
-//    	}
+    	if(getPath() != null && getPath().size() > 0) {
+    		for(int slot = 0; slot < Math.min(getVessel().has3Moves() ? 3 : 4, getPath().size()); slot++) { //moves to enter
+    			getMoves().setMove(slot, getPath().get(slot).move);
+    		}	
+    	}
     }
     
     @Override

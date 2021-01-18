@@ -853,14 +853,13 @@ public class BattleControlComponent extends SeaBattleScreen implements InputProc
     }
 
     public void render(float delta) {
+    	stage.getBatch().setColor(Color.WHITE);
         stage.getViewport().setCamera(camera);
+        stage.getBatch().setProjectionMatrix(camera.combined);
         stage.getViewport().apply();
-        stage.getBatch().setProjectionMatrix(stage.getCamera().combined);
     	renderBackground();
         renderMoveControl();
         renderDisengage();
-    	stage.act();
-    	stage.draw();
     }
     
     public void reset() {

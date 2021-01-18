@@ -950,7 +950,7 @@ public class Player extends Position {
 	public void setTeam(Team team) {
 		this.team = team;
 	}
-
+	
 	public void printType() {
 		System.out.println(name + " ,"+ type);
 	}

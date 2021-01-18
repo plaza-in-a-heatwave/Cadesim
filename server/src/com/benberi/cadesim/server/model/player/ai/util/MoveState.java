@@ -8,10 +8,10 @@ public class MoveState {
 	public Position position;
 	public VesselFace face;
 	public MoveType move;
-	public int time;
+	public byte time;
 	public boolean visited = false;
 	
-	public MoveState(Position position, VesselFace face, MoveType move, int time) {
+	public MoveState(Position position, VesselFace face, MoveType move, byte time) {
 		this.position = position;
 		this.face = face;
 		this.move = move;

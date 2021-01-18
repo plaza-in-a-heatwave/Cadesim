@@ -46,7 +46,7 @@ public class SetFlagsPacket extends ClientPacketExecutor {
         int playerSize = p.readByte();
 
         for (int i = 0; i < playerSize; i++) {
-            String vesselName = p.readByteString();
+            String vesselName = p.readByteString(); //causes error for bots sometimes
             Vessel vessel = getContext().getEntities().getVesselByName(vesselName);
             if (vessel != null) {
                 int flagsSize = p.readByte();

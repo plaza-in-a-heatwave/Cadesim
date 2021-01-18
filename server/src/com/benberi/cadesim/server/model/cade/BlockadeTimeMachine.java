@@ -12,7 +12,7 @@ public class BlockadeTimeMachine {
      */
     private int roundTime = ServerConfiguration.getRoundSetting();
     private int turnTime = ServerConfiguration.getTurnSetting();
-    
+    private int finalTurnTime = ServerConfiguration.getTurnSetting();
 
     /*
      * Break duration and break interval
@@ -92,6 +92,19 @@ public class BlockadeTimeMachine {
             roundTime--; // Tick blockade time
             turnTime--;  // Tick turn time
 
+            if(turnTime == (finalTurnTime - 10) && !context.getPlayerManager().listBots().isEmpty()) {
+                context.getPlayerManager().AILogic();
+            }
+            if(turnTime == (finalTurnTime - 30) && !context.getPlayerManager().listBots().isEmpty()) {
+                try {
+                    for (Player p : context.getPlayerManager().listBots()) {
+                        context.getPlayerManager().sendMoveBar(p);
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }        
+            }
             // bugfix for final turn: use turnTime instead of roundTime so players can
             // end on a full turn.
             if ((!isLastTurn) && (roundTime < turnTime) && (turnTime > 0))
@@ -119,17 +132,6 @@ public class BlockadeTimeMachine {
                 }
             } else {
                 // not enabled
-            }
-            if(turnTime == 250 && !context.getPlayerManager().listBots().isEmpty()) {
-                try {
-                    context.getPlayerManager().AILogic();
-                    for (Player p : context.getPlayerManager().listRegisteredPlayers()) {
-                        context.getPlayerManager().sendMoveBar(p);
-                    }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }        
             }
 
             // if turn ended

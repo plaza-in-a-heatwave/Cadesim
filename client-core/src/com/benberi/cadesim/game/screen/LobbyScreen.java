@@ -294,6 +294,11 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     	if(!buttonConn.isTouchable()) {
     		buttonConn.setTouchable(Touchable.enabled);
     	}
+    	if(popup.isVisible()) {
+    		stage.getBatch().setColor(Color.GRAY);
+    	}else {
+    		stage.getBatch().setColor(Color.WHITE);
+    	}
     	stage.getBatch().begin();
     	stage.getBatch().draw(clientlogo, Gdx.graphics.getWidth()/2 - 60, MAIN_GROUP_OFFSET_Y + 432, 128, 128);
     	stage.getBatch().end();

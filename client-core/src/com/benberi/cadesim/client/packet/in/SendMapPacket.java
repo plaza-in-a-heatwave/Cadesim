@@ -1,5 +1,7 @@
 package com.benberi.cadesim.client.packet.in;
 
+import java.util.HashSet;
+
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
@@ -22,7 +24,9 @@ public class SendMapPacket extends ClientPacketExecutor {
         }
         getContext().setIslandId(p.readByte());
         getContext().getBattleScreen().createMap(map);
-        getContext().setConnected(true);   
+        getContext().setConnected(true); 
+        HashSet<Object> seen=new HashSet<>();
+        getContext().getEntities().vessels.removeIf(e->!seen.add(e.getName()));
     }
 
     @Override
