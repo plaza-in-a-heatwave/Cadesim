@@ -22,5 +22,29 @@ public class AStarNode {
 		this.hCost = hCost;
 		this.fCost = this.gCost + this.hCost;
 	}
+	
+	public AStarNode MoveNone() {
+		return new AStarNode(position.copy(), face, MoveType.NONE, this, 0, 0);
+    }
+	
+	public AStarNode MoveForward() {
+		return new AStarNode(position.copy().add(Position.Forward(face)), face, MoveType.FORWARD, this, 0, 0);
+    }
+	
+	public AStarNode MoveLeft() {
+		return new AStarNode(position.copy().add(Position.Left(face)), face.getPrev(), MoveType.LEFT, this, 0, 0);
+    }
+	
+	public AStarNode TurnLeft() {
+		return new AStarNode(position.copy(), face.getPrev(), MoveType.LEFT, this, 0, 0);
+    }
+	
+	public AStarNode MoveRight() {
+		return new AStarNode(position.copy().add(Position.Right(face)), face.getNext(), MoveType.RIGHT, this, 0, 0);
+    }
+	
+	public AStarNode TurnRight() {
+		return new AStarNode(position.copy(), face.getNext(), MoveType.RIGHT, this, 0, 0);
+    }
   
 }  

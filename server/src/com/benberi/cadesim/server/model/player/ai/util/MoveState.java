@@ -19,6 +19,30 @@ public class MoveState {
 		visited = false;
 	}
 	
+	public MoveState MoveNone() {
+		return new MoveState(position.copy(), face, MoveType.NONE, time);
+    }
+	
+	public MoveState MoveForward() {
+		return new MoveState(position.copy().add(Position.Forward(face)), face, MoveType.FORWARD, time);
+    }
+	
+	public MoveState MoveLeft() {
+		return new MoveState(position.copy().add(Position.Left(face)), face.getPrev(), MoveType.LEFT, time);
+    }
+	
+	public MoveState TurnLeft() {
+		return new MoveState(position.copy(), face.getPrev(), MoveType.LEFT, time);
+    }
+	
+	public MoveState MoveRight() {
+		return new MoveState(position.copy().add(Position.Right(face)), face.getNext(), MoveType.RIGHT, time);
+    }
+	
+	public MoveState TurnRight() {
+		return new MoveState(position.copy(), face.getNext(), MoveType.RIGHT, time);
+    }
+
     @Override
     public boolean equals(Object o) {
         if(o instanceof MoveState) {

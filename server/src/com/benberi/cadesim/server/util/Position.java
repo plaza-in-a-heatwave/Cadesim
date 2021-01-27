@@ -1,5 +1,7 @@
 package com.benberi.cadesim.server.util;
 
+import com.benberi.cadesim.server.model.player.vessel.VesselFace;
+
 /**
  * 2D Position
  */
@@ -133,6 +135,55 @@ public class Position {
     
     @Override
     public String toString() {
-    	return "Position x: " + this.getX() + ", Position y: " + this.getY();
+    	return "Position (x,y): " + this.getX() + "," + this.getY();
+    }
+    
+    public static Position Forward(VesselFace face) {
+    	switch(face) {
+    		case NORTH:
+    			return new Position(0,1);
+    		case SOUTH:
+    			return new Position(0,-1);
+    		case WEST:
+    			return new Position(-1,0);
+    		case EAST:
+    			return new Position(1,0);	
+    		default:
+    			return new Position(0,0);
+    	}
+    }
+    
+    public static Position Left(VesselFace face) {
+    	switch(face) {
+    		case NORTH:
+    			return new Position(-1,1);
+    		case SOUTH:
+    			return new Position(1,-1);
+    		case WEST:
+    			return new Position(-1,-1);
+    		case EAST:
+    			return new Position(1,1);	
+    		default:
+    			return new Position(0,0);
+    	}
+    }
+    
+    public static Position Right(VesselFace face) {
+    	switch(face) {
+    		case NORTH:
+    			return new Position(1,1);
+    		case SOUTH:
+    			return new Position(-1,-1);
+    		case WEST:
+    			return new Position(-1,1);
+    		case EAST:
+    			return new Position(1,-1);	
+    		default:
+    			return new Position(0,0);
+    	}
+    }
+    
+    public Position add(Position other) {
+    	return new Position(this.x += other.x, this.y += other.y);
     }
 }

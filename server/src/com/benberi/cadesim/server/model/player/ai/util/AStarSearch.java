@@ -4,7 +4,6 @@ import java.util.*;
 import com.benberi.cadesim.server.ServerContext;
 import com.benberi.cadesim.server.model.player.Player;
 import com.benberi.cadesim.server.model.player.move.MoveType;
-import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.util.Position;
 
 /**
@@ -57,39 +56,36 @@ public class AStarSearch {
                 openList.clear();
                 closedList.clear();
                 Collections.reverse(path);
+                if(path.size() > 3 && bot.getVessel().has3Moves()) {
+                	path.subList(0, 3);
+                }else if(path.size() > 4 && !(bot.getVessel().has3Moves())) {
+                	path.subList(0, 4);
+                }
                 return path;
             }
             openList.remove(current);
             closedList.add(current);
-            
-            int x = current.position.getX();
-            int y = current.position.getY();
-            switch (current.face) {
-	            case NORTH:
-	            	neighbors.add(new AStarNode(new Position(x, y), VesselFace.NORTH, MoveType.NONE,current,0,0));
-	            	neighbors.add(new AStarNode(new Position(x, y+1), VesselFace.NORTH, MoveType.FORWARD,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x-1, y+1), VesselFace.WEST, MoveType.LEFT,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x+1, y+1), VesselFace.EAST, MoveType.RIGHT,current,0,0));
-	                break;
-	            case EAST:
-	            	neighbors.add(new AStarNode(new Position(x, y), VesselFace.EAST, MoveType.NONE,current,0,0));
-	            	neighbors.add(new AStarNode(new Position(x+1, y), VesselFace.EAST, MoveType.FORWARD,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x+1, y+1), VesselFace.NORTH, MoveType.LEFT,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x+1, y-1), VesselFace.SOUTH, MoveType.RIGHT,current,0,0));
-	                break;
-	            case SOUTH:
-	                neighbors.add(new AStarNode(new Position(x, y), VesselFace.SOUTH, MoveType.NONE,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x, y-1), VesselFace.SOUTH, MoveType.FORWARD,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x-1, y-1), VesselFace.WEST, MoveType.RIGHT,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x+1, y-1), VesselFace.EAST, MoveType.LEFT,current,0,0));
-	                break;
-	            case WEST:
-	            	neighbors.add(new AStarNode(new Position(x, y), VesselFace.WEST, MoveType.NONE,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x-1, y), VesselFace.WEST, MoveType.FORWARD,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x-1, y+1), VesselFace.NORTH, MoveType.RIGHT,current,0,0));
-	                neighbors.add(new AStarNode(new Position(x-1, y-1), VesselFace.SOUTH, MoveType.LEFT,current,0,0));
-	                break;
-            }
+            //add specific neighbors
+        	neighbors.add(current.MoveNone());
+        	if(context.getMap().isRock(current.MoveForward().position.getX(), current.MoveForward().position.getY(), bot)) {
+        		neighbors.add(current.TurnLeft()); // turn in place
+            	neighbors.add(current.TurnRight());
+        	}else {
+            	neighbors.add(current.MoveForward());
+            	if(context.getMap().isRock(current.MoveLeft().position.getX(), current.MoveLeft().position.getY(), bot)) {
+            		neighbors.add(current.TurnLeft()); // turn in place
+            		neighbors.add(current.TurnRight());
+            	}else {
+            		neighbors.add(current.MoveLeft());
+            	}
+            	if(context.getMap().isRock(current.MoveRight().position.getX(), current.MoveRight().position.getY(), bot)) {
+            		neighbors.add(current.TurnLeft()); // turn in place
+            		neighbors.add(current.TurnRight());
+            	}else {
+            		neighbors.add(current.MoveRight());
+            	}
+        	}
+        	
             for(AStarNode neighborNode : neighbors) {
             	//skip if out of particular move
             	if((leftAmount == 0 && neighborNode.move == MoveType.LEFT) ||
@@ -99,20 +95,19 @@ public class AStarSearch {
             	}
             	// Compute the cost to get *to* the action tile.
                 double costToReach = current.position.distance(neighborNode.position);
-            	if(neighborNode.move == MoveType.FORWARD) {
+            	if(neighborNode.move == MoveType.FORWARD) { // use turns over forwards
             		costToReach += 0.2;
             	}
                 int at = context.getMap().getTile(neighborNode.position.getX(), neighborNode.position.getY());
                 if(context.getMap().isWind(at)){ // special action tiles
                 	neighborNode.position = context.getMap().getNextActionTilePositionForTile(neighborNode.position, at);
-                	costToReach += getActionCost(neighborNode.position, at);
+                	costToReach += getActionCost(neighborNode, at);
                 }
             	if(context.getMap().isWhirlpool(at)) {
             		neighborNode.position = context.getMap().getFinalActionTilePosition(at, neighborNode.position, 0);
             		neighborNode.face = neighborNode.face.getNext();
-            		costToReach += getActionCost(neighborNode.position, at);
+            		costToReach += getActionCost(neighborNode, at);
             	}
-                if(at == 1 || at == 2) continue;
                 if(context.getPlayerManager().getPlayerByPosition(neighborNode.position.getX(), neighborNode.position.getY()) != null) continue; // skip if player
                 double gCost = current.gCost + costToReach;
                 double hCost = heuristicDistance(neighborNode.position,goal);
@@ -127,11 +122,11 @@ public class AStarSearch {
     /*
      * Returns a double value for cost to use a specific tile
      */
-    private double getActionCost(Position node, int currentTile) {
-    	if(currentTile > 3 && currentTile < 11) {
+    private double getActionCost(AStarNode node, int currentTile) {
+    	if(currentTile > 3 && currentTile < 11 && node.move == MoveType.NONE) {
     		return 0.2;
     	}else {
-        	return 1;	
+        	return 0.6;	
     	}
     }
 

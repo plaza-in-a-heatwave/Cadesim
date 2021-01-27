@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.util.Utils;
@@ -239,6 +240,7 @@ public class ServerConfiguration {
             for (File f : mapList) {
                 names.add(f.getName());
             }
+            Collections.sort(names, String.CASE_INSENSITIVE_ORDER);
             ServerConfiguration.mapList = names;
         }
         catch (NullPointerException e) {

@@ -128,7 +128,9 @@ public class GameService implements Runnable {
                 // complete the game refresh
                 playerManager.renewGame();
                 context.getTimeMachine().renewRound(); // bugfix - order matters
-                playerManager.spawnAI();
+                if(ServerConfiguration.getAISetting() != "off") {
+                    playerManager.spawnAI();	
+                }
             	for(Player other : playerManager.listBots()) {
             		other.performLogic();
             	}
