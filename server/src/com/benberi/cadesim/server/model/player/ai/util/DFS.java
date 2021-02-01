@@ -24,7 +24,7 @@ public class DFS {
         Position playerPosition = player.copy();
         List<MoveState> neighbors = new ArrayList<>();
         stateList = new Hashtable<Position, MoveState>();
-        MoveState currentState = new MoveState(playerPosition, player.getFace(), MoveType.NONE, (byte) 0);
+        MoveState currentState = new MoveState(playerPosition, player.getFace(), MoveType.NONE, null, (double) 0, (byte) 0);
         Stack<MoveState> stack = new  Stack<MoveState>();
         stack.add(currentState);
         currentState.visited = true;

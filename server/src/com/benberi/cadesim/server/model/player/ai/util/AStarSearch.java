@@ -23,7 +23,9 @@ public class AStarSearch {
 	public AStarSearch(ServerContext context) {
 		this.context = context;
 	}
-
+	/*
+	 * Comparator to sort list of nodes based on fCost; weighs different options
+	 */
 	private Comparator<AStarNode> nodeSorter = new Comparator<AStarNode>() {
 
         @Override
@@ -34,7 +36,9 @@ public class AStarSearch {
         }
         
     };
-    
+	/*
+	 * Finds path from current bots location to goal position
+	 */
     public List<AStarNode> findPath(Player bot, Position goal){
         openList = new ArrayList<AStarNode>();
         closedList = new ArrayList<AStarNode>();
@@ -47,9 +51,9 @@ public class AStarSearch {
         while(openList.size() > 0) {
             Collections.sort(openList, nodeSorter);
             current = openList.get(0);
-            if(current.position.equals(goal)) {
+            if(current.position.equals(goal)) { // if goal node found
                 List<AStarNode> path = new ArrayList<AStarNode>();
-                while(current.parent != null) {
+                while(current.parent != null) { // retrace steps
                     path.add(current);
                     current = current.parent;
                 }
@@ -57,9 +61,9 @@ public class AStarSearch {
                 closedList.clear();
                 Collections.reverse(path);
                 if(path.size() > 3 && bot.getVessel().has3Moves()) {
-                	path.subList(0, 3);
+                	path = path.subList(0, 3);
                 }else if(path.size() > 4 && !(bot.getVessel().has3Moves())) {
-                	path.subList(0, 4);
+                	path = path.subList(0, 4);
                 }
                 return path;
             }
@@ -85,8 +89,8 @@ public class AStarSearch {
             		neighbors.add(current.MoveRight());
             	}
         	}
-        	
             for(AStarNode neighborNode : neighbors) {
+            	if(context.getMap().isOutOfBounds(neighborNode.position.getX(), neighborNode.position.getY()))continue;
             	//skip if out of particular move
             	if((leftAmount == 0 && neighborNode.move == MoveType.LEFT) ||
             			(rightAmount == 0 && neighborNode.move == MoveType.RIGHT) ||
@@ -95,9 +99,9 @@ public class AStarSearch {
             	}
             	// Compute the cost to get *to* the action tile.
                 double costToReach = current.position.distance(neighborNode.position);
-            	if(neighborNode.move == MoveType.FORWARD) { // use turns over forwards
-            		costToReach += 0.2;
-            	}
+            	
+            	if(neighborNode.move == MoveType.FORWARD) costToReach += 0.2;
+            	if(current.position.equals(neighborNode.position) && neighborNode.move != MoveType.NONE) costToReach += 0.8; // when ship is trapped by rock
                 int at = context.getMap().getTile(neighborNode.position.getX(), neighborNode.position.getY());
                 if(context.getMap().isWind(at)){ // special action tiles
                 	neighborNode.position = context.getMap().getNextActionTilePositionForTile(neighborNode.position, at);
@@ -108,13 +112,11 @@ public class AStarSearch {
             		neighborNode.face = neighborNode.face.getNext();
             		costToReach += getActionCost(neighborNode, at);
             	}
-                if(context.getPlayerManager().getPlayerByPosition(neighborNode.position.getX(), neighborNode.position.getY()) != null) continue; // skip if player
-                double gCost = current.gCost + costToReach;
-                double hCost = heuristicDistance(neighborNode.position,goal);
-                AStarNode node = new AStarNode(neighborNode.position, neighborNode.face,neighborNode.move, current, gCost, hCost);
-                if(positionInList(closedList, neighborNode.position) && gCost >= node.gCost) continue;
-                if(!positionInList(openList, neighborNode.position) || gCost < node.gCost) openList.add(node);
+                AStarNode node = new AStarNode(neighborNode.position, neighborNode.face,neighborNode.move, current, current.gCost + costToReach, heuristicDistance(neighborNode.position,goal));
+                if(positionInList(closedList, neighborNode.position) && current.gCost >= node.gCost)continue;
+                if(!positionInList(openList, neighborNode.position) || current.gCost < node.gCost) openList.add(node);
             }
+            neighbors.clear(); // clear neighbors after iterating.
         }
         closedList.clear();
         return null;
@@ -124,12 +126,14 @@ public class AStarSearch {
      */
     private double getActionCost(AStarNode node, int currentTile) {
     	if(currentTile > 3 && currentTile < 11 && node.move == MoveType.NONE) {
-    		return 0.2;
+    		return -0.8;
     	}else {
-        	return 0.6;	
+        	return 0.4;	
     	}
     }
-
+	/*
+	 * provides heuristic distance from current to goal positions
+	 */
     private double heuristicDistance(Position current, Position goal) {
         int xDifference = Math.abs(goal.getX() - current.getX());
         int yDifference = Math.abs(goal.getY() - current.getY());
@@ -139,7 +143,9 @@ public class AStarSearch {
 
         return orthogonal * ORTHOGONAL_COST + diagonal * DIAGONAL_COST;
     }
-    
+	/*
+	 * Checks if position is in specified list
+	 */
     private boolean positionInList(List<AStarNode> list, Position position) {
         for(AStarNode n : list) {
             if(n.position.equals(position)) return true;

@@ -12,8 +12,7 @@ import com.benberi.cadesim.server.model.player.ai.NPC_Type1;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type2;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type3;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type4;
-import com.benberi.cadesim.server.model.player.ai.util.AStarSearch;
-import com.benberi.cadesim.server.model.player.ai.util.DFS;
+import com.benberi.cadesim.server.model.player.ai.util.Dijsktra;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.CollisionCalculator;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -131,7 +129,7 @@ public class PlayerManager {
      * random number generator
      */
     Random randomGenerator = new Random();
-    protected AStarSearch algorithm;
+    protected Dijsktra algorithm;
     /**
      * restart conditions
      */
@@ -265,15 +263,13 @@ public class PlayerManager {
 		this.gameEnded = gameEnded;
 	}
 
-	public DFS dfs;
 	/**
      * constructor
      */
     public PlayerManager(ServerContext context) {
         this.context = context;
         this.collision = new CollisionCalculator(context, this);
-        this.algorithm = new AStarSearch(context);
-        this.dfs = new DFS(context);
+        this.algorithm = new Dijsktra(context);
         resetTemporarySettings();
     }
     
@@ -1231,15 +1227,16 @@ public class PlayerManager {
             p.getPackets().sendFlags();
         }
     }
-
+	/*
+	 * Perform logic for AI each turn
+	 */
     public void AILogic() {
         for(Player other : listBots()) {
         	other.clearPath();
-        	Position destination = getMaxTilePoints(other);
-        	if(destination == null || other.equals(destination)) {
+        	if(other.getDestination() == null || other.equals(other.getDestination())) {
         		return;
         	}
-        	other.setPath(getAlgorithm().findPath(other, destination));
+        	other.setPath(getAlgorithm().findPath(other, other.getDestination()));
     		other.performLogic();
     	}
     }
@@ -1260,11 +1257,31 @@ public class PlayerManager {
         	}
         }
     }
+    
+    /*
+     * Wrapper to reset all flags - bugfix
+     */
+    public void resetPlayerFlags() {
+    	context.getMap().resetFlags();
+    	for(Player player : listRegisteredPlayers()) {
+    		player.getFlags().clear();
+    	}
+    }
+    
+    /*
+     * Wrapper to reset specific players flags
+     */
+    public void resetPlayerFlags(Player player) {
+    	for(Player pl : listRegisteredPlayers()) {
+    		if(pl == player) player.getFlags().clear();
+    	}
+    }
 
     public void renewGame()
     {
     	//set island once per server restart
     	ServerConfiguration.setIslandId(randomGenerator.nextInt(3));
+    	resetPlayerFlags();
     	// empty temporary ban list
     	temporaryBannedIPs.clear();
     	
@@ -1708,7 +1725,7 @@ public class PlayerManager {
     	
     }
     /*
-     * Remove AI from map
+     * Wrapper to remove AI from the map
      */
     public void removeAI() {
     	for(Player p : listRegisteredPlayers()) {
@@ -1720,7 +1737,9 @@ public class PlayerManager {
 	    	}
     	}
     }
-    
+	/*
+	 * Wrapper method to get the bots team
+	 */
     public Team getBotTeam() {
     	switch(listRegisteredPlayers().get(0).getTeam()) {
 	    	case ATTACKER:
@@ -1731,9 +1750,11 @@ public class PlayerManager {
 	    		return Team.ATTACKER;
     	}
     }
-
+	/*
+	 * method to get the starting bot face based on team
+	 */
     public VesselFace getBotFace() {
-    	switch(listRegisteredPlayers().get(0).getTeam()) {
+    	switch(listBots().get(0).getTeam()) {
 	    	case ATTACKER:
 	    		return VesselFace.NORTH;
 	    	case DEFENDER:
@@ -1742,72 +1763,13 @@ public class PlayerManager {
 	    		return VesselFace.SOUTH;
     	}
     }
-
-    //searches each tile for corresponding flag points
-    public Map<Integer, Position> checkTilePoints(Player player) {
-    	List<Flag> localFlags = new ArrayList<>();
-    	Map<Integer, Position>tilePoints = new HashMap<>();
-        int diameter = player.getVessel().getInfluenceDiameter(); //as much diameter as warfrig
-        int radius = diameter / 2;
-        int squareRadius = radius;
-        for (int i = 0; i < context.getMap().getMap().length; i++) {
-            for(int j = 0; j < context.getMap().getMap()[i].length; j++) {
-                int pointTotal = 0;
-                localFlags.clear();
-            	if(context.getMap().isRock(i, j, player) || context.getMap().isOutOfBounds(i, j)) {
-            		continue;
-            	}
-            	for (int x = i - squareRadius; x < i + squareRadius; x++) {
-      	          	for (int y = j - squareRadius; y < j + squareRadius; y++) {
-      	          		if((java.lang.Math.pow(x - i, 2) + java.lang.Math.pow(y - j, 2)) < java.lang.Math.pow(radius, 2)) {
-      	          			Flag checkedFlag = context.getMap().getFlag(x, y);
-      	          			if ((checkedFlag != null) && (!checkedFlag.isControlled()) && (!localFlags.contains(checkedFlag))) { // add once only
-      	                      localFlags.add(checkedFlag);
-      	          			}
-      	          		}
-      	          	}
-            	}
-            	Flag north = context.getMap().getFlag(i, j + radius);
-                Flag south = context.getMap().getFlag(i, j - radius);
-                Flag west = context.getMap().getFlag(i - radius, j);
-                Flag east = context.getMap().getFlag(i + radius, j);
-                
-                // add the four cardinal flags.
-                // in case radius is 0, our cardinal flags will be 4x identical.
-                // avoid adding 4x in this case.
-                if ((north != null) && (!north.isControlled()) && (!localFlags.contains(north))) {
-                    localFlags.add(north);
-                }
-                if ((south != null)&& (!south.isControlled())  && (!localFlags.contains(south))) {
-                    localFlags.add(south);
-                }
-                if ((west != null) && (!west.isControlled()) && (!localFlags.contains(west))) {
-                    localFlags.add(west);
-                }
-                if ((east != null) && (!east.isControlled()) && (!localFlags.contains(east))) {
-                    localFlags.add(east);
-                }
-                
-                for(Flag points : localFlags) {
-                	pointTotal += points.getSize().getID();
-                }
-                if(pointTotal != 0) {
-                    Position tile = new Position(i,j);
-                    tilePoints.put(pointTotal,tile);	
-                }
-            }
-        }
-        return tilePoints;
-    }
     
-    //sorts flags in reverse order giving max points per position
+    //returns tile with the max available points
     public Position getMaxTilePoints(Player player) {
-    	Map<Integer, Position> sortedMap = new TreeMap<Integer, Position>(Comparator.reverseOrder());
-    	sortedMap.putAll(checkTilePoints(player));
-    	if(sortedMap.size() == 0) {
-    		return null;
-    	}
-    	return (Position)sortedMap.values().toArray()[0];
+    	Map<Integer, Position> tilePoints = player.checkTilePoints();
+    	Position pos = tilePoints.get(tilePoints.keySet().stream().max(Integer::compareTo).orElse(0));
+    	player.setPlayerFlags(pos);
+    	return pos;
     }
     /*
      * Respawn AI for new map or change of teams
@@ -1860,34 +1822,43 @@ public class PlayerManager {
 	    		return;
 	    	case "easy":
 	    		for (int i =0; i < playerListSize * 1; i++) {
-	    			createBot(NPC_Type.TYPE4, randomBotName(), maxShipSize, getBotTeam(), null, getBotFace(), 0.0f);
+	    			createBot(NPC_Type.TYPE4, randomBotName(), maxShipSize, Team.ATTACKER, null, VesselFace.NORTH, 0.0f);
 	    		}
 //	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
 //	    		createBot(NPC_Type.TYPE1, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
 //	    		createBot(NPC_Type.TYPE2, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
 //	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
 	    		respawnAI();
+	    		for(Player bot : listBots()) {
+		        	bot.setDestination(getMaxTilePoints(bot));	
+	    		}
 	    		return;
 	    		
 	    	case "medium":
 	    		for (int i =0; i < playerListSize *1.5 ; i++) {
-	    			createBot(NPC_Type.TYPE4, randomBotName(), maxShipSize, getBotTeam(), null, getBotFace(), 0.0f);
+	    			createBot(NPC_Type.TYPE4, randomBotName(), maxShipSize,Team.ATTACKER, null, VesselFace.NORTH, 0.0f);
 	    		}
-	    		createBot(NPC_Type.TYPE1, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE2, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE1, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE2, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
 	    		respawnAI();
+	    		for(Player bot : listBots()) {
+		        	bot.setDestination(getMaxTilePoints(bot));	
+	    		}
 	    		return;
 	    	case "hard":
 	    		for (int i =0; i < playerListSize * 2 ; i++) {
-	    			createBot(NPC_Type.TYPE4, randomBotName(), maxShipSize, getBotTeam(), null, getBotFace(), 0.0f);
+	    			createBot(NPC_Type.TYPE4, randomBotName(), maxShipSize, Team.ATTACKER, null, VesselFace.NORTH, 0.0f);
 	    		}
-	    		createBot(NPC_Type.TYPE1, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE2, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE2, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
-	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE1, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE2, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE2, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
+//	    		createBot(NPC_Type.TYPE3, randomBotName(), randomShipSize(maxShipSize), getBotTeam(), null, getBotFace(), 0.0f);
 	    		respawnAI();
+	    		for(Player bot : listBots()) {
+		        	bot.setDestination(getMaxTilePoints(bot));	
+	    		}
 	    		return;
 	    	default:
 	    		return;
@@ -1961,6 +1932,10 @@ public class PlayerManager {
     	if(beforeTeam != afterTeam) {
     		respawnAI();
     		sendTeamInfo();
+    		AILogic();
+    		for(Player bot : listBots()) {
+	        	bot.setDestination(getMaxTilePoints(bot));	
+    		}
     	}
     }
     
@@ -2222,7 +2197,7 @@ public class PlayerManager {
 		}
     }
 
-	public AStarSearch getAlgorithm() {
+	public Dijsktra getAlgorithm() {
 		return algorithm;
 	}
 }

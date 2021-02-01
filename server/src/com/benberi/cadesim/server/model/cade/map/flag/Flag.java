@@ -22,9 +22,18 @@ public class Flag extends Position {
      * The team that controls the flag, null if none
      */
     private Team team;
+    private boolean checked = false;
 
     public Flag(FlagSize size) {
         this.size = size;
+    }
+    
+    public boolean isChecked() {
+        return this.checked;
+    }
+
+    public void setChecked(Boolean value) {
+        this.checked = value;
     }
 
     public boolean isControlled() {

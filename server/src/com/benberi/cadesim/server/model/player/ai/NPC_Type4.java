@@ -25,7 +25,9 @@ public class NPC_Type4 extends Player {
     public void calculateRoute() {
     	if(getPath() != null && getPath().size() > 0) {
     		for(int slot = 0; slot < Math.min(getVessel().has3Moves() ? 3 : 4, getPath().size()); slot++) { //moves to enter
-    			getMoves().setMove(slot, getPath().get(slot).move);
+    			if(getPath().get(slot) != null) {
+        			getMoves().setMove(slot, getPath().get(slot).move);	
+    			}
     		}	
     	}
     }

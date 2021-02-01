@@ -7,7 +7,7 @@ import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
-import com.benberi.cadesim.server.model.player.ai.util.AStarNode;
+import com.benberi.cadesim.server.model.player.ai.util.MoveState;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.PlayerCollisionStorage;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -22,7 +22,11 @@ import com.benberi.cadesim.server.util.Position;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -143,7 +147,7 @@ public class Player extends Position {
     private boolean enteredSafeLandside = false;  // reason why
     private boolean enteredSafeOceanside = false; // "
     
-    private List<AStarNode> path;
+    private List<MoveState> path;
     private Position goal;
     
     /**
@@ -165,6 +169,9 @@ public class Player extends Position {
     }
 
     private List<Flag> flags;
+    private List<Flag> flagPoints;
+ 
+    private Position destination;
     private boolean isBot;
 
     /**
@@ -187,9 +194,128 @@ public class Player extends Position {
         this.channel = c;
         this.lastAliveMilliseconds = System.currentTimeMillis();
         this.flags = new ArrayList<Flag>();
+        this.flagPoints = new ArrayList<Flag>();
         setBot(c == null);
 
         set(-1, -1); // not spawned
+    }
+    
+    public int leftTokens() {
+    	return this.getMoveTokens().countLeftMoves();
+    }
+    
+    public int rightTokens() {
+    	return this.getMoveTokens().countRightMoves();
+    }
+    
+    public int forwardTokens() {
+    	return this.getMoveTokens().countForwardMoves();
+    }
+    
+    public Position getDestination() {
+    	return destination;
+    }
+    public void setDestination(Position dest) {
+    	this.destination = dest;
+    }
+    //searches each tile for corresponding flag points
+    public void setPlayerFlags(Position position) {
+    	List<Flag> localFlags = new ArrayList<>();
+        int diameter = this.getVessel().getInfluenceDiameter(); //as much diameter as warfrig
+        int radius = diameter / 2;
+        int squareRadius = radius;
+        
+    	for (int x = position.getX() - squareRadius; x < position.getX() + squareRadius; x++) {
+	          	for (int y = position.getY() - squareRadius; y < position.getY() + squareRadius; y++) {
+	          		if((java.lang.Math.pow(x - position.getX(), 2) + java.lang.Math.pow(y - position.getY(), 2)) < java.lang.Math.pow(radius, 2)) {
+	          			Flag checkedFlag = context.getMap().getFlag(x, y);
+	          			if ((checkedFlag != null)) { // add once only
+	                      localFlags.add(checkedFlag);
+	          			}
+	          		}
+	          	}
+    	}
+        
+        Flag north = context.getMap().getFlag(position.getX(), position.getY() + radius);
+        Flag south = context.getMap().getFlag(position.getX(), position.getY() - radius);
+        Flag west = context.getMap().getFlag(position.getX() - radius, position.getY());
+        Flag east = context.getMap().getFlag(position.getX() + radius, position.getY());
+        
+        if ((north != null) && !north.isChecked()) {
+            localFlags.add(north);
+        }
+        if ((south != null) && !south.isChecked()) {
+            localFlags.add(south);
+        }
+        if ((west != null) && !west.isChecked()) {
+            localFlags.add(west);
+        }
+        if ((east != null) && !east.isChecked()) {
+            localFlags.add(east);
+        }
+        for(Flag flag : context.getMap().getFlags()) {
+        	if(north != null || west != null || east != null || south != null) {
+            	if( north != null && flag.get() == north.get() || 
+            			south != null && flag.get() == south.get() || 
+            					east != null && flag.get() == east.get() || 
+            							west != null && flag.get() == west.get()) {
+            		flag.setChecked(true);
+            	}	
+        	}
+        }
+    }
+    
+    //searches each tile for corresponding flag points
+    public Map<Integer, Position> checkTilePoints() {
+    	Set<Flag> localFlags = new HashSet<>();
+    	Map<Integer, Position>tilePoints = new HashMap<>();
+        int diameter = this.getVessel().getInfluenceDiameter(); //as much diameter as warfrig
+        int radius = diameter / 2;
+        int squareRadius = radius;
+        for (int i = 0; i < context.getMap().getMap().length; i++) {
+            for(int j = 0; j < context.getMap().getMap()[i].length; j++) {
+                int pointTotal = 0;
+            	if(context.getMap().isRock(i, j, this) || context.getMap().isOutOfBounds(i, j)) continue;
+            	for (int x = i - squareRadius; x < i + squareRadius; x++) {
+      	          	for (int y = j - squareRadius; y < j + squareRadius; y++) {
+      	          		if((java.lang.Math.pow(x - i, 2) + java.lang.Math.pow(y - j, 2)) < java.lang.Math.pow(radius, 2)) {
+      	          			Flag checkedFlag = context.getMap().getFlag(x, y);
+      	          			if ((checkedFlag != null)) { // add once only
+      	                      localFlags.add(checkedFlag);
+      	          			}
+      	          		}
+      	          	}
+            	}
+            	
+            	Flag north = context.getMap().getFlag(i, j + radius);
+                Flag south = context.getMap().getFlag(i, j - radius);
+                Flag west = context.getMap().getFlag(i - radius, j);
+                Flag east = context.getMap().getFlag(i + radius, j);
+                
+                if ((north != null) && !north.isChecked()) {
+                    localFlags.add(north);
+                }
+                if ((south != null) && !south.isChecked()) {
+                    localFlags.add(south);
+                }
+                if ((west != null) && !west.isChecked()) {
+                    localFlags.add(west);
+                }
+                if ((east != null) && !east.isChecked()) {
+                    localFlags.add(east);
+                }
+
+                for(Flag points : localFlags) {
+                	pointTotal += points.getSize().getID();
+                }
+                if(pointTotal != 0) {
+                    Position tile = new Position(i,j);
+                    tilePoints.put(pointTotal,tile);
+                }
+            	localFlags.clear();
+            }	
+        }
+        return tilePoints;
     }
 
     public void calculateRoute() {
@@ -922,6 +1048,14 @@ public class Player extends Position {
     public void setFlags(List<Flag> flags) {
         this.flags = flags;
     }
+    
+    public List<Flag> getFlagPoints() {
+        return flagPoints;
+    }
+
+    public void setFlagPoints(List<Flag> flags) {
+        this.flagPoints = flags;
+    }
 
 	public int getTurnsUntilControl() {
 		return turnsUntilControl;
@@ -963,7 +1097,7 @@ public class Player extends Position {
 		type = typeValue;
 	}
 
-	public void setPath(List<AStarNode> path) {
+	public void setPath(List<MoveState> path) {
 		this.path = path;
 		
 	}
@@ -972,7 +1106,7 @@ public class Player extends Position {
 		if(this.path != null) this.path.clear();
 	}
 	
-	public List<AStarNode> getPath() {
+	public List<MoveState> getPath() {
 		return this.path;
 	}
 	
