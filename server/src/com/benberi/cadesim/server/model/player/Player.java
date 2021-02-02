@@ -7,6 +7,7 @@ import com.benberi.cadesim.server.config.Constants;
 import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
+import com.benberi.cadesim.server.model.player.ai.util.AStarNode;
 import com.benberi.cadesim.server.model.player.ai.util.MoveState;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.PlayerCollisionStorage;
@@ -147,7 +148,7 @@ public class Player extends Position {
     private boolean enteredSafeLandside = false;  // reason why
     private boolean enteredSafeOceanside = false; // "
     
-    private List<MoveState> path;
+    private List<AStarNode> path;
     private Position goal;
     
     /**
@@ -593,7 +594,6 @@ public class Player extends Position {
     		respawnOnLandside(false, customPosition, customFace, customDamage, shouldSpawnFullCannons);
     	} else {
     		context.getPlayerManager().serverBroadcastMessage(this.getName() + " was sunk!");
-
     		// after sink, return control after x turns
     		this.setTurnsUntilControl(context.getPlayerManager().getRespawnDelay());
     		if (getTurnsUntilControl() > 0)
@@ -604,7 +604,7 @@ public class Player extends Position {
     				" turns after sinking"
     			);
     		}
-
+    		context.getPlayerManager().resetPlayerFlags(this); // reset flags that are stuck
             // sunk, 'respawn' on land side with new ship
             vessel.resetDamageAndBilge();
     		respawnOnLandside(true, customPosition, customFace, customDamage, shouldSpawnFullCannons);
@@ -1097,7 +1097,7 @@ public class Player extends Position {
 		type = typeValue;
 	}
 
-	public void setPath(List<MoveState> path) {
+	public void setPath(List<AStarNode> path) {
 		this.path = path;
 		
 	}
@@ -1106,7 +1106,7 @@ public class Player extends Position {
 		if(this.path != null) this.path.clear();
 	}
 	
-	public List<MoveState> getPath() {
+	public List<AStarNode> getPath() {
 		return this.path;
 	}
 	

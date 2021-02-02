@@ -95,7 +95,7 @@ public class BlockadeTimeMachine {
             if(turnTime == (finalTurnTime - 10) && !context.getPlayerManager().listBots().isEmpty()) {
                 context.getPlayerManager().AILogic();
             }
-            if(turnTime == (finalTurnTime - 30) && !context.getPlayerManager().listBots().isEmpty()) {
+            if(turnTime == (finalTurnTime - 50) && !context.getPlayerManager().listBots().isEmpty()) {
                 try {
                     for (Player p : context.getPlayerManager().listBots()) {
                         context.getPlayerManager().sendMoveBar(p);

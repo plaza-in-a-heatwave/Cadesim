@@ -12,7 +12,7 @@ import com.benberi.cadesim.server.model.player.ai.NPC_Type1;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type2;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type3;
 import com.benberi.cadesim.server.model.player.ai.NPC_Type4;
-import com.benberi.cadesim.server.model.player.ai.util.Dijsktra;
+import com.benberi.cadesim.server.model.player.ai.util.AStarSearch;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.CollisionCalculator;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -129,7 +129,7 @@ public class PlayerManager {
      * random number generator
      */
     Random randomGenerator = new Random();
-    protected Dijsktra algorithm;
+    protected AStarSearch algorithm;
     /**
      * restart conditions
      */
@@ -269,7 +269,7 @@ public class PlayerManager {
     public PlayerManager(ServerContext context) {
         this.context = context;
         this.collision = new CollisionCalculator(context, this);
-        this.algorithm = new Dijsktra(context);
+        this.algorithm = new AStarSearch(context);
         resetTemporarySettings();
     }
     
@@ -1272,8 +1272,14 @@ public class PlayerManager {
      * Wrapper to reset specific players flags
      */
     public void resetPlayerFlags(Player player) {
-    	for(Player pl : listRegisteredPlayers()) {
-    		if(pl == player) player.getFlags().clear();
+    	if(player.isBot()) {
+        	for(Player pl : listBots()) {
+        		if(pl == player) player.getFlags().clear();
+        	}	
+    	}else {
+        	for(Player pl : listRegisteredPlayers()) {
+        		if(pl == player) player.getFlags().clear();
+        	}	
     	}
     }
 
@@ -1934,7 +1940,8 @@ public class PlayerManager {
     		sendTeamInfo();
     		AILogic();
     		for(Player bot : listBots()) {
-	        	bot.setDestination(getMaxTilePoints(bot));	
+	        	bot.setDestination(getMaxTilePoints(bot));
+	        	resetPlayerFlags(bot);
     		}
     	}
     }
@@ -2197,7 +2204,7 @@ public class PlayerManager {
 		}
     }
 
-	public Dijsktra getAlgorithm() {
+	public AStarSearch getAlgorithm() {
 		return algorithm;
 	}
 }

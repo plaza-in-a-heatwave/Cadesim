@@ -42,13 +42,12 @@ public class AStarSearch {
     public List<AStarNode> findPath(Player bot, Position goal){
         openList = new ArrayList<AStarNode>();
         closedList = new ArrayList<AStarNode>();
-        List<AStarNode> neighbors = new ArrayList<AStarNode>();
         int leftAmount = bot.getMoveTokens().countLeftMoves();
         int forwardAmount = bot.getMoveTokens().countForwardMoves();
         int rightAmount = bot.getMoveTokens().countRightMoves();
-        AStarNode current = new AStarNode(bot, bot.getFace(), MoveType.NONE, null, 0, bot.distance(goal));
+        AStarNode current = new AStarNode(bot, bot.getFace(), MoveType.NONE, null, 0, bot.distance(goal), 0);
         openList.add(current);
-        while(openList.size() > 0) {
+        while(!openList.isEmpty()) {
             Collections.sort(openList, nodeSorter);
             current = openList.get(0);
             if(current.position.equals(goal)) { // if goal node found
@@ -60,63 +59,40 @@ public class AStarSearch {
                 openList.clear();
                 closedList.clear();
                 Collections.reverse(path);
-                if(path.size() > 3 && bot.getVessel().has3Moves()) {
-                	path = path.subList(0, 3);
-                }else if(path.size() > 4 && !(bot.getVessel().has3Moves())) {
-                	path = path.subList(0, 4);
-                }
                 return path;
             }
+            if(current.step > 200)break;
             openList.remove(current);
             closedList.add(current);
             //add specific neighbors
-        	neighbors.add(current.MoveNone());
-        	if(context.getMap().isRock(current.MoveForward().position.getX(), current.MoveForward().position.getY(), bot)) {
-        		neighbors.add(current.TurnLeft()); // turn in place
-            	neighbors.add(current.TurnRight());
-        	}else {
-            	neighbors.add(current.MoveForward());
-            	if(context.getMap().isRock(current.MoveLeft().position.getX(), current.MoveLeft().position.getY(), bot)) {
-            		neighbors.add(current.TurnLeft()); // turn in place
-            		neighbors.add(current.TurnRight());
-            	}else {
-            		neighbors.add(current.MoveLeft());
-            	}
-            	if(context.getMap().isRock(current.MoveRight().position.getX(), current.MoveRight().position.getY(), bot)) {
-            		neighbors.add(current.TurnLeft()); // turn in place
-            		neighbors.add(current.TurnRight());
-            	}else {
-            		neighbors.add(current.MoveRight());
-            	}
-        	}
-            for(AStarNode neighborNode : neighbors) {
-            	if(context.getMap().isOutOfBounds(neighborNode.position.getX(), neighborNode.position.getY()))continue;
+            current.addNeighbors(context, bot);
+            for(AStarNode neighbor : current.getNeighbors()) {
+            	if(context.getMap().isOutOfBounds(neighbor.position.getX(), neighbor.position.getY()))continue;
             	//skip if out of particular move
-            	if((leftAmount == 0 && neighborNode.move == MoveType.LEFT) ||
-            			(rightAmount == 0 && neighborNode.move == MoveType.RIGHT) ||
-            			(forwardAmount == 0 && neighborNode.move == MoveType.FORWARD)) {
+            	if((leftAmount == 0 && neighbor.move == MoveType.LEFT) ||
+            			(rightAmount == 0 && neighbor.move == MoveType.RIGHT) ||
+            			(forwardAmount == 0 && neighbor.move == MoveType.FORWARD)) {
             		continue;
             	}
             	// Compute the cost to get *to* the action tile.
-                double costToReach = current.position.distance(neighborNode.position);
+                double costToReach = current.position.distance(neighbor.position);
             	
-            	if(neighborNode.move == MoveType.FORWARD) costToReach += 0.2;
-            	if(current.position.equals(neighborNode.position) && neighborNode.move != MoveType.NONE) costToReach += 0.8; // when ship is trapped by rock
-                int at = context.getMap().getTile(neighborNode.position.getX(), neighborNode.position.getY());
+            	if(neighbor.move == MoveType.FORWARD) costToReach += 0.5;
+            	if(current.position.equals(neighbor.position) && neighbor.move != MoveType.NONE) costToReach += 0.8; // when ship is trapped by rock
+                int at = context.getMap().getTile(neighbor.position.getX(), neighbor.position.getY());
                 if(context.getMap().isWind(at)){ // special action tiles
-                	neighborNode.position = context.getMap().getNextActionTilePositionForTile(neighborNode.position, at);
-                	costToReach += getActionCost(neighborNode, at);
+                	neighbor.position = context.getMap().getNextActionTilePositionForTile(neighbor.position, at);
+                	costToReach += getActionCost(neighbor, at);
                 }
             	if(context.getMap().isWhirlpool(at)) {
-            		neighborNode.position = context.getMap().getFinalActionTilePosition(at, neighborNode.position, 0);
-            		neighborNode.face = neighborNode.face.getNext();
-            		costToReach += getActionCost(neighborNode, at);
+            		neighbor.position = context.getMap().getFinalActionTilePosition(at, neighbor.position, 0);
+            		neighbor.face = neighbor.face.getNext();
+            		costToReach += getActionCost(neighbor, at);
             	}
-                AStarNode node = new AStarNode(neighborNode.position, neighborNode.face,neighborNode.move, current, current.gCost + costToReach, heuristicDistance(neighborNode.position,goal));
-                if(positionInList(closedList, neighborNode.position) && current.gCost >= node.gCost)continue;
-                if(!positionInList(openList, neighborNode.position) || current.gCost < node.gCost) openList.add(node);
+                AStarNode node = new AStarNode(neighbor.position, neighbor.face,neighbor.move, current, current.gCost + costToReach, heuristicDistance(neighbor.position,goal), neighbor.step);
+                if(positionInList(closedList, neighbor.position) && current.gCost >= node.gCost)continue;
+                if(!positionInList(openList, neighbor.position) || current.gCost < node.gCost) openList.add(node);
             }
-            neighbors.clear(); // clear neighbors after iterating.
         }
         closedList.clear();
         return null;
