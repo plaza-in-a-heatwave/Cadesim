@@ -1192,10 +1192,10 @@ public class PlayerManager {
             // bugfix: recalculate flags for aesthetic reasons
             // otherwise any flags owned by the removed player stay the same color until the
             // end of the round when they are recalculated.
-            calculateInfluenceFlags();
-            for (Player p : listRegisteredPlayers()) {
-                p.getPackets().sendFlags();
-            }
+//            calculateInfluenceFlags();
+//            for (Player p : listRegisteredPlayers()) {
+//                p.getPackets().sendFlags();
+//            }
         }
     }
 
