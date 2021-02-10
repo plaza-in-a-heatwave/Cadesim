@@ -6,7 +6,7 @@ ui.name = CadeSim Updater
 ui.icon = gclogo.png
 ui.background_image = getdown-bg.png
 ui.hide_decorations = true
-ui.progress = 30, 220, 364, 17
+ui.progress = 30, 219, 364, 17
 ui.progress_bar = C9B612
 ui.progress_text = FBFAD8
 ui.status = 30, 136, 364, 80
@@ -23,8 +23,6 @@ strict_comments = true
 apparg = --no-update
 
 resource = version.txt
-#resouce needed to separate server/user stuff
-resource = server.config
 #resource needed to change images
 resource = bg.png
 resource = getdown-bg.png
