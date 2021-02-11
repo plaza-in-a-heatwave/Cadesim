@@ -79,6 +79,7 @@ declare -a clientfiles=(
     "gclogo.ico"
     "gclogo.png"
     "user.config"
+    "server.config"
     "version.txt"
 )
 for file in "${clientfiles[@]}"; do
@@ -109,7 +110,7 @@ fi
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-if ! zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt" --exclude "version.txt">/dev/null; then
+if ! zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "server.config" --exclude "digest2.txt" --exclude "version.txt">/dev/null; then
     echo "failed to zip client files."
     exit 1
 fi

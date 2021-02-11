@@ -641,7 +641,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
 
                         // Y position of the vessel
                         float yy = getIsometricY(vessel.getX(), vessel.getY(), vessel);
-
+                        
                         if (canDraw(xx + vessel.getOrientationLocation().getOffsetx(), yy + vessel.getOrientationLocation().getOffsety(), vessel.getRegionWidth(), vessel.getRegionHeight())) {
                             // draw vessel
                         	stage.getBatch().begin();
@@ -649,14 +649,12 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                         	stage.getBatch().end();
                         }
 
-
                         Vector3 v = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
                         othercamera.unproject(v, 0, 200, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() - 200);
+                        float xxx = (xx + vessel.getOrientationLocation().getOffsetx()) + 8;
+                        float yyy = (yy + vessel.getOrientationLocation().getOffsety()) + 8 ;
 
-                        float xxx = xx + vessel.getOrientationLocation().getOffsetx();
-                        float yyy = yy + vessel.getOrientationLocation().getOffsety();
-
-                        if (v.x>= xxx && v.x <= xxx + vessel.getRegionWidth() && v.y >= yyy && v.y <= yyy + vessel.getRegionHeight()) {
+                        if (v.x>= xxx - 10 && v.x <= xxx + vessel.getRegionWidth() && v.y >= yyy - 170 && v.y <= yyy + vessel.getRegionHeight()) {
 
                             // get diameter, divide by sqrt(2): our diameter matches |_ (geometric), but we want \ (isometric).
                             float diameter = (vessel.getInfluenceRadius() * 2) / 1.4142f;
