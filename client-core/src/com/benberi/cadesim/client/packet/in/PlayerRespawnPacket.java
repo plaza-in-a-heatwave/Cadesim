@@ -1,5 +1,7 @@
 package com.benberi.cadesim.client.packet.in;
 
+import java.util.HashSet;
+
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
@@ -28,6 +30,8 @@ public class PlayerRespawnPacket extends ClientPacketExecutor {
                 getContext().getBattleScreen().initializePlayerCamera(v);
             }
         }
+        HashSet<Object> seen=new HashSet<>();
+        getContext().getEntities().vessels.removeIf(e->!seen.add(e.getName()));
     }
 
     @Override

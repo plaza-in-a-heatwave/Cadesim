@@ -384,15 +384,14 @@ public class CollisionCalculator {
             		continue;
             	}
             	collide(p, player, turn, phase);
-//            	collide(player, player, turn, phase);
-//            	int playerTile = context.getMap().getTile(player.getX(), player.getY());
-//            	int tile = context.getMap().getTile(p.getX(), p.getY());
-//            	if(context.getMap().isWhirlpool(tile) && context.getMap().isWind(playerTile)) { //below needed to spin ship in place
-//            		p.setFace(p.getFace().getNext());
-//                	p.getAnimationStructure().getTurn(turn).setFace(p.getFace());
-//                	p.getAnimationStructure().getTurn(turn).setSpinCollision(true);
-//                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
-//            	}
+            	int playerTile = context.getMap().getTile(player.getX(), player.getY());
+            	int tile = context.getMap().getTile(p.getX(), p.getY());
+            	if(context.getMap().isWhirlpool(tile) && context.getMap().isWind(playerTile)) { //below needed to spin ship in place
+            		p.setFace(p.getFace().getNext());
+                	p.getAnimationStructure().getTurn(turn).setFace(p.getFace());
+                	p.getAnimationStructure().getTurn(turn).setSpinCollision(true);
+                 	player.getAnimationStructure().getTurn(turn).setSpinCollision(false);
+            	}
             }
             return true;
         }

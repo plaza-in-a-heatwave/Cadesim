@@ -1,5 +1,7 @@
 package com.benberi.cadesim.client.packet.in;
 
+import java.util.HashSet;
+
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.client.codec.util.Packet;
 import com.benberi.cadesim.client.packet.ClientPacketExecutor;
@@ -44,8 +46,9 @@ public class TurnAnimationPacket extends ClientPacketExecutor {
             else {
                 p.getBuffer().readerIndex(p.getBuffer().readerIndex() + 16);
             }
-
         }
+        HashSet<Object> seen=new HashSet<>();
+        getContext().getEntities().vessels.removeIf(e->!seen.add(e.getName()));
         getContext().getBattleScreen().setTurnExecute();
     }
 
