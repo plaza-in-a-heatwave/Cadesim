@@ -215,13 +215,12 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     	multiplexer.addProcessor(this);
     	multiplexer.addProcessor(stage);
     	Gdx.input.setInputProcessor(multiplexer);
-    	if(!Constants.AUTO_UPDATE) { // test purposes
+		String developerMode = userProperties.get("developer-mode");
+		if (developerMode != null && developerMode.equalsIgnoreCase("on")) {
     		Constants.PROTOCOL_PORT = 4970;
     		address.setText("localhost");
     		code.setText("");
-    	}else {
-        	fillInfo();
-    	}
+		}
     }
     
     public void createPopup() {
@@ -833,6 +832,7 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
 					put("user.last_ship", prop.getProperty("user.last_ship"));
 					put("user.volume", prop.getProperty("user.volume"));
 					put("autoupdate", prop.getProperty("autoupdate"));
+					put("developer-mode", prop.getProperty("developer-mode"));
 			}};
 		}catch (FileNotFoundException e) {
 			return new HashMap<String,String> (){
