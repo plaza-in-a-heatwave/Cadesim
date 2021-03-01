@@ -219,6 +219,8 @@ public class LobbyScreen extends AbstractScreen implements InputProcessor {
     		Constants.PROTOCOL_PORT = 4970;
     		address.setText("localhost");
     		code.setText("");
+    	}else {
+        	fillInfo();
     	}
     }
     
