@@ -13,8 +13,8 @@ echo "* before creating the release.  *"
 echo "*********************************"
 
 # jars can have different names when released for compatibility
-CLIENTJARNAME="cadesim.jar"        # also remember to change this in getdown.txt
-SERVERJARNAME="cadesim-server.jar"
+CLIENTJARNAME="beta.jar"        # also remember to change this in getdown.txt
+SERVERJARNAME="beta-server.jar"
 
 # project dirs
 ROOT="$(realpath "$(dirname "$0")")"
@@ -38,8 +38,8 @@ CLIENTUSERDIR="$CLIENTBUILDDIR"/user
 SERVERUSERDIR="$SERVERBUILDDIR"/user
 
 # zip: one package option for user
-CLIENTZIPNAME="$CLIENTUSERDIR"/cadesim-client.zip
-SERVERZIPNAME="$SERVERUSERDIR"/cadesim-server.zip
+CLIENTZIPNAME="$CLIENTUSERDIR"/beta-client.zip
+SERVERZIPNAME="$SERVERUSERDIR"/beta-server.zip
 
 # change working directory to cadesim
 pushd "$ROOT">/dev/null
@@ -110,7 +110,7 @@ fi
 # generate package for user. If using git bash, follow instructions here:
 # https://ranxing.wordpress.com/2016/12/13/add-zip-into-git-bash-on-windows/
 # # TODO: add MSI, deb package installers here if wanted.
-if ! zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "server.config" --exclude "digest2.txt" --exclude "version.txt">/dev/null; then
+if ! zip -r "$CLIENTZIPNAME" . -9 --exclude "/$(basename "$CLIENTUSERDIR")/*" --exclude "/$(basename "$CLIENTHTTPDIR")/*" --exclude "digest.txt" --exclude "digest2.txt" --exclude "version.txt">/dev/null; then
     echo "failed to zip client files."
     exit 1
 fi
