@@ -1016,7 +1016,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
             }
             if (this.canDragMap && sy < othercamera.viewportHeight - 200) {
 	        	 float x = Gdx.input.getDeltaX(); float y = Gdx.input.getDeltaY();
-	        	 othercamera.translate(-x,y*1f);
+	        	 othercamera.translate(-x,y*1.0f);
             }
             if (battleMenu.touchDragged(sx, sy, pointer)) {
                 return true;
