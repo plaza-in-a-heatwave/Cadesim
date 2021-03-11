@@ -1,5 +1,8 @@
 package com.benberi.cadesim.server.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Constants {	
 	/**
 	 * Name of server
@@ -13,6 +16,15 @@ public class Constants {
 	 * Banned prefix should contain substring of the ids.
 	 */
 	public static final String bannedSubstring  = "cadesim"; // players not allowed to use this in their name
+	public static final List<String> bannedNames = new ArrayList<String>() {
+		private static final long serialVersionUID = 1L;
+		{
+			add("fatigue");
+			add("cyclist");
+			add("eyad");
+			add("benberi");
+		}
+	};
 	public static final String serverBroadcast  = "<cadesim_broadcast>";
 	public static final String serverTeam    = "<cadesim_team>";
 	public static final String serverPrivate    = "<cadesim_private>";
@@ -157,7 +169,7 @@ public class Constants {
      *
      * Individual options can also be enabled/disabled as required.
      */
-    public static final boolean ENABLE_DEVELOPER_FEATURES = false;
+    public static final boolean ENABLE_DEVELOPER_FEATURES = true;
 
     public static final boolean ENABLE_CONTINUOUS_REBOOT  = ENABLE_DEVELOPER_FEATURES;
     public static final int     CONTINOUS_REBOOT_INTERVAL = 60000;  // 60,000 ms, 60 sec

@@ -881,7 +881,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         lobbyButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
-        		ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
+        		ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);
         		context.exitMapEditor();
         	}
         });

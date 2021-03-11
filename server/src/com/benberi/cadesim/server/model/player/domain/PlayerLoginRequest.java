@@ -28,6 +28,7 @@ public class PlayerLoginRequest {
      * The version
      */
     private int version;
+    
 
     public PlayerLoginRequest(Player player, String name, int ship, int team, int version) {
         this.player = player;
@@ -56,4 +57,5 @@ public class PlayerLoginRequest {
     public int getVersion() {
         return version;
     }
+    
 }

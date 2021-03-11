@@ -7,7 +7,6 @@ import com.badlogic.gdx.Gdx;
 import com.benberi.cadesim.util.ScreenEnum;
 import com.benberi.cadesim.util.ScreenManager;
 import com.kotcrab.vis.ui.VisUI;
-import com.kotcrab.vis.ui.widget.file.FileChooser;
 
 public class BlockadeSimulator extends Game{
 
@@ -15,14 +14,13 @@ public class BlockadeSimulator extends Game{
 	 * The game context
 	 */
 	private GameContext context;
-
+	
 	@Override
 	public void create () {
-		context = new GameContext(this);
+		VisUI.setSkipGdxVersionCheck(true);
 		VisUI.load();
-        FileChooser.setDefaultPrefsName("com.cadesim.mapeditor.filechooser");
-		ScreenManager.getInstance().initialize(this);
-		ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
+		context = new GameContext(this);
+		ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);	
 	}
 	
 	@Override

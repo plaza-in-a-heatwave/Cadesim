@@ -14,7 +14,7 @@ import com.benberi.cadesim.client.packet.in.LoginResponsePacket;
 import com.benberi.cadesim.client.packet.out.*;
 import com.benberi.cadesim.game.entity.EntityManager;
 import com.benberi.cadesim.game.entity.vessel.move.MoveType;
-import com.benberi.cadesim.game.screen.LobbyScreen;
+import com.benberi.cadesim.game.screen.LoginScreen;
 import com.benberi.cadesim.game.screen.component.BattleControlComponent;
 import com.benberi.cadesim.game.screen.component.MenuComponent;
 import com.benberi.cadesim.game.screen.SeaBattleScreen;
@@ -23,9 +23,9 @@ import com.benberi.cadesim.util.GameToolsContainer;
 import com.benberi.cadesim.util.RandomUtils;
 import com.benberi.cadesim.util.ScreenEnum;
 import com.benberi.cadesim.util.ScreenManager;
+import com.benberi.cadesim.util.SqlDatabase;
 import com.benberi.cadesim.util.Team;
 import com.benberi.cadesim.util.TextureCollection;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 
@@ -35,7 +35,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -78,7 +80,7 @@ public class GameContext {
      */
     private SeaBattleScreen seaBattleScreen;
     
-    private LobbyScreen lobbyScreen;
+    private LoginScreen lobbyScreen;
 
     private BattleControlComponent controlArea;
 
@@ -95,8 +97,15 @@ public class GameContext {
 
     public String myVessel;
     public int myVesselY;
-    
+    public List<String> admins;
+    public Map<Integer, String> serverInfo = new HashMap<Integer, String>();
+    public String currentServerRoom = "";
+    public String userName;
+    public String accountName;
+    public String hostURL;
     public int myVesselType;
+    public Team myTeam;
+    public String serverRoom;
     
     /**
      * List of maps
@@ -125,16 +134,6 @@ public class GameContext {
 
     private ClientPacketHandler packets;
     final Graphics graphics = Gdx.graphics;
-//    private ConnectScene connectScene;
-    public Team myTeam;
-    
-    public void setTeam(int value) {
-    	if(value == 0) {
-    		this.myTeam = Team.ATTACKER;
-    	}else {
-    		this.myTeam = Team.DEFENDER;
-    	}
-    }
     
     public ChannelPipeline pipeline;
 
@@ -201,17 +200,21 @@ public class GameContext {
      */
     public void create() {
         assetManager = new GameAssetManager();
-        assetManager.loadConnectSceneTextures();
-        assetManager.loadAllShipTextures();
-        assetManager.loadShipInfo();
-        assetManager.loadSounds();
-        assetManager.loadSeaBattle();
+        assetManager.loadStartup();
         assetManager.loadFonts();
-        assetManager.loadControl();
+        assetManager.loadConnectSceneTextures();
         assetManager.manager.finishLoading();
-
+    }
+    
+    public void loadSeaAssets() {
+    	assetManager.loadSkinShipTexture();
+    	assetManager.loadSeaAssets();
         textures = new TextureCollection(this);
-        textures.create();
+        textures.loadSeaTextures();
+    }
+    
+    public void loadGameAssets() {
+        assetManager.loadSeaBattleAssets();
     }
     
     public List<String> getMaps() {
@@ -279,11 +282,11 @@ public class GameContext {
     	});
     }
 
-    public void setLobbyScreen(LobbyScreen lobby) {
+    public void setLobbyScreen(LoginScreen lobby) {
     	lobbyScreen = lobby;
     }
     
-    public LobbyScreen getLobbyScreen() {
+    public LoginScreen getLobbyScreen() {
         return lobbyScreen;
     }
     
@@ -345,13 +348,14 @@ public class GameContext {
      * Sends a login packet to the server with the given display name
      * @param display   The display name
      */
-    public void sendLoginPacket(String code, String display, int ship, int team) {
+    public void sendLoginPacket(String accountName, String display, int ship, int team) {
         LoginPacket packet = new LoginPacket();
         packet.setVersion(Constants.PROTOCOL_VERSION);
-        packet.setCode(code);
+        packet.setAccountName(accountName);
         packet.setName(display);
         packet.setShip(ship);
         packet.setTeam(team);
+        System.out.println("Login:" + display);
         sendPacket(packet);
         shipId = ship;
     }
@@ -378,6 +382,17 @@ public class GameContext {
         packet.set(slot1, slot2);
         sendPacket(packet);
     }
+    /**
+     * Attempts to connect to server
+     *
+     * @param displayName   The display name
+     * @param ip            The IP Address to connect
+     * @throws UnknownHostException 
+     */
+    public void connectdb(String username, String password) {
+    	SqlDatabase.connect(username, password, context); // do something with server info
+    }
+    
     int response;
     /**
      * Attempts to connect to server
@@ -387,7 +402,7 @@ public class GameContext {
      * @throws UnknownHostException 
      */
 	GameContext context = this;
-    public void connect(final String displayName, String ip, String code, int ship, int team) throws UnknownHostException {
+    public void connect(final String accountName, final String displayName, String ip, int ship, int team) throws UnknownHostException {
     	haveServerResponse = false; // reset for next connect
     	if(!RandomUtils.validIP(ip) && RandomUtils.validUrl(ip)) {
     		try {
@@ -401,7 +416,7 @@ public class GameContext {
             @Override
             public void onSuccess(Channel channel) {
                 serverChannel = channel; // initialize the server channel
-                sendLoginPacket(code, displayName, ship, team); // send login packet
+                sendLoginPacket(accountName, displayName, ship, team); // send login packet
                 myVessel = displayName;
                 myVesselType = ship;
                 myTeam = Team.forId(team);
@@ -502,8 +517,7 @@ public class GameContext {
 				Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
-						getLobbyScreen().setPopupMessage("You have disconnected from the server.");
-						getLobbyScreen().showPopup();	
+						getLobbyScreen().setStatusMessage("Server: " + "You have disconnected from the server.");
 					}
 				});		
 			}
@@ -588,11 +602,10 @@ public class GameContext {
         setConnected(false);
         setIsInLobby(true);
         getServerChannel().disconnect();
-        ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, this);
+        ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, this);
 		Gdx.graphics.setTitle("GC:" + Constants.VERSION);
 		System.out.println("Client disconnected.");
-		getLobbyScreen().setPopupMessage("Client Disconnected.");
-		getLobbyScreen().showPopup();
+		getLobbyScreen().setStatusMessage("Client: " + "Client Disconnected.");
 		getBattleScreen().dispose();
 	    getControl().dispose();
 	    Gdx.graphics.setResizable(true);
@@ -620,24 +633,21 @@ public class GameContext {
     public void handleServersideDisconnect() {
     	if(getServerResponse()) {
     		getServerChannel().disconnect();
-	        getLobbyScreen().setPopupMessage("Login error.");
-			getLobbyScreen().showPopup();
+	        getLobbyScreen().setStatusMessage("Server: " + "Login error.");
     		System.out.println("Login error; handling response.");
     	}else {
 	        setConnected(false);
 	        setIsInLobby(true);
 	        getServerChannel().disconnect();
-	        getLobbyScreen().setPopupMessage("Server Disconnected.");
-			getLobbyScreen().showPopup();
+	        getLobbyScreen().setStatusMessage("Server: " + "Server Disconnected.");
     	}
 
     	Gdx.app.postRunnable(new Runnable() {
 			@Override
 			public void run() {
-		        ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
+		        ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);
 		        graphics.setResizable(true);
-		        getLobbyScreen().setPopupMessage("Server Disconnected.");
-				getLobbyScreen().showPopup();
+		        getLobbyScreen().setStatusMessage("Server: " + "Server Disconnected.");
 				graphics.setTitle("GC: v" + Constants.VERSION);
 			}
     	});
@@ -791,4 +801,56 @@ public class GameContext {
     public ClientConnectionTask getConnectTask() {
 		return connectTask;
 	}
+    
+    public void setTeam(int value) {
+    	if(value == 0) {
+    		this.myTeam = Team.ATTACKER;
+    	}else {
+    		this.myTeam = Team.DEFENDER;
+    	}
+    }
+    
+    public int getTeam() {
+    	return this.myTeam.getID();
+    }
+    
+    public void setUserName(String name) {
+    	userName = name;
+    }
+    
+    public String getUserName() {
+    	return userName;
+    }
+    
+    public void setAccountName(String name) {
+    	accountName = name;
+    }
+    
+    public String getAccountName() {
+    	return accountName;
+    }
+    
+    public void setHostURL(String url) {
+    	hostURL = url;
+    }
+    
+    public String getHostURL() {
+    	return hostURL;
+    }
+    
+    public void setVesselType(int vesselType) {
+    	myVesselType = vesselType;
+    }
+    
+    public int getVesselType() {
+    	return myVesselType;
+    }
+    
+    public String getServerRoom() {
+    	return serverRoom;
+    }
+    
+    public void setServerRoom(String room) {
+    	serverRoom = room;
+    }
 }

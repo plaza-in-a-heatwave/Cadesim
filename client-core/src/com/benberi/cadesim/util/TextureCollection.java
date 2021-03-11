@@ -32,8 +32,11 @@ public class TextureCollection {
     /**
      * Creates all textures
      */
-    public void create() {
+    public void loadSeaTextures() {
         createSeaTiles();
+    }
+    
+    public void loadSeaBattleTextures() {
         createVessels();
         createMisc();
     }

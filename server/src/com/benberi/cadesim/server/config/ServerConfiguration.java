@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
 import com.benberi.cadesim.server.util.Utils;
@@ -40,6 +41,7 @@ public class ServerConfiguration {
 	private static String attackerName = "attacker";
 	private static String defenderName = "defender";
 	private static String authCode = ""; // by default no auth code
+	private static String developerPass = ""; //empty password
 	private static String serverName = Constants.name;
 	private static int tokenExpiry = 4;
 	private static boolean runContinuousMode = true;
@@ -49,7 +51,7 @@ public class ServerConfiguration {
     private static boolean testMode = false;
     private static boolean customMap = false;
     private static boolean checkForUpdatesOnStartup = false;
-
+    private static List<String> developerNames = new ArrayList<String>();
     private static ArrayList<Object> gameSettings = new ArrayList<Object>(Arrays.asList(
     		turnDuration,roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(),
     		turnDuration,roundDuration,respawnDelay, disengageBehavior, getJobbersQualityAsString(), isCustomMap(), mapName, null, aiLevel));
@@ -108,6 +110,13 @@ public class ServerConfiguration {
 		ServerConfiguration.scheduledAutoUpdate = value;
 	}
 
+	public static void addDeveloperName(String name) {
+		ServerConfiguration.developerNames.add(name);
+	}
+	
+	public static List<String> getDeveloperNames() {
+		return ServerConfiguration.developerNames; 
+	}
     public static int getPlayerLimit() {
         return ServerConfiguration.playerLimit;
     }
@@ -329,6 +338,14 @@ public class ServerConfiguration {
 
 	public static void setAuthCode(String authCode) {
 		ServerConfiguration.authCode = authCode;
+	}
+	
+	public static String getDeveloperPassword() {
+		return ServerConfiguration.developerPass;
+	}
+
+	public static void setDeveloperPassword(String pass) {
+		ServerConfiguration.developerPass = pass;
 	}
 
 	public static String getServerName() {

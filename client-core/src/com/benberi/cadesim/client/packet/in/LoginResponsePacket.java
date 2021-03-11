@@ -47,8 +47,7 @@ public class LoginResponsePacket extends ClientPacketExecutor {
 			@Override
 			public void run() {
 				if(string != null) {
-	                getContext().getLobbyScreen().setPopupMessage(string);
-	                getContext().getLobbyScreen().showPopup();	
+	                getContext().getLobbyScreen().setStatusMessage("Client: " + string);
 				}
 			}
     	});

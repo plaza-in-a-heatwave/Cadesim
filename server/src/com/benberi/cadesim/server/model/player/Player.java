@@ -8,7 +8,6 @@ import com.benberi.cadesim.server.model.cade.Team;
 import com.benberi.cadesim.server.model.cade.map.BlockadeMap;
 import com.benberi.cadesim.server.model.cade.map.flag.Flag;
 import com.benberi.cadesim.server.model.player.ai.util.AStarNode;
-import com.benberi.cadesim.server.model.player.ai.util.MoveState;
 import com.benberi.cadesim.server.model.player.ai.util.NPC_Type;
 import com.benberi.cadesim.server.model.player.collision.PlayerCollisionStorage;
 import com.benberi.cadesim.server.model.player.domain.JobbersQuality;
@@ -51,6 +50,7 @@ public class Player extends Position {
      * The name of the player
      */
     private String name = "";
+    private String accountName = "";
 
     /**
      * Player's vessel
@@ -487,6 +487,14 @@ public class Player extends Position {
      */
     public String getName() {
         return name;
+    }
+    
+    public String getAccountName() {
+    	return accountName;
+    }
+    
+    public void setAccountName(String name) {
+    	accountName = name;
     }
 
     /**

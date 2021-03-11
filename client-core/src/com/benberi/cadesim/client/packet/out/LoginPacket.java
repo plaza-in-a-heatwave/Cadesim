@@ -10,7 +10,7 @@ import com.benberi.cadesim.client.packet.OutgoingPacket;
 public class LoginPacket extends OutgoingPacket {
 
     private String name;
-    private String code;
+    private String accountName;
     private int ship;
     private int version;
     private int team;
@@ -23,9 +23,10 @@ public class LoginPacket extends OutgoingPacket {
         this.name = name;
     }
     
-    public void setCode(String code) {
-    	this.code = code;
+    public void setAccountName(String name) {
+    	this.accountName = name;
     }
+    
 
     @Override
     public void encode() {
@@ -34,7 +35,11 @@ public class LoginPacket extends OutgoingPacket {
         writeByte(ship);
         writeByte(team);
         writeByteString(name);
-        writeByteString(code);
+        if(accountName == null) {
+            writeByteString("");
+        }else {
+            writeByteString(accountName);
+        }
         setLength(getBuffer().readableBytes());
     }
 

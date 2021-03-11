@@ -12,8 +12,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -116,7 +119,7 @@ public class GameServerBootstrap {
         if (!ServerConfiguration.loadAvailableMaps()) {
             ServerContext.log("ERROR: Failed to find maps folder. create a folder called \"maps\" in the same directory.");
             System.exit(Constants.EXIT_ERROR_CANT_FIND_MAPS);
-        }
+        } 
         ServerConfiguration.pregenerateNextMapName();
 
         // set up CLI options
@@ -424,6 +427,26 @@ public class GameServerBootstrap {
             help(options);
         }
 
+        File file = new File("serverInfo.txt"); 
+		try {
+			Scanner sc = new Scanner(file);
+	        while (sc.hasNextLine()) {
+	        	String line = sc.nextLine();
+	        	if(line.startsWith("developerCredentials")){
+	        		ServerConfiguration.setDeveloperPassword(line.split("=")[1]);
+	        	}
+	        	if(line.startsWith("developerNames")) {
+	        		String[] names = (line.split("=")[1]).split(",");
+	        		for(String name : names) {
+		        		ServerConfiguration.addDeveloperName(name.toLowerCase());
+	        		}
+	        	}
+	        }
+	        sc.close();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} 	 
         // create the bootstrap. this loads our config, among other things.
         GameServerBootstrap bootstrap = new GameServerBootstrap();
 

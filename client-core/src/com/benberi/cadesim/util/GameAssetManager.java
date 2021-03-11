@@ -15,6 +15,10 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 public class GameAssetManager {
 	public final AssetManager manager = new AssetManager();
 	
+	public AssetManager getManager() {
+		return manager;
+	}
+
 	/*
 	 * Parameters for fonts
 	 */
@@ -225,6 +229,8 @@ public class GameAssetManager {
     private final static String CHATMESSAGESERVERPRIVATE = "ui/chat_message_server_private.png";
 
     private final static String MAPEDITOR = "skin/mapEditor.png";
+    private final static String GUEST = "skin/guest.png";
+    private final static String GUEST_DISABLED = "skin/guest_disabled.png";
     private final static String MAPEDITOR_DISABLED ="skin/mapEditor_disabled.png";
     
 	private final static String CLIENTLOGO = "gclogo.png";
@@ -383,6 +389,9 @@ public class GameAssetManager {
     public AssetDescriptor<Texture> mapEditorButtonUp = new AssetDescriptor<Texture>(MAPEDITOR, Texture.class);
     public AssetDescriptor<Texture> mapEditorButtonDown = new AssetDescriptor<Texture>(MAPEDITOR_DISABLED, Texture.class);
     
+    public AssetDescriptor<Texture> guestButtonUp = new AssetDescriptor<Texture>(GUEST, Texture.class);
+    public AssetDescriptor<Texture> guestButtonDown = new AssetDescriptor<Texture>(GUEST_DISABLED, Texture.class);
+    
     public AssetDescriptor<Texture> clientlogo = new AssetDescriptor<Texture>(CLIENTLOGO, Texture.class);
 	/*
 	 * Font asset descriptors
@@ -443,13 +452,8 @@ public class GameAssetManager {
 		manager.load(creak_sound);
 	}
 	
-    public void loadSeaBattle() {
-    	manager.load(seaBattleCursor);
+	public void loadSeaAssets() {
     	manager.load(sea);
-    	manager.load(alkaid_island);
-    	manager.load(pukru_island);
-    	manager.load(doyle_island);
-    	manager.load(isle_keris_island);
     	manager.load(cell);
     	manager.load(safe);
     	manager.load(bigrock);
@@ -460,19 +464,31 @@ public class GameAssetManager {
     	manager.load(smallrock_disabled);
     	manager.load(whirlpool_disabled);
     	manager.load(wind_disabled);
-    	manager.load(infoPanel);
-    	manager.load(contenders);
     	manager.load(flag);
     	manager.load(flagTexture);
     	manager.load(flagTexture_disabled);
+	}
+	
+    public void loadSeaBattleAssets() {
+    	manager.load(seaBattleCursor);
+    	manager.load(alkaid_island);
+    	manager.load(pukru_island);
+    	manager.load(doyle_island);
+    	manager.load(isle_keris_island);
+    	manager.load(infoPanel);
+    	manager.load(contenders);
     	manager.load(menuUp);
     	manager.load(menuDown);
     	manager.load(buttonUp);
     	manager.load(buttonDown);
-    	manager.load(battleSelection);	
+    	manager.load(battleSelection);
+    	loadShipAssets();
+    	loadAllShipTextures();
+    	loadSounds();
+    	loadControl();
     }
     
-    public void loadShipInfo() {
+    public void loadShipAssets() {
     	manager.load(cannonball_large);
         manager.load(cannonball_medium);
         manager.load(cannonball_small);
@@ -482,7 +498,6 @@ public class GameAssetManager {
         manager.load(explode_medium);
         manager.load(explode_small);
         manager.load(hit);
-
     }
     
     public void loadControl() {
@@ -536,20 +551,10 @@ public class GameAssetManager {
     }
     
 	public void loadConnectSceneTextures() {
-		manager.load(clientlogo);
-		manager.load(background);
+		manager.load(guestButtonUp);
+		manager.load(guestButtonDown);
 		manager.load(mapEditorButtonUp);
 		manager.load(mapEditorButtonDown);
-		manager.load(textfieldTexture);
-		manager.load(loginButton);
-		manager.load(loginButtonDown);
-		manager.load(cursor);
-		manager.load(selection);
-		manager.load(selectBoxBackground);
-		manager.load(selectBoxListBackground);
-		manager.load(selectBoxListSelection);
-		loadSkinShipTexture();
-		
 	}
 	
 	public void loadAllShipTextures() {
@@ -588,7 +593,7 @@ public class GameAssetManager {
     	manager.load(xebec);
 	}
     
-    private void loadSkinShipTexture() {
+    public void loadSkinShipTexture() {
     	manager.load(baghlahSkin);
     	manager.load(blackshipSkin);
     	manager.load(dhowSkin);
@@ -606,7 +611,7 @@ public class GameAssetManager {
     	manager.load(xebecSkin);
 	}
     
-	public void loadFonts() {
+    public void loadStartup() {
 		FileHandleResolver resolver = new InternalFileHandleResolver();
 		manager.setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
         manager.setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
@@ -619,7 +624,10 @@ public class GameAssetManager {
         //load regular font
         regularFont = new AssetDescriptor<BitmapFont>(REGULARFONT, BitmapFont.class, parameter);
         manager.load(regularFont);
-        
+        manager.load(clientlogo);
+    }
+    
+	public void loadFonts() {
         parameterNotes.fontFileName = "font/FjallaOne-Regular.ttf";
         parameterNotes.fontParameters.size = 11;
         parameterNotes.fontParameters.color = new Color(Color.WHITE);
@@ -629,7 +637,7 @@ public class GameAssetManager {
         //load note font
         notesFont = new AssetDescriptor<BitmapFont>(NOTESFONT, BitmapFont.class, parameterNotes);
         manager.load(notesFont);
-        
+
         parameterTitle.fontFileName = "font/Open_Sans/OpenSans-SemiBold.ttf";
         parameterTitle.fontParameters.size = 46;
         parameterTitle.fontParameters.color = new Color(Color.WHITE);
@@ -717,8 +725,6 @@ public class GameAssetManager {
         
         chatMessageFont = new AssetDescriptor<BitmapFont>(CHATMESSAGEFONT, BitmapFont.class, parameterMessageFont);
         manager.load(chatMessageFont);
-
-
 	}
 	
 }

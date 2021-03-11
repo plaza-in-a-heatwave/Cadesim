@@ -1,0 +1,2 @@
+developerCredentials=gc-global-developer
+developerNames=Eyad,Fatigue,Cyclist,Benberi

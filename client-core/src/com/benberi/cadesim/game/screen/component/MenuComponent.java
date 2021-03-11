@@ -143,6 +143,7 @@ public class MenuComponent extends SeaBattleScreen implements InputProcessor {
 	private Table selectionTable;
 	private Container<Table> tableContainer;
 	private Label disengageLabel;
+	@SuppressWarnings("unused")
 	private Label aiLabel;
 	private Label turnLabel;
 	private Label roundLabel;

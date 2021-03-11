@@ -33,7 +33,7 @@ public abstract class AbstractScreen extends ScreenAdapter {
         renderer = new ShapeRenderer();
         shapeRenderer = new ShapeRenderer();
         camera = new OrthographicCamera();
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        skin = new Skin(Gdx.files.internal("skin/x1/uiskin.json"));
 	}
 	// Subclasses must load actors in this method
 	public abstract void buildStage();

@@ -1,6 +1,9 @@
 package com.benberi.cadesim.game.screen;
 
+import java.net.UnknownHostException;
+
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -9,6 +12,9 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
+import com.badlogic.gdx.utils.async.AsyncResult;
+import com.badlogic.gdx.utils.async.AsyncTask;
 import com.benberi.cadesim.GameContext;
 import com.benberi.cadesim.util.AbstractScreen;
 import com.benberi.cadesim.util.LoadingBar;
@@ -30,24 +36,42 @@ public class LoadingScreen extends AbstractScreen{
     private float startX, endX;
     private float percent;
     private long loginAttemptTimestampMillis;
-
+    private boolean isConnected = false;
     private Actor loadingBar;
 	
 	public LoadingScreen(GameContext context, String text) {
 		this.context = context;
 		this.text = text;
 	}
-
+	private AsyncExecutor executor = new AsyncExecutor(4);
+	private AsyncResult<Void> connectTask;
 	@Override
 	public void buildStage() {
 		font = context.getManager().get(context.getAssetObject().regularFont);
 		clientlogo = context.getManager().get(context.getAssetObject().clientlogo);
+		
+		Gdx.app.postRunnable(new Runnable() {
+			@Override
+			public void run() {
+				connectTask = executor.submit(new AsyncTask<Void>() {
+			         public Void call() {
+			            try {
+							Thread.sleep(1200);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+			            return null;
+			         }
+			    });
+			}
+		});
 	}
 	
     @Override
     public void show() {
         // Tell the manager to load assets for the loading screen
     	context.getManager().load("loading.pack", TextureAtlas.class);
+    	context.loadGameAssets();
         // Wait until they are finished loading
         context.getManager().finishLoading();
 
@@ -117,14 +141,21 @@ public class LoadingScreen extends AbstractScreen{
         // Clear the screen
 		Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		if (connectTask != null && connectTask.isDone() && context.getManager().update() && !isConnected) {
+			isConnected = true;
+			try {
+				context.connect(context.getAccountName(), context.getUserName(), context.getHostURL(), context.getVesselType(), context.getTeam());
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
         if(System.currentTimeMillis() - loginAttemptTimestampMillis >= 8000) {
             if(!(ScreenManager.getScreen() instanceof SeaBattleScreen)) {
             	Gdx.app.postRunnable(new Runnable() {
         			@Override
         			public void run() {
-                    	ScreenManager.getInstance().showScreen(ScreenEnum.LOBBY, context);
-                    	context.getLobbyScreen().setPopupMessage("Unable to connect; please retry.");
-                    	context.getLobbyScreen().showPopup();
+                    	ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);
+                    	context.getLobbyScreen().setStatusMessage("Client: " + "Unable to connect; please retry.");
         			}
             		
             	});
@@ -132,7 +163,10 @@ public class LoadingScreen extends AbstractScreen{
         }
         // Interpolate the percentage to make it more smooth
         percent = Interpolation.linear.apply(percent, context.getManager().getProgress(), 0.1f);
-
+        
+		if(context.getManager().update()) {
+	        context.getTextures().loadSeaBattleTextures();
+		}
         // Update positions (and size) to match the percentage
         loadingBarHidden.setX(startX + endX * percent);
         loadingBg.setX(loadingBarHidden.getX() + 30);
@@ -143,7 +177,8 @@ public class LoadingScreen extends AbstractScreen{
         stage.act();
         stage.draw();
         stage.getBatch().begin();
-        font.draw(stage.getBatch(), text, (Gdx.graphics.getWidth()/2) - 90,Gdx.graphics.getHeight()/2 + 10);
+        font.setColor(Color.BLACK);
+        font.draw(stage.getBatch(), text, (Gdx.graphics.getWidth()/2 - text.length() * 3),Gdx.graphics.getHeight()/2 + 10);
         stage.getBatch().end();
     }
 

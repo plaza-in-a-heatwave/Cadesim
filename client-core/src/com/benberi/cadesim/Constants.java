@@ -1,5 +1,8 @@
 package com.benberi.cadesim;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Constants {
 
 	/**
@@ -30,6 +33,8 @@ public class Constants {
      */
     public static int PROTOCOL_PORT = 0;
     public static String SERVER_CODE = "";
+    public static Map<Integer, String> SERVER_ROOMS = new HashMap<Integer, String>();
+    public static HashMap<String,String> USERPROPERTIES;
 
     /**
      * Announce client lives every few ms
@@ -41,7 +46,7 @@ public class Constants {
      *
      * Individual options can also be enabled/disabled as required.
      */
-    public static final boolean ENABLE_DEVELOPER_FEATURES = false;
+    public static boolean ENABLE_DEVELOPER_FEATURES = false;
     public static final boolean ENABLE_CHOOSE_BLACKSHIP = ENABLE_DEVELOPER_FEATURES; // see dropdown in lobby
     public static final boolean ENABLE_LAG_TEST_MODE    = ENABLE_DEVELOPER_FEATURES; // toggle with /lagtestmode. disabled when in lobby.
 

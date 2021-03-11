@@ -20,7 +20,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "Cadesim"
-        gdxVersion = '1.9.13'
+        gdxVersion = '1.9.12'
         roboVMVersion = '2.3.11'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.3'
@@ -33,6 +33,7 @@ allprojects {
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -55,6 +56,7 @@ project(":client-core") {
         compile group: 'commons-io', name: 'commons-io', version: '2.6'
         compile group: 'javax.xml.soap', name: 'javax.xml.soap-api', version: '1.4.0'
         compile "com.kotcrab.vis:vis-ui:$visuiVersion"
+        compile 'com.jcraft:jsch:0.1.54'
     }
 }
 
