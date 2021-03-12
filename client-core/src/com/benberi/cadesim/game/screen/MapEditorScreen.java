@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextTooltip;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -688,7 +689,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
          		whirlSEButton.setDisabled(true);
          	}
          });
-         
          whirlSWButton.addListener(new ClickListener() {
          	@Override
              public void clicked(InputEvent event, float x, float y) {
@@ -700,8 +700,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
          		whirlSWButton.setDisabled(true);
          	}
          });
-         
-        
          whirlNEButton.addListener(new ClickListener() {
          	@Override
              public void clicked(InputEvent event, float x, float y) {
@@ -713,7 +711,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
          		whirlNEButton.setDisabled(true);
          	}
          });
-         
          whirlNWButton.addListener(new ClickListener() {
          	@Override
              public void clicked(InputEvent event, float x, float y) {
@@ -758,6 +755,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
          		windSButton.setDisabled(true);
          	}
          });
+        flag3Button.addListener(new TextTooltip("3-Point flag", skin));
      	flag3Button.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -813,7 +811,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         		smallRockButton.setDisabled(true);
         	}
         });
-        
         loadButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -825,7 +822,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         		loadMap();
         	}
         });
-        
         addWhirlButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -847,7 +843,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         		saveMap();
         	}
         });
-        
         helpButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -859,7 +854,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         		showHelp();
         	}
         });
-        
         newButton.addListener(new ClickListener() {
         	@Override
             public void clicked(InputEvent event, float x, float y) {
@@ -878,7 +872,6 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         		context.exitMapEditor();
         	}
         });
-    	
     }
     
     public void initButtons() {

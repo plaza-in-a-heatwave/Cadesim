@@ -19,7 +19,8 @@ public class PlayerLoginPacket extends ServerPacketExecutor {
         int team = p.readByte();
         String name = p.readByteString();
         String accountName = p.readByteString();
+        String accountPass = p.readByteString();
         pl.setAccountName(accountName);
-        getContext().getPlayerManager().queuePlayerLogin(new PlayerLoginRequest(pl, name, ship, team, version));
+        getContext().getPlayerManager().queuePlayerLogin(new PlayerLoginRequest(pl, name, accountPass, ship, team, version));
     }
 }

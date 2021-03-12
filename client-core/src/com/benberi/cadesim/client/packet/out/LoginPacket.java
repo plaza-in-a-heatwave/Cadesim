@@ -11,6 +11,7 @@ public class LoginPacket extends OutgoingPacket {
 
     private String name;
     private String accountName;
+    private String accountPassword;
     private int ship;
     private int version;
     private int team;
@@ -27,6 +28,9 @@ public class LoginPacket extends OutgoingPacket {
     	this.accountName = name;
     }
     
+    public void setAccountPass(String pass) {
+    	this.accountPassword = pass;
+    }
 
     @Override
     public void encode() {
@@ -37,8 +41,10 @@ public class LoginPacket extends OutgoingPacket {
         writeByteString(name);
         if(accountName == null) {
             writeByteString("");
+            writeByteString("");
         }else {
             writeByteString(accountName);
+            writeByteString(accountPassword);
         }
         setLength(getBuffer().readableBytes());
     }

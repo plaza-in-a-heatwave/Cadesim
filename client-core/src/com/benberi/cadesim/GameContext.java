@@ -101,6 +101,7 @@ public class GameContext {
     public Map<Integer, String> serverInfo = new HashMap<Integer, String>();
     public String currentServerRoom = "";
     public String accountName = "";
+    public String accountPassword = "";
     public String hostURL;
     public int myVesselType;
     public Team myTeam;
@@ -347,10 +348,11 @@ public class GameContext {
      * Sends a login packet to the server with the given display name
      * @param display   The display name
      */
-    public void sendLoginPacket(String accountName, String display, int ship, int team) {
+    public void sendLoginPacket(String accountName, String accountPassword, String display, int ship, int team) {
         LoginPacket packet = new LoginPacket();
         packet.setVersion(Constants.PROTOCOL_VERSION);
         packet.setAccountName(accountName);
+        packet.setAccountPass(accountPassword);
         packet.setName(display);
         packet.setShip(ship);
         packet.setTeam(team);
@@ -400,7 +402,7 @@ public class GameContext {
      * @throws UnknownHostException 
      */
 	GameContext context = this;
-    public void connect(final String accountName, final String displayName, String ip, int ship, int team) throws UnknownHostException {
+    public void connect(final String accountName, final String accountPass,final String displayName, String ip, int ship, int team) throws UnknownHostException {
     	haveServerResponse = false; // reset for next connect
     	if(!RandomUtils.validIP(ip) && RandomUtils.validUrl(ip)) {
     		try {
@@ -414,7 +416,7 @@ public class GameContext {
             @Override
             public void onSuccess(Channel channel) {
                 serverChannel = channel; // initialize the server channel
-                sendLoginPacket(accountName, displayName, ship, team); // send login packet
+                sendLoginPacket(accountName, accountPass, displayName, ship, team); // send login packet
                 myVessel = displayName;
                 myVesselType = ship;
                 myTeam = Team.forId(team);
@@ -849,6 +851,14 @@ public class GameContext {
     
     public String getAccountName() {
     	return accountName;
+    }
+    
+    public void setAccountPass(String name) {
+    	accountPassword = name;
+    }
+    
+    public String getAccountPass() {
+    	return accountPassword;
     }
     
     public void setHostURL(String url) {

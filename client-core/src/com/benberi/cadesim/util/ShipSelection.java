@@ -2,6 +2,7 @@ package com.benberi.cadesim.util;
 
 import java.util.ArrayList;
 import com.badlogic.gdx.graphics.Texture;
+import com.benberi.cadesim.Constants;
 import com.benberi.cadesim.GameContext;
 
 public class ShipSelection {
@@ -58,7 +59,9 @@ public class ShipSelection {
         shipList.add(new Tuple<String, Texture>("War Frigate",  warfrig));
         shipList.add(new Tuple<String, Texture>("War Galleon",  wargal));
         shipList.add(new Tuple<String, Texture>("Grand Frigate",  grandfrig));
-        shipList.add(new Tuple<String, Texture>("Black Ship",  blackship));
+        if (Constants.ENABLE_DEVELOPER_FEATURES) {
+        	shipList.add(new Tuple<String, Texture>("Black Ship",  blackship));
+        }
     }
     
     public int getCurrentShipAsInt() {

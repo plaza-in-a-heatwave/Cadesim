@@ -85,6 +85,7 @@ project(":server") {
         compile group: 'io.netty', name: 'netty-all', version: '4.1.40.Final'
         compile group: 'io.netty', name: 'netty-all', version: '4.1.40.Final-sources'
         compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+        compile 'com.jcraft:jsch:0.1.54'
     }
 }
 

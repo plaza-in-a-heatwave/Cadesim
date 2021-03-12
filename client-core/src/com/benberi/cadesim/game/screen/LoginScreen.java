@@ -94,6 +94,7 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
     private String[] url = null;
 	private AsyncExecutor executor = new AsyncExecutor(4);
 	private AsyncResult<Void> task;
+	private TooltipManager tooltipManager = new TooltipManager();
 
     public LoginScreen(GameContext context) {
     	super();
@@ -107,7 +108,7 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
         mapEditorButtonStyle = new ImageButtonStyle();
         guestButtonStyle = new ImageButtonStyle();
         url = null;
-
+        tooltipManager.instant();
     	initTextures();
     	initGreetings();
     	message = new Label("", skin);
@@ -158,30 +159,7 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
 			}
 		});
     }
-    
-    public void setStatusMessage(String popupMessage) {
-    	message.setText(popupMessage);
-    	message.setPosition(Gdx.graphics.getWidth()/2 - message.getText().length() * 3, 170);
-    }
-    
-    
-    public void addStage() {
-    	stage.addActor(accountName);
-    	stage.addActor(password);
-    	stage.addActor(settingTable);
-        stage.addActor(loginButton);
-        stage.addActor(buttonMapEditor); // comment to toggle
-        stage.addActor(buttonGuest); // comment to toggle
-        stage.addActor(message);
-        stage.addActor(passwordMode);
-    }
-    
-    public Color toRGB(int r, int g, int b) {
-    	  float RED = r / 255.0f;
-    	  float GREEN = g / 255.0f;
-    	  float BLUE = b / 255.0f;
-    	  return new Color(RED, GREEN, BLUE, 1);
-    	 }
+   
 
 	/*
 	 * Greeting list for startup screen
@@ -246,33 +224,6 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
         guestDisabledDrawable = new TextureRegionDrawable(new TextureRegion(guestButtonDown));
     }
     
-	/*
-	 * fill selectboxes with appropriate information
-	 */
-    public void fillSelectBoxes() {
-        String[] rooms = Constants.SERVER_ROOMS.values().toArray(new String[Constants.SERVER_ROOMS.size()]);
-        roomLabel.setItems(rooms);
-    }
-
-	/*
-	 * Initialize properties such as team info/resolution, etc.
-	 */
-    public void fillInfo() {
-    	accountName = new TextField("", skin);
-        if(Constants.USERPROPERTIES.get("user.accountname") != null) {
-        	accountName.setText(Constants.USERPROPERTIES.get("user.accountname"));
-        }
-        
-        password = new TextField(Constants.SERVER_CODE, skin);
-        password.setPasswordCharacter('*');
-        password.setPasswordMode(true);
-        
-        accountName.setWidth(200);
-        password.setWidth(200);
-    	accountName.setMaxLength(Constants.MAX_NAME_SIZE);
-    	password.setMaxLength(Constants.MAX_NAME_SIZE);
-    }
-    
     public void initListeners() {
     	passwordMode.addListener(new ChangeListener() {
     	    @Override
@@ -299,6 +250,8 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
             	});
 			}
         });
+        buttonGuest.addListener(new TextTooltip("Login as guest", tooltipManager, skin));
+        buttonMapEditor.addListener(new TextTooltip("Open map editor", tooltipManager, skin));
         buttonMapEditor.addListener(new ChangeListener() {//runs update if there is one before logging in 
         	public void changed(ChangeEvent event, Actor actor) {
             	Gdx.app.postRunnable(new Runnable() {
@@ -348,6 +301,57 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
                 }
             }
         });
+    }
+    
+    
+    public void setStatusMessage(String popupMessage) {
+    	message.setText(popupMessage);
+    	message.setPosition(Gdx.graphics.getWidth()/2 - message.getText().length() * 3, 170);
+    }
+    
+    
+    public void addStage() {
+    	stage.addActor(accountName);
+    	stage.addActor(password);
+    	stage.addActor(settingTable);
+        stage.addActor(loginButton);
+        stage.addActor(buttonMapEditor); // comment to toggle
+        stage.addActor(buttonGuest); // comment to toggle
+        stage.addActor(message);
+        stage.addActor(passwordMode);
+    }
+    
+    public Color toRGB(int r, int g, int b) {
+    	  float RED = r / 255.0f;
+    	  float GREEN = g / 255.0f;
+    	  float BLUE = b / 255.0f;
+    	  return new Color(RED, GREEN, BLUE, 1);
+    	 }
+	/*
+	 * fill selectboxes with appropriate information
+	 */
+    public void fillSelectBoxes() {
+        String[] rooms = Constants.SERVER_ROOMS.values().toArray(new String[Constants.SERVER_ROOMS.size()]);
+        roomLabel.setItems(rooms);
+    }
+
+	/*
+	 * Initialize properties such as team info/resolution, etc.
+	 */
+    public void fillInfo() {
+    	accountName = new TextField("", skin);
+        if(Constants.USERPROPERTIES.get("user.accountname") != null) {
+        	accountName.setText(Constants.USERPROPERTIES.get("user.accountname"));
+        }
+        
+        password = new TextField(Constants.SERVER_CODE, skin);
+        password.setPasswordCharacter('*');
+        password.setPasswordMode(true);
+        
+        accountName.setWidth(200);
+        password.setWidth(200);
+    	accountName.setMaxLength(Constants.MAX_NAME_SIZE);
+    	password.setMaxLength(Constants.MAX_NAME_SIZE);
     }
 
 	/*

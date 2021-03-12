@@ -1,12 +1,10 @@
-package com.benberi.cadesim.util;
+package com.benberi.cadesim.server.util;
 
 import java.sql.Connection;  
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.badlogic.gdx.Gdx;
-import com.benberi.cadesim.GameContext;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;  
    
@@ -15,6 +13,10 @@ public class SqlDatabase {
 	static int lport;
     static String rhost;
     static int rport;
+    static Connection con;
+    static String username = "";
+    static String password = "";
+    
     public static void createSession(){
         String user = "admin";
         String password = "";
@@ -37,13 +39,13 @@ public class SqlDatabase {
         catch(Exception e){System.err.print(e);}
     }
     
-    public static void connect(String username, String password, GameContext context) {  
+    public static void connect(String username, String password) {  
 	    try{
 	    	createSession();
 	    } catch(Exception ex){
 	        ex.printStackTrace();
 	    }
-        Connection con = null;
+        con = null;
         String driver = "com.mysql.jdbc.Driver";
         String url = "jdbc:mysql://" + rhost +":" + lport + "/";
         String db = "globjpqo_globalcadesim";
@@ -52,30 +54,50 @@ public class SqlDatabase {
         try{
 	        Class.forName(driver);
 	        con = DriverManager.getConnection(url+db, dbUser, dbPasswd);
-	        try{
-		        String query = "select * from account where aname=? and password=?";
-		
-	            PreparedStatement stmt = con.prepareStatement(query);
-	            //Parameters
-	            stmt.setString(1, username);
-	            stmt.setString(2, password);
-	            //Execute
-	            ResultSet rs = stmt.executeQuery();
-		        if(rs.next()) {
-		        	Gdx.app.postRunnable(new Runnable() {
-	        			@Override
-	        			public void run() {
-	        				context.setAccountPass(password);
-	        	        	ScreenManager.getInstance().showScreen(ScreenEnum.SELECTION, context);
-	        			}
-	            	});
-		        }
-	        }catch (SQLException s){
-	        	System.out.println("SQL statement is not executed!");
-	        }
          }catch (Exception e){
         	  e.printStackTrace();
          }
+    }
+    
+    public static boolean runLoginQuery() {
+        try{
+        	if (con != null && username != "" && password != "") {
+        		String query = "select * from account where aname=? and password=?";
+                PreparedStatement stmt = con.prepareStatement(query);
+                //Parameters
+                stmt.setString(1, username);
+                stmt.setString(2, password);
+                //Execute
+                ResultSet rs = stmt.executeQuery();
+    	        if(rs.next()) {
+    	        	// check here
+    	        	return true;
+    	        }
+        	}
+        }catch (SQLException s){
+        	System.out.println("SQL statement is not executed!");
+        }
+        return false;
+    }
+    
+    public static boolean runQuery(String query) {
+        try{
+        	if (con != null && username != "" && password != "") {
+                PreparedStatement stmt = con.prepareStatement(query);
+                //Parameters
+                stmt.setString(1, username);
+                stmt.setString(2, password);
+                //Execute
+                ResultSet rs = stmt.executeQuery();
+    	        if(rs.next()) {
+    	        	// check here
+    	        	return true;
+    	        }
+        	}
+        }catch (SQLException s){
+        	System.out.println("SQL statement is not executed!");
+        }
+        return false;
     }
 	/** 
 //	* Connect to a sample database 

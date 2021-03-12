@@ -24,7 +24,7 @@ import com.benberi.cadesim.server.model.player.vessel.VesselFace;
 import com.benberi.cadesim.server.model.player.vessel.VesselMovementAnimation;
 import com.benberi.cadesim.server.util.Direction;
 import com.benberi.cadesim.server.util.Position;
-
+import com.benberi.cadesim.server.util.SqlDatabase;
 
 import io.netty.channel.Channel;
 
@@ -1063,6 +1063,7 @@ public class PlayerManager {
 
             Player pl = request.getPlayer();
             String name = request.getName();
+            String pass = request.getPass();
             int version = request.getVersion();
             int ship = request.getShip();
             int team = request.getTeam();
@@ -1082,7 +1083,12 @@ public class PlayerManager {
             {
                 continue;
             }
-
+            boolean databaseResponse = false;
+            if (ServerConfiguration.getDeveloperNames().contains(pl.getAccountName())) {
+            	SqlDatabase.connect(pl.getAccountName(), pass);
+            	databaseResponse = SqlDatabase.runLoginQuery();
+            }
+            
             int response = LoginResponsePacket.SUCCESS;
 
             if (version != Constants.PROTOCOL_VERSION) {
@@ -1115,7 +1121,8 @@ public class PlayerManager {
                 );
                 response = LoginResponsePacket.BAD_SHIP;
             }
-            else if ((!Constants.ENABLE_CHOOSE_BLACKSHIP) && (Vessel.VESSEL_IDS.get(ship).equals("blackship"))) {
+            else if ((!Constants.ENABLE_CHOOSE_BLACKSHIP) && (Vessel.VESSEL_IDS.get(ship).equals("blackship") &&
+            		!databaseResponse)) {
                 ServerContext.log(
                         "Warning: Player chose black ship, but it is not allowed."
                 );
