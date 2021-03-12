@@ -100,8 +100,7 @@ public class GameContext {
     public List<String> admins;
     public Map<Integer, String> serverInfo = new HashMap<Integer, String>();
     public String currentServerRoom = "";
-    public String userName;
-    public String accountName;
+    public String accountName = "";
     public String hostURL;
     public int myVesselType;
     public Team myTeam;
@@ -355,7 +354,6 @@ public class GameContext {
         packet.setName(display);
         packet.setShip(ship);
         packet.setTeam(team);
-        System.out.println("Login:" + display);
         sendPacket(packet);
         shipId = ship;
     }
@@ -452,14 +450,37 @@ public class GameContext {
                 case LoginResponsePacket.BAD_VERSION:
                 	return "Outdated client.";
                 case LoginResponsePacket.NAME_IN_USE:
+                	Gdx.app.postRunnable(new Runnable() {
+						@Override
+						public void run() {
+		                	ScreenManager.getInstance().showScreen(ScreenEnum.SELECTION, context);
+						}
+                		
+                	});
                 	return "Display name already in use.";
                 case LoginResponsePacket.BAD_SHIP:
+                	Gdx.app.postRunnable(new Runnable() {
+						@Override
+						public void run() {
+		                	ScreenManager.getInstance().showScreen(ScreenEnum.SELECTION, context);
+						}
+                		
+                	});
                 	return "The selected ship is not allowed.";
                 case LoginResponsePacket.SERVER_FULL:
+                	ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);
                 	return "The server is full.";
                 case LoginResponsePacket.BAD_NAME:
+                	Gdx.app.postRunnable(new Runnable() {
+						@Override
+						public void run() {
+		                	ScreenManager.getInstance().showScreen(ScreenEnum.SELECTION, context);
+						}
+                		
+                	});
                 	return "That ship name is not allowed.";
                 default:
+                	ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);
                 	return "Unknown login failure.";
             }
 
@@ -602,7 +623,7 @@ public class GameContext {
         setConnected(false);
         setIsInLobby(true);
         getServerChannel().disconnect();
-        ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, this);
+        ScreenManager.getInstance().showScreen(ScreenEnum.SELECTION, this);
 		Gdx.graphics.setTitle("GC:" + Constants.VERSION);
 		System.out.println("Client disconnected.");
 		getLobbyScreen().setStatusMessage("Client: " + "Client Disconnected.");
@@ -641,16 +662,16 @@ public class GameContext {
 	        getServerChannel().disconnect();
 	        getLobbyScreen().setStatusMessage("Server: " + "Server Disconnected.");
     	}
-
-    	Gdx.app.postRunnable(new Runnable() {
-			@Override
-			public void run() {
-		        ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);
-		        graphics.setResizable(true);
-		        getLobbyScreen().setStatusMessage("Server: " + "Server Disconnected.");
-				graphics.setTitle("GC: v" + Constants.VERSION);
-			}
-    	});
+//
+//    	Gdx.app.postRunnable(new Runnable() {
+//			@Override
+//			public void run() {
+//		        ScreenManager.getInstance().showScreen(ScreenEnum.LOGIN, context);
+//		        graphics.setResizable(true);
+//		        getLobbyScreen().setStatusMessage("Server: " + "Server Disconnected.");
+//				graphics.setTitle("GC: v" + Constants.VERSION);
+//			}
+//    	});
     }
 
     public GameAssetManager getAssetObject() {
@@ -814,12 +835,12 @@ public class GameContext {
     	return this.myTeam.getID();
     }
     
-    public void setUserName(String name) {
-    	userName = name;
+    public void setVesselName(String name) {
+    	myVessel = name;
     }
     
-    public String getUserName() {
-    	return userName;
+    public String getVesselName() {
+    	return myVessel;
     }
     
     public void setAccountName(String name) {

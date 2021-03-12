@@ -164,7 +164,41 @@ public class TextureCollection {
 
             }
         }
+        return new Texture(pixmap);
+    }
+    
+    public static Texture prepareAltTextureForTeam(Texture texture, Team team) {
+        // The texture data
+        TextureData data = texture.getTextureData();
 
+        // Make sure its prepared
+        if (!data.isPrepared()) {
+            data.prepare();
+        }
+
+        // Our pixmap
+        Pixmap pixmap = data.consumePixmap();
+
+        // Loop through all pixels
+        for (int x = 0; x < pixmap.getWidth(); x++) {
+            for (int y = 0; y < pixmap.getHeight(); y++) {
+
+                // The current color in the given position
+                int color = pixmap.getPixel(x, y);
+
+                // RGBA conversion from int
+                int R = ((color & 0xff000000) >>> 24);
+                int G = ((color & 0x00ff0000) >>> 16);
+                int B = ((color & 0x0000ff00) >>> 8);
+                int A = ((color & 0x000000ff));
+
+                // Chec
+                if (R == 90 && G == 172 && B == 222 && A == 255) {
+                    pixmap.drawPixel(x, y, Color.rgba8888(team.getAltColor()));
+                }
+
+            }
+        }
         return new Texture(pixmap);
     }
 }

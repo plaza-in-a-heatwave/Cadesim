@@ -144,7 +144,7 @@ public class LoadingScreen extends AbstractScreen{
 		if (connectTask != null && connectTask.isDone() && context.getManager().update() && !isConnected) {
 			isConnected = true;
 			try {
-				context.connect(context.getAccountName(), context.getUserName(), context.getHostURL(), context.getVesselType(), context.getTeam());
+				context.connect(context.getAccountName(), context.getVesselName(), context.getHostURL(), context.getVesselType(), context.getTeam());
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			}

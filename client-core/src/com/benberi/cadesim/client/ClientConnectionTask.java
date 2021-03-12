@@ -56,7 +56,6 @@ public class ClientConnectionTask extends Bootstrap implements Runnable,Disposab
             }
         });
         ChannelFuture future = connect(ip,Constants.PROTOCOL_PORT);
-        System.out.println(Constants.PROTOCOL_PORT);
         future.addListener(new ChannelFutureListener() {
         	@Override public void operationComplete(ChannelFuture future) throws Exception{
 		        if(!future.isSuccess()) {

@@ -1,6 +1,10 @@
 package com.benberi.cadesim;
 
+import java.awt.Window;
+import java.util.Arrays;
 import java.util.Timer;
+
+import javax.swing.JWindow;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -17,6 +21,9 @@ public class BlockadeSimulator extends Game{
 	
 	@Override
 	public void create () {
+		Arrays.asList(Window.getWindows()).stream()
+			.filter(window -> window instanceof JWindow)
+			.forEach(window -> window.setVisible(false));
 		VisUI.setSkipGdxVersionCheck(true);
 		VisUI.load();
 		context = new GameContext(this);

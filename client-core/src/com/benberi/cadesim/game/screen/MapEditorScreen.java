@@ -46,14 +46,7 @@ import com.kotcrab.vis.ui.widget.file.FileChooserAdapter;
 import com.kotcrab.vis.ui.widget.file.FileTypeFilter;
 
 public class MapEditorScreen extends AbstractScreen implements InputProcessor {
-    /**
-     * The main game context
-     */
-	
-	/**
-     * The shape renderer
-     */
-    
+
     private TextButton loadButton;
     private TextButton helpButton;
     private TextButton saveButton;
@@ -1031,7 +1024,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
 	private void drawBackground() {
      	Gdx.gl.glEnable(GL20.GL_BLEND);
         renderer.begin(ShapeRenderer.ShapeType.Filled);
-        renderer.setColor(new Color(128 / 255f, 128 / 255f, 128 / 255f, 0.7f));
+        renderer.setColor(new Color(38 / 255f, 38 / 255f, 38 / 255f, 1f));
         renderer.rect(Gdx.graphics.getWidth()-175, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         renderer.setColor(new Color(72 / 255f, 72 / 255f, 72 / 255f, 1));
@@ -1040,7 +1033,7 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
         renderer.setColor(new Color(135 / 255f, 161 / 255f, 188 / 255f, 1));
         renderer.rect(Gdx.graphics.getWidth()-173, 0, 1, Gdx.graphics.getHeight());
 
-        renderer.setColor(new Color(68 / 255f, 101 / 255f, 136 / 255f, 1));
+        renderer.setColor(new Color(135 / 255f, 135 / 255f, 135 / 255f, 1));
         renderer.rect(Gdx.graphics.getWidth()-171, 0, 1, Gdx.graphics.getHeight());
         renderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);

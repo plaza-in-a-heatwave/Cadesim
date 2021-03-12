@@ -727,7 +727,7 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                 
                 // render move bar
                 int BAR_HEIGHT_ABOVE_SHIP = 15; // px
-                int BAR_HEIGHT = 7;
+                int BAR_HEIGHT = 8;
                 renderer.begin(ShapeRenderer.ShapeType.Line);
                 float x = getIsometricX(vessel.getX(), vessel.getY(), vessel);
                 float y = getIsometricY(vessel.getX(), vessel.getY(), vessel);
@@ -754,12 +754,12 @@ public class SeaBattleScreen extends AbstractScreen implements InputProcessor{
                     fill = fill > 3? 3:fill; // cap at 3 if large ship
                     w = (width) / 3;
                 }
-                renderer.rect(x + (vessel.getRegionWidth() / 2) - (width / 2), y + vessel.getRegionHeight() + BAR_HEIGHT_ABOVE_SHIP, fill * w, BAR_HEIGHT - 1);
+                renderer.rect(x + (vessel.getRegionWidth() / 2) - (width / 2), y + 1  + vessel.getRegionHeight() + BAR_HEIGHT_ABOVE_SHIP, fill * w, BAR_HEIGHT - 1);
 
                 // draw red fill extension if large ship
                 if (vessel.getMoveType() == VesselMoveType.THREE_MOVES && vessel.getNumberOfMoves() > 3) {
                     renderer.setColor(Color.RED);
-                    renderer.rect(x + (vessel.getRegionWidth() / 2) - (width / 2) + (3*w), y + vessel.getRegionHeight() + BAR_HEIGHT_ABOVE_SHIP, w, BAR_HEIGHT - 1);
+                    renderer.rect(x + (vessel.getRegionWidth() / 2) - (width / 2) + (3*w), y + 1 + vessel.getRegionHeight() + BAR_HEIGHT_ABOVE_SHIP, w, BAR_HEIGHT - 1);
                 }
                 renderer.end();
 

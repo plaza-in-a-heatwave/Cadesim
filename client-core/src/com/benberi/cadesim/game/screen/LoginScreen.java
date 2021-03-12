@@ -7,9 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Properties;
-import java.util.Random;
 import org.apache.commons.io.IOUtils;
 
 import com.badlogic.gdx.Gdx;
@@ -45,22 +43,12 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
     private GameContext context;
     final Graphics graphics = Gdx.graphics;
 
-//    private long popupTimestamp;
-
-    /**
-     * Batch for opening screen
-     */
-
-
     private BitmapFont font;
     private BitmapFont titleFont;
     private BitmapFont notesFont;
     
     // connectscene
     private ArrayList<String> greetings = new ArrayList<String>();
-    private ArrayList<String> port_numbers = new ArrayList<String>();
-    private ArrayList<String> server_codes = new ArrayList<String>();
-    private ArrayList<String> room_names = new ArrayList<String>();
     private java.util.Random prng = new java.util.Random(System.currentTimeMillis());
     private String chosenGreeting;
     private final String CODE_URL = "https://github.com/plaza-in-a-heatwave/Cadesim/issues";
@@ -103,7 +91,6 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
     public int screenWidth;
     public int screenHeight;
     
-    private Random random = new Random();
     private String[] url = null;
 	private AsyncExecutor executor = new AsyncExecutor(4);
 	private AsyncResult<Void> task;
@@ -116,9 +103,6 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
     
     public void buildStage() {
 		context.setLobbyScreen(this);
-    	port_numbers.clear();
-    	room_names.clear();
-    	server_codes.clear();
     	greetings.clear();
         mapEditorButtonStyle = new ImageButtonStyle();
         guestButtonStyle = new ImageButtonStyle();
@@ -131,11 +115,12 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
         mapEditorButtonStyle.imageUp = mapEditorDrawable;
         mapEditorButtonStyle.imageDown = mapEditorDisabledDrawable;
         mapEditorButtonStyle.imageOver = mapEditorDisabledDrawable;
+        mapEditorButtonStyle.imageDisabled = mapEditorDisabledDrawable;
         
         guestButtonStyle.imageUp = guestDrawable;
         guestButtonStyle.imageDown = guestDisabledDrawable;
         guestButtonStyle.imageOver = guestDisabledDrawable;
-        
+        guestButtonStyle.imageDisabled = guestDisabledDrawable;
         //login button
         Skin altskin = new Skin(Gdx.files.internal("skin/glassy/glassy-ui.json"));
         loginButton = new TextButton("LOGON", altskin);
@@ -197,46 +182,6 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
     	  float BLUE = b / 255.0f;
     	  return new Color(RED, GREEN, BLUE, 1);
     	 }
-
-    @Override
-    public void render(float delta) {
-		Gdx.gl.glClearColor(37f/255f, 37f/255f, 38/255f, 1f);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		//enable login click if disabled
-    	if(!loginButton.isTouchable()) {
-    		loginButton.setTouchable(Touchable.enabled);
-    	}
-    	
-    	if(task != null && task.isDone() && isStartup && context.getManager().update()) {
-    		isStartup = false;
-    		buttonGuest.setDisabled(false);
-    		buttonMapEditor.setDisabled(false);
-    	}
-        stage.getBatch().setColor(Color.WHITE);
-    	stage.getBatch().begin();
-    	stage.getBatch().draw(clientlogo, Gdx.graphics.getWidth()/2 - clientlogo.getWidth()/2, MAIN_GROUP_OFFSET_Y + 432, 128, 128);
-    	stage.getBatch().end();
-    	stage.getBatch().begin();
-    	titleFont.setColor(toRGB(240,137,13));
-    	titleFont.draw(stage.getBatch(), "Global CadeSim", Gdx.graphics.getWidth()/2 - 230, MAIN_GROUP_OFFSET_Y + 420);
-    	notesFont.draw(stage.getBatch(), chosenGreeting,       Gdx.graphics.getWidth()/2 + 130, MAIN_GROUP_OFFSET_Y + 399);        		
-		notesFont.draw(stage.getBatch(), "Version " + Constants.VERSION + " by Cyclist & Fatigue, based on the Cadesim by Benberi", 15, 75);
-    	notesFont.draw(stage.getBatch(), "Inspired by the original Dachimpy Cadesim", 15, 50);
-    	notesFont.draw(stage.getBatch(), "Found a bug? Let us know!", 15, 25);
-    	
-    	if (codeURL) { notesFont.setColor(Color.SKY); }
-        notesFont.draw(stage.getBatch(), CODE_URL, 138, 25);
-        notesFont.setColor(Color.WHITE);
-    	
-        font.setColor(Color.ORANGE);
-        font.draw(stage.getBatch(), "Account:",   Gdx.graphics.getWidth()/2 - 180, MAIN_GROUP_OFFSET_Y + 355);
-        font.draw(stage.getBatch(), "Password:", Gdx.graphics.getWidth()/2 - 190, MAIN_GROUP_OFFSET_Y + 320);
-        font.draw(stage.getBatch(), "Server:", Gdx.graphics.getWidth()/2 - 170, MAIN_GROUP_OFFSET_Y + 270);
-        stage.getBatch().end();
-		
-        stage.act();
-		stage.draw();
-    }
 
 	/*
 	 * Greeting list for startup screen
@@ -313,10 +258,9 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
 	 * Initialize properties such as team info/resolution, etc.
 	 */
     public void fillInfo() {
-        if(Constants.USERPROPERTIES.get("user.username") == null) {
-        	accountName = new TextField("User"+Integer.toString(random.nextInt(9999)), skin);
-        }else {
-        	accountName = new TextField(Constants.USERPROPERTIES.get("user.username"), skin);	
+    	accountName = new TextField("", skin);
+        if(Constants.USERPROPERTIES.get("user.accountname") != null) {
+        	accountName.setText(Constants.USERPROPERTIES.get("user.accountname"));
         }
         
         password = new TextField(Constants.SERVER_CODE, skin);
@@ -340,21 +284,23 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
     	    	}
     	    }
     	});
-        buttonGuest.addListener(new ClickListener() {//runs update if there is one before logging in 
-            public void clicked(InputEvent event, float x, float y){
+        buttonGuest.addListener(new ChangeListener() {//runs update if there is one before logging in 
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
             	context.setServerRoom(roomLabel.getSelected());
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
 		            	stage.clear();
+		            	context.setAccountName("");
 		            	ScreenManager.getInstance().showScreen(ScreenEnum.SELECTION, context);
 		            	graphics.setResizable(false);
 					}
             	});
-            }
+			}
         });
-        buttonMapEditor.addListener(new ClickListener() {//runs update if there is one before logging in 
-            public void clicked(InputEvent event, float x, float y){
+        buttonMapEditor.addListener(new ChangeListener() {//runs update if there is one before logging in 
+        	public void changed(ChangeEvent event, Actor actor) {
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
@@ -417,12 +363,6 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
         accountName.setPosition(width/2 - accountName.getWidth()/2 , MAIN_GROUP_OFFSET_Y + 330);
         password.setPosition(width/2 - password.getWidth()/2, MAIN_GROUP_OFFSET_Y + 295);
         passwordMode.setPosition(width/2 + 120,  MAIN_GROUP_OFFSET_Y + 295);
-    }
-
-    @Override
-    public void dispose() {
-    	super.dispose();
-    	renderer.dispose();
     }
     
     @Override
@@ -570,7 +510,7 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
             prop.load(new FileInputStream("user.config"));
             prop.setProperty("user.width", Integer.toString(Gdx.graphics.getWidth()));
             prop.setProperty("user.height", Integer.toString(Gdx.graphics.getHeight()));
-            prop.setProperty("user.username", accountName.getText());
+            prop.setProperty("user.accountname", accountName.getText());
             prop.setProperty("user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
             prop.store(new FileOutputStream("user.config"),null);
     	}catch (FileNotFoundException e) {
@@ -578,7 +518,7 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
 			
             prop.setProperty("user.width", Integer.toString(Gdx.graphics.getWidth()));
             prop.setProperty("user.height", Integer.toString(Gdx.graphics.getHeight()));
-            prop.setProperty("user.username", accountName.getText());
+            prop.setProperty("user.accountname", accountName.getText());
             prop.setProperty("user.last_room_index", Integer.toString(roomLabel.getSelectedIndex()));
             
             try {
@@ -588,52 +528,6 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-    }
-
-    public HashMap<String,String> getUserProperties(){
-        Properties prop =new Properties();
-        try {
-			prop.load(new FileInputStream("user.config"));
-			return new HashMap<String,String> (){
-				private static final long serialVersionUID = 1L;
-				{
-					put("user.username", prop.getProperty("user.username"));
-					put("user.last_room_index", prop.getProperty("user.last_room_index"));
-					put("user.last_team", prop.getProperty("user.last_team"));
-					put("user.width", prop.getProperty("user.width"));
-					put("user.height", prop.getProperty("user.height"));
-					put("user.volume", prop.getProperty("user.volume"));
-					put("autoupdate", prop.getProperty("autoupdate"));
-					put("url", prop.getProperty("url"));
-			}};
-		}catch (FileNotFoundException e) {
-			return new HashMap<String,String> (){
-				private static final long serialVersionUID = 1L;
-				{
-					put("user.username", "User"+Integer.toString(random.nextInt(9999)));
-					put("user.last_room_index", "0");
-					put("user.last_team", "0");
-					put("user.width", "800");
-					put("user.height", "600");
-					put("user.volume", "0.15");
-					put("autoupdate", "yes");
-					put("url", prop.getProperty("url"));
-			}};
-		} catch (IOException e) {
-			return new HashMap<String,String> (){
-				private static final long serialVersionUID = 1L;
-				{
-					put("user.username", "User"+Integer.toString(random.nextInt(9999)));
-					put("user.last_room_index", "0");
-					put("user.last_team", "0");
-					put("user.width", "800");
-					put("user.height", "600");
-					put("user.last_ship", "11");
-					put("user.volume", "0.15");
-					put("autoupdate", "yes");
-					put("url", prop.getProperty("url"));
-			}};
 		}
     }
     
@@ -676,6 +570,52 @@ public class LoginScreen extends AbstractScreen implements InputProcessor {
 		screenWidth = width;
 		screenHeight = height;
 	}
+	
+	@Override
+    public void render(float delta) {
+		Gdx.gl.glClearColor(37f/255f, 37f/255f, 38/255f, 1f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		//enable login click if disabled
+    	if(!loginButton.isTouchable()) {
+    		loginButton.setTouchable(Touchable.enabled);
+    	}
+    	
+    	if(task != null && task.isDone() && isStartup && context.getManager().update()) {
+    		isStartup = false;
+    		buttonGuest.setDisabled(false);
+    		buttonMapEditor.setDisabled(false);
+    	}
+        stage.getBatch().setColor(Color.WHITE);
+    	stage.getBatch().begin();
+    	stage.getBatch().draw(clientlogo, Gdx.graphics.getWidth()/2 - clientlogo.getWidth()/2, MAIN_GROUP_OFFSET_Y + 432, 128, 128);
+    	stage.getBatch().end();
+    	stage.getBatch().begin();
+    	titleFont.setColor(toRGB(240,137,13));
+    	titleFont.draw(stage.getBatch(), "Global CadeSim", Gdx.graphics.getWidth()/2 - 230, MAIN_GROUP_OFFSET_Y + 420);
+    	notesFont.draw(stage.getBatch(), chosenGreeting,       Gdx.graphics.getWidth()/2 + 130, MAIN_GROUP_OFFSET_Y + 399);        		
+		notesFont.draw(stage.getBatch(), "Version " + Constants.VERSION + " by Cyclist & Fatigue, based on the Cadesim by Benberi", 15, 75);
+    	notesFont.draw(stage.getBatch(), "Inspired by the original Dachimpy Cadesim", 15, 50);
+    	notesFont.draw(stage.getBatch(), "Found a bug? Let us know!", 15, 25);
+    	
+    	if (codeURL) { notesFont.setColor(Color.SKY); }
+        notesFont.draw(stage.getBatch(), CODE_URL, 138, 25);
+        notesFont.setColor(Color.WHITE);
+    	
+        font.setColor(Color.ORANGE);
+        font.draw(stage.getBatch(), "Account:",   Gdx.graphics.getWidth()/2 - 180, MAIN_GROUP_OFFSET_Y + 355);
+        font.draw(stage.getBatch(), "Password:", Gdx.graphics.getWidth()/2 - 190, MAIN_GROUP_OFFSET_Y + 320);
+        font.draw(stage.getBatch(), "Server:", Gdx.graphics.getWidth()/2 - 170, MAIN_GROUP_OFFSET_Y + 270);
+        stage.getBatch().end();
+		
+        stage.act();
+		stage.draw();
+    }
+
+    @Override
+    public void dispose() {
+    	super.dispose();
+    	renderer.dispose();
+    }
 	
 	@Override
 	public void resize (int width, int height) {

@@ -24,7 +24,9 @@ import com.benberi.cadesim.util.AbstractScreen;
 import com.benberi.cadesim.util.ScreenEnum;
 import com.benberi.cadesim.util.ScreenManager;
 import com.benberi.cadesim.util.ShipSelection;
+import com.benberi.cadesim.util.Team;
 import com.benberi.cadesim.util.TeamSelection;
+import com.benberi.cadesim.util.TextureCollection;
 import com.benberi.cadesim.util.UtilMethods;
 
 public class SelectionScreen extends AbstractScreen implements InputProcessor {
@@ -53,6 +55,8 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
     private Label incorrectNameLabel;
     private Label shipLabel;
     private Label teamLabel;
+    private Label shipTextLabel;
+    private Label teamTextLabel;
     
     private ShipSelection ship;
     private TeamSelection team;
@@ -61,6 +65,8 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
     private TextButton nextButton;
     private TextButton prevTeamButton;
     private TextButton nextTeamButton;
+    
+    private Image shipImage;
     
     public SelectionScreen(GameContext context) {
     	super();
@@ -78,10 +84,14 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
         prevTeamButton = new TextButton("<<<", skin);
         nextTeamButton = new TextButton(">>>", skin);
     	shipNameLabel = new Label("Ship Name:", skin);
+    	shipNameLabel.setColor(Color.ORANGE);
     	incorrectNameLabel = new Label("", skin);
         shipName = new TextField("",skin);
+        if (Constants.USERPROPERTIES.get("user.username") != null) shipName.setText(Constants.USERPROPERTIES.get("user.username"));
         shipLabel = new Label("Ship Type:", skin);
+        shipLabel.setColor(Color.ORANGE);
         teamLabel = new Label("Team:", skin);
+        teamLabel.setColor(Color.ORANGE);
     	initTextures();
         //login button
         Skin altskin = new Skin(Gdx.files.internal("skin/glassy/glassy-ui.json"));
@@ -90,14 +100,19 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
         selectionTable = new Table();
         selectionTable.add(prevButton).padRight(30).width(40).height(20);
         cell = selectionTable.add().width(100).height(90);
-        cell.setActor(new Image(ship.getCurrentShip()));
+        shipImage = new Image(TextureCollection.prepareAltTextureForTeam(ship.getCurrentShip(), Team.forId(team.getCurrentTeamAsInt())));
+    	cell.setActor(shipImage);
         selectionTable.add(nextButton).width(40).height(20).padLeft(30).row();
         shipCell = selectionTable.add().colspan(3).padBottom(20f);
-        shipCell.setActor(new Label(ship.getCurrentShipLabel(), skin));
         selectionTable.row();
         selectionTable.add(prevTeamButton).width(40).height(20);
         teamCell = selectionTable.add().width(70).padLeft(10).padRight(10);
-        teamCell.setActor(new Label(team.getCurrentTeam(), skin));
+		teamTextLabel = new Label(team.getCurrentTeam(), skin);
+        teamCell.setActor(teamTextLabel);
+        teamTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
+        shipTextLabel = new Label(ship.getCurrentShipLabel(), skin);
+        shipCell.setActor(shipTextLabel);
+        shipTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
         selectionTable.add(nextTeamButton).width(40).height(20);
         addStage();
         selectionTable.pack();
@@ -106,8 +121,6 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
     	multiplexer.addProcessor(this);
     	multiplexer.addProcessor(stage);
     	Gdx.input.setInputProcessor(multiplexer);
-    	
-    
     }
 
     public void addStage() {
@@ -169,7 +182,6 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
     public void initListeners() {
     	shipName.setMaxLength(15);
     	shipName.setTextFieldFilter(new TextField.TextFieldFilter() {
-
 			@Override
             public  boolean acceptChar(TextField textField, char c) {
             	if (Character.toString(c).matches("^[a-zA-Z0-9]")) {
@@ -177,12 +189,12 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
                 }
                 return false;
            }
-
 		});
         shipName.setTextFieldListener(new TextField.TextFieldListener() {
             @Override
             public void keyTyped(TextField textField, char key) {
             	if(textField.getText().toLowerCase().contains("fatigue")) {
+            		incorrectNameLabel.setColor(Color.YELLOW);
             		incorrectNameLabel.setText("Reserved name; please choose another.");
             		incorrectNameLabel.setPosition(Gdx.graphics.getWidth()/2-120, 380);
             	}else{
@@ -195,7 +207,13 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
             	Gdx.app.postRunnable(new Runnable() {
         			@Override
         			public void run() {
-        				context.setUserName(shipName.getText());
+        				if (shipName.getText().equals("") || shipName.getText().toString().equals("")) {
+                    		incorrectNameLabel.setColor(Color.YELLOW);
+                    		incorrectNameLabel.setText("Please enter a ship name.");
+                    		incorrectNameLabel.setPosition(Gdx.graphics.getWidth()/2-120, 380);
+                    		return;
+        				}
+        				context.setVesselName(shipName.getText());
         				context.setHostURL("localhost");
         				context.setVesselType(ship.getCurrentShipAsInt());
         				context.setTeam(team.getCurrentTeamAsInt());
@@ -228,8 +246,12 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
-						cell.setActor(new Image(ship.getNextShip()));
-				        shipCell.setActor(new Label(ship.getNextShipLabel(), skin));
+						ship.getNextShip();
+						shipTextLabel = new Label(ship.getNextShipLabel(), skin);
+						shipTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
+						shipCell.setActor(shipTextLabel);
+			            shipImage = new Image(TextureCollection.prepareAltTextureForTeam(ship.getCurrentShip(), Team.forId(team.getCurrentTeamAsInt())));
+			        	cell.setActor(shipImage);
 					}
             	});
             }
@@ -239,8 +261,12 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
-						cell.setActor(new Image(ship.getPreviousShip()));
-				        shipCell.setActor(new Label(ship.getPreviousShipLabel(), skin));
+						ship.getPreviousShip();
+						shipTextLabel = new Label(ship.getPreviousShipLabel(), skin);
+						shipTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
+						shipCell.setActor(shipTextLabel);
+			            shipImage = new Image(TextureCollection.prepareAltTextureForTeam(ship.getCurrentShip(), Team.forId(team.getCurrentTeamAsInt())));
+			        	cell.setActor(shipImage);
 					}
             	});
             }
@@ -251,7 +277,14 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
-				        teamCell.setActor(new Label(team.getPreviousTeam(), skin));
+						teamTextLabel = new Label(team.getPreviousTeam(), skin);
+				        teamCell.setActor(teamTextLabel);
+				        teamTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
+						shipTextLabel = new Label(ship.getPreviousShipLabel(), skin);
+						shipTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
+						shipCell.setActor(shipTextLabel);
+			            shipImage = new Image(TextureCollection.prepareAltTextureForTeam(ship.getCurrentShip(), Team.forId(team.getCurrentTeamAsInt())));
+			        	cell.setActor(shipImage);
 					}
             	});
             }
@@ -262,7 +295,14 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
             	Gdx.app.postRunnable(new Runnable() {
 					@Override
 					public void run() {
-				        teamCell.setActor(new Label(team.getNextTeam(), skin));
+						teamTextLabel = new Label(team.getNextTeam(), skin);
+				        teamCell.setActor(teamTextLabel);
+				        teamTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
+						shipTextLabel = new Label(ship.getPreviousShipLabel(), skin);
+						shipTextLabel.setColor(Team.forString(teamTextLabel.getText().toString()).getAltColor());
+						shipCell.setActor(shipTextLabel);
+			            shipImage = new Image(TextureCollection.prepareAltTextureForTeam(ship.getCurrentShip(), Team.forId(team.getCurrentTeamAsInt())));
+			        	cell.setActor(shipImage);
 					}
             	});
             }
@@ -307,7 +347,6 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-
         return false;
     }
 
@@ -379,11 +418,6 @@ public class SelectionScreen extends AbstractScreen implements InputProcessor {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
-    }
-    
-    public void loginFailed() {
-//        setPopupMessage("Could not connect to server.");
-//        showPopup();
     }
 
 	public String getOld_Name() {

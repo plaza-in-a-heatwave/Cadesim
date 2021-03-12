@@ -22,6 +22,7 @@ public class DesktopLauncher {
     private static String servers = "";
     
 	public static void main (String[] arg) {
+		new SplashScreen();
         for (String s : arg) {
             if (s.equals("--no-update")) {
 				Constants.AUTO_UPDATE = false;
@@ -104,6 +105,7 @@ public class DesktopLauncher {
 			return new HashMap<String,String> (){
 				private static final long serialVersionUID = 1L;
 				{
+					put("user.accountname", prop.getProperty("user.accountname"));
 					put("user.username", prop.getProperty("user.username"));
 					put("user.last_room_index", prop.getProperty("user.last_room_index"));
 					put("user.last_ship", prop.getProperty("user.last_ship"));
@@ -119,6 +121,7 @@ public class DesktopLauncher {
 			return new HashMap<String,String> (){
 				private static final long serialVersionUID = 1L;
 				{
+					put("user.accountname", "");
 					put("user.username", "User"+Integer.toString(random.nextInt(9999)));
 					put("user.last_room_index", "0");
 					put("user.last_team", "0");
@@ -134,6 +137,7 @@ public class DesktopLauncher {
 			return new HashMap<String,String> (){
 				private static final long serialVersionUID = 1L;
 				{
+					put("user.accountname", "");
 					put("user.username", "User"+Integer.toString(random.nextInt(9999)));
 					put("user.last_room_index", "0");
 					put("user.last_team", "0");
