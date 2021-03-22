@@ -29,7 +29,9 @@ import com.benberi.cadesim.game.entity.vessel.move.MovePhase;
 import com.benberi.cadesim.game.entity.vessel.move.MoveType;
 import com.benberi.cadesim.game.screen.impl.battle.map.GameObject;
 import com.benberi.cadesim.game.screen.impl.battle.map.tile.impl.BigRock;
+import com.benberi.cadesim.game.screen.impl.battle.map.tile.impl.SmallRock;
 import com.benberi.cadesim.util.OrientationLocation;
+import com.benberi.cadesim.util.RandomUtils;
 import com.benberi.cadesim.util.Team;
 import com.benberi.cadesim.util.TextureCollection;
 
@@ -577,7 +579,8 @@ public abstract class Vessel extends Entity {
         if (leftShoots == 1) {
             Vector2 target = getClosestLeftCannonCollide();
             CannonBall ball = createCannon(getContext(), this, target);
-            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null || getContext().getBattleScreen().getMap().getObject(target.x, target.y) instanceof BigRock) {
+            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null || 
+            		RandomUtils.instanceOf(getContext().getBattleScreen().getMap().getObject(target.x, target.y), BigRock.class, SmallRock.class)){
                 ball.setExplodeOnReach(true);
             }
             cannonballs.add(ball);
@@ -588,7 +591,8 @@ public abstract class Vessel extends Entity {
             CannonBall ball1 = createCannon(getContext(), this, target);
             CannonBall ball2 = createCannon(getContext(), this, target);
 
-            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null || getContext().getBattleScreen().getMap().getObject(target.x, target.y) instanceof BigRock) {
+            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null || 
+            		RandomUtils.instanceOf(getContext().getBattleScreen().getMap().getObject(target.x, target.y), BigRock.class, SmallRock.class)){
                 ball1.setExplodeOnReach(true);
                 ball2.setExplodeOnReach(true);
             }
@@ -607,7 +611,8 @@ public abstract class Vessel extends Entity {
         if (rightShoots == 1) {
             Vector2 target = getClosestRightCannonCollide();
             CannonBall ball = createCannon(getContext(), this, target);
-            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null) {
+            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null || 
+            		RandomUtils.instanceOf(getContext().getBattleScreen().getMap().getObject(target.x, target.y), BigRock.class, SmallRock.class)){
                 ball.setExplodeOnReach(true);
             }
             cannonballs.add(ball);
@@ -617,7 +622,8 @@ public abstract class Vessel extends Entity {
 
             CannonBall ball1 = createCannon(getContext(), this, target);
             CannonBall ball2 = createCannon(getContext(), this, target);
-            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null) {
+            if (getContext().getEntities().getVesselByPosition(target.x, target.y) != null || 
+            		RandomUtils.instanceOf(getContext().getBattleScreen().getMap().getObject(target.x, target.y), BigRock.class, SmallRock.class)){
                 ball1.setExplodeOnReach(true);
                 ball2.setExplodeOnReach(true);
             }

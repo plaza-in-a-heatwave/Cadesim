@@ -1121,8 +1121,8 @@ public class MapEditorScreen extends AbstractScreen implements InputProcessor {
     public void saveMap() {
         FileChooser fileChooser = new FileChooser(Mode.SAVE);
     	fileChooser.setSize(500, 300);
-        fileChooser.setDirectory(System.getProperty("user.home"));
-        FileTypeFilter typeFilter = new FileTypeFilter(true); //allow "All Types" mode where all files are shown
+        fileChooser.setDirectory(System.getProperty("user.home") + "/Desktop");
+        FileTypeFilter typeFilter = new FileTypeFilter(false); //allow "All Types" mode where all files are shown
         typeFilter.addRule("Text files (*.txt)", "txt");
         fileChooser.setFileTypeFilter(typeFilter);
         stage.addActor(fileChooser.fadeIn());
