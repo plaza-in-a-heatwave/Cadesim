@@ -47,38 +47,41 @@ public class CollisionCalculator {
         for (Player p : players.listRegisteredPlayers()) {
         	MoveType move = p.getMoves().getMove(turn);
             Position next = p;
-            Position previous = p;
-            Position finalPosition = p;
+//            Position previous = p;
+//            Position finalPosition = p;
             if (p == pl) {
             	continue;
             }
             
             if (!p.getCollisionStorage().isPositionChanged()) {
         		next = move.getNextPositionWithPhase(p, p.getFace(),phase);
-        		previous = move.getNextPositionWithPhase(p, p.getFace(),0);
-        		finalPosition = move.getFinalPosition(p, p.getFace());
+//        		previous = move.getNextPositionWithPhase(p, p.getFace(),0);
+//        		finalPosition = move.getFinalPosition(p, p.getFace());
             }
-            if(phase == 0) {
-	            if(next.equals(target)) {
-	            	collided.add(p);
-	            }
+            if(next.equals(target)) {
+            	collided.add(p);
             }
-            if(finalPosition.equals(target)) {
-            	if(phase == 1 && p.getCollisionStorage().isCollided(turn, 0) &&
-            			(pl.getMoves().getMove(turn) == MoveType.LEFT || pl.getMoves().getMove(turn) == MoveType.RIGHT)) {
-            		collided.add(p);
-            	}
-            }else if(previous.equals(target) && finalPosition.equals(target)){
-            	if(phase == 1) {
-            		collided.add(p);
-            	}
-            }else if(phase == 1 && p.getCollisionStorage().isCollided(turn, 0)) {
-            	continue;
-            }else {
-	            if(next.equals(target)) {
-	            	collided.add(p);
-	            }
-            }
+//            if(phase == 0) {
+//	            if(next.equals(target)) {
+//	            	collided.add(p);
+//	            }
+//            }
+//            if(finalPosition.equals(target)) {
+//            	if(phase == 1 && p.getCollisionStorage().isCollided(turn, 0) &&
+//            			(pl.getMoves().getMove(turn) == MoveType.LEFT || pl.getMoves().getMove(turn) == MoveType.RIGHT)) {
+//            		collided.add(p);
+//            	}
+//            }else if(previous.equals(target) && finalPosition.equals(target)){
+//            	if(phase == 1) {
+//            		collided.add(p);
+//            	}
+//            }else if(phase == 1 && p.getCollisionStorage().isCollided(turn, 0)) {
+//            	continue;
+//            }else {
+//	            if(next.equals(target)) {
+//	            	collided.add(p);
+//	            }
+//            }
         }
         
         return collided;
